@@ -8,7 +8,7 @@ export class EditorRotateEvent extends Event implements IEditorRotateEvent {
 
     static ROTATE = 'editor.rotate'
 
-    readonly target: IUI
+    declare readonly target: IUI
     readonly editor: IEditor
 
     // rotateOf(origin, rotation)

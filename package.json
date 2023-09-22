@@ -1,13 +1,11 @@
 {
   "name": "leafer-in",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
-  "main": "dist/in.esm.js",
+  "main": "src/index.ts",
   "types": "types/index.d.ts",
-  "unpkg": "dist/in.js",
-  "jsdelivr": "dist/in.js",
-  "files": ["dist", "types"],
+  "files": ["src","types", "dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/leaferjs/in"
@@ -32,11 +30,7 @@
     "engine"
   ],
   "dependencies": {
-    "@leafer-in/interface": "1.0.0-rc.1",
-    "@leafer-in/editor": "1.0.0-rc.1",
-    "@leafer-ui/interface": "1.0.0-rc.1",
-    "@leafer/interface": "1.0.0-rc.1",
-    "@leafer-ui/core": "1.0.0-rc.1",
-    "@leafer/core": "1.0.0-rc.1"
+    "@leafer-in/interface": "1.0.0-rc.2",
+    "@leafer-in/editor": "1.0.0-rc.2"
   }
 }

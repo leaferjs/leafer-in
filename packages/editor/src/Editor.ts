@@ -99,7 +99,7 @@ export class Editor extends Group implements IEditor {
     }
 
     public getTool(value: IUI): IEditorTool {
-        return (value.tag === 'Line' && value.hasSize) ? LineTool : RectTool
+        return (value.tag === 'Line' && value.resizeable) ? LineTool : RectTool
     }
 
     public update(): void {
@@ -165,7 +165,7 @@ export class Editor extends Group implements IEditor {
         if (e.shiftKey) lockRatio = true
         if (e.altKey && !around) around = 'center'
 
-        if (resizeType === 'auto') resizeType = target.hasSize ? 'size' : 'scale'
+        if (resizeType === 'auto') resizeType = target.resizeable ? 'size' : 'scale'
         const data = getResizeData(target.boxBounds, __direction, e.getInnerMove(this.targetRect), lockRatio, around)
 
         const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...data, target, editor: this, dragEvent: e, resizeType })

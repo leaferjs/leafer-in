@@ -7,7 +7,7 @@ export class EditorResizeEvent extends Event implements IEditorResizeEvent {
 
     static RESIZE = 'editor.resize'
 
-    readonly target: IUI
+    declare readonly target: IUI
     readonly editor: IEditor
 
     readonly resizeType: IResizeType

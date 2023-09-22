@@ -29,8 +29,21 @@ export const RectTool: IEditorTool = {
             target.scaleX *= width / old.width
             target.scaleY *= height / old.height
         } else {
-            target.width = width
-            target.height = height
+            if (width < 0) {
+                target.width = -width
+                target.scaleX *= -1
+            } else {
+                if (target.width !== width) target.width = width
+            }
+
+            if (height < 0) {
+                target.height = -height
+                target.scaleY *= -1
+            } else {
+                if (target.height !== height) target.height = height // Text auto height
+            }
+
+
         }
     },
 
