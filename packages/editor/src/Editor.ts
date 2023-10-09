@@ -1,4 +1,4 @@
-import { IGroupInputData, IPolygon, IUI, IEventListenerId } from '@leafer-ui/interface'
+import { IGroupInputData, IPolygon, IUI, IEventListenerId, IAround } from '@leafer-ui/interface'
 import { IEditor, IEditorConfig, IEditorTool, IDirection8 } from '@leafer-in/interface'
 
 import { Group, Rect, Polygon, DragEvent, PointHelper, PointerEvent, KeyEvent, RotateEvent, DataHelper, MathHelper, RenderEvent } from '@leafer-ui/core'
@@ -65,9 +65,10 @@ export class Editor extends Group implements IEditor {
     protected init() {
         let rotatePoint: IUI, resizeLine: IUI, resizePoint: IUI
         const { resizePoints, rotatePoints, resizeLines } = this
+        const arounds: IAround[] = [{ x: 1, y: 1 }, 'center', { x: 0, y: 1 }, 'center', { x: 0, y: 0 }, 'center', { x: 1, y: 0 }, 'center']
 
         for (let i = 0; i < 8; i++) {
-            rotatePoint = new Rect({ around: 'center', width: 30, height: 30, hitRadius: 10, hitFill: "all" })
+            rotatePoint = new Rect({ around: arounds[i], width: 15, height: 15, hitFill: "all" })
             rotatePoints.push(rotatePoint)
             this.__listenPointEvents(rotatePoint, 'rotate', i)
 

@@ -116,8 +116,10 @@ export const RectTool: IEditorTool = {
 
                 resizeP.rotation = 90
                 resizeP.visible = type === 'mobile'
+                rotateP.visible = false
 
             } else {
+                rotateP.visible = type !== 'mobile'
                 rectPoints.push(point.x, point.y)
             }
         }
