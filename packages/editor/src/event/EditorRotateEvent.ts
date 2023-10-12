@@ -12,7 +12,7 @@ export class EditorRotateEvent extends Event implements IEditorRotateEvent {
     readonly editor: IEditor
 
     // rotateOf(origin, rotation)
-    readonly origin: IPointData
+    declare readonly origin: IPointData
     readonly rotation: number
 
     constructor(type: string, data?: IEditorRotateEvent) {

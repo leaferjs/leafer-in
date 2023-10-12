@@ -22,7 +22,7 @@ export class EditorResizeEvent extends Event implements IEditorResizeEvent {
     readonly old: IBoundsData
 
     // scaleOf(origin, scaleX, scaleY)
-    readonly origin: IPointData
+    declare readonly origin: IPointData
     readonly scaleX: number
     readonly scaleY: number
 
