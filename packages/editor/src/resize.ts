@@ -81,7 +81,7 @@ export function getResizeData(old: IBoundsData, direction: IDirection8, move: IP
     reset(matrix)
     scaleOfOuter(matrix, origin, scaleX, scaleY)
     const bounds = { x: old.x + matrix.e, y: old.y + matrix.f, width: width * scaleX, height: height * scaleY }
-    return { bounds, old, origin, scaleX, scaleY, direction, lockRatio, around, }
+    return { bounds, old, origin, scaleX, scaleY, direction, lockRatio, around }
 
 }
 

@@ -1,7 +1,7 @@
-import { IGroupInputData, IPolygon, IUI, IEventListenerId, IAround } from '@leafer-ui/interface'
+import { IGroupInputData, IPolygon, IUI, IEventListenerId, IPointData } from '@leafer-ui/interface'
 import { IEditor, IEditorConfig, IEditorTool, IDirection8 } from '@leafer-in/interface'
 
-import { Group, Rect, Polygon, DragEvent, PointHelper, PointerEvent, KeyEvent, RotateEvent, DataHelper, MathHelper, RenderEvent } from '@leafer-ui/core'
+import { Group, Rect, Polygon, DragEvent, PointHelper, PointerEvent, KeyEvent, RotateEvent, DataHelper, MathHelper, RenderEvent, Bounds } from '@leafer-ui/core'
 
 import { getResizeData } from './resize'
 import { updateCursor } from './cursor'
@@ -11,45 +11,35 @@ import { RectTool } from './tool/RectTool'
 
 import { EditorResizeEvent } from './event/EditorResizeEvent'
 import { EditorRotateEvent } from './event/EditorRotateEvent'
+import { simulateTarget } from './simulate'
+import { create } from './create'
+import { config } from './config'
 
 
 export class Editor extends Group implements IEditor {
 
-    public config: IEditorConfig = {
-        type: 'pc',
-        stroke: '#836DFF',
-        pointFill: '#FFFFFF',
-        pointSize: 10,
-        pointRadius: 10,
-        rotateGap: 90,
-        hideOnMove: false,
-        moveCursor: 'move',
-        resizeType: 'auto',
-        resizeCursor: ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'],
-        rotateCursor: ['ne-resize', 'e-resize', 'se-resize', 's-resize', 'sw-resize', 'w-resize', 'nw-resize', 'n-resize'],
-        resizeable: true,
-        rotateable: true
+    public config: IEditorConfig = config
+
+    public get target(): IUI | IUI[] { return this._target }
+    public set target(value: IUI | IUI[]) {
+        this._target = value, this.list = value ? (value instanceof Array ? value : [value]) : []
+        this.onTarget(value)
     }
+    private _target: IUI | IUI[]
+    public list: IUI[]
+
+    public simulateTarget: IUI = new Rect()
+
+    public box: IUI = new Rect({ hitFill: 'all', hitRadius: 5 }) // target rect
+    public rect: IPolygon = new Polygon({ hittable: false, strokeAlign: 'center', strokeWidth: 2 }) // target stroke
+
+    public circle: IUI = new Rect({ around: 'center', hitRadius: 10 }) // rotate point
 
     public resizePoints: IUI[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public rotatePoints: IUI[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public resizeLines: IUI[] = [] // top, right, bottom, left
 
-    public targetRect: IUI = new Rect({ hitFill: 'all', hitRadius: 5 })
-    public rect: IPolygon = new Polygon({ hittable: false, strokeAlign: 'center' })
-    public circle: IUI = new Rect({ around: 'center', hitRadius: 10 }) // rotate point
-
     public tool: IEditorTool
-
-    private _target: IUI
-    public get target(): IUI { return this._target }
-    public set target(value: IUI) {
-        this.__removeTargetEvents()
-        this.visible = !!value
-
-        this._target = value
-        if (value) this.onTarget()
-    }
 
     public enterPoint: IUI
 
@@ -59,55 +49,36 @@ export class Editor extends Group implements IEditor {
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
-        this.init()
-    }
-
-    protected init() {
-        let rotatePoint: IUI, resizeLine: IUI, resizePoint: IUI
-        const { resizePoints, rotatePoints, resizeLines } = this
-        const arounds: IAround[] = [{ x: 1, y: 1 }, 'center', { x: 0, y: 1 }, 'center', { x: 0, y: 0 }, 'center', { x: 1, y: 0 }, 'center']
-
-        for (let i = 0; i < 8; i++) {
-            rotatePoint = new Rect({ around: arounds[i], width: 15, height: 15, hitFill: "all" })
-            rotatePoints.push(rotatePoint)
-            this.__listenPointEvents(rotatePoint, 'rotate', i)
-
-            if (i % 2) {
-                resizeLine = new Rect({ around: 'center', width: 10, height: 10, hitFill: "all" })
-                resizeLines.push(resizeLine)
-                this.__listenPointEvents(resizeLine, 'resize', i)
-            }
-
-            resizePoint = new Rect({ around: 'center', hitRadius: 5 })
-            resizePoints.push(resizePoint)
-            this.__listenPointEvents(resizePoint, 'resize', i)
-        }
-
-        this.__listenPointEvents(this.circle, 'rotate', 1)
-        this.addMany(...rotatePoints, this.targetRect, this.rect, this.circle, ...resizeLines, ...resizePoints)
-
+        create(this)
         this.__listenEvents()
     }
 
+    protected onTarget(value: IUI | IUI[]): void {
+        this.__removeTargetEvents()
+        this.visible = !!value
+        this.simulateTarget.parent = null
 
-    protected onTarget(): void {
-        this.tool = this.getTool(this.target)
-        this.waitLeafer(() => {
-            this.update()
-            this.updateMoveCursor()
-            this.__listenTargetEvents()
-        })
+        if (value) {
+            this.waitLeafer(() => {
+                this.tool = this.getTool(this.target)
+                simulateTarget(this)
+
+                this.update()
+                this.updateMoveCursor()
+                this.__listenTargetEvents()
+            })
+        }
     }
 
-    public getTool(value: IUI): IEditorTool {
-        return (value.tag === 'Line' && value.resizeable) ? LineTool : RectTool
+    public getTool(value: IUI | IUI[]): IEditorTool {
+        return value instanceof Array || !(value.tag === 'Line' && value.resizeable) ? RectTool : LineTool
     }
+
 
     public update(): void {
         if (!this.target) return
         this.tool.update(this)
     }
-
 
     protected onDrag(e: DragEvent): void {
         const { resizeable, rotateable } = this.config
@@ -119,46 +90,59 @@ export class Editor extends Group implements IEditor {
     }
 
     protected onMove(e: DragEvent): void {
-        const { target } = this
-        const { x, y } = e.getLocalMove(target)
-        if (e.shiftKey) {
-            if (Math.abs(x) > Math.abs(y)) {
-                target.x += x
+        let local: IPointData
+        const { list } = this
+
+        const each = (item: IUI) => {
+            local = e.getLocalMove(item)
+            if (e.shiftKey) {
+                if (Math.abs(local.x) > Math.abs(local.y)) {
+                    item.x += local.x
+                } else {
+                    item.y += local.y
+                }
             } else {
-                target.y += y
+                item.x += local.x
+                item.y += local.y
             }
-        } else {
-            target.x += x
-            target.y += y
         }
+
+        list.forEach(each)
+        each(this.simulateTarget)
     }
 
     protected onRotate(e: DragEvent | RotateEvent): void {
-        const { target } = this
+        const { list } = this
         const { rotateGap } = this.config
-        const { x, y, width, height } = target.boxBounds
-        const origin = { x: x + width / 2, y: y + height / 2 }
+        const { x, y, width, height } = this.box.boxBounds
+        const worldOrigin = this.box.getWorldPoint({ x: x + width / 2, y: y + height / 2 })
 
-        let rotation: number
+        const each = (item: IUI) => {
+            let rotation: number
+            const origin = item.getInnerPoint(worldOrigin)
 
-        if (e instanceof RotateEvent) {
-            rotation = e.rotation
-        } else {
-            const point = e
-            const last = { x: point.x - e.moveX, y: point.y - e.moveY }
-            rotation = PointHelper.getChangeAngle(last, target.getWorldPoint(origin), point)
+            if (e instanceof RotateEvent) {
+                rotation = e.rotation
+            } else {
+                const point = e
+                const last = { x: point.x - e.moveX, y: point.y - e.moveY }
+                rotation = PointHelper.getChangeAngle(last, item.getWorldPoint(origin), point)
+            }
+
+            rotation = MathHelper.getGapRotation(item.rotation + rotation, rotateGap) - item.rotation
+
+            const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { editor: this, target: item, origin, rotation })
+
+            this.tool.rotate(event)
+            item.emitEvent(event)
         }
 
-        rotation = MathHelper.getGapRotation(target.rotation + rotation, rotateGap) - target.rotation
-
-        const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { editor: this, target, origin, rotation })
-
-        this.tool.rotate(event)
-        target.emitEvent(event)
+        list.forEach(each)
+        each(this.simulateTarget)
     }
 
     public onResize(e: DragEvent): void {
-        const { target } = this
+        const { list, box } = this
         const { __direction } = e.current.__
 
         let { resizeType, around, lockRatio } = this.config
@@ -166,32 +150,45 @@ export class Editor extends Group implements IEditor {
         if (e.shiftKey) lockRatio = true
         if (e.altKey && !around) around = 'center'
 
-        if (resizeType === 'auto') resizeType = target.resizeable ? 'size' : 'scale'
-        const data = getResizeData(target.boxBounds, __direction, e.getInnerMove(this.targetRect), lockRatio, around)
+        const data = getResizeData(box.boxBounds, __direction, e.getInnerMove(box), lockRatio, around)
+        const worldOrigin = box.getWorldPoint(data.origin)
 
-        const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...data, target, editor: this, dragEvent: e, resizeType })
+        const each = (item: IUI) => {
+            const origin = item.getInnerPoint(worldOrigin)
+            const old = item.boxBounds
 
-        this.tool.resize(event)
-        target.emitEvent(event)
+            const bounds = new Bounds(old)
+            bounds.scaleOf(origin, data.scaleX, data.scaleY)
+
+            if (resizeType === 'auto') resizeType = item.resizeable ? 'size' : 'scale'
+            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...data, old, bounds, target: item, editor: this, dragEvent: e, resizeType })
+
+            this.tool.resize(event)
+            item.emitEvent(event)
+        }
+
+        list.forEach(each)
+        each(this.simulateTarget)
     }
 
 
     public updateMoveCursor(): void {
-        this.targetRect.cursor = this.config.moveCursor
+        this.box.cursor = this.config.moveCursor
     }
 
 
     protected __listenEvents(): void {
+        const { box } = this
         this.__eventIds = [
-            this.targetRect.on_(DragEvent.START, () => { this.opacity = this.config.hideOnMove ? 0 : 1 }),
-            this.targetRect.on_(DragEvent.DRAG, this.onMove, this),
-            this.targetRect.on_(DragEvent.END, () => { this.opacity = 1 }),
-            this.targetRect.on_(PointerEvent.ENTER, this.updateMoveCursor, this)
+            box.on_(DragEvent.START, () => { this.opacity = this.config.hideOnMove ? 0 : 1 }),
+            box.on_(DragEvent.DRAG, this.onMove, this),
+            box.on_(DragEvent.END, () => { this.opacity = 1 }),
+            box.on_(PointerEvent.ENTER, this.updateMoveCursor, this)
         ]
     }
 
     protected __removeListenEvents(): void {
-        this.targetRect.off_(this.__eventIds)
+        this.box.off_(this.__eventIds)
         this.__eventIds.length = 0
     }
 
@@ -207,7 +204,7 @@ export class Editor extends Group implements IEditor {
 
     protected __listenTargetEvents(): void {
         if (this.target) {
-            const { leafer } = this.target
+            const { leafer } = this.list[0]
             this.__targetEventIds = [
                 leafer.on_(RenderEvent.START, this.update, this),
                 leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e) => { updateCursor(this, e) })
@@ -217,7 +214,7 @@ export class Editor extends Group implements IEditor {
 
     protected __removeTargetEvents(): void {
         if (this.__targetEventIds.length) {
-            const { leafer } = this.target
+            const { leafer } = this.list[0]
             if (leafer) leafer.off_(this.__targetEventIds)
             this.__targetEventIds.length = 0
         }
@@ -226,7 +223,7 @@ export class Editor extends Group implements IEditor {
 
     public destroy(): void {
         this.__removeListenEvents()
-        this._target = null
+        this.list = null
         super.destroy()
     }
 

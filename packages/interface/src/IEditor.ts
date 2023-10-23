@@ -1,4 +1,4 @@
-import { IGroup, IUI, IRectInputData, IResizeType, IPolygon, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IResizeType, IPolygon, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IRect } from '@leafer-ui/interface'
 
 export interface IEditor extends IGroup {
     config: IEditorConfig
@@ -8,16 +8,19 @@ export interface IEditor extends IGroup {
     resizeLines: IUI[]
 
     circle: IUI
-    targetRect: IUI
     rect: IPolygon
+    box: IRect
 
-    target: IUI
+    target: IUI | IUI[]
+    list: IUI[]
+
+    simulateTarget: IUI
 
     tool: IEditorTool
 
     enterPoint: IUI
 
-    getTool(value: IUI): IEditorTool
+    getTool(value: IUI | IUI[]): IEditorTool
     update(): void
 }
 

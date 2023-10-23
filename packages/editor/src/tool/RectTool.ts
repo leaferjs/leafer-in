@@ -1,7 +1,7 @@
-import { IUI, IUIInputData, IPointData } from '@leafer-ui/interface'
+import { IUI, IUIInputData, IPointData, IBoundsData } from '@leafer-ui/interface'
 import { IEditor, IEditorResizeEvent, IEditorRotateEvent, IEditorTool } from '@leafer-in/interface'
 
-import { Bounds, Matrix } from '@leafer-ui/core'
+import { Bounds, Matrix, Platform } from '@leafer-ui/core'
 
 
 export const RectTool: IEditorTool = {
@@ -9,7 +9,7 @@ export const RectTool: IEditorTool = {
     name: 'RectTool',
 
     getMirrorData(editor: IEditor): IPointData {
-        const { scaleX, scaleY } = editor.target
+        const { scaleX, scaleY } = editor.simulateTarget
         return {
             x: scaleX < 0 ? 1 : 0, // 1 = mirrorX
             y: scaleY < 0 ? 1 : 0
@@ -19,16 +19,17 @@ export const RectTool: IEditorTool = {
     resize(e: IEditorResizeEvent): void {
         const { target, bounds, resizeType, old } = e
         const { x, y, width, height } = bounds
-        const point = { x: x - old.x, y: y - old.y }
+        const inner = { x: x - old.x, y: y - old.y } // boxBounds change
 
-        target.innerToWorld(point, null, true, target.parent)
-        target.x += point.x
-        target.y += point.y
+        const local = target.getLocalPointByInner(inner, null, true)
+        target.x += local.x
+        target.y += local.y
 
         if (resizeType === 'scale') {
             target.scaleX *= width / old.width
             target.scaleY *= height / old.height
         } else {
+
             if (width < 0) {
                 target.width = -width
                 target.scaleX *= -1
@@ -43,7 +44,6 @@ export const RectTool: IEditorTool = {
                 if (target.height !== height) target.height = height // Text auto height
             }
 
-
         }
     },
 
@@ -53,89 +53,98 @@ export const RectTool: IEditorTool = {
     },
 
     update(editor: IEditor) {
-        const { target, config, rotatePoints, targetRect, rect, circle, resizeLines, resizePoints } = editor
-        const { type, resizeable, rotateable, stroke, pointFill, pointSize, pointRadius } = config
+        const { simulateTarget, box } = editor
 
-        const defaultStyle = { fill: pointFill, stroke, width: pointSize, height: pointSize, cornerRadius: pointRadius }
-        const pointStyles = config.point instanceof Array ? config.point : [config.point || defaultStyle]
+        simulateTarget.parent.__layout.checkUpdate()
 
-        const box = new Bounds(target.boxBounds)
-        const w = target.worldTransform, pw = editor.parent.worldTransform
+        Platform.layout(simulateTarget)
+        const boxBounds = new Bounds(simulateTarget.__layout.boxBounds)
+        const w = simulateTarget.__world
 
-        const matrix = new Matrix(w)
-        matrix.divide(pw)
+        const pw = editor.parent.worldTransform
+
+        const matrix = new Matrix(w).divide(pw)
         const worldX = matrix.e, worldY = matrix.f
-
 
         let { scaleX, scaleY, rotation, skewX, skewY } = w
         scaleX /= pw.scaleX, scaleY /= pw.scaleY, rotation -= pw.rotation, skewX -= pw.skewX, skewY -= pw.skewY
 
-        const { x, y, width, height } = box.scale(scaleX, scaleY) // maybe width / height < 0
+        boxBounds.scale(scaleX, scaleY) // maybe width / height < 0
 
         editor.set({ x: worldX, y: worldY, rotation, skewX, skewY })
-        targetRect.set({ x, y, width: box.width / scaleX, height: box.height / scaleY, scaleX, scaleY, visible: true })
+        box.set({ x: boxBounds.x, y: boxBounds.y, width: boxBounds.width / scaleX, height: boxBounds.height / scaleY, scaleX, scaleY, visible: true })
 
-
-        const points: IPointData[] = [ // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
-            { x, y },
-            { x: x + width / 2, y },
-            { x: x + width, y },
-            { x: x + width, y: y + height / 2 },
-            { x: x + width, y: y + height },
-            { x: x + width / 2, y: y + height },
-            { x, y: y + height },
-            { x, y: y + height / 2 }
-        ]
-
-        const rectPoints: number[] = []
-        let point: IPointData, style: IUIInputData, rotateP: IUI, resizeP: IUI, resizeL: IUI
-
-        for (let i = 0; i < 8; i++) {
-            point = points[i]
-            style = pointStyles[i % pointStyles.length]
-
-            resizeP = resizePoints[i]
-            resizeL = resizeLines[Math.floor(i / 2)]
-            rotateP = rotatePoints[i]
-
-            resizeP.set(style)
-            resizeP.x = rotateP.x = resizeL.x = point.x
-            resizeP.y = rotateP.y = resizeL.y = point.y
-
-            resizeP.visible = resizeL.visible = resizeable || rotateable
-            rotateP.visible = rotateable && resizeable
-
-            if (i % 2) { // top,  right, bottom, left
-                if (((i + 1) / 2) % 2) { // top, bottom
-                    resizeL.width = Math.abs(width)
-                    rotateP.width = Math.max(10, Math.abs(width) - 30) // skew
-                } else {
-                    resizeL.height = Math.abs(height)
-                    rotateP.height = Math.max(10, Math.abs(height) - 30) // skew
-                }
-
-                resizeP.rotation = 90
-                resizeP.visible = type === 'mobile'
-                rotateP.visible = false
-
-            } else {
-                rotateP.visible = type !== 'mobile'
-                rectPoints.push(point.x, point.y)
-            }
-        }
-
-
-
-        style = config.rotatePoint || style
-
-        circle.set(style)
-        circle.x = x + width / 2
-        if (!style.y) circle.y = y - (10 + (resizeP.height + circle.height) / 2) * (this.getMirrorData(editor).y ? -1 : 1)
-        circle.visible = rotateable && type === 'mobile'
-
-        rect.set(config.rect || { stroke })
-        rect.points = rectPoints
-        rect.visible = true
+        updateStyle(editor, boxBounds)
     }
 
+}
+
+
+function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
+    const { config, rotatePoints, rect, circle, resizeLines, resizePoints } = editor
+    const { type, resizeable, rotateable, stroke, pointFill, pointSize, pointRadius } = config
+
+    const defaultStyle = { fill: pointFill, stroke, width: pointSize, height: pointSize, cornerRadius: pointRadius }
+    const pointStyles = config.point instanceof Array ? config.point : [config.point || defaultStyle]
+
+    const { x, y, width, height } = boxBounds
+
+    const points: IPointData[] = [ // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+        { x, y },
+        { x: x + width / 2, y },
+        { x: x + width, y },
+        { x: x + width, y: y + height / 2 },
+        { x: x + width, y: y + height },
+        { x: x + width / 2, y: y + height },
+        { x, y: y + height },
+        { x, y: y + height / 2 }
+    ]
+
+    const rectPoints: number[] = []
+    let point: IPointData, style: IUIInputData, rotateP: IUI, resizeP: IUI, resizeL: IUI
+
+    for (let i = 0; i < 8; i++) {
+        point = points[i]
+        style = pointStyles[i % pointStyles.length]
+
+        resizeP = resizePoints[i]
+        resizeL = resizeLines[Math.floor(i / 2)]
+        rotateP = rotatePoints[i]
+
+        resizeP.set(style)
+        resizeP.x = rotateP.x = resizeL.x = point.x
+        resizeP.y = rotateP.y = resizeL.y = point.y
+
+        resizeP.visible = resizeL.visible = resizeable || rotateable
+        rotateP.visible = rotateable && resizeable
+
+        if (i % 2) { // top,  right, bottom, left
+            if (((i + 1) / 2) % 2) { // top, bottom
+                resizeL.width = Math.abs(width)
+                rotateP.width = Math.max(10, Math.abs(width) - 30) // skew
+            } else {
+                resizeL.height = Math.abs(height)
+                rotateP.height = Math.max(10, Math.abs(height) - 30) // skew
+            }
+
+            resizeP.rotation = 90
+            resizeP.visible = type === 'mobile'
+            rotateP.visible = false
+
+        } else {
+            rotateP.visible = type !== 'mobile'
+            rectPoints.push(point.x, point.y)
+        }
+    }
+
+    style = config.rotatePoint || style
+
+    circle.set(style)
+    circle.x = x + width / 2
+    if (!style.y) circle.y = y - (10 + (resizeP.height + circle.height) / 2) * (RectTool.getMirrorData(editor).y ? -1 : 1)
+    circle.visible = rotateable && type === 'mobile'
+
+    rect.set(config.rect || { stroke })
+    rect.points = rectPoints
+    rect.visible = true
 }
