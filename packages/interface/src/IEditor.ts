@@ -31,6 +31,7 @@ export interface IEditorTool {
     getMirrorData(editor: IEditor): IPointData
     resize(e: IEditorResizeEvent): void
     rotate(e: IEditorRotateEvent): void
+    skew(e: IEditorSkewEvent): void
     update(editor: IEditor): void
 }
 
@@ -100,4 +101,14 @@ export interface IEditorRotateEvent extends IEvent {
     // rotateOf(origin, rotation)
     readonly origin?: IPointData
     readonly rotation?: number
+}
+
+export interface IEditorSkewEvent extends IEvent {
+    readonly target?: IUI
+    readonly editor?: IEditor
+
+    // skewOf(origin, skewX, skewY)
+    readonly origin?: IPointData
+    readonly skewX?: number
+    readonly skewY?: number
 }

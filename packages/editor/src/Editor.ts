@@ -1,7 +1,7 @@
-import { IGroupInputData, IPolygon, IUI, IEventListenerId } from '@leafer-ui/interface'
+import { IGroupInputData, IPolygon, IUI, IEventListenerId, IPointData } from '@leafer-ui/interface'
 import { IEditor, IEditorConfig, IEditorTool } from '@leafer-in/interface'
 
-import { Group, Rect, Polygon, DragEvent, PointHelper, PointerEvent, RotateEvent, DataHelper, MathHelper, Bounds } from '@leafer-ui/core'
+import { Group, Rect, Polygon, DragEvent, PointerEvent, RotateEvent, DataHelper, MathHelper, Bounds } from '@leafer-ui/core'
 
 import { EditorResizeEvent } from './event/EditorResizeEvent'
 import { EditorRotateEvent } from './event/EditorRotateEvent'
@@ -11,7 +11,8 @@ import { getTool } from './tool'
 
 import { create } from './editor/create'
 import { onTarget } from './editor/target'
-import { getResizeData } from './editor/resize'
+import { getAround, getResizeData, getRotateData, getSkewData } from './editor/resize'
+import { EditorSkewEvent } from './event/EditorSkewEvent'
 
 
 export class Editor extends Group implements IEditor {
@@ -94,23 +95,22 @@ export class Editor extends Group implements IEditor {
     }
 
     protected onRotate(e: DragEvent | RotateEvent): void {
+        const { __direction } = e.current.__
+        if (__direction % 2) return this.onSkew(e as DragEvent)
+
         const { list, box, simulateTarget } = this
-        const { x, y, width, height } = box.boxBounds
-        const { rotateGap } = this.config
+        const { around, rotateGap } = this.config
 
-        const worldOrigin = box.getWorldPoint({ x: x + width / 2, y: y + height / 2 })
-
-        let rotation: number
+        let worldOrigin: IPointData, rotation: number
         if (e instanceof RotateEvent) {
-            rotation = e.rotation
+            rotation = e.rotation, worldOrigin = e
         } else {
-            const point = e
-            const last = { x: point.x - e.moveX, y: point.y - e.moveY }
-            rotation = PointHelper.getChangeAngle(last, worldOrigin, point)
+            const last = { x: e.x - e.moveX, y: e.y - e.moveY }
+            const data = getRotateData(box.boxBounds, __direction, e.getInner(box), box.getInnerPoint(last), e.altKey ? null : (around || 'center'))
+            rotation = data.rotation, worldOrigin = box.getWorldPoint(data.origin)
         }
 
         rotation = MathHelper.getGapRotation(simulateTarget.rotation + rotation, rotateGap) - simulateTarget.rotation
-
         if (!rotation) return
 
         const each = (item: IUI) => {
@@ -122,8 +122,28 @@ export class Editor extends Group implements IEditor {
         }
 
         list.forEach(each)
+        each(simulateTarget)
+    }
+
+
+    protected onSkew(e: DragEvent): void {
+        const { list, box } = this
+        const data = getSkewData(box.boxBounds, e.current.__.__direction, e.getInnerMove(box), getAround(this.config.around, e.altKey))
+        const { skewX, skewY } = data
+        const worldOrigin = box.getWorldPoint(data.origin)
+
+        const each = (item: IUI) => {
+            const origin = item.getInnerPoint(worldOrigin)
+            const event = new EditorSkewEvent(EditorSkewEvent.SKEW, { editor: this, target: item, origin, skewX, skewY })
+
+            this.tool.skew(event)
+            item.emitEvent(event)
+        }
+
+        list.forEach(each)
         each(this.simulateTarget)
     }
+
 
     public onResize(e: DragEvent): void {
         const { list, box } = this
@@ -132,18 +152,17 @@ export class Editor extends Group implements IEditor {
         let { resizeType, around, lockRatio } = this.config
 
         if (e.shiftKey) lockRatio = true
-        if (e.altKey && !around) around = 'center'
 
-        const data = getResizeData(box.boxBounds, __direction, e.getInnerMove(box), lockRatio, around)
-        const worldOrigin = box.getWorldPoint(data.origin)
+        const resizeData = getResizeData(box.boxBounds, __direction, e.getInnerMove(box), lockRatio, getAround(around, e.altKey))
+        const worldOrigin = box.getWorldPoint(resizeData.origin)
 
         const each = (item: IUI) => {
             const old = item.boxBounds
             const origin = item.getInnerPoint(worldOrigin)
-            const bounds = new Bounds(old).scaleOf(origin, data.scaleX, data.scaleY)
+            const bounds = new Bounds(old).scaleOf(origin, resizeData.scaleX, resizeData.scaleY)
 
             if (resizeType === 'auto') resizeType = item.resizeable ? 'size' : 'scale'
-            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...data, old, bounds, target: item, editor: this, dragEvent: e, resizeType })
+            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...resizeData, old, bounds, target: item, editor: this, dragEvent: e, resizeType })
 
             this.tool.resize(event)
             item.emitEvent(event)

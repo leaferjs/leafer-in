@@ -1,5 +1,5 @@
-import { IUI, IUIInputData, IPointData, IBoundsData } from '@leafer-ui/interface'
-import { IEditor, IEditorResizeEvent, IEditorRotateEvent, IEditorTool } from '@leafer-in/interface'
+import { IUI, IUIInputData, IPointData, IBoundsData, IRectInputData } from '@leafer-ui/interface'
+import { IEditor, IEditorResizeEvent, IEditorRotateEvent, IEditorTool, IEditorSkewEvent } from '@leafer-in/interface'
 
 import { Bounds, Matrix, Platform } from '@leafer-ui/core'
 
@@ -48,8 +48,13 @@ export const RectTool: IEditorTool = {
     },
 
     rotate(e: IEditorRotateEvent): void {
-        const { target, rotation, origin } = e
+        const { target, origin, rotation } = e
         target.rotateOf(origin, rotation)
+    },
+
+    skew(e: IEditorSkewEvent): void {
+        const { target, origin, skewX, skewY } = e
+        target.skewOf(origin, skewX, skewY)
     },
 
     update(editor: IEditor) {
@@ -82,21 +87,20 @@ export const RectTool: IEditorTool = {
 
 function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
     const { config, rotatePoints, rect, circle, resizeLines, resizePoints } = editor
-    const { type, resizeable, rotateable, stroke, pointFill, pointSize, pointRadius } = config
-
-    const defaultStyle = { fill: pointFill, stroke, width: pointSize, height: pointSize, cornerRadius: pointRadius }
-    const pointStyles = config.point instanceof Array ? config.point : [config.point || defaultStyle]
+    const { type, resizeable, rotateable, stroke } = config
 
     const { x, y, width, height } = boxBounds
 
-    const points: IPointData[] = getDirection8Points(boxBounds)
+    const points = getDirection8Points(boxBounds)
+    const pointsStyle = getDirection8PointsStyle(editor)
 
     const rectPoints: number[] = []
+    const mirror = RectTool.getMirrorData(editor)
     let point: IPointData, style: IUIInputData, rotateP: IUI, resizeP: IUI, resizeL: IUI
 
     for (let i = 0; i < 8; i++) {
         point = points[i]
-        style = pointStyles[i % pointStyles.length]
+        style = pointsStyle[i % pointsStyle.length]
 
         resizeP = resizePoints[i]
         resizeL = resizeLines[Math.floor(i / 2)]
@@ -124,20 +128,33 @@ function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
 
         } else {
             rotateP.visible = type !== 'mobile'
+            rotateP.scaleX = mirror.x ? -1 : 1
+            rotateP.scaleY = mirror.y ? -1 : 1
             rectPoints.push(point.x, point.y)
         }
     }
 
     style = config.rotatePoint || style
 
+    // primary rotate
+
     circle.set(style)
     circle.x = x + width / 2
-    if (!style.y) circle.y = y - (10 + (resizeP.height + circle.height) / 2) * (RectTool.getMirrorData(editor).y ? -1 : 1)
+    if (!style.y) circle.y = y - (10 + (resizeP.height + circle.height) / 2) * (mirror.y ? -1 : 1)
     circle.visible = rotateable && type === 'mobile'
+
+    // target stroke
 
     rect.set(config.rect || { stroke })
     rect.points = rectPoints
     rect.visible = true
+}
+
+function getDirection8PointsStyle(editor: IEditor): IRectInputData[] {
+    const { config } = editor
+    const { stroke, pointFill, pointSize, pointRadius } = config
+    const defaultStyle = { fill: pointFill, stroke, width: pointSize, height: pointSize, cornerRadius: pointRadius }
+    return config.point instanceof Array ? config.point : [config.point || defaultStyle]
 }
 
 function getDirection8Points(bounds: IBoundsData): IPointData[] {

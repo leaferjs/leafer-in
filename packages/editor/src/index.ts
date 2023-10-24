@@ -1,5 +1,6 @@
 export { Editor } from './Editor'
 export { EditorResizeEvent } from './event/EditorResizeEvent'
 export { EditorRotateEvent } from './event/EditorRotateEvent'
+export { EditorSkewEvent } from './event/EditorSkewEvent'
 export { LineTool } from './tool/LineTool'
 export { RectTool } from './tool/RectTool'

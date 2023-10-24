@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditorTool, IEditorResizeEvent, IEditorRotateEvent, ILine, IPointData } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditorTool, IEditorResizeEvent, IEditorRotateEvent, ILine, IPointData, IEditorSkewEvent } from '@leafer-in/interface'
 
 import { RectTool } from './RectTool'
 
@@ -69,6 +69,9 @@ export const LineTool: IEditorTool = {
 
     rotate(e: IEditorRotateEvent): void {
         RectTool.rotate(e)
+    },
+
+    skew(_e: IEditorSkewEvent): void {
     },
 
     update(editor: IEditor) {
