@@ -3,6 +3,7 @@ import { IEditor } from '@leafer-in/interface'
 
 import { Bounds } from '@leafer-ui/core'
 
+
 export function simulateTarget(editor: IEditor) {
     const { simulateTarget: simulateTarget, list } = editor
 

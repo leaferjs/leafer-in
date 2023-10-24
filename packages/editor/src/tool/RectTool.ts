@@ -9,7 +9,7 @@ export const RectTool: IEditorTool = {
     name: 'RectTool',
 
     getMirrorData(editor: IEditor): IPointData {
-        const { scaleX, scaleY } = editor.simulateTarget
+        const { scaleX, scaleY } = editor.box
         return {
             x: scaleX < 0 ? 1 : 0, // 1 = mirrorX
             y: scaleY < 0 ? 1 : 0
@@ -89,16 +89,7 @@ function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
 
     const { x, y, width, height } = boxBounds
 
-    const points: IPointData[] = [ // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
-        { x, y },
-        { x: x + width / 2, y },
-        { x: x + width, y },
-        { x: x + width, y: y + height / 2 },
-        { x: x + width, y: y + height },
-        { x: x + width / 2, y: y + height },
-        { x, y: y + height },
-        { x, y: y + height / 2 }
-    ]
+    const points: IPointData[] = getDirection8Points(boxBounds)
 
     const rectPoints: number[] = []
     let point: IPointData, style: IUIInputData, rotateP: IUI, resizeP: IUI, resizeL: IUI
@@ -147,4 +138,18 @@ function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
     rect.set(config.rect || { stroke })
     rect.points = rectPoints
     rect.visible = true
+}
+
+function getDirection8Points(bounds: IBoundsData): IPointData[] {
+    const { x, y, width, height } = bounds
+    return [ // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+        { x, y },
+        { x: x + width / 2, y },
+        { x: x + width, y },
+        { x: x + width, y: y + height / 2 },
+        { x: x + width, y: y + height },
+        { x: x + width / 2, y: y + height },
+        { x, y: y + height },
+        { x, y: y + height / 2 }
+    ]
 }

@@ -72,7 +72,6 @@ export const LineTool: IEditorTool = {
     },
 
     update(editor: IEditor) {
-
         const { rotatePoints, circle, resizeLines, resizePoints } = editor
         RectTool.update(editor)
 
@@ -82,7 +81,6 @@ export const LineTool: IEditorTool = {
         }
 
         circle.visible = false
-
     }
 
 }

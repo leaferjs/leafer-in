@@ -5,7 +5,6 @@ import { IDirection8, IEditor } from '@leafer-in/interface'
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
-
     const point = editor.enterPoint
     if (!point || !editor.target || !editor.visible) return
 
@@ -28,12 +27,10 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
     if (index < 0) index += 8
 
     point.cursor = __isResizePoint ? resizeCursor[index] : rotateCursor[index]
-
 }
 
 
 export function mirrorCursors(mirror: ICursorType[], mirrorX: number, mirrorY: number): void {
-
     if (mirrorX) {
         const topCursor = mirror[top], topLeftCursor = mirror[topLeft], topRightCursor = mirror[topRight]
         mirror[top] = mirror[bottom]
@@ -53,5 +50,4 @@ export function mirrorCursors(mirror: ICursorType[], mirrorX: number, mirrorY: n
         mirror[topRight] = topLeftCursor
         mirror[bottomRight] = bottomLeftCursor
     }
-
 }
