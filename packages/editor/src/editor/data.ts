@@ -26,48 +26,44 @@ export function getResizeData(old: IBoundsData, direction: IDirection8, move: IP
     switch (direction) {
         case top:
             scaleY = topScale
-            if (lockRatio) scaleX = scaleY
             origin = { x: 0.5, y: 1 }
             break
         case right:
             scaleX = rightScale
-            if (lockRatio) scaleY = scaleX
             origin = { x: 0, y: 0.5 }
             break
         case bottom:
             scaleY = bottomScale
-            if (lockRatio) scaleX = scaleY
             origin = { x: 0.5, y: 0 }
             break
         case left:
             scaleX = leftScale
-            if (lockRatio) scaleY = scaleX
             origin = { x: 1, y: 0.5 }
             break
         case topLeft:
             scaleY = topScale
             scaleX = leftScale
-            if (lockRatio) scaleX = scaleY
             origin = { x: 1, y: 1 }
             break
         case topRight:
             scaleY = topScale
             scaleX = rightScale
-            if (lockRatio) scaleX = scaleY
             origin = { x: 0, y: 1 }
             break
         case bottomRight:
             scaleY = bottomScale
             scaleX = rightScale
-            if (lockRatio) scaleX = scaleY
             origin = { x: 0, y: 0 }
             break
         case bottomLeft:
             scaleY = bottomScale
             scaleX = leftScale
-            if (lockRatio) scaleX = scaleY
             origin = { x: 1, y: 0 }
-            break
+    }
+
+    if (lockRatio) {
+        if (scaleX !== 1) scaleY = scaleX
+        else scaleX = scaleY
     }
 
     setOrigin(origin, around, old)
@@ -75,6 +71,7 @@ export function getResizeData(old: IBoundsData, direction: IDirection8, move: IP
     reset(matrix)
     scaleOfOuter(matrix, origin, scaleX, scaleY)
     const bounds = { x: old.x + matrix.e, y: old.y + matrix.f, width: width * scaleX, height: height * scaleY }
+
     return { bounds, old, origin, scaleX, scaleY, direction, lockRatio, around }
 
 }
@@ -107,9 +104,7 @@ export function getRotateData(bounds: IBoundsData, direction: IDirection8, curre
 
     setOrigin(origin, around, bounds)
 
-    const changeAngle = PointHelper.getChangeAngle(last, origin, current)
-
-    return { origin, rotation: changeAngle }
+    return { origin, rotation: PointHelper.getChangeAngle(last, origin, current) }
 }
 
 export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditorSkewEvent {
@@ -144,13 +139,8 @@ export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: I
     last.y = y + last.y * height
 
     setOrigin(origin, around, bounds)
-
-    const changeAngle = PointHelper.getChangeAngle(last, origin, { x: last.x + move.x, y: last.y + move.y })
-    if (skewX) {
-        skewX = -changeAngle
-    } else {
-        skewY = changeAngle
-    }
+    const changeAngle = PointHelper.getChangeAngle(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
+    skewX ? skewX = -changeAngle : skewY = changeAngle
 
     return { origin, skewX, skewY }
 }

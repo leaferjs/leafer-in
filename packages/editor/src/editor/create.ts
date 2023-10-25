@@ -22,7 +22,7 @@ export function create(editor: IEditor) {
             listenPointEvents(resizeLine, 'resize', i, editor)
         }
 
-        resizePoint = new Rect({ around: 'center', hitRadius: 5, strokeWidth: 2 })
+        resizePoint = new Rect({ around: 'center', strokeAlign: 'outside', hitRadius: 5 })
         resizePoints.push(resizePoint)
         listenPointEvents(resizePoint, 'resize', i, editor)
     }

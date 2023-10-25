@@ -87,7 +87,7 @@ export const RectTool: IEditorTool = {
 
 function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
     const { config, rotatePoints, rect, circle, resizeLines, resizePoints } = editor
-    const { type, resizeable, rotateable, stroke } = config
+    const { type, resizeable, rotateable, stroke, strokeWidth } = config
 
     const { x, y, width, height } = boxBounds
 
@@ -145,15 +145,15 @@ function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
 
     // target stroke
 
-    rect.set(config.rect || { stroke })
+    rect.set(config.rect || { stroke, strokeWidth })
     rect.points = rectPoints
     rect.visible = true
 }
 
 function getDirection8PointsStyle(editor: IEditor): IRectInputData[] {
     const { config } = editor
-    const { stroke, pointFill, pointSize, pointRadius } = config
-    const defaultStyle = { fill: pointFill, stroke, width: pointSize, height: pointSize, cornerRadius: pointRadius }
+    const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = config
+    const defaultStyle = { fill: pointFill, stroke, strokeWidth, width: pointSize, height: pointSize, cornerRadius: pointRadius }
     return config.point instanceof Array ? config.point : [config.point || defaultStyle]
 }
 

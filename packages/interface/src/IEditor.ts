@@ -1,4 +1,4 @@
-import { IGroup, IUI, IRectInputData, IResizeType, IPolygon, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IRect, IEventListenerId } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IResizeType, IPolygon, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IRect, IEventListenerId, IStroke, IFill } from '@leafer-ui/interface'
 
 export interface IEditor extends IGroup {
     config: IEditorConfig
@@ -43,8 +43,10 @@ export interface IEditorConfig {
     lockRatio?: boolean
     rotateGap?: number
 
-    stroke?: string
-    pointFill?: string
+    stroke?: IStroke
+    strokeWidth?: number
+
+    pointFill?: IFill
     pointSize?: number
     pointRadius?: number
 

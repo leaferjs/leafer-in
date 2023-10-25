@@ -11,7 +11,7 @@ import { getTool } from './tool'
 
 import { create } from './editor/create'
 import { onTarget } from './editor/target'
-import { getAround, getResizeData, getRotateData, getSkewData } from './editor/resize'
+import { getAround, getResizeData, getRotateData, getSkewData } from './editor/data'
 import { EditorSkewEvent } from './event/EditorSkewEvent'
 
 
@@ -33,7 +33,7 @@ export class Editor extends Group implements IEditor {
     // draw
 
     public box: IUI = new Rect({ hitFill: 'all', hitRadius: 5 }) // target rect
-    public rect: IPolygon = new Polygon({ hittable: false, strokeAlign: 'center', strokeWidth: 2 }) // target stroke, no scale
+    public rect: IPolygon = new Polygon({ hittable: false, strokeAlign: 'center' }) // target stroke, no scale
 
     public circle: IUI = new Rect({ around: 'center', hitRadius: 10 }) // rotate point
 
@@ -113,12 +113,12 @@ export class Editor extends Group implements IEditor {
         rotation = MathHelper.getGapRotation(simulateTarget.rotation + rotation, rotateGap) - simulateTarget.rotation
         if (!rotation) return
 
-        const each = (item: IUI) => {
-            const origin = item.getInnerPoint(worldOrigin)
-            const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { editor: this, target: item, origin, rotation })
+        const each = (target: IUI) => {
+            const origin = target.getInnerPoint(worldOrigin)
+            const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { editor: this, target, origin, rotation: box.__hasMirror ? -rotation : rotation })
 
             this.tool.rotate(event)
-            item.emitEvent(event)
+            target.emitEvent(event)
         }
 
         list.forEach(each)
@@ -132,12 +132,12 @@ export class Editor extends Group implements IEditor {
         const { skewX, skewY } = data
         const worldOrigin = box.getWorldPoint(data.origin)
 
-        const each = (item: IUI) => {
-            const origin = item.getInnerPoint(worldOrigin)
-            const event = new EditorSkewEvent(EditorSkewEvent.SKEW, { editor: this, target: item, origin, skewX, skewY })
+        const each = (target: IUI) => {
+            const origin = target.getInnerPoint(worldOrigin)
+            const event = new EditorSkewEvent(EditorSkewEvent.SKEW, { editor: this, target, origin, skewX, skewY })
 
             this.tool.skew(event)
-            item.emitEvent(event)
+            target.emitEvent(event)
         }
 
         list.forEach(each)
@@ -156,16 +156,16 @@ export class Editor extends Group implements IEditor {
         const resizeData = getResizeData(box.boxBounds, __direction, e.getInnerMove(box), lockRatio, getAround(around, e.altKey))
         const worldOrigin = box.getWorldPoint(resizeData.origin)
 
-        const each = (item: IUI) => {
-            const old = item.boxBounds
-            const origin = item.getInnerPoint(worldOrigin)
+        const each = (target: IUI) => {
+            const old = target.boxBounds
+            const origin = target.getInnerPoint(worldOrigin)
             const bounds = new Bounds(old).scaleOf(origin, resizeData.scaleX, resizeData.scaleY)
 
-            if (resizeType === 'auto') resizeType = item.resizeable ? 'size' : 'scale'
-            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...resizeData, old, bounds, target: item, editor: this, dragEvent: e, resizeType })
+            if (resizeType === 'auto') resizeType = target.resizeable ? 'size' : 'scale'
+            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...resizeData, old, bounds, target, editor: this, dragEvent: e, resizeType })
 
             this.tool.resize(event)
-            item.emitEvent(event)
+            target.emitEvent(event)
         }
 
         list.forEach(each)
