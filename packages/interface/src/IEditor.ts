@@ -60,6 +60,7 @@ export interface IEditorConfig {
 
     rotateable?: boolean
     resizeable?: boolean
+    skewable?: boolean
 }
 
 export enum IDirection8 {

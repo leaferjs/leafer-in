@@ -94,19 +94,19 @@ export class Editor extends Group implements IEditor {
         each(this.simulateTarget)
     }
 
-    protected onRotate(e: DragEvent | RotateEvent): void {
+    public onRotate(e: DragEvent | RotateEvent): void {
+        const { skewable, around, rotateGap } = this.config
         const { __direction } = e.current.__
-        if (__direction % 2) return this.onSkew(e as DragEvent)
+        if (skewable && __direction % 2) return this.onSkew(e as DragEvent)
 
         const { list, box, simulateTarget } = this
-        const { around, rotateGap } = this.config
 
         let worldOrigin: IPointData, rotation: number
         if (e instanceof RotateEvent) {
             rotation = e.rotation, worldOrigin = e
         } else {
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = getRotateData(box.boxBounds, __direction, e.getInner(box), box.getInnerPoint(last), e.altKey ? null : (around || 'center'))
+            const data = getRotateData(box.boxBounds, __direction, e.getInner(box), box.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
             rotation = data.rotation, worldOrigin = box.getWorldPoint(data.origin)
         }
 
@@ -126,7 +126,7 @@ export class Editor extends Group implements IEditor {
     }
 
 
-    protected onSkew(e: DragEvent): void {
+    public onSkew(e: DragEvent): void {
         const { list, box } = this
         const data = getSkewData(box.boxBounds, e.current.__.__direction, e.getInnerMove(box), getAround(this.config.around, e.altKey))
         const { skewX, skewY } = data

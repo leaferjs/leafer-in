@@ -13,5 +13,6 @@ export const config: IEditorConfig = {
     resizeCursor: ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'],
     rotateCursor: ['ne-resize', 'e-resize', 'se-resize', 's-resize', 'sw-resize', 'w-resize', 'nw-resize', 'n-resize'],
     resizeable: true,
-    rotateable: true
+    rotateable: true,
+    skewable: true
 }
