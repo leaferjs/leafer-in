@@ -1,43 +1,56 @@
-import { IEditor } from '@leafer-in/interface'
+import { IEditor, IUI, ILeafList } from '@leafer-in/interface'
 
-import { RenderEvent, KeyEvent } from '@leafer-ui/core'
+import { RenderEvent, KeyEvent, LeafList } from '@leafer-ui/core'
 
-import { simulateTarget } from './simulate'
-import { updateCursor } from './cursor'
+import { simulate } from './simulate'
+import { updateCursor, updateMoveCursor } from './cursor'
+import { arrowKey } from './arrowKey'
+import { EditorEvent } from '../event/EditorEvent'
 
 
-export function onTarget(editor: IEditor): void {
-    const { target } = editor
-    removeTargetEvents(editor)
-    editor.visible = !!target
-    editor.simulateTarget.parent = null
+export function onTarget(editor: IEditor, value: IUI | IUI[] | ILeafList): void {
+    if (value) {
+        editor.targetList = value instanceof LeafList ? value : new LeafList(value instanceof Array ? value : [value as IUI])
+    } else {
+        editor.targetList.reset()
+    }
 
-    if (target) {
+    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor }))
+
+    const { targetList } = editor
+    editor.targetSimulate.parent = null
+    editor.leafer.app.selector.list = new LeafList()
+
+    if (targetList.length) {
         editor.waitLeafer(() => {
-            editor.tool = editor.getTool(target)
-            simulateTarget(editor)
+            editor.tool = editor.getTool(editor.targetList.list as IUI[])
+            if (editor.multiple) simulate(editor)
 
             editor.update()
-            editor.updateMoveCursor()
+            updateMoveCursor(editor)
             listenTargetEvents(editor)
         })
+    } else {
+        removeTargetEvents(editor)
     }
 }
 
 function listenTargetEvents(editor: IEditor): void {
-    if (editor.target) {
-        const { leafer } = editor.list[0]
-        editor.__targetEventIds = [
-            leafer.on_(RenderEvent.START, editor.update, editor),
-            leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e) => { updateCursor(editor, e) })
+    if (!editor.targetEventIds.length) {
+        if (!editor.targetLeafer) editor.targetLeafer = editor.targetList.indexAt(0).leafer
+        const { targetLeafer } = editor
+        editor.targetEventIds = [
+            targetLeafer.on_(RenderEvent.START, editor.update, editor),
+            targetLeafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e) => { updateCursor(editor, e) }),
+            targetLeafer.on_(KeyEvent.DOWN, (e) => { arrowKey(e, editor) })
         ]
     }
 }
 
 function removeTargetEvents(editor: IEditor): void {
-    if (editor.__targetEventIds.length) {
-        const { leafer } = editor.list[0]
-        if (leafer) leafer.off_(editor.__targetEventIds)
-        editor.__targetEventIds.length = 0
+    if (editor.targetEventIds.length) {
+        const { targetLeafer } = editor
+        if (targetLeafer) targetLeafer.off_(editor.targetEventIds)
+        editor.targetEventIds.length = 0
     }
 }

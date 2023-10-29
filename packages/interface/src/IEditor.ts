@@ -1,34 +1,44 @@
-import { IGroup, IUI, IRectInputData, IResizeType, IPolygon, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IRect, IEventListenerId, IStroke, IFill } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IResizeType, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeafer } from '@leafer-ui/interface'
+import { IEditBox } from './IEditBox'
+import { IEditSelector } from './IEditSelector'
 
 export interface IEditor extends IGroup {
     config: IEditorConfig
 
-    resizePoints: IUI[]
-    rotatePoints: IUI[]
-    resizeLines: IUI[]
+    hoverTarget: IUI
+    target: IUI | IUI[] | ILeafList
 
-    circle: IUI
-    rect: IPolygon
-    box: IRect
+    targetList: ILeafList
+    readonly multiple: boolean
 
-    target: IUI | IUI[]
-    list: IUI[]
+    targetSimulate: IUI
+    targetLeafer: ILeafer
 
-    simulateTarget: IUI
+    selector: IEditSelector
+    box: IEditBox
 
     tool: IEditorTool
 
-    enterPoint: IUI
+    targetEventIds: IEventListenerId[]
 
-    __targetEventIds: IEventListenerId[]
+    hasItem(item: IUI): void
+    shiftItem(item: IUI): void
+    addItem(item: IUI): void
+    removeItem(item: IUI): void
 
     getTool(value: IUI | IUI[]): IEditorTool
     update(): void
+
+    onMove(e: IDragEvent): void
+    onResize(e: IDragEvent): void
+    onRotate(e: IDragEvent | IRotateEvent): void
+    onSkew(e: IDragEvent): void
 }
 
 export interface IEditorTool {
     name: string
     getMirrorData(editor: IEditor): IPointData
+    move(e: IEditorMoveEvent): void
     resize(e: IEditorResizeEvent): void
     rotate(e: IEditorRotateEvent): void
     skew(e: IEditorSkewEvent): void
@@ -53,6 +63,7 @@ export interface IEditorConfig {
     point?: IRectInputData | IRectInputData[]
     rotatePoint?: IRectInputData
     rect?: IRectInputData
+    selectRect?: IRectInputData
 
     hideOnMove?: boolean
 
@@ -76,10 +87,16 @@ export enum IDirection8 {
     left
 }
 
-export interface IEditorResizeEvent extends IEvent {
+export interface IEditorEvent extends IEvent {
     readonly target?: IUI
     readonly editor?: IEditor
+}
+export interface IEditorMoveEvent extends IEditorEvent {
+    readonly moveX: number
+    readonly moveY: number
+}
 
+export interface IEditorResizeEvent extends IEditorEvent {
     readonly resizeType?: IResizeType
     readonly lockRatio?: boolean
     readonly around?: IAround
@@ -97,21 +114,16 @@ export interface IEditorResizeEvent extends IEvent {
     readonly scaleY?: number
 }
 
-export interface IEditorRotateEvent extends IEvent {
-    readonly target?: IUI
-    readonly editor?: IEditor
-
+export interface IEditorRotateEvent extends IEditorEvent {
     // rotateOf(origin, rotation)
     readonly origin?: IPointData
     readonly rotation?: number
 }
 
-export interface IEditorSkewEvent extends IEvent {
-    readonly target?: IUI
-    readonly editor?: IEditor
-
+export interface IEditorSkewEvent extends IEditorEvent {
     // skewOf(origin, skewX, skewY)
     readonly origin?: IPointData
     readonly skewX?: number
     readonly skewY?: number
 }
+

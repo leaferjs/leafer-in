@@ -4,16 +4,11 @@ import { IEditor } from '@leafer-in/interface'
 import { Bounds } from '@leafer-ui/core'
 
 
-export function simulateTarget(editor: IEditor) {
-    const { simulateTarget: simulateTarget, list } = editor
+export function simulate(editor: IEditor) {
+    const { targetSimulate: simulateTarget, targetList: list } = editor
+    const { x, y, width, height } = new Bounds().setByListWithHandle(list.list, (leaf: ILeaf) => leaf.worldBoxBounds)
 
-    const one = list.length === 1
-    const { x, y, width, height } = one ? list[0].boxBounds : new Bounds().setByListWithHandle(list, (leaf: ILeaf) => leaf.worldBoxBounds)
-
-    simulateTarget.parent = one ? list[0].parent : list[0].leafer.zoomLayer as IGroup
-    simulateTarget.reset({ x, y, width, height })
-    if (one) {
-        const { scaleX, scaleY, rotation, skewX, skewY } = list[0]
-        simulateTarget.set({ scaleX, scaleY, rotation, skewX, skewY })
-    }
+    const parent = simulateTarget.parent = list.list[0].leafer.zoomLayer as IGroup
+    const { scaleX, scaleY, e: worldX, f: worldY } = parent.__world
+    simulateTarget.reset({ x: x - worldX, y: y - worldY, width: width / scaleX, height: height / scaleY })
 }

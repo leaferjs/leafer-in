@@ -1,4 +1,6 @@
 export { Editor } from './Editor'
+export { EditorEvent } from './event/EditorEvent'
+export { EditorMoveEvent } from './event/EditorMoveEvent'
 export { EditorResizeEvent } from './event/EditorResizeEvent'
 export { EditorRotateEvent } from './event/EditorRotateEvent'
 export { EditorSkewEvent } from './event/EditorSkewEvent'

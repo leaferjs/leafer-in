@@ -1,23 +1,19 @@
-import { IUI, IPointData } from '@leafer-ui/interface'
-import { IEditor, IEditorRotateEvent } from '@leafer-in/interface'
+import { IPointData } from '@leafer-ui/interface'
+import { IEditorRotateEvent } from '@leafer-in/interface'
 
-import { Event } from '@leafer-ui/core'
+import { EditorEvent } from './EditorEvent'
 
 
-export class EditorRotateEvent extends Event implements IEditorRotateEvent {
+export class EditorRotateEvent extends EditorEvent implements IEditorRotateEvent {
 
     static ROTATE = 'editor.rotate'
-
-    declare readonly target: IUI
-    readonly editor: IEditor
 
     // rotateOf(origin, rotation)
     declare readonly origin: IPointData
     readonly rotation: number
 
     constructor(type: string, data?: IEditorRotateEvent) {
-        super(type)
-        if (data) Object.assign(this, data)
+        super(type, data)
     }
 
 }

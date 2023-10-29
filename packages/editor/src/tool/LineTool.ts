@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditorTool, IEditorResizeEvent, IEditorRotateEvent, ILine, IPointData, IEditorSkewEvent } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditorTool, IEditorResizeEvent, IEditorRotateEvent, ILine, IPointData, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 
 import { RectTool } from './RectTool'
 
@@ -14,6 +14,10 @@ export const LineTool: IEditorTool = {
             x: 0,
             y: 0
         }
+    },
+
+    move(e: IEditorMoveEvent): void {
+        RectTool.move(e)
     },
 
     resize(e: IEditorResizeEvent): void {
@@ -75,7 +79,7 @@ export const LineTool: IEditorTool = {
     },
 
     update(editor: IEditor) {
-        const { rotatePoints, circle, resizeLines, resizePoints } = editor
+        const { rotatePoints, circle, resizeLines, resizePoints } = editor.box
         RectTool.update(editor)
 
         for (let i = 0; i < 8; i++) {

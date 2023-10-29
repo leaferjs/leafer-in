@@ -1,14 +1,11 @@
-import { IUI, IResizeType, IBoundsData, IPointData, IAround, IDragEvent } from '@leafer-ui/interface'
-import { IEditor, IDirection8, IEditorResizeEvent } from '@leafer-in/interface'
+import { IResizeType, IBoundsData, IPointData, IAround, IDragEvent } from '@leafer-ui/interface'
+import { IDirection8, IEditorResizeEvent } from '@leafer-in/interface'
 
-import { Event } from '@leafer-ui/core'
+import { EditorEvent } from './EditorEvent'
 
-export class EditorResizeEvent extends Event implements IEditorResizeEvent {
+export class EditorResizeEvent extends EditorEvent implements IEditorResizeEvent {
 
     static RESIZE = 'editor.resize'
-
-    declare readonly target: IUI
-    readonly editor: IEditor
 
     readonly resizeType: IResizeType
     readonly lockRatio: boolean
@@ -27,8 +24,7 @@ export class EditorResizeEvent extends Event implements IEditorResizeEvent {
     readonly scaleY: number
 
     constructor(type: string, data?: IEditorResizeEvent) {
-        super(type)
-        if (data) Object.assign(this, data)
+        super(type, data)
     }
 
 }

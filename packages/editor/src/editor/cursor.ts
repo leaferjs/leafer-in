@@ -5,17 +5,20 @@ import { IDirection8, IEditor } from '@leafer-in/interface'
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
-    const point = editor.enterPoint
-    if (!point || !editor.target || !editor.visible) return
+    const point = editor.box.enterPoint
+    if (!point || !editor.targetList.length || !editor.box.visible) return
 
-    let { rotation } = editor
+
+
+    let { rotation } = editor.box
     let { resizeCursor, rotateCursor, resizeable } = editor.config
     const mirror = editor.tool.getMirrorData(editor)
-    const { __direction, __isResizePoint } = point.__
+    const { direction, pointType } = point
 
-    editor.enterPoint = point
+    editor.box.enterPoint = point
+    const isResizePoint = pointType === 'resize'
 
-    if (__isResizePoint && (e.metaKey || e.ctrlKey || !resizeable)) resizeCursor = rotateCursor
+    if (isResizePoint && (e.metaKey || e.ctrlKey || !resizeable)) resizeCursor = rotateCursor
 
     if (mirror.x || mirror.y) {
         mirrorCursors(resizeCursor = [...resizeCursor], mirror.x, mirror.y)
@@ -23,10 +26,14 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
         if (mirror.x + mirror.y === 1) rotation = -rotation
     }
 
-    let index = (__direction + Math.round(rotation / 45)) % 8
+    let index = (direction + Math.round(rotation / 45)) % 8
     if (index < 0) index += 8
 
-    point.cursor = __isResizePoint ? resizeCursor[index] : rotateCursor[index]
+    point.cursor = isResizePoint ? resizeCursor[index] : rotateCursor[index]
+}
+
+export function updateMoveCursor(editor: IEditor): void {
+    editor.box.targetRect.cursor = editor.config.moveCursor
 }
 
 

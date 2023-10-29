@@ -1,7 +1,7 @@
 import { IUI, IUIInputData, IPointData, IBoundsData, IRectInputData } from '@leafer-ui/interface'
-import { IEditor, IEditorResizeEvent, IEditorRotateEvent, IEditorTool, IEditorSkewEvent } from '@leafer-in/interface'
+import { IEditor, IEditorResizeEvent, IEditorRotateEvent, IEditorTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 
-import { Bounds, Matrix, Platform } from '@leafer-ui/core'
+import { Bounds, Matrix } from '@leafer-ui/core'
 
 
 export const RectTool: IEditorTool = {
@@ -9,11 +9,15 @@ export const RectTool: IEditorTool = {
     name: 'RectTool',
 
     getMirrorData(editor: IEditor): IPointData {
-        const { scaleX, scaleY } = editor.box
+        const { scaleX, scaleY } = editor.box.targetRect
         return {
             x: scaleX < 0 ? 1 : 0, // 1 = mirrorX
             y: scaleY < 0 ? 1 : 0
         }
+    },
+
+    move(e: IEditorMoveEvent): void {
+        e.target.move(e.moveX, e.moveY)
     },
 
     resize(e: IEditorResizeEvent): void {
@@ -58,13 +62,14 @@ export const RectTool: IEditorTool = {
     },
 
     update(editor: IEditor) {
-        const { simulateTarget, box } = editor
+        const { targetSimulate, targetList } = editor
+        const { targetRect } = editor.box
 
-        simulateTarget.parent.__layout.checkUpdate()
+        const first = targetList.list[0]
 
-        Platform.layout(simulateTarget)
-        const boxBounds = new Bounds(simulateTarget.__layout.boxBounds)
-        const w = simulateTarget.__world
+        if (editor.multiple) targetSimulate.parent.__layout.checkUpdate()
+        const boxBounds = new Bounds(editor.multiple ? targetSimulate.boxBounds : first.boxBounds) // need layout
+        const w = editor.multiple ? targetSimulate.__world : first.__world
 
         const pw = editor.parent.worldTransform
 
@@ -76,8 +81,10 @@ export const RectTool: IEditorTool = {
 
         boxBounds.scale(scaleX, scaleY) // maybe width / height < 0
 
-        editor.set({ x: worldX, y: worldY, rotation, skewX, skewY })
-        box.set({ x: boxBounds.x, y: boxBounds.y, width: boxBounds.width / scaleX, height: boxBounds.height / scaleY, scaleX, scaleY, visible: true })
+        // style
+
+        editor.box.set({ x: worldX, y: worldY, rotation, skewX, skewY })
+        targetRect.set({ x: boxBounds.x, y: boxBounds.y, width: boxBounds.width / scaleX, height: boxBounds.height / scaleY, scaleX, scaleY, visible: true })
 
         updateStyle(editor, boxBounds)
     }
@@ -86,7 +93,8 @@ export const RectTool: IEditorTool = {
 
 
 function updateStyle(editor: IEditor, boxBounds: IBoundsData): void {
-    const { config, rotatePoints, rect, circle, resizeLines, resizePoints } = editor
+    const { config } = editor
+    const { rotatePoints, rect, circle, resizeLines, resizePoints } = editor.box
     const { type, resizeable, rotateable, stroke, strokeWidth } = config
 
     const { x, y, width, height } = boxBounds
