@@ -1,4 +1,4 @@
-import { IBounds, IUI, ILeaferCanvas, IRenderOptions } from '@leafer-ui/interface'
+import { IBounds, IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
 import { Bounds, Paint, UI } from '@leafer-ui/core'
 
 import { IWireframe } from '@leafer-in/interface'
@@ -23,6 +23,12 @@ export class Wireframe extends UI implements IWireframe {
         this.strokeAlign = 'center'
         this.noBounds = true
         this.width = this.height = 10000
+    }
+
+    public setTarget(target: IUI | IUI[], style: IRectInputData): void {
+        const { stroke, strokeWidth } = style
+        this.set({ stroke, strokeWidth })
+        this.target = target
     }
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {

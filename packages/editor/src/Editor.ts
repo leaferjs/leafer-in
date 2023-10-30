@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, ILeafer } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, ILeaferBase } from '@leafer-ui/interface'
 import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, Bounds, LeafList } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditorTool } from '@leafer-in/interface'
@@ -41,7 +41,7 @@ export class Editor extends Group implements IEditor {
 
 
     public targetSimulate: IUI = new Rect({ visible: false })
-    public targetLeafer: ILeafer
+    public targetLeafer: ILeaferBase
 
 
     public selector: EditSelector = new EditSelector(this)
