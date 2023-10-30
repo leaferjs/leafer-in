@@ -139,9 +139,7 @@ export class Editor extends Group implements IEditor {
             const old = target.boxBounds
             const origin = target.getInnerPoint(worldOrigin)
             const bounds = new Bounds(old).scaleOf(origin, resizeData.scaleX, resizeData.scaleY)
-
-            if (resizeType === 'auto') resizeType = target.resizeable ? 'size' : 'scale'
-            events.push(new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...resizeData, old, bounds, target, editor: this, dragEvent: e, resizeType }))
+            events.push(new EditorResizeEvent(EditorResizeEvent.RESIZE, { ...resizeData, old, bounds, target, editor: this, dragEvent: e, resizeType: resizeType === 'auto' ? (target.resizeable ? 'size' : 'scale') : resizeType }))
         }
 
         list.forEach(each)
