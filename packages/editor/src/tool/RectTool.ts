@@ -1,9 +1,6 @@
 import { IUI, IUIInputData, IPointData, IBoundsData, IRectInputData } from '@leafer-ui/interface'
 import { IEditor, IEditorResizeEvent, IEditorRotateEvent, IEditorTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 
-import { Bounds, Matrix } from '@leafer-ui/core'
-
-
 export const RectTool: IEditorTool = {
 
     name: 'RectTool',
@@ -68,25 +65,16 @@ export const RectTool: IEditorTool = {
         const first = targetList.list[0]
 
         if (editor.multiple) targetSimulate.parent.__layout.checkUpdate()
-        const boxBounds = new Bounds(editor.multiple ? targetSimulate.boxBounds : first.boxBounds) // need layout
-        const w = editor.multiple ? targetSimulate.__world : first.__world
 
-        const pw = editor.parent.worldTransform
+        const target = editor.multiple ? targetSimulate : first
 
-        const matrix = new Matrix(w).divide(pw)
-        const worldX = matrix.e, worldY = matrix.f
+        const orientBounds = target.getOrientBounds('box', 'world', editor, true)
+        editor.box.set(orientBounds)
 
-        let { scaleX, scaleY, rotation, skewX, skewY } = w
-        scaleX /= pw.scaleX, scaleY /= pw.scaleY, rotation -= pw.rotation, skewX -= pw.skewX, skewY -= pw.skewY
+        const targetStyle = { x: 0, y: 0, width: orientBounds.width, height: orientBounds.height, visible: true }
+        targetRect.set(targetStyle)
 
-        boxBounds.scale(scaleX, scaleY) // maybe width / height < 0
-
-        // style
-
-        editor.box.set({ x: worldX, y: worldY, rotation, skewX, skewY })
-        targetRect.set({ x: boxBounds.x, y: boxBounds.y, width: boxBounds.width / scaleX, height: boxBounds.height / scaleY, scaleX, scaleY, visible: true })
-
-        updateStyle(editor, boxBounds)
+        updateStyle(editor, targetStyle)
     }
 
 }
