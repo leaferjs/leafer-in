@@ -1,4 +1,4 @@
-import { IGroup, IPolygon, IRect } from '@leafer-ui/interface'
+import { IGroup, IRect, IBoundsData } from '@leafer-ui/interface'
 import { IEditor } from '@leafer-in/interface'
 import { IEditPoint } from './IEditPoint'
 
@@ -8,13 +8,14 @@ export interface IEditBox extends IGroup {
     dragging?: boolean
 
     circle: IEditPoint
-    rect: IPolygon
-    targetRect: IRect
+    rect: IRect
 
     resizePoints: IEditPoint[]
     rotatePoints: IEditPoint[]
     resizeLines: IEditPoint[]
 
     enterPoint: IEditPoint
+
+    update(bounds: IBoundsData): void
 
 }

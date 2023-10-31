@@ -73,7 +73,7 @@ export class EditSelector extends Group implements IEditSelector {
 
     protected onTap(e: PointerEvent): void {
         if (!e.middle && e.shiftKey && !this.lastDown) {
-            const options = { exclude: new LeafList(this.editor.box.targetRect) }
+            const options = { exclude: new LeafList(this.editor.box.rect) }
             const find = this.findOneEditable(e.target.leafer.interaction.findPath(e, options))
             if (find) this.editor.shiftItem(find)
         }

@@ -124,15 +124,15 @@ export class Editor extends Group implements IEditor {
 
     public onResize(e: DragEvent): void {
         const list = this.targetList.list as IUI[]
-        const { targetRect } = this.box
+        const { rect } = this.box
         const { direction } = e.current as IEditPoint
 
         let { resizeType, around, lockRatio } = this.config
 
         if (e.shiftKey) lockRatio = true
 
-        const resizeData = getResizeData(targetRect.boxBounds, direction, e.getInnerMove(targetRect), lockRatio, getAround(around, e.altKey))
-        const worldOrigin = targetRect.getWorldPoint(resizeData.origin)
+        const resizeData = getResizeData(rect.boxBounds, direction, e.getInnerMove(rect), lockRatio, getAround(around, e.altKey))
+        const worldOrigin = rect.getWorldPoint(resizeData.origin)
 
         const events: EditorResizeEvent[] = []
         const each = (target: IUI) => {
@@ -157,7 +157,7 @@ export class Editor extends Group implements IEditor {
         const { direction } = e.current as IEditPoint
         if (skewable && direction % 2) return this.onSkew(e as DragEvent)
 
-        const { targetRect } = this.box
+        const { rect } = this.box
         const list = this.targetList.list as IUI[]
 
         let worldOrigin: IPointData, rotation: number
@@ -165,8 +165,8 @@ export class Editor extends Group implements IEditor {
             rotation = e.rotation, worldOrigin = e
         } else {
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = getRotateData(targetRect.boxBounds, direction, e.getInner(targetRect), targetRect.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
-            rotation = data.rotation, worldOrigin = targetRect.getWorldPoint(data.origin)
+            const data = getRotateData(rect.boxBounds, direction, e.getInner(rect), rect.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
+            rotation = data.rotation, worldOrigin = rect.getWorldPoint(data.origin)
         }
 
         rotation = MathHelper.getGapRotation(this.rotation + rotation, rotateGap) - this.rotation
@@ -191,12 +191,11 @@ export class Editor extends Group implements IEditor {
     }
 
     public onSkew(e: DragEvent): void {
-        const { targetSimulate } = this
         const list = this.targetList.list as IUI[]
-        const find = this.multiple ? targetSimulate : list[0]
-        const data = getSkewData(find.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(find), getAround(this.config.around, e.altKey))
+        const { rect } = this.box
+        const data = getSkewData(rect.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(rect), getAround(this.config.around, e.altKey))
         const { skewX, skewY } = data
-        const worldOrigin = find.getWorldPoint(data.origin)
+        const worldOrigin = rect.getWorldPoint(data.origin)
 
         const events: EditorSkewEvent[] = []
         const each = (target: IUI) => {

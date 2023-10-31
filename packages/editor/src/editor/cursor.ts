@@ -33,7 +33,7 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
 }
 
 export function updateMoveCursor(editor: IEditor): void {
-    editor.box.targetRect.cursor = editor.config.moveCursor
+    editor.box.rect.cursor = editor.config.moveCursor
 }
 
 
