@@ -36,6 +36,7 @@ export class Editor extends Group implements IEditor {
     private _target: IUI | IUI[] | ILeafList
 
 
+    public get list(): IUI[] { return this.targetList.list as IUI[] }
     public targetList: ILeafList = new LeafList() // from target
     public get multiple(): boolean { return this.targetList.length > 1 }
 
@@ -51,6 +52,8 @@ export class Editor extends Group implements IEditor {
     public tool: IEditorTool
 
     public targetEventIds: IEventListenerId[] = []
+
+    public get rect() { return this.multiple ? this.targetSimulate : this.targetList.list[0] }
 
 
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
@@ -96,7 +99,7 @@ export class Editor extends Group implements IEditor {
     // operate
 
     public onMove(e: DragEvent): void {
-        const list = this.targetList.list as IUI[]
+        const { list } = this
 
         const each = (target: IUI) => {
             const move = e.getLocalMove(target)
@@ -121,8 +124,7 @@ export class Editor extends Group implements IEditor {
 
 
     public onResize(e: DragEvent): void {
-        const list = this.targetList.list as IUI[]
-        const { rect } = this.box
+        const { list, rect } = this
         const { direction } = e.current as IEditPoint
 
         let { resizeType, around, lockRatio } = this.config
@@ -154,8 +156,7 @@ export class Editor extends Group implements IEditor {
         const { direction } = e.current as IEditPoint
         if (skewable && direction % 2) return this.onSkew(e as DragEvent)
 
-        const { rect } = this.box
-        const list = this.targetList.list as IUI[]
+        const { list, rect } = this
 
         let worldOrigin: IPointData, rotation: number
         if (e instanceof RotateEvent) {
@@ -188,10 +189,8 @@ export class Editor extends Group implements IEditor {
     }
 
     public onSkew(e: DragEvent): void {
-        const list = this.targetList.list as IUI[]
-        const { rect } = this.box
+        const { list, rect } = this
         const { targetOrigin, skewX, skewY } = getSkewData(rect.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(rect), getAround(this.config.around, e.altKey))
-        console.log(targetOrigin, skewX, skewY)
         const worldOrigin = rect.getWorldPoint(targetOrigin)
 
         const each = (target: IUI) => {

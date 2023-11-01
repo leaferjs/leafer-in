@@ -116,7 +116,7 @@ export class EditBox extends Group implements IEditBox {
                     resizeL.width = width
                     if (resizeP.width > width - 30) resizeP.visible = false
                 } else {
-                    resizeL.height = bounds.height
+                    resizeL.height = height
                     resizeP.rotation = 90
                     if (resizeP.width > height - 30) resizeP.visible = false
                 }

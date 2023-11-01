@@ -1,7 +1,7 @@
 import { IBoundsData, IPointData, IAround } from '@leafer-ui/interface'
 import { IEditorResizeEvent, IDirection8, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
-import { PointHelper } from '@leafer-ui/core'
+import { AroundHelper, PointHelper } from '@leafer-ui/core'
 
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
@@ -64,7 +64,7 @@ export function getResizeData(old: IBoundsData, direction: IDirection8, move: IP
         else scaleX = scaleY
     }
 
-    setOrigin(origin, around, old)
+    setRealOrigin(origin, around, old)
     return { targetOrigin: origin, scaleX, scaleY, direction, lockRatio, around }
 
 }
@@ -95,7 +95,7 @@ export function getRotateData(bounds: IBoundsData, direction: IDirection8, curre
 
     }
 
-    setOrigin(origin, around, bounds)
+    setRealOrigin(origin, around, bounds)
 
     return { targetOrigin: origin, rotation: PointHelper.getChangeAngle(last, origin, current) }
 }
@@ -131,7 +131,7 @@ export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: I
     last.x = x + last.x * width
     last.y = y + last.y * height
 
-    setOrigin(origin, around, bounds)
+    setRealOrigin(origin, around, bounds)
     const changeAngle = PointHelper.getChangeAngle(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
     skewX ? skewX = -changeAngle : skewY = changeAngle
 
@@ -143,16 +143,12 @@ export function getAround(around: IAround, altKey: boolean): IAround {
     return around
 }
 
-function setOrigin(origin: IPointData, around: IAround, bounds: IBoundsData,): void {
+function setRealOrigin(origin: IPointData, around: IAround, bounds: IBoundsData,): void {
     const { x, y, width, height } = bounds
     if (around) {
-        if (around === 'center') {
-            origin.x = 0.5
-            origin.y = 0.5
-        } else {
-            origin.x = around.x
-            origin.y = around.y
-        }
+        around = AroundHelper.read(around)
+        origin.x = around.x
+        origin.y = around.y
     }
     origin.x = x + origin.x * width
     origin.y = y + origin.y * height
