@@ -97,32 +97,28 @@ export interface IEditorMoveEvent extends IEditorEvent {
 }
 
 export interface IEditorResizeEvent extends IEditorEvent {
-    readonly resizeType?: IResizeType
-    readonly lockRatio?: boolean
-    readonly around?: IAround
+    // scaleOf(origin, scaleX, scaleY, resize)
+    readonly targetOrigin?: IPointData
+    readonly scaleX?: number
+    readonly scaleY?: number
+    readonly resize?: boolean
 
     readonly dragEvent?: IDragEvent
     readonly direction?: IDirection8
 
-    // from old to bounds
-    readonly bounds?: IBoundsData
-    readonly old?: IBoundsData
-
-    // scaleOf(origin, scaleX, scaleY)
-    readonly origin?: IPointData
-    readonly scaleX?: number
-    readonly scaleY?: number
+    readonly lockRatio?: boolean
+    readonly around?: IAround
 }
 
 export interface IEditorRotateEvent extends IEditorEvent {
     // rotateOf(origin, rotation)
-    readonly origin?: IPointData
+    readonly targetOrigin?: IPointData
     readonly rotation?: number
 }
 
 export interface IEditorSkewEvent extends IEditorEvent {
     // skewOf(origin, skewX, skewY)
-    readonly origin?: IPointData
+    readonly targetOrigin?: IPointData
     readonly skewX?: number
     readonly skewY?: number
 }

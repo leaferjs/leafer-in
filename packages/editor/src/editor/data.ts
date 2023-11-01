@@ -1,12 +1,10 @@
-import { IBoundsData, IPointData, IMatrixData, IAround } from '@leafer-ui/interface'
+import { IBoundsData, IPointData, IAround } from '@leafer-ui/interface'
 import { IEditorResizeEvent, IDirection8, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
-import { MatrixHelper, PointHelper } from '@leafer-ui/core'
+import { PointHelper } from '@leafer-ui/core'
 
 
-const { scaleOfOuter, reset } = MatrixHelper
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
-const matrix = {} as IMatrixData
 
 export function getResizeData(old: IBoundsData, direction: IDirection8, move: IPointData, lockRatio: boolean, around: IAround): IEditorResizeEvent {
 
@@ -67,12 +65,7 @@ export function getResizeData(old: IBoundsData, direction: IDirection8, move: IP
     }
 
     setOrigin(origin, around, old)
-
-    reset(matrix)
-    scaleOfOuter(matrix, origin, scaleX, scaleY)
-    const bounds = { x: old.x + matrix.e, y: old.y + matrix.f, width: width * scaleX, height: height * scaleY }
-
-    return { bounds, old, origin, scaleX, scaleY, direction, lockRatio, around }
+    return { targetOrigin: origin, scaleX, scaleY, direction, lockRatio, around }
 
 }
 
@@ -104,7 +97,7 @@ export function getRotateData(bounds: IBoundsData, direction: IDirection8, curre
 
     setOrigin(origin, around, bounds)
 
-    return { origin, rotation: PointHelper.getChangeAngle(last, origin, current) }
+    return { targetOrigin: origin, rotation: PointHelper.getChangeAngle(last, origin, current) }
 }
 
 export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditorSkewEvent {
@@ -142,7 +135,7 @@ export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: I
     const changeAngle = PointHelper.getChangeAngle(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
     skewX ? skewX = -changeAngle : skewY = changeAngle
 
-    return { origin, skewX, skewY }
+    return { targetOrigin: origin, skewX, skewY }
 }
 
 export function getAround(around: IAround, altKey: boolean): IAround {

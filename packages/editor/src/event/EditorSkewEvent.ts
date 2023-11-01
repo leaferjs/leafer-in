@@ -9,7 +9,7 @@ export class EditorSkewEvent extends EditorEvent implements IEditorSkewEvent {
     static SKEW = 'editor.skew'
 
     // skewOf(origin, skewX, skewY)
-    declare readonly origin: IPointData
+    readonly targetOrigin: IPointData
     readonly skewX: number
     readonly skewY: number
 

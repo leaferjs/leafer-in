@@ -18,44 +18,18 @@ export const RectTool: IEditorTool = {
     },
 
     resize(e: IEditorResizeEvent): void {
-        const { target, bounds, resizeType, old } = e
-        const { x, y, width, height } = bounds
-        const inner = { x: x - old.x, y: y - old.y } // boxBounds change
-
-        const local = target.getLocalPointByInner(inner, null, true)
-        target.x += local.x
-        target.y += local.y
-
-        if (resizeType === 'scale') {
-            target.scaleX *= width / old.width
-            target.scaleY *= height / old.height
-        } else {
-
-            if (width < 0) {
-                target.width = -width
-                target.scaleX *= -1
-            } else {
-                if (target.width !== width) target.width = width
-            }
-
-            if (height < 0) {
-                target.height = -height
-                target.scaleY *= -1
-            } else {
-                if (target.height !== height) target.height = height // Text auto height
-            }
-
-        }
+        const { target, resize, targetOrigin, scaleX, scaleY } = e
+        target.scaleOf(targetOrigin, scaleX, scaleY, resize)
     },
 
     rotate(e: IEditorRotateEvent): void {
-        const { target, origin, rotation } = e
-        target.rotateOf(origin, rotation)
+        const { target, targetOrigin, rotation } = e
+        target.rotateOf(targetOrigin, rotation)
     },
 
     skew(e: IEditorSkewEvent): void {
-        const { target, origin, skewX, skewY } = e
-        target.skewOf(origin, skewX, skewY)
+        const { target, targetOrigin, skewX, skewY } = e
+        target.skewOf(targetOrigin, skewX, skewY)
     },
 
     update(editor: IEditor) {

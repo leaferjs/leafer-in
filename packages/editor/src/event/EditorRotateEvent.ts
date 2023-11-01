@@ -9,7 +9,7 @@ export class EditorRotateEvent extends EditorEvent implements IEditorRotateEvent
     static ROTATE = 'editor.rotate'
 
     // rotateOf(origin, rotation)
-    declare readonly origin: IPointData
+    readonly targetOrigin: IPointData
     readonly rotation: number
 
     constructor(type: string, data?: IEditorRotateEvent) {
