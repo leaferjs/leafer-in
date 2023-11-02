@@ -6,20 +6,19 @@ import { AroundHelper, PointHelper } from '@leafer-ui/core'
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
 
-export function getResizeData(old: IBoundsData, direction: IDirection8, move: IPointData, lockRatio: boolean, around: IAround): IEditorResizeEvent {
+export function getResizeData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean, around: IAround): IEditorResizeEvent {
+    let origin: IPointData, scaleX: number = 1, scaleY: number = 1
+    const { width, height } = bounds
 
     if (around) {
-        move.x *= 2
-        move.y *= 2
+        pointMove.x *= 2
+        pointMove.y *= 2
     }
 
-    let origin: IPointData, scaleX: number = 1, scaleY: number = 1
-    const { width, height } = old
-
-    const topScale = (-move.y + height) / height
-    const rightScale = (move.x + width) / width
-    const bottomScale = (move.y + height) / height
-    const leftScale = (-move.x + width) / width
+    const topScale = (-pointMove.y + height) / height
+    const rightScale = (pointMove.x + width) / width
+    const bottomScale = (pointMove.y + height) / height
+    const leftScale = (-pointMove.x + width) / width
 
     switch (direction) {
         case top:
@@ -64,35 +63,26 @@ export function getResizeData(old: IBoundsData, direction: IDirection8, move: IP
         else scaleX = scaleY
     }
 
-    setRealOrigin(origin, around, old)
+    setRealOrigin(origin, around, bounds)
     return { targetOrigin: origin, scaleX, scaleY, direction, lockRatio, around }
-
 }
 
 
 export function getRotateData(bounds: IBoundsData, direction: IDirection8, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
     let origin: IPointData
 
-    if (around) {
-
-        origin = {} as IPointData
-
-    } else {
-
-        switch (direction) {
-            case topLeft:
-                origin = { x: 1, y: 1 }
-                break
-            case topRight:
-                origin = { x: 0, y: 1 }
-                break
-            case bottomRight:
-                origin = { x: 0, y: 0 }
-                break
-            case bottomLeft:
-                origin = { x: 1, y: 0 }
-        }
-
+    switch (direction) {
+        case topLeft:
+            origin = { x: 1, y: 1 }
+            break
+        case topRight:
+            origin = { x: 0, y: 1 }
+            break
+        case bottomRight:
+            origin = { x: 0, y: 0 }
+            break
+        case bottomLeft:
+            origin = { x: 1, y: 0 }
     }
 
     setRealOrigin(origin, around, bounds)
@@ -101,8 +91,8 @@ export function getRotateData(bounds: IBoundsData, direction: IDirection8, curre
 }
 
 export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditorSkewEvent {
-    let skewX = 0, skewY = 0
-    let origin: IPointData, last: IPointData
+    let origin: IPointData, skewX = 0, skewY = 0
+    let last: IPointData
 
     switch (direction) {
         case top:
@@ -139,8 +129,7 @@ export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: I
 }
 
 export function getAround(around: IAround, altKey: boolean): IAround {
-    if (altKey && !around) around = 'center'
-    return around
+    return (altKey && !around) ? AroundHelper.center : around
 }
 
 function setRealOrigin(origin: IPointData, around: IAround, bounds: IBoundsData,): void {

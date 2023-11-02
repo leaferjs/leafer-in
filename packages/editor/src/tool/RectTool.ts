@@ -42,7 +42,7 @@ export const RectTool: IEditorTool = {
             targetSimulate.parent.updateLayout()
         }
 
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getOrientBounds('box', 'world', editor, true)
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getOrientBounds('box', editor, true)
         editor.box.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         editor.box.update({ x: 0, y: 0, width, height })
     }
