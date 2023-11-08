@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, ILeaferBase } from '@leafer-ui/interface'
-import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList } from '@leafer-ui/core'
+import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditorTool } from '@leafer-in/interface'
 
@@ -17,6 +17,7 @@ import { getTool } from './tool'
 import { onTarget } from './editor/target'
 import { onHover } from './editor/hover'
 import { getAround, getResizeData, getRotateData, getSkewData } from './editor/data'
+import { EditPoint } from './ui/EditPoint'
 
 
 export class Editor extends Group implements IEditor {
@@ -54,12 +55,14 @@ export class Editor extends Group implements IEditor {
     public targetEventIds: IEventListenerId[] = []
 
     public get rect() { return this.multiple ? this.targetSimulate : this.targetList.list[0] }
+    public aroundPoint: IEditPoint = new EditPoint({ around: 'center', hitRadius: 10, width: 10, height: 10, fill: 'red' })
 
 
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
         this.addMany(this.selector, this.box)
+        this.add(this.aroundPoint)
     }
 
     // item
@@ -74,7 +77,7 @@ export class Editor extends Group implements IEditor {
 
     public addItem(item: IUI): void {
         if (this.hasItem(item)) return
-        this.targetList.push(item)
+        this.targetList.add(item)
         this.target = this.targetList.list as IUI[]
     }
 
@@ -132,22 +135,35 @@ export class Editor extends Group implements IEditor {
 
         const resizeData = getResizeData(rect.boxBounds, direction, e.getInnerMove(rect), lockRatio, getAround(around, e.altKey))
         const worldOrigin = rect.getWorldPoint(resizeData.targetOrigin)
+        this.aroundPoint.set(worldOrigin)
 
-        const each = (target: IUI) => {
-            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, {
-                target,
-                editor: this,
-                dragEvent: e,
-                ...resizeData,
-                targetOrigin: target.getInnerPoint(worldOrigin),
-                resize: ((resizeType === 'auto' ? (target.resizeable ? 'size' : 'scale') : resizeType) === 'size')
+        if (this.multiple) {
+
+            const rect = this.targetSimulate
+            const matrix = new Matrix(rect.localTransform)
+            rect.scaleOf(rect.getInnerPoint(worldOrigin), resizeData.scaleX, resizeData.scaleY)
+            matrix.divideParent(rect.localTransform)
+
+            list.forEach(target => {
+                target.transform(matrix)
             })
-            this.tool.resize(event)
-            event.target.emitEvent(event)
-        }
 
-        list.forEach(each)
-        if (this.multiple) each(this.targetSimulate)
+        } else {
+            const each = (target: IUI) => {
+                const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, {
+                    target,
+                    editor: this,
+                    dragEvent: e,
+                    ...resizeData,
+                    targetOrigin: target.getInnerPoint(worldOrigin),
+                    resize: ((resizeType === 'auto' ? (target.resizeable ? 'size' : 'scale') : resizeType) === 'size')
+                })
+                this.tool.resize(event)
+                event.target.emitEvent(event)
+            }
+
+            list.forEach(each)
+        }
     }
 
 
@@ -163,15 +179,16 @@ export class Editor extends Group implements IEditor {
             rotation = e.rotation, worldOrigin = e
         } else {
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = getRotateData(rect.boxBounds, direction, e.getInner(rect), rect.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
-            rotation = data.rotation, worldOrigin = rect.getWorldPoint(data.targetOrigin)
+            const rotateData = getRotateData(rect.boxBounds, direction, e.getInner(rect), rect.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
+            rotation = rotateData.rotation, worldOrigin = rect.getWorldPoint(rotateData.targetOrigin)
         }
 
-        rotation = MathHelper.getGapRotation(this.rotation + rotation, rotateGap) - this.rotation
+        rotation = MathHelper.getGapRotation(rotation, rotateGap, rect.rotation)
         if (!rotation) return
 
         const mirror = this.tool.getMirrorData(this)
         if (mirror.x + mirror.y === 1) rotation = -rotation
+        this.aroundPoint.set(worldOrigin)
 
         const each = (target: IUI) => {
             const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, {
@@ -190,8 +207,15 @@ export class Editor extends Group implements IEditor {
 
     public onSkew(e: DragEvent): void {
         const { list, rect } = this
-        const { targetOrigin, skewX, skewY } = getSkewData(rect.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(rect), getAround(this.config.around, e.altKey))
+        const { around, rotateGap } = this.config
+        rect.updateLayout(true)
+        let { targetOrigin, skewX, skewY } = getSkewData(rect.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(rect), getAround(around, e.altKey))
         const worldOrigin = rect.getWorldPoint(targetOrigin)
+        this.aroundPoint.set(worldOrigin)
+
+        if (skewX) skewX = MathHelper.getGapRotation(skewX, rotateGap, rect.skewX)
+        if (skewY) skewY = MathHelper.getGapRotation(skewY, rotateGap, rect.skewY)
+        if (!skewX && !skewY) return
 
         const each = (target: IUI) => {
             const event = new EditorSkewEvent(EditorSkewEvent.SKEW, {
@@ -207,6 +231,8 @@ export class Editor extends Group implements IEditor {
 
         list.forEach(each)
         if (this.multiple) each(this.targetSimulate)
+
+        rect.updateLayout()
     }
 
 

@@ -5,6 +5,7 @@ import { AroundHelper, PointHelper } from '@leafer-ui/core'
 
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
+const { toPoint } = AroundHelper
 
 export function getResizeData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean, around: IAround): IEditorResizeEvent {
     let origin: IPointData, scaleX: number = 1, scaleY: number = 1
@@ -63,7 +64,8 @@ export function getResizeData(bounds: IBoundsData, direction: IDirection8, point
         else scaleX = scaleY
     }
 
-    setRealOrigin(origin, around, bounds)
+    toPoint(around || origin, bounds, origin)
+
     return { targetOrigin: origin, scaleX, scaleY, direction, lockRatio, around }
 }
 
@@ -85,9 +87,9 @@ export function getRotateData(bounds: IBoundsData, direction: IDirection8, curre
             origin = { x: 1, y: 0 }
     }
 
-    setRealOrigin(origin, around, bounds)
+    toPoint(around || origin, bounds, origin)
 
-    return { targetOrigin: origin, rotation: PointHelper.getChangeAngle(last, origin, current) }
+    return { targetOrigin: origin, rotation: PointHelper.getRotation(last, origin, current) }
 }
 
 export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditorSkewEvent {
@@ -121,24 +123,14 @@ export function getSkewData(bounds: IBoundsData, direction: IDirection8, move: I
     last.x = x + last.x * width
     last.y = y + last.y * height
 
-    setRealOrigin(origin, around, bounds)
-    const changeAngle = PointHelper.getChangeAngle(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
-    skewX ? skewX = -changeAngle : skewY = changeAngle
+    toPoint(around || origin, bounds, origin)
+
+    const rotation = PointHelper.getRotation(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
+    skewX ? skewX = -rotation : skewY = rotation
 
     return { targetOrigin: origin, skewX, skewY }
 }
 
 export function getAround(around: IAround, altKey: boolean): IAround {
     return (altKey && !around) ? AroundHelper.center : around
-}
-
-function setRealOrigin(origin: IPointData, around: IAround, bounds: IBoundsData,): void {
-    const { x, y, width, height } = bounds
-    if (around) {
-        around = AroundHelper.read(around)
-        origin.x = around.x
-        origin.y = around.y
-    }
-    origin.x = x + origin.x * width
-    origin.y = y + origin.y * height
 }
