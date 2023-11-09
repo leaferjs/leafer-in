@@ -10,7 +10,7 @@ export const config: IEditorConfig = {
     pointSize: 8,
     pointRadius: 16,
 
-    rotateGap: 90,
+    rotateGap: 45,
 
     hideOnMove: false,
 

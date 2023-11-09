@@ -138,32 +138,23 @@ export class Editor extends Group implements IEditor {
         this.aroundPoint.set(worldOrigin)
 
         if (this.multiple) {
-
-            const rect = this.targetSimulate
-            const matrix = new Matrix(rect.localTransform)
+            const matrix = resizeData.transform = new Matrix(rect.localTransform)
             rect.scaleOf(rect.getInnerPoint(worldOrigin), resizeData.scaleX, resizeData.scaleY)
             matrix.divideParent(rect.localTransform)
-
-            list.forEach(target => {
-                target.transform(matrix)
-            })
-
-        } else {
-            const each = (target: IUI) => {
-                const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, {
-                    target,
-                    editor: this,
-                    dragEvent: e,
-                    ...resizeData,
-                    targetOrigin: target.getInnerPoint(worldOrigin),
-                    resize: ((resizeType === 'auto' ? (target.resizeable ? 'size' : 'scale') : resizeType) === 'size')
-                })
-                this.tool.resize(event)
-                event.target.emitEvent(event)
-            }
-
-            list.forEach(each)
         }
+
+        list.forEach((target: IUI) => {
+            const event = new EditorResizeEvent(EditorResizeEvent.RESIZE, {
+                target,
+                editor: this,
+                dragEvent: e,
+                ...resizeData,
+                targetOrigin: target.getInnerPoint(worldOrigin),
+                resize: ((resizeType === 'auto' ? (target.resizeable ? 'size' : 'scale') : resizeType) === 'size')
+            })
+            this.tool.resize(event)
+            event.target.emitEvent(event)
+        })
     }
 
 

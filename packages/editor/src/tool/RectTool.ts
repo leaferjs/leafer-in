@@ -18,8 +18,12 @@ export const RectTool: IEditorTool = {
     },
 
     resize(e: IEditorResizeEvent): void {
-        const { target, resize, targetOrigin, scaleX, scaleY } = e
-        target.scaleOf(targetOrigin, scaleX, scaleY, resize)
+        const { target, resize, targetOrigin, scaleX, scaleY, transform } = e
+        if (transform) {
+            target.transform(transform, resize)
+        } else {
+            target.scaleOf(targetOrigin, scaleX, scaleY, resize)
+        }
     },
 
     rotate(e: IEditorRotateEvent): void {

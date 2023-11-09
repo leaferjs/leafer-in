@@ -1,4 +1,4 @@
-import { IGroup, IUI, IRectInputData, IResizeType, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IResizeType, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase, IMatrixData } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelector } from './IEditSelector'
 
@@ -101,6 +101,7 @@ export interface IEditorResizeEvent extends IEditorEvent {
     readonly targetOrigin?: IPointData
     readonly scaleX?: number
     readonly scaleY?: number
+    transform?: IMatrixData
     readonly resize?: boolean
 
     readonly dragEvent?: IDragEvent

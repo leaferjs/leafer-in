@@ -1,4 +1,4 @@
-import { IPointData, IAround, IDragEvent } from '@leafer-ui/interface'
+import { IPointData, IAround, IDragEvent, IMatrixData } from '@leafer-ui/interface'
 import { IDirection8, IEditorResizeEvent } from '@leafer-in/interface'
 
 import { EditorEvent } from './EditorEvent'
@@ -11,6 +11,7 @@ export class EditorResizeEvent extends EditorEvent implements IEditorResizeEvent
     readonly targetOrigin: IPointData
     readonly scaleX: number
     readonly scaleY: number
+    readonly transform?: IMatrixData
     readonly resize: boolean
 
     readonly dragEvent: IDragEvent
