@@ -6,7 +6,7 @@ const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } =
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const point = editor.box.enterPoint
-    if (!point || !editor.targetList.length || !editor.box.visible) return
+    if (!point || !editor.leafList.length || !editor.box.visible) return
 
 
 

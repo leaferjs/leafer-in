@@ -1,10 +1,10 @@
 import { IPointData } from '@leafer-ui/interface'
-import { IEditorSkewEvent } from '@leafer-in/interface'
+import { IEditSkewEvent } from '@leafer-in/interface'
 
-import { EditorEvent } from './EditorEvent'
+import { EditEvent } from './EditEvent'
 
 
-export class EditorSkewEvent extends EditorEvent implements IEditorSkewEvent {
+export class EditSkewEvent extends EditEvent implements IEditSkewEvent {
 
     static SKEW = 'editor.skew'
 
@@ -13,7 +13,7 @@ export class EditorSkewEvent extends EditorEvent implements IEditorSkewEvent {
     readonly skewX: number
     readonly skewY: number
 
-    constructor(type: string, data?: IEditorSkewEvent) {
+    constructor(type: string, data?: IEditSkewEvent) {
         super(type, data)
     }
 

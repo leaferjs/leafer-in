@@ -5,25 +5,25 @@ import { RenderEvent, KeyEvent, LeafList } from '@leafer-ui/core'
 import { simulate } from './simulate'
 import { updateCursor, updateMoveCursor } from './cursor'
 import { arrowKey } from './arrowKey'
-import { EditorEvent } from '../event/EditorEvent'
+import { EditEvent } from '../event/EditEvent'
 
 
 export function onTarget(editor: IEditor, value: IUI | IUI[] | ILeafList): void {
     if (value) {
-        editor.targetList = value instanceof LeafList ? value : new LeafList(value instanceof Array ? value : [value as IUI])
+        editor.leafList = value instanceof LeafList ? value : new LeafList(value instanceof Array ? value : [value as IUI])
     } else {
-        editor.targetList.reset()
+        editor.leafList.reset()
     }
 
-    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor }))
+    editor.emitEvent(new EditEvent(EditEvent.SELECT, { editor }))
 
-    const { targetList } = editor
+    const { leafList: targetList } = editor
     editor.targetSimulate.parent = null
     editor.leafer.app.selector.list = new LeafList()
 
     if (targetList.length) {
         editor.waitLeafer(() => {
-            editor.tool = editor.getTool(editor.targetList.list as IUI[])
+            editor.tool = editor.getTool(editor.leafList.list as IUI[])
             if (editor.multiple) simulate(editor)
 
             editor.update()
@@ -37,7 +37,7 @@ export function onTarget(editor: IEditor, value: IUI | IUI[] | ILeafList): void 
 
 function listenTargetEvents(editor: IEditor): void {
     if (!editor.targetEventIds.length) {
-        if (!editor.targetLeafer) editor.targetLeafer = editor.targetList.indexAt(0).leafer
+        if (!editor.targetLeafer) editor.targetLeafer = editor.leafList.indexAt(0).leafer
         const { targetLeafer } = editor
         editor.targetEventIds = [
             targetLeafer.on_(RenderEvent.START, editor.update, editor),

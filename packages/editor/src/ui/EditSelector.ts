@@ -4,7 +4,7 @@ import { Bounds, PointerEvent, DragEvent, MoveEvent, LeafList, Group, ZoomEvent 
 import { IEditSelector, IEditor, IWireframe } from '@leafer-in/interface'
 
 import { findBounds } from '../selector/findBounds'
-import { EditorEvent } from '../event/EditorEvent'
+import { EditEvent } from '../event/EditEvent'
 import { Wireframe } from './Wireframe'
 import { SelectArea } from './SelectArea'
 
@@ -43,7 +43,7 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     public allowSelect(e: DragEvent) {
-        return (!this.editor.targetList.length && !this.inEditLayer(e.target)) || (e.shiftKey && !this.findOneEditable(e.path))
+        return (!this.editor.leafList.length && !this.inEditLayer(e.target)) || (e.shiftKey && !this.findOneEditable(e.path))
     }
 
 
@@ -91,7 +91,7 @@ export class EditSelector extends Group implements IEditSelector {
             this.selectArea.setStyle({ visible: true, stroke, strokeWidth, x, y }, selectArea)
             this.selectArea.setBounds(this.dragBounds.get())
 
-            this.originList = editor.targetList.clone()
+            this.originList = editor.leafList.clone()
         }
     }
 
@@ -133,7 +133,7 @@ export class EditSelector extends Group implements IEditSelector {
             } else {
 
                 editor.target = this.originList
-                if (editor.targetList.length) editor.update()
+                if (editor.leafList.length) editor.update()
 
             }
         }
@@ -149,8 +149,8 @@ export class EditSelector extends Group implements IEditSelector {
 
             const { app } = editor.leafer
             this.__eventIds = [
-                editor.on_(EditorEvent.HOVER, () => this.hoverWireframe.setTarget(editor.hoverTarget, editor.config)),
-                editor.on_(EditorEvent.SELECT, () => { this.targetWireframe.setTarget(editor.targetList.list as IUI[], editor.config), this.hoverWireframe.target = null }),
+                editor.on_(EditEvent.HOVER, () => this.hoverWireframe.setTarget(editor.hoverTarget, editor.config)),
+                editor.on_(EditEvent.SELECT, () => { this.targetWireframe.setTarget(editor.leafList.list as IUI[], editor.config), this.hoverWireframe.target = null }),
 
                 app.on_(PointerEvent.MOVE, (e: PointerEvent) => { this.editor.hoverTarget = this.findOneEditable(e.path) }),
 

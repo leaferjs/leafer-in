@@ -4,7 +4,7 @@ import { Group, Rect, DragEvent, PointerEvent } from '@leafer-ui/core'
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
 import { updateCursor, updateMoveCursor } from '../editor/cursor'
-import { EditorEvent } from '../event/EditorEvent'
+import { EditEvent } from '../event/EditEvent'
 import { EditPoint } from './EditPoint'
 
 
@@ -159,7 +159,7 @@ export class EditBox extends Group implements IEditBox {
     protected __listenEvents(): void {
         const { rect: targetRect, editor } = this
         this.__eventIds = [
-            editor.on_(EditorEvent.SELECT, () => { this.visible = !!editor.targetList.length }),
+            editor.on_(EditEvent.SELECT, () => { this.visible = !!editor.leafList.length }),
             targetRect.on_(DragEvent.START, () => { this.dragging = true, this.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
             targetRect.on_(DragEvent.DRAG, editor.onMove, editor),
             targetRect.on_(DragEvent.END, () => { this.dragging = false, this.opacity = 1 }),

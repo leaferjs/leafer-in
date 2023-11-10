@@ -1,26 +1,22 @@
-import { IDirection8, IEditor, IEditorTool, IEditorResizeEvent, IEditorRotateEvent, ILine, IPointData, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditTool, IEditResizeEvent, IEditRotateEvent, ILine, IPointData, IEditSkewEvent, IEditMoveEvent } from '@leafer-in/interface'
 
-import { RectTool } from './RectTool'
+import { EditTool } from './EditTool'
 
 
 const { left, right } = IDirection8
 
-export const LineTool: IEditorTool = {
+export class LineEditTool extends EditTool {
 
-    name: 'LineTool',
+    public tag = 'Line'
 
     getMirrorData(_editor: IEditor): IPointData {
         return {
             x: 0,
             y: 0
         }
-    },
+    }
 
-    move(e: IEditorMoveEvent): void {
-        RectTool.move(e)
-    },
-
-    resize(e: IEditorResizeEvent): void {
+    onResize(e: IEditResizeEvent): void {
         const { direction, dragEvent, lockRatio, around } = e
         const target = e.target as ILine
 
@@ -69,18 +65,15 @@ export const LineTool: IEditorTool = {
         target.getInnerPointByLocal(toPoint, null, null, true)
         target.toPoint = toPoint
 
-    },
+    }
 
-    rotate(e: IEditorRotateEvent): void {
-        RectTool.rotate(e)
-    },
+    onSkew(_e: IEditSkewEvent): void {
 
-    skew(_e: IEditorSkewEvent): void {
-    },
+    }
 
     update(editor: IEditor) {
         const { rotatePoints, circle, resizeLines, resizePoints } = editor.box
-        RectTool.update(editor)
+        super.update(editor)
 
         for (let i = 0; i < 8; i++) {
             if (i < 4) resizeLines[i].visible = false

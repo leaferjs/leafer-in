@@ -2,7 +2,7 @@ import { KeyEvent, DragEvent } from '@leafer/core'
 import { IEditor, IDragEvent } from '@leafer-in/interface'
 
 export function arrowKey(e: KeyEvent, editor: IEditor): void {
-    if (editor.targetList.length) {
+    if (editor.leafList.length) {
         const move = { x: 0, y: 0 }
         const distance = e.shiftKey ? 10 : 1
         switch (e.code) {

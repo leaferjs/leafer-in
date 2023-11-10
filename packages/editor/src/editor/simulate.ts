@@ -5,7 +5,7 @@ import { Bounds } from '@leafer-ui/core'
 
 
 export function simulate(editor: IEditor) {
-    const { targetSimulate: simulateTarget, targetList } = editor
+    const { targetSimulate: simulateTarget, leafList: targetList } = editor
     const { x, y, width, height } = new Bounds().setListWithHandle(targetList.list, (leaf: ILeaf) => leaf.worldBoxBounds)
 
     const parent = simulateTarget.parent = targetList.list[0].leafer.zoomLayer as IGroup
