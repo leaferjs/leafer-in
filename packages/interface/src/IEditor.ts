@@ -15,9 +15,9 @@ export interface IEditor extends IGroup {
     targetLeafer: ILeaferBase
 
     selector: IEditSelector
-    box: IEditBox
+    editBox: IEditBox
 
-    tool: IEditTool
+    editTool: IEditTool
 
     targetEventIds: IEventListenerId[]
 

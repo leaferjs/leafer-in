@@ -1,4 +1,4 @@
-import { IEditor, IUI, ILeafList } from '@leafer-in/interface'
+import { IEditor, IUI } from '@leafer-in/interface'
 
 import { RenderEvent, KeyEvent, LeafList } from '@leafer-ui/core'
 
@@ -8,7 +8,8 @@ import { arrowKey } from './arrowKey'
 import { EditEvent } from '../event/EditEvent'
 
 
-export function onTarget(editor: IEditor, value: IUI | IUI[] | ILeafList): void {
+export function onTarget(editor: IEditor): void {
+    const value = editor.target
     if (value) {
         editor.leafList = value instanceof LeafList ? value : new LeafList(value instanceof Array ? value : [value as IUI])
     } else {
@@ -23,7 +24,7 @@ export function onTarget(editor: IEditor, value: IUI | IUI[] | ILeafList): void 
 
     if (targetList.length) {
         editor.waitLeafer(() => {
-            editor.tool = editor.getTool(editor.leafList.list as IUI[])
+            editor.editTool = editor.getTool(editor.leafList.list as IUI[])
             if (editor.multiple) simulate(editor)
 
             editor.update()

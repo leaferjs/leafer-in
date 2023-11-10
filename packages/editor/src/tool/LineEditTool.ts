@@ -72,7 +72,7 @@ export class LineEditTool extends EditTool {
     }
 
     update(editor: IEditor) {
-        const { rotatePoints, circle, resizeLines, resizePoints } = editor.box
+        const { rotatePoints, circle, resizeLines, resizePoints } = editor.editBox
         super.update(editor)
 
         for (let i = 0; i < 8; i++) {

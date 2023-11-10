@@ -34,8 +34,7 @@ export class EditSelector extends Group implements IEditSelector {
 
 
     protected findOneEditable(path: LeafList): IUI {
-        const { targetLeafer } = this.editor
-        return path.list.find((leaf) => leaf.editable && leaf.leafer === targetLeafer) as IUI
+        return path.list.find((leaf) => leaf.editable) as IUI
     }
 
     protected inEditLayer(target: ILeaf): boolean {
@@ -73,7 +72,7 @@ export class EditSelector extends Group implements IEditSelector {
 
     protected onTap(e: PointerEvent): void {
         if (!e.middle && e.shiftKey && !this.lastDown) {
-            const options = { exclude: new LeafList(this.editor.box.rect) }
+            const options = { exclude: new LeafList(this.editor.editBox.rect) }
             const find = this.findOneEditable(e.target.leafer.interaction.findPath(e, options))
             if (find) this.editor.shiftItem(find)
         }
@@ -104,7 +103,7 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     protected onDrag(e: DragEvent): void {
-        if (this.editor.box.dragging) {
+        if (this.editor.editBox.dragging) {
             this.onDragEnd()
             return
         }
@@ -114,7 +113,7 @@ export class EditSelector extends Group implements IEditSelector {
             const total = e.getInnerTotal(this)
 
             const dragBounds = this.dragBounds.clone().unsign()
-            const list = new LeafList((editor.targetLeafer as unknown as IUI).find(findBounds, dragBounds))
+            const list = new LeafList(editor.leafer.app.find(findBounds, dragBounds))
 
             this.dragBounds.width = total.x
             this.dragBounds.height = total.y

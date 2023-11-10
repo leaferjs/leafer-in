@@ -8,7 +8,7 @@ export class EditTool implements IEditTool {
     public tag = 'EditTool'
 
     getMirrorData(editor: IEditor): IPointData {
-        const { scaleX, scaleY } = editor.box
+        const { scaleX, scaleY } = editor.editBox
         return {
             x: scaleX < 0 ? 1 : 0, // 1 = mirrorX
             y: scaleY < 0 ? 1 : 0
@@ -61,8 +61,8 @@ export class EditTool implements IEditTool {
         }
 
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getOrientBounds('box', editor, true)
-        editor.box.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
-        editor.box.update({ x: 0, y: 0, width, height })
+        editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
+        editor.editBox.update({ x: 0, y: 0, width, height })
     }
 
 }

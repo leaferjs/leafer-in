@@ -1,5 +1,5 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, ILeaferBase, IEditSize } from '@leafer-ui/interface'
-import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix } from '@leafer-ui/core'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, ILeaferBase, IEditSize, IObject, IFunction } from '@leafer-ui/interface'
+import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, defineKey } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool } from '@leafer-in/interface'
 
@@ -24,43 +24,33 @@ export class Editor extends Group implements IEditor {
 
     public config = config
 
-    // hover
+    @targetAttr(onHover)
+    public hoverTarget: IUI
 
-    public get hoverTarget(): IUI { return this._hoverTarget }
-    public set hoverTarget(value: IUI) { if (this._hoverTarget !== value) this._hoverTarget = value, onHover(this, value) }
-    private _hoverTarget: IUI
+    @targetAttr(onTarget)
+    public target: IUI | IUI[] | ILeafList
 
-    // target
-
-    public get target(): IUI | IUI[] | ILeafList { return this._target }
-    public set target(value: IUI | IUI[] | ILeafList) { if (this._target !== value) this._target = value, onTarget(this, value) }
-    private _target: IUI | IUI[] | ILeafList
-
-
-    public leafList: ILeafList = new LeafList() // from target
     public get multiple(): boolean { return this.leafList.length > 1 }
-
+    public get element() { return this.multiple ? this.targetSimulate : this.leafList.list[0] as IUI }
+    public leafList: ILeafList = new LeafList() // from target
 
     public targetSimulate: IUI = new Rect({ visible: false })
     public targetLeafer: ILeaferBase
 
 
     public selector: EditSelector = new EditSelector(this)
-    public box: IEditBox = new EditBox(this)
-
-
-    public tool: IEditTool
+    public editBox: IEditBox = new EditBox(this)
+    public editTool: IEditTool
 
     public targetEventIds: IEventListenerId[] = []
 
-    public get element() { return this.multiple ? this.targetSimulate : this.leafList.list[0] as IUI }
     public aroundPoint: IEditPoint = new EditPoint({ around: 'center', hitRadius: 10, width: 10, height: 10, fill: 'red' })
 
 
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
-        this.addMany(this.selector, this.box)
+        this.addMany(this.selector, this.editBox)
         this.add(this.aroundPoint)
     }
 
@@ -70,21 +60,16 @@ export class Editor extends Group implements IEditor {
         return this.leafList.has(item)
     }
 
-    public shiftItem(item: IUI): void {
-        this.hasItem(item) ? this.removeItem(item) : this.addItem(item)
-    }
-
     public addItem(item: IUI): void {
-        if (this.hasItem(item)) return
-        this.leafList.add(item)
-        this.target = this.leafList.list as IUI[]
+        if (!this.hasItem(item)) this.leafList.add(item), this.target = this.leafList.list as IUI[]
     }
 
     public removeItem(item: IUI): void {
-        if (this.hasItem(item)) {
-            this.leafList.remove(item)
-            this.target = this.leafList.list as IUI[]
-        }
+        if (this.hasItem(item)) this.leafList.remove(item), this.target = this.leafList.list as IUI[]
+    }
+
+    public shiftItem(item: IUI): void {
+        this.hasItem(item) ? this.removeItem(item) : this.addItem(item)
     }
 
     // update
@@ -100,28 +85,24 @@ export class Editor extends Group implements IEditor {
 
     public update(): void {
         if (!this.target) return
-        this.tool.update(this)
+        this.editTool.update(this)
     }
 
     // operate
 
     public onMove(e: DragEvent): void {
         const { element } = this
-
         let { moveX, moveY } = e
+
         if (e.shiftKey) {
             if (Math.abs(moveX) > Math.abs(moveY)) moveY = 0
             else moveX = 0
         }
 
-        const event = new EditMoveEvent(EditMoveEvent.MOVE, {
-            target: element,
-            editor: this,
-            moveX,
-            moveY
-        })
+        const event = new EditMoveEvent(EditMoveEvent.MOVE, { target: element, editor: this, moveX, moveY })
 
-        this.tool.onMove(event)
+        this.editTool.onMove(event)
+        this.emitEvent(event)
 
         if (this.multiple) {
             const move = e.getLocalMove(element)
@@ -149,15 +130,10 @@ export class Editor extends Group implements IEditor {
         }
 
         const event = new EditResizeEvent(EditResizeEvent.RESIZE, {
-            ...data,
-            target: element,
-            editor: this,
-            dragEvent: e,
-            transform,
-            worldOrigin
+            ...data, target: element, editor: this, dragEvent: e, transform, worldOrigin
         })
 
-        this.tool.onResize(event)
+        this.editTool.onResize(event)
         this.emitEvent(event)
     }
 
@@ -181,17 +157,12 @@ export class Editor extends Group implements IEditor {
         rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
         if (!rotation) return
 
-        const mirror = this.tool.getMirrorData(this)
+        const mirror = this.editTool.getMirrorData(this)
         if (mirror.x + mirror.y === 1) rotation = -rotation
 
-        const event = new EditRotateEvent(EditRotateEvent.ROTATE, {
-            target: element,
-            editor: this,
-            worldOrigin,
-            rotation
-        })
+        const event = new EditRotateEvent(EditRotateEvent.ROTATE, { target: element, editor: this, worldOrigin, rotation })
 
-        this.tool.onRotate(event)
+        this.editTool.onRotate(event)
         this.emitEvent(event)
 
         if (this.multiple) element.rotateOf(element.getInnerPoint(worldOrigin), rotation)
@@ -210,13 +181,10 @@ export class Editor extends Group implements IEditor {
         if (!skewX && !skewY) return
 
         const event = new EditSkewEvent(EditSkewEvent.SKEW, {
-            target: element,
-            editor: this,
-            skewX,
-            skewY
+            target: element, editor: this, skewX, skewY
         })
 
-        this.tool.onSkew(event)
+        this.editTool.onSkew(event)
         this.emitEvent(event)
 
         if (this.multiple) element.skewOf(element.getInnerPoint(worldOrigin), skewX, skewY)
@@ -233,4 +201,15 @@ export class Editor extends Group implements IEditor {
         }
     }
 
+}
+
+
+function targetAttr(fn: IFunction) {
+    return (target: Editor, key: string) => {
+        const privateKey = '_' + key
+        defineKey(target, key, {
+            get() { return (this as IObject)[privateKey] },
+            set(value: unknown) { if ((this as IObject)[privateKey] !== value) (this as IObject)[privateKey] = value, fn(this, value) }
+        } as ThisType<Editor>)
+    }
 }

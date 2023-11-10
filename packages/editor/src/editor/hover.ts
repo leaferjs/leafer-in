@@ -1,9 +1,9 @@
-import { IEditor, IUI } from '@leafer-in/interface'
+import { IEditor } from '@leafer-in/interface'
 import { EditEvent } from '../event/EditEvent'
 
 
 
-export function onHover(editor: IEditor, _value: IUI): void {
+export function onHover(editor: IEditor): void {
     editor.emitEvent(new EditEvent(EditEvent.HOVER, { editor }))
 
 }

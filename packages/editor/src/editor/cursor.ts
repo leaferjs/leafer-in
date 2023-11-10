@@ -5,17 +5,17 @@ import { IDirection8, IEditor } from '@leafer-in/interface'
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
-    const point = editor.box.enterPoint
-    if (!point || !editor.leafList.length || !editor.box.visible) return
+    const point = editor.editBox.enterPoint
+    if (!point || !editor.leafList.length || !editor.editBox.visible) return
 
 
 
-    let { rotation } = editor.box
+    let { rotation } = editor.editBox
     let { resizeCursor, rotateCursor, resizeable } = editor.config
-    const mirror = editor.tool.getMirrorData(editor)
+    const mirror = editor.editTool.getMirrorData(editor)
     const { direction, pointType } = point
 
-    editor.box.enterPoint = point
+    editor.editBox.enterPoint = point
     const isResizePoint = pointType === 'resize'
 
     if (isResizePoint && (e.metaKey || e.ctrlKey || !resizeable)) resizeCursor = rotateCursor
@@ -33,7 +33,7 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
 }
 
 export function updateMoveCursor(editor: IEditor): void {
-    editor.box.rect.cursor = editor.config.moveCursor
+    editor.editBox.rect.cursor = editor.config.moveCursor
 }
 
 
