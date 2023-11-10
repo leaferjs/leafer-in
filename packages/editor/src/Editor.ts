@@ -104,7 +104,7 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
 
         if (this.multiple) {
-            const move = e.getLocalMove(element)
+            const move = element.getLocalPoint({ x: moveX, y: moveY }, null, true)
             element.move(move.x, move.y)
         }
     }
