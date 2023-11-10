@@ -1,4 +1,4 @@
-import { IGroup, IUI, IRectInputData, IResizeType, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase, IMatrixData } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase, IMatrixData } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelector } from './IEditSelector'
 
@@ -47,7 +47,7 @@ export interface IEditorTool {
 
 export interface IEditorConfig {
     type?: 'pc' | 'mobile'
-    resizeType?: 'auto' | IResizeType
+    resizeType?: 'auto' | IEditSize
 
     around?: IAround
     lockRatio?: boolean

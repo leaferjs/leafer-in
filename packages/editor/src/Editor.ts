@@ -150,7 +150,7 @@ export class Editor extends Group implements IEditor {
                 dragEvent: e,
                 ...resizeData,
                 targetOrigin: target.getInnerPoint(worldOrigin),
-                resize: ((resizeType === 'auto' ? (target.resizeable ? 'size' : 'scale') : resizeType) === 'size')
+                resize: ((resizeType === 'auto' ? (target.editSize) : resizeType) === 'size')
             })
             this.tool.resize(event)
             event.target.emitEvent(event)
