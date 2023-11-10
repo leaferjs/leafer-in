@@ -12,15 +12,16 @@ export class SelectArea extends Group {
         this.addMany(this.fillArea, this.strokeArea)
     }
 
-    setStyle(style: IRectInputData, userStyle?: IRectInputData): void {
+    public setStyle(style: IRectInputData, userStyle?: IRectInputData): void {
         const { visible, stroke, strokeWidth } = style
         this.visible = visible
         this.strokeArea.reset({ ...(userStyle || { stroke, strokeWidth }) })
         this.fillArea.reset({ visible: userStyle ? false : true, fill: stroke, opacity: 0.1 })
     }
 
-    setBounds(bounds: IBoundsData): void {
+    public setBounds(bounds: IBoundsData): void {
         this.strokeArea.set(bounds)
         this.fillArea.set(bounds)
     }
+
 }

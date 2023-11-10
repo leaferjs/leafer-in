@@ -113,7 +113,7 @@ export class EditSelector extends Group implements IEditSelector {
             const total = e.getInnerTotal(this)
 
             const dragBounds = this.dragBounds.clone().unsign()
-            const list = new LeafList(editor.leafer.app.find(findBounds, dragBounds))
+            const list = new LeafList(editor.app.find(findBounds, dragBounds))
 
             this.dragBounds.width = total.x
             this.dragBounds.height = total.y
@@ -146,10 +146,13 @@ export class EditSelector extends Group implements IEditSelector {
         const { editor } = this
         editor.waitLeafer(() => {
 
-            const { app } = editor.leafer
+            const { app } = editor
             this.__eventIds = [
                 editor.on_(EditEvent.HOVER, () => this.hoverWireframe.setTarget(editor.hoverTarget, editor.config)),
-                editor.on_(EditEvent.SELECT, () => { this.targetWireframe.setTarget(editor.leafList.list as IUI[], editor.config), this.hoverWireframe.target = null }),
+                editor.on_(EditEvent.SELECT, () => {
+                    this.targetWireframe.setTarget(editor.leafList.list as IUI[], editor.config)
+                    this.hoverWireframe.target = null
+                }),
 
                 app.on_(PointerEvent.MOVE, (e: PointerEvent) => { this.editor.hoverTarget = this.findOneEditable(e.path) }),
 

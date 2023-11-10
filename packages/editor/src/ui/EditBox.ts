@@ -157,13 +157,13 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected __listenEvents(): void {
-        const { rect: targetRect, editor } = this
+        const { rect, editor } = this
         this.__eventIds = [
             editor.on_(EditEvent.SELECT, () => { this.visible = !!editor.leafList.length }),
-            targetRect.on_(DragEvent.START, () => { this.dragging = true, this.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
-            targetRect.on_(DragEvent.DRAG, editor.onMove, editor),
-            targetRect.on_(DragEvent.END, () => { this.dragging = false, this.opacity = 1 }),
-            targetRect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor))
+            rect.on_(DragEvent.START, () => { this.dragging = true, this.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
+            rect.on_(DragEvent.DRAG, editor.onMove, editor),
+            rect.on_(DragEvent.END, () => { this.dragging = false, this.opacity = 1 }),
+            rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor))
         ]
     }
 
@@ -173,6 +173,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public destroy(): void {
+        this.editor = null
         this.__removeListenEvents()
         super.destroy()
     }

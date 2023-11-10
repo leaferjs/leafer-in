@@ -17,13 +17,11 @@ export function onTarget(editor: IEditor): void {
     }
 
     editor.emitEvent(new EditEvent(EditEvent.SELECT, { editor }))
-
-    const { leafList: targetList } = editor
     editor.targetSimulate.parent = null
-    editor.leafer.app.selector.list = new LeafList()
 
-    if (targetList.length) {
+    if (editor.leafList.length) {
         editor.waitLeafer(() => {
+            editor.app.selector.list = new LeafList()
             editor.editTool = editor.getTool(editor.leafList.list as IUI[])
             if (editor.multiple) simulate(editor)
 
@@ -38,20 +36,20 @@ export function onTarget(editor: IEditor): void {
 
 function listenTargetEvents(editor: IEditor): void {
     if (!editor.targetEventIds.length) {
-        if (!editor.targetLeafer) editor.targetLeafer = editor.leafList.indexAt(0).leafer
-        const { targetLeafer } = editor
+        const { leafer } = editor.leafList.list[0]
         editor.targetEventIds = [
-            targetLeafer.on_(RenderEvent.START, editor.update, editor),
-            targetLeafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e) => { updateCursor(editor, e) }),
-            targetLeafer.on_(KeyEvent.DOWN, (e) => { arrowKey(e, editor) })
+            leafer.on_(RenderEvent.START, editor.update, editor),
+            leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e) => { updateCursor(editor, e) }),
+            leafer.on_(KeyEvent.DOWN, (e) => { arrowKey(e, editor) })
         ]
     }
 }
 
 function removeTargetEvents(editor: IEditor): void {
-    if (editor.targetEventIds.length) {
-        const { targetLeafer } = editor
-        if (targetLeafer) targetLeafer.off_(editor.targetEventIds)
-        editor.targetEventIds.length = 0
+    const { targetEventIds } = editor
+    if (targetEventIds.length) {
+        const { app } = targetEventIds[0].current
+        if (app) app.off_(editor.targetEventIds)
+        targetEventIds.length = 0
     }
 }

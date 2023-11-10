@@ -18,7 +18,7 @@ export class EditTool implements IEditTool {
     onMove(e: IEditMoveEvent): void {
         const { moveX, moveY, editor } = e
         editor.leafList.forEach(target => {
-            const move = target.getLocalPoint({ x: moveX, y: moveY })
+            const move = target.getLocalPoint({ x: moveX, y: moveY }, null, true)
             target.move(move.x, move.y)
         })
     }
@@ -51,9 +51,9 @@ export class EditTool implements IEditTool {
     }
 
     update(editor: IEditor) {
-        const { targetSimulate, leafList: targetList } = editor
+        const { targetSimulate, leafList } = editor
 
-        let target = targetList.list[0]
+        let target = leafList.list[0]
 
         if (editor.multiple) {
             target = targetSimulate

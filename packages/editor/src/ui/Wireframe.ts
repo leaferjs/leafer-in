@@ -3,15 +3,13 @@ import { Bounds, Paint, UI } from '@leafer-ui/core'
 
 import { IWireframe } from '@leafer-in/interface'
 
+import { targetAttr } from '../decorator/data'
+
 
 export class Wireframe extends UI implements IWireframe {
 
-    public get target(): IUI | IUI[] { return this._target }
-    public set target(value: IUI | IUI[]) {
-        this._target = value, this.list = value ? (value instanceof Array ? value : [value]) : []
-        this.forceUpdate()
-    }
-    private _target: IUI | IUI[]
+    @targetAttr(onTarget)
+    public target: IUI | IUI[]
 
     public list: IUI[] = []
 
@@ -43,4 +41,16 @@ export class Wireframe extends UI implements IWireframe {
             this.__.strokeWidth = strokeWidth
         }
     }
+
+    public destroy(): void {
+        this.target = null
+        super.destroy()
+    }
+
+}
+
+function onTarget(wireFrame: Wireframe): void {
+    const value = wireFrame.target
+    wireFrame.list = value ? (value instanceof Array ? value : [value]) : []
+    wireFrame.forceUpdate()
 }

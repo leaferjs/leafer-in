@@ -1,5 +1,5 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, ILeaferBase, IEditSize, IObject, IFunction } from '@leafer-ui/interface'
-import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, defineKey } from '@leafer-ui/core'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize } from '@leafer-ui/interface'
+import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool } from '@leafer-in/interface'
 
@@ -18,6 +18,7 @@ import { onTarget } from './editor/target'
 import { onHover } from './editor/hover'
 import { getAround, getResizeData, getRotateData, getSkewData } from './editor/data'
 import { EditPoint } from './ui/EditPoint'
+import { targetAttr } from './decorator/data'
 
 
 export class Editor extends Group implements IEditor {
@@ -35,12 +36,10 @@ export class Editor extends Group implements IEditor {
     public leafList: ILeafList = new LeafList() // from target
 
     public targetSimulate: IUI = new Rect({ visible: false })
-    public targetLeafer: ILeaferBase
 
-
-    public selector: EditSelector = new EditSelector(this)
     public editBox: IEditBox = new EditBox(this)
     public editTool: IEditTool
+    public selector: EditSelector = new EditSelector(this)
 
     public targetEventIds: IEventListenerId[] = []
 
@@ -192,24 +191,13 @@ export class Editor extends Group implements IEditor {
         this.aroundPoint.set(worldOrigin)
     }
 
-
     public destroy(): void {
         if (!this.destroyed) {
             this.targetSimulate.destroy()
-            this.target = this.hoverTarget = this.targetLeafer = this.targetSimulate = null
+            this.target = this.hoverTarget = this.targetSimulate = null
             super.destroy()
         }
     }
 
 }
 
-
-function targetAttr(fn: IFunction) {
-    return (target: Editor, key: string) => {
-        const privateKey = '_' + key
-        defineKey(target, key, {
-            get() { return (this as IObject)[privateKey] },
-            set(value: unknown) { if ((this as IObject)[privateKey] !== value) (this as IObject)[privateKey] = value, fn(this, value) }
-        } as ThisType<Editor>)
-    }
-}

@@ -1,4 +1,4 @@
-import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IBoundsData, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase, IMatrixData, ILeaf } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase, IMatrixData, ILeaf } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelector } from './IEditSelector'
 
@@ -12,7 +12,6 @@ export interface IEditor extends IGroup {
     readonly multiple: boolean
 
     targetSimulate: IUI
-    targetLeafer: ILeaferBase
 
     selector: IEditSelector
     editBox: IEditBox
