@@ -1,4 +1,4 @@
-import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, ILeaferBase, IMatrixData, ILeaf } from '@leafer-ui/interface'
+import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, IMatrixData, ILeaf } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelector } from './IEditSelector'
 
@@ -30,7 +30,7 @@ export interface IEditor extends IGroup {
     update(): void
 
     onMove(e: IDragEvent): void
-    onResize(e: IDragEvent): void
+    onScale(e: IDragEvent): void
     onRotate(e: IDragEvent | IRotateEvent): void
     onSkew(e: IDragEvent): void
 }
@@ -39,7 +39,7 @@ export interface IEditTool {
     tag: string
     getMirrorData(editor: IEditor): IPointData
     onMove(e: IEditMoveEvent): void
-    onResize(e: IEditResizeEvent): void
+    onScale(e: IEditScaleEvent): void
     onRotate(e: IEditRotateEvent): void
     onSkew(e: IEditSkewEvent): void
     update(editor: IEditor): void
@@ -98,7 +98,7 @@ export interface IEditMoveEvent extends IEditEvent {
     readonly moveY: number
 }
 
-export interface IEditResizeEvent extends IEditEvent {
+export interface IEditScaleEvent extends IEditEvent {
     // scaleOf(origin, scaleX, scaleY, resize) / transform(transform, resize)
     transform?: IMatrixData
 

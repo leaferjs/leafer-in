@@ -1,11 +1,11 @@
 import { IAround, IDragEvent, IMatrixData } from '@leafer-ui/interface'
-import { IDirection8, IEditResizeEvent } from '@leafer-in/interface'
+import { IDirection8, IEditResizeEvent as IEditScaleEvent } from '@leafer-in/interface'
 
 import { EditEvent } from './EditEvent'
 
-export class EditResizeEvent extends EditEvent implements IEditResizeEvent {
+export class EditScaleEvent extends EditEvent implements IEditScaleEvent {
 
-    static RESIZE = 'editor.resize'
+    static SCALE = 'editor.scale'
 
     // scaleOf(origin, scaleX, scaleY, resize)
     readonly scaleX: number
@@ -19,7 +19,7 @@ export class EditResizeEvent extends EditEvent implements IEditResizeEvent {
     readonly lockRatio: boolean
     readonly around: IAround
 
-    constructor(type: string, data?: IEditResizeEvent) {
+    constructor(type: string, data?: IEditScaleEvent) {
         super(type, data)
     }
 

@@ -8,10 +8,8 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const point = editor.editBox.enterPoint
     if (!point || !editor.leafList.length || !editor.editBox.visible) return
 
-
-
     let { rotation } = editor.editBox
-    let { resizeCursor, rotateCursor, resizeable } = editor.config
+    let { resizeCursor, rotateCursor, resizeable, } = editor.config
     const mirror = editor.editTool.getMirrorData(editor)
     const { direction, pointType } = point
 

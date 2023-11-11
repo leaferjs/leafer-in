@@ -16,7 +16,7 @@ export class LineEditTool extends EditTool {
         }
     }
 
-    onResize(e: IEditResizeEvent): void {
+    onScale(e: IEditResizeEvent): void {
         const { direction, dragEvent, lockRatio, around } = e
         const target = e.target as ILine
 

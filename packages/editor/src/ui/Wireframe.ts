@@ -34,8 +34,10 @@ export class Wireframe extends UI implements IWireframe {
             const { strokeWidth, stroke } = this.__
             this.list.forEach(target => {
                 canvas.setWorld(target.__world, options.matrix)
-                target.__drawRenderPath(canvas)
-                this.__.strokeWidth = strokeWidth / Math.abs(target.__world.scaleX)
+                canvas.beginPath()
+                target.__.__pathForRender ? target.__drawRenderPath(canvas) : target.__drawPathByBox(canvas)
+                const { scaleX, scaleY } = target.__world
+                this.__.strokeWidth = strokeWidth / Math.abs(Math.max(scaleX, scaleY))
                 typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
             })
             this.__.strokeWidth = strokeWidth

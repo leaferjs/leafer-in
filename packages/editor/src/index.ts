@@ -1,7 +1,7 @@
 export { Editor } from './Editor'
 export { EditEvent as EditorEvent } from './event/EditEvent'
 export { EditMoveEvent as EditorMoveEvent } from './event/EditMoveEvent'
-export { EditResizeEvent as EditorResizeEvent } from './event/EditResizeEvent'
+export { EditScaleEvent as EditorResizeEvent } from './event/EditScaleEvent'
 export { EditRotateEvent as EditorRotateEvent } from './event/EditRotateEvent'
 export { EditSkewEvent as EditorSkewEvent } from './event/EditSkewEvent'
 export { LineEditTool as LineTool } from './tool/LineEditTool'

@@ -14,7 +14,7 @@ export class EditBox extends Group implements IEditBox {
     public dragging: boolean
 
     public rect: IRect = new Rect({ hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
-    public circle: IEditPoint = new EditPoint({ around: 'center', hitRadius: 10 }) // rotate point
+    public circle: IEditPoint = new EditPoint({ name: 'circle', around: 'center', strokeAlign: 'outside', hitRadius: 10, cursor: 'crosshair' }) // rotate point
 
     public resizePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public rotatePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
@@ -53,7 +53,7 @@ export class EditBox extends Group implements IEditBox {
             this.listenPointEvents(resizePoint, 'resize', i)
         }
 
-        this.listenPointEvents(circle, 'rotate', 1)
+        this.listenPointEvents(circle, 'rotate', 2)
         this.addMany(...rotatePoints, rect, circle, ...resizeLines, ...resizePoints)
     }
 
@@ -66,7 +66,7 @@ export class EditBox extends Group implements IEditBox {
         point.on_(DragEvent.DRAG, this.onDrag, this)
         point.on_(DragEvent.END, () => { this.dragging = false })
         point.on_(PointerEvent.LEAVE, () => this.enterPoint = null)
-        point.on_(PointerEvent.ENTER, (e) => { this.enterPoint = point, updateCursor(editor, e) })
+        if (point.name !== 'circle') point.on_(PointerEvent.ENTER, (e) => { this.enterPoint = point, updateCursor(editor, e) })
     }
 
     protected onDrag(e: DragEvent): void {
@@ -75,7 +75,7 @@ export class EditBox extends Group implements IEditBox {
         if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
             if (editor.config.rotateable) editor.onRotate(e)
         } else {
-            editor.onResize(e)
+            editor.onScale(e)
         }
     }
 
@@ -130,7 +130,7 @@ export class EditBox extends Group implements IEditBox {
 
         circle.set(style)
         circle.x = points[1].x
-        if (!style.y) circle.y = points[1].y - (10 + (resizeP.height + circle.height) / 2)
+        if (!style.y) circle.y = points[1].y - (12 + (resizeP.height + circle.height) / 2)
         circle.visible = rotateable && type === 'mobile'
 
         rect.set(config.rect || { stroke, strokeWidth })

@@ -4,7 +4,7 @@ import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool } from '@leafer-in/interface'
 
 import { EditMoveEvent } from './event/EditMoveEvent'
-import { EditResizeEvent } from './event/EditResizeEvent'
+import { EditScaleEvent } from './event/EditScaleEvent'
 import { EditRotateEvent } from './event/EditRotateEvent'
 import { EditSkewEvent } from './event/EditSkewEvent'
 
@@ -68,6 +68,7 @@ export class Editor extends Group implements IEditor {
         this.hasItem(item) ? this.removeItem(item) : this.addItem(item)
     }
 
+
     // update
 
     public getTool(value: IUI | IUI[]): IEditTool {
@@ -84,53 +85,30 @@ export class Editor extends Group implements IEditor {
         this.editTool.update(this)
     }
 
+
     // operate
 
     public onMove(e: DragEvent): void {
-        const { element } = this
-        let { moveX, moveY } = e
+        const move = e.getLocalMove(this.element)
 
         if (e.shiftKey) {
-            if (Math.abs(moveX) > Math.abs(moveY)) moveY = 0
-            else moveX = 0
+            if (Math.abs(move.x) > Math.abs(move.y)) move.y = 0
+            else move.x = 0
         }
 
-        const event = new EditMoveEvent(EditMoveEvent.MOVE, { target: element, editor: this, moveX, moveY })
-
-        this.editTool.onMove(event)
-        this.emitEvent(event)
-
-        if (this.multiple) {
-            const move = element.getLocalPoint({ x: moveX, y: moveY }, null, true)
-            element.move(move.x, move.y)
-        }
+        this.move(move.x, move.y)
     }
 
-    public onResize(e: DragEvent): void {
+    public onScale(e: DragEvent): void {
         const { element } = this
         const { direction } = e.current as IEditPoint
 
         let { around, lockRatio } = this.config
         if (e.shiftKey) lockRatio = true
 
-        const data = getResizeData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, getAround(around, e.altKey))
+        const { origin, scaleX, scaleY } = getResizeData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, getAround(around, e.altKey))
 
-        let transform: Matrix
-        const { origin, scaleX, scaleY } = data
-        const worldOrigin = element.getWorldPoint(origin)
-
-        if (this.multiple) {
-            transform = new Matrix(element.localTransform)
-            element.scaleOf(origin, scaleX, scaleY)
-            transform.divideParent(element.localTransform)
-        }
-
-        const event = new EditResizeEvent(EditResizeEvent.RESIZE, {
-            ...data, target: element, editor: this, dragEvent: e, transform, worldOrigin
-        })
-
-        this.editTool.onResize(event)
-        this.emitEvent(event)
+        this.scaleOf(origin, scaleX, scaleY)
     }
 
     public onRotate(e: DragEvent | RotateEvent): void {
@@ -139,15 +117,15 @@ export class Editor extends Group implements IEditor {
         if (skewable && direction % 2) return this.onSkew(e as DragEvent)
 
         const { element } = this
-        let worldOrigin: IPointData, rotation: number
+        let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
-            rotation = e.rotation, worldOrigin = e
+            rotation = e.rotation, origin = element.getInnerPoint(e)
         } else {
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
             const data = getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
             rotation = data.rotation
-            worldOrigin = element.getWorldPoint(data.origin)
+            origin = data.origin
         }
 
         rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
@@ -156,25 +134,71 @@ export class Editor extends Group implements IEditor {
         const mirror = this.editTool.getMirrorData(this)
         if (mirror.x + mirror.y === 1) rotation = -rotation
 
-        const event = new EditRotateEvent(EditRotateEvent.ROTATE, { target: element, editor: this, worldOrigin, rotation })
-
-        this.editTool.onRotate(event)
-        this.emitEvent(event)
-
-        if (this.multiple) element.rotateOf(element.getInnerPoint(worldOrigin), rotation)
+        this.rotateOf(origin, rotation)
     }
+
 
     public onSkew(e: DragEvent): void {
         const { element } = this
         const { around, rotateGap } = this.config
         element.updateLayout(true)
         let { origin, skewX, skewY } = getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), getAround(around, e.altKey))
-        const worldOrigin = element.getWorldPoint(origin)
 
         if (skewX) skewX = MathHelper.getGapRotation(skewX, rotateGap, element.skewX)
         if (skewY) skewY = MathHelper.getGapRotation(skewY, rotateGap, element.skewY)
 
         if (!skewX && !skewY) return
+
+        this.skewOf(origin, skewX, skewY)
+    }
+
+
+    // transform
+
+    public move(x: number, y: number): void {
+        const { element } = this
+        const world = element.getWorldPointByLocal({ x, y }, null, true)
+        const event = new EditMoveEvent(EditMoveEvent.MOVE, { target: element, editor: this, moveX: world.x, moveY: world.y })
+
+        this.editTool.onMove(event)
+        this.emitEvent(event)
+
+        if (this.multiple) element.move(x, y)
+    }
+
+    public scaleOf(origin: IPointData, scaleX: number, scaleY?: number, _resize?: boolean): void {
+        const { element } = this
+        const worldOrigin = element.getWorldPoint(origin)
+
+        let transform: Matrix
+
+        if (this.multiple) {
+            transform = new Matrix(element.localTransform)
+            element.scaleOf(origin, scaleX, scaleY)
+            transform.divideParent(element.localTransform)
+        }
+
+        const event = new EditScaleEvent(EditScaleEvent.SCALE, { target: element, editor: this, worldOrigin, scaleX, scaleY, transform })
+
+        this.editTool.onScale(event)
+        this.emitEvent(event)
+    }
+
+    public rotateOf(origin: IPointData, rotation: number): void {
+        const { element } = this
+        const worldOrigin = element.getWorldPoint(origin)
+
+        const event = new EditRotateEvent(EditRotateEvent.ROTATE, { target: element, editor: this, worldOrigin, rotation })
+
+        this.editTool.onRotate(event)
+        this.emitEvent(event)
+
+        if (this.multiple) element.rotateOf(origin, rotation)
+    }
+
+    public skewOf(origin: IPointData, skewX: number, skewY?: number, _resize?: boolean): void {
+        const { element } = this
+        const worldOrigin = element.getWorldPoint(origin)
 
         let transform: Matrix
 
@@ -191,6 +215,7 @@ export class Editor extends Group implements IEditor {
         this.editTool.onSkew(event)
         this.emitEvent(event)
     }
+
 
     public destroy(): void {
         if (!this.destroyed) {

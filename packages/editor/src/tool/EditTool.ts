@@ -23,7 +23,7 @@ export class EditTool implements IEditTool {
         })
     }
 
-    onResize(e: IEditResizeEvent): void {
+    onScale(e: IEditResizeEvent): void {
         const { scaleX, scaleY, transform, worldOrigin, editor } = e
         editor.leafList.forEach(target => {
             const resize = editor.getEditSize(target) === 'size'
