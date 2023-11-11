@@ -44,9 +44,14 @@ export class EditTool implements IEditTool {
     }
 
     onSkew(e: IEditSkewEvent): void {
-        const { skewX, skewY, worldOrigin, editor } = e
+        const { skewX, skewY, transform, worldOrigin, editor } = e
         editor.leafList.forEach(target => {
-            target.skewOf(target.getInnerPoint(worldOrigin), skewX, skewY)
+            const resize = editor.getEditSize(target) === 'size'
+            if (transform) {
+                target.transform(transform, resize)
+            } else {
+                target.skewOf(target.getInnerPoint(worldOrigin), skewX, skewY, resize)
+            }
         })
     }
 

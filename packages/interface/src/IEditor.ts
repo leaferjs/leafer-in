@@ -102,7 +102,6 @@ export interface IEditResizeEvent extends IEditEvent {
     // scaleOf(origin, scaleX, scaleY, resize) / transform(transform, resize)
     transform?: IMatrixData
 
-    readonly targetOrigin?: IPointData
     readonly scaleX?: number
     readonly scaleY?: number
     readonly resize?: boolean
@@ -116,13 +115,12 @@ export interface IEditResizeEvent extends IEditEvent {
 
 export interface IEditRotateEvent extends IEditEvent {
     // rotateOf(origin, rotation)
-    readonly targetOrigin?: IPointData
     readonly rotation?: number
 }
 
 export interface IEditSkewEvent extends IEditEvent {
     // skewOf(origin, skewX, skewY)
-    readonly worldOrigin?: IPointData
+    transform?: IMatrixData
     readonly skewX?: number
     readonly skewY?: number
 }

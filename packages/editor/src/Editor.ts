@@ -172,21 +172,27 @@ export class Editor extends Group implements IEditor {
         const { around, rotateGap } = this.config
         element.updateLayout(true)
         let { origin, skewX, skewY } = getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), getAround(around, e.altKey))
-        const worldOrigin = element.getWorldPoint(origin as IPointData)
+        const worldOrigin = element.getWorldPoint(origin)
 
         if (skewX) skewX = MathHelper.getGapRotation(skewX, rotateGap, element.skewX)
         if (skewY) skewY = MathHelper.getGapRotation(skewY, rotateGap, element.skewY)
 
         if (!skewX && !skewY) return
 
+        let transform: Matrix
+
+        if (this.multiple) {
+            transform = new Matrix(element.localTransform)
+            element.skewOf(origin, skewX, skewY)
+            transform.divideParent(element.localTransform)
+        }
+
         const event = new EditSkewEvent(EditSkewEvent.SKEW, {
-            target: element, editor: this, skewX, skewY
+            target: element, editor: this, skewX, skewY, transform, worldOrigin
         })
 
         this.editTool.onSkew(event)
         this.emitEvent(event)
-
-        if (this.multiple) element.skewOf(element.getInnerPoint(worldOrigin), skewX, skewY)
 
         this.aroundPoint.set(worldOrigin)
     }
