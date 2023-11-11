@@ -17,7 +17,6 @@ import { getTool } from './tool'
 import { onTarget } from './editor/target'
 import { onHover } from './editor/hover'
 import { getAround, getResizeData, getRotateData, getSkewData } from './editor/data'
-import { EditPoint } from './ui/EditPoint'
 import { targetAttr } from './decorator/data'
 
 
@@ -43,15 +42,13 @@ export class Editor extends Group implements IEditor {
 
     public targetEventIds: IEventListenerId[] = []
 
-    public aroundPoint: IEditPoint = new EditPoint({ around: 'center', hitRadius: 10, width: 10, height: 10, fill: 'red' })
-
 
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
         this.addMany(this.selector, this.editBox)
-        this.add(this.aroundPoint)
     }
+
 
     // item
 
@@ -193,8 +190,6 @@ export class Editor extends Group implements IEditor {
 
         this.editTool.onSkew(event)
         this.emitEvent(event)
-
-        this.aroundPoint.set(worldOrigin)
     }
 
     public destroy(): void {

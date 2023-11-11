@@ -4,7 +4,7 @@ export const config: IEditorConfig = {
     type: 'pc',
 
     stroke: '#836DFF',
-    strokeWidth: 1,
+    strokeWidth: 2,
 
     pointFill: '#FFFFFF',
     pointSize: 8,

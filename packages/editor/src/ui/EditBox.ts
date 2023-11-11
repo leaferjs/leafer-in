@@ -38,7 +38,7 @@ export class EditBox extends Group implements IEditBox {
         const arounds: IAround[] = [{ x: 1, y: 1 }, 'center', { x: 0, y: 1 }, 'center', { x: 0, y: 0 }, 'center', { x: 1, y: 0 }, 'center']
 
         for (let i = 0; i < 8; i++) {
-            rotatePoint = new EditPoint({ around: arounds[i], width: 15, height: 15, hitFill: "all", fill: 'blue' })
+            rotatePoint = new EditPoint({ around: arounds[i], width: 15, height: 15, hitFill: "all" })
             rotatePoints.push(rotatePoint)
             this.listenPointEvents(rotatePoint, 'rotate', i)
 
@@ -134,7 +134,7 @@ export class EditBox extends Group implements IEditBox {
         circle.visible = rotateable && type === 'mobile'
 
         rect.set(config.rect || { stroke, strokeWidth })
-        rect.set({ ...bounds, visible: true, fill: '#FF00FF20' })
+        rect.set({ ...bounds, visible: true })
     }
 
     public getDirection8PointsStyle(): IRectInputData[] {
