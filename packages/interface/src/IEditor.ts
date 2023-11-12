@@ -2,6 +2,7 @@ import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IPointData, IAroun
 import { IEditBox } from './IEditBox'
 import { IEditSelector } from './IEditSelector'
 
+
 export interface IEditor extends IGroup {
     config: IEditorConfig
 
@@ -9,12 +10,15 @@ export interface IEditor extends IGroup {
     target: IUI | IUI[] | ILeafList
 
     leafList: ILeafList
+    readonly list: IUI[]
     readonly multiple: boolean
 
     targetSimulate: IUI
 
     selector: IEditSelector
     editBox: IEditBox
+
+    readonly dragging: boolean
 
     editTool: IEditTool
 
@@ -63,7 +67,9 @@ export interface IEditorConfig {
     point?: IRectInputData | IRectInputData[]
     rotatePoint?: IRectInputData
     rect?: IRectInputData
-    selectArea?: IRectInputData
+
+    useSelector?: boolean
+    selectBox?: IRectInputData
 
     hideOnMove?: boolean
 

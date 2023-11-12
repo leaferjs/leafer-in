@@ -12,6 +12,7 @@ export const config: IEditorConfig = {
 
     rotateGap: 45,
 
+    useSelector: true,
     hideOnMove: false,
 
     moveCursor: 'move',

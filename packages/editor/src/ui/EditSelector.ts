@@ -13,6 +13,7 @@ export class EditSelector extends Group implements IEditSelector {
 
     public editor: IEditor
     public get dragging(): boolean { return !!this.originList }
+    public get running(): boolean { return this.editor.config.useSelector }
 
     public hoverWireframe: IWireframe = new Wireframe()
     public targetWireframe: IWireframe = new Wireframe()
@@ -48,7 +49,7 @@ export class EditSelector extends Group implements IEditSelector {
 
 
     protected onBeforeDown(e: PointerEvent): void {
-        if (!e.middle) {
+        if (this.running && !e.middle) {
             const find = this.lastDown = this.findOneEditable(e.path)
 
             if (find) {
@@ -72,7 +73,7 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     protected onTap(e: PointerEvent): void {
-        if (!e.middle && e.shiftKey && !this.lastDown) {
+        if (this.running && !e.middle && e.shiftKey && !this.lastDown) {
             const options = { exclude: new LeafList(this.editor.editBox.rect) }
             const find = this.findOneEditable(e.target.leafer.interaction.findPath(e, options))
             if (find) this.editor.shiftItem(find)
@@ -81,9 +82,9 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     protected onDragStart(e: DragEvent): void {
-        if (this.allowSelect(e)) {
+        if (this.running && this.allowSelect(e)) {
             const { editor } = this
-            const { stroke, strokeWidth, selectArea } = editor.config
+            const { stroke, strokeWidth, selectBox: selectArea } = editor.config
             const { x, y } = e.getInner(this)
 
             this.selectBounds.set(x, y)
@@ -143,20 +144,35 @@ export class EditSelector extends Group implements IEditSelector {
         if (this.dragging) this.originList = null, this.selectBox.visible = false
     }
 
+    protected onSelect(): void {
+        if (this.running) {
+            const { config, list } = this.editor
+            const { stroke, strokeWidth } = config
+            this.targetWireframe.setTarget(list, { stroke, strokeWidth: Math.max(1, strokeWidth / 2) })
+            this.hoverWireframe.target = null
+        }
+    }
+
+    protected onHover(): void {
+        if (this.running && !this.dragging && !this.editor.dragging) {
+            this.hoverWireframe.setTarget(this.editor.hoverTarget, this.editor.config)
+        }
+    }
+
+    protected onPointerMove(e: PointerEvent): void {
+        if (this.running) this.editor.hoverTarget = this.findOneEditable(e.path)
+    }
+
     protected __listenEvents(): void {
         const { editor } = this
         editor.waitLeafer(() => {
 
             const { app } = editor
             this.__eventIds = [
-                editor.on_(EditEvent.HOVER, () => !this.dragging && this.hoverWireframe.setTarget(editor.hoverTarget, editor.config)),
-                editor.on_(EditEvent.SELECT, () => {
-                    this.targetWireframe.setTarget(editor.leafList.list as IUI[], editor.config)
-                    this.hoverWireframe.target = null
-                }),
+                editor.on_(EditEvent.HOVER, this.onHover, this),
+                editor.on_(EditEvent.SELECT, this.onSelect, this),
 
-                app.on_(PointerEvent.MOVE, (e: PointerEvent) => { this.editor.hoverTarget = this.findOneEditable(e.path) }),
-
+                app.on_(PointerEvent.MOVE, this.onPointerMove, this),
                 app.on_(PointerEvent.BEFORE_DOWN, this.onBeforeDown, this),
                 app.on_(PointerEvent.TAP, this.onTap, this),
 
