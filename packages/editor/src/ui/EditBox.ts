@@ -160,9 +160,9 @@ export class EditBox extends Group implements IEditBox {
         const { rect, editor } = this
         this.__eventIds = [
             editor.on_(EditEvent.SELECT, () => { this.visible = !!editor.leafList.length }),
-            rect.on_(DragEvent.START, () => { this.dragging = true, this.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
+            rect.on_(DragEvent.START, () => { this.dragging = true, this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
-            rect.on_(DragEvent.END, () => { this.dragging = false, this.opacity = 1 }),
+            rect.on_(DragEvent.END, () => { this.dragging = false, this.editor.opacity = 1 }),
             rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor))
         ]
     }

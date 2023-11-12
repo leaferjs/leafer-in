@@ -6,18 +6,19 @@ import { IEditSelector, IEditor, IWireframe } from '@leafer-in/interface'
 import { findBounds } from '../selector/findBounds'
 import { EditEvent } from '../event/EditEvent'
 import { Wireframe } from './Wireframe'
-import { SelectArea } from './SelectArea'
+import { SelectBox } from './SelectBox'
 
 
 export class EditSelector extends Group implements IEditSelector {
 
     public editor: IEditor
+    public get dragging(): boolean { return !!this.originList }
 
     public hoverWireframe: IWireframe = new Wireframe()
     public targetWireframe: IWireframe = new Wireframe()
 
-    public selectArea = new SelectArea()
-    public dragBounds: IBounds = new Bounds()
+    public selectBox = new SelectBox()
+    public selectBounds: IBounds = new Bounds()
 
     protected originList: ILeafList
     protected lastDown: IUI
@@ -28,7 +29,7 @@ export class EditSelector extends Group implements IEditSelector {
     constructor(editor: IEditor) {
         super()
         this.editor = editor
-        this.addMany(this.targetWireframe, this.hoverWireframe, this.selectArea)
+        this.addMany(this.targetWireframe, this.hoverWireframe, this.selectBox)
         this.__listenEvents()
     }
 
@@ -85,20 +86,20 @@ export class EditSelector extends Group implements IEditSelector {
             const { stroke, strokeWidth, selectArea } = editor.config
             const { x, y } = e.getInner(this)
 
-            this.dragBounds.set(x, y)
+            this.selectBounds.set(x, y)
 
-            this.selectArea.setStyle({ visible: true, stroke, strokeWidth, x, y }, selectArea)
-            this.selectArea.setBounds(this.dragBounds.get())
+            this.selectBox.setStyle({ visible: true, stroke, strokeWidth, x, y }, selectArea)
+            this.selectBox.setBounds(this.selectBounds.get())
 
             this.originList = editor.leafList.clone()
         }
     }
 
     protected onAutoMove(e: MoveEvent): void {
-        if (this.originList) {
+        if (this.dragging) {
             const { x, y } = e.getLocalMove(this)
-            this.dragBounds.x += x
-            this.dragBounds.y += y
+            this.selectBounds.x += x
+            this.selectBounds.y += y
         }
     }
 
@@ -108,17 +109,17 @@ export class EditSelector extends Group implements IEditSelector {
             return
         }
 
-        if (this.originList) {
+        if (this.dragging) {
             const { editor } = this
             const total = e.getInnerTotal(this)
 
-            const dragBounds = this.dragBounds.clone().unsign()
+            const dragBounds = this.selectBounds.clone().unsign()
             const list = new LeafList(editor.app.find(findBounds, dragBounds))
 
-            this.dragBounds.width = total.x
-            this.dragBounds.height = total.y
+            this.selectBounds.width = total.x
+            this.selectBounds.height = total.y
 
-            this.selectArea.setBounds(dragBounds.get())
+            this.selectBox.setBounds(dragBounds.get())
 
             if (list.length) {
 
@@ -139,7 +140,7 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     protected onDragEnd(): void {
-        if (this.originList) this.originList = null, this.selectArea.visible = false
+        if (this.dragging) this.originList = null, this.selectBox.visible = false
     }
 
     protected __listenEvents(): void {
@@ -148,7 +149,7 @@ export class EditSelector extends Group implements IEditSelector {
 
             const { app } = editor
             this.__eventIds = [
-                editor.on_(EditEvent.HOVER, () => this.hoverWireframe.setTarget(editor.hoverTarget, editor.config)),
+                editor.on_(EditEvent.HOVER, () => !this.dragging && this.hoverWireframe.setTarget(editor.hoverTarget, editor.config)),
                 editor.on_(EditEvent.SELECT, () => {
                     this.targetWireframe.setTarget(editor.leafList.list as IUI[], editor.config)
                     this.hoverWireframe.target = null

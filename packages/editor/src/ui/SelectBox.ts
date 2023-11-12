@@ -1,7 +1,7 @@
 import { Group, Rect } from '@leafer-ui/core'
 import { IBoundsData, IGroupInputData, IRect, IRectInputData } from '@leafer-ui/interface'
 
-export class SelectArea extends Group {
+export class SelectBox extends Group {
 
     public strokeArea: IRect = new Rect({ strokeAlign: 'center' })
     public fillArea: IRect = new Rect()
@@ -16,7 +16,7 @@ export class SelectArea extends Group {
         const { visible, stroke, strokeWidth } = style
         this.visible = visible
         this.strokeArea.reset({ ...(userStyle || { stroke, strokeWidth }) })
-        this.fillArea.reset({ visible: userStyle ? false : true, fill: stroke, opacity: 0.1 })
+        this.fillArea.reset({ visible: userStyle ? false : true, fill: stroke, opacity: 0.2 })
     }
 
     public setBounds(bounds: IBoundsData): void {
