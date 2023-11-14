@@ -65,7 +65,7 @@ export class EditTool implements IEditTool {
             targetSimulate.parent.updateLayout()
         }
 
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getOrientBounds('box', editor, true)
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getLayoutBounds('box', editor, true)
         editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         editor.editBox.update({ x: 0, y: 0, width, height })
     }
