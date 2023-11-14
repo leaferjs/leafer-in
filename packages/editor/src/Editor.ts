@@ -145,7 +145,7 @@ export class Editor extends Group implements IEditor {
     public onSkew(e: DragEvent): void {
         const { element } = this
         const { around, rotateGap } = this.config
-        element.updateLayout(true)
+        element.updateLayout()
         let { origin, skewX, skewY } = getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), getAround(around, e.altKey))
 
         if (skewX) skewX = MathHelper.getGapRotation(skewX, rotateGap, element.skewX)
