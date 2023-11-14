@@ -1,4 +1,3 @@
-import { IPointData } from '@leafer-ui/interface'
 import { IEditRotateEvent } from '@leafer-in/interface'
 
 import { EditEvent } from './EditEvent'

@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditTool, IEditResizeEvent, IEditRotateEvent, ILine, IPointData, IEditSkewEvent, IEditMoveEvent } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditResizeEvent, ILine, IPointData, IEditSkewEvent } from '@leafer-in/interface'
 
 import { EditTool } from './EditTool'
 
