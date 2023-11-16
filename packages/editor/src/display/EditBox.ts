@@ -156,6 +156,13 @@ export class EditBox extends Group implements IEditBox {
         ]
     }
 
+    protected onDoubleClick(): void {
+        const { list } = this.editor
+        if (list.length === 1 && list[0].isBranch) {
+            //list[0].hitChildren = true
+        }
+    }
+
     protected __listenEvents(): void {
         const { rect, editor } = this
         this.__eventIds = [
@@ -163,7 +170,8 @@ export class EditBox extends Group implements IEditBox {
             rect.on_(DragEvent.START, () => { this.dragging = true, this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
             rect.on_(DragEvent.END, () => { this.dragging = false, this.editor.opacity = 1 }),
-            rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor))
+            rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor)),
+            rect.on_(PointerEvent.DOUBLE_CLICK, this.onDoubleClick, this)
         ]
     }
 

@@ -8,8 +8,8 @@ import { EditScaleEvent } from './event/EditScaleEvent'
 import { EditRotateEvent } from './event/EditRotateEvent'
 import { EditSkewEvent } from './event/EditSkewEvent'
 
-import { EditSelector } from './ui/EditSelector'
-import { EditBox } from './ui/EditBox'
+import { EditSelector } from './display/EditSelector'
+import { EditBox } from './display/EditBox'
 
 import { config } from './config'
 import { getTool } from './tool'
@@ -18,6 +18,7 @@ import { onTarget } from './editor/target'
 import { onHover } from './editor/hover'
 import { getAround, getResizeData, getRotateData, getSkewData } from './editor/data'
 import { targetAttr } from './decorator/data'
+import { EditHelper } from './helper/EditHelper'
 
 
 export class Editor extends Group implements IEditor {
@@ -177,9 +178,10 @@ export class Editor extends Group implements IEditor {
         let transform: Matrix
 
         if (this.multiple) {
-            transform = new Matrix(element.localTransform)
+            const childMatrix = { ...element.localTransform }
             element.scaleOf(origin, scaleX, scaleY)
-            transform.divideParent(element.localTransform)
+            transform = new Matrix(element.localTransform)
+            transform.divide(childMatrix)
         }
 
         const event = new EditScaleEvent(EditScaleEvent.SCALE, { target: element, editor: this, worldOrigin, scaleX, scaleY, transform })
@@ -220,6 +222,42 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
     }
 
+    // group
+
+    public group(): void {
+        if (this.multiple) this.target = EditHelper.group(this.list, this.element)
+    }
+
+
+    public ungroup(): void {
+        if (this.list.length) this.target = EditHelper.ungroup(this.list)
+    }
+
+    // lock
+
+    public lock(): void {
+        this.list.forEach(leaf => leaf.locked = true)
+    }
+
+    public unlock(): void {
+        this.list.forEach(leaf => leaf.locked = false)
+    }
+
+    // level
+
+    public toTop(): void {
+        if (this.list.length) {
+            EditHelper.toTop(this.list)
+            this.leafList.update()
+        }
+    }
+
+    public toBottom(): void {
+        if (this.list.length) {
+            EditHelper.toBottom(this.list)
+            this.leafList.update()
+        }
+    }
 
     public destroy(): void {
         if (!this.destroyed) {
@@ -230,4 +268,3 @@ export class Editor extends Group implements IEditor {
     }
 
 }
-

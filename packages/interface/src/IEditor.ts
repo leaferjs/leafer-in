@@ -37,6 +37,15 @@ export interface IEditor extends IGroup {
     onScale(e: IDragEvent): void
     onRotate(e: IDragEvent | IRotateEvent): void
     onSkew(e: IDragEvent): void
+
+    group(): void
+    ungroup(): void
+
+    lock(): void
+    unlock(): void
+
+    toTop(): void
+    toBottom(): void
 }
 
 export interface IEditTool {

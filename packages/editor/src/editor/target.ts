@@ -39,7 +39,7 @@ function listenTargetEvents(editor: IEditor): void {
         const { leafer } = editor.leafList.list[0]
         editor.targetEventIds = [
             leafer.on_(RenderEvent.START, editor.update, editor),
-            leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e) => { updateCursor(editor, e) }),
+            leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e: KeyEvent) => { updateCursor(editor, e) }),
             leafer.on_(KeyEvent.DOWN, (e) => { arrowKey(e, editor) })
         ]
     }
