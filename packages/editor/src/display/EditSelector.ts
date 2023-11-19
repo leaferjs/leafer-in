@@ -1,28 +1,31 @@
 import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId } from '@leafer-ui/interface'
 import { Bounds, PointerEvent, DragEvent, MoveEvent, LeafList, Group, ZoomEvent } from '@leafer-ui/core'
 
-import { IEditSelector, IEditor, IWireframe } from '@leafer-in/interface'
+import { IEditSelector, IEditor, ISelectBox, IStroker } from '@leafer-in/interface'
 
-import { findBounds } from '../selector/findBounds'
-import { EditEvent } from '../event/EditEvent'
-import { Wireframe } from './Wireframe'
+import { Stroker } from './Stroker'
 import { SelectBox } from './SelectBox'
+import { SelectHelper } from '../helper/SelectHelper'
+import { EditEvent } from '../event/EditEvent'
 
+
+const { findOne } = SelectHelper
 
 export class EditSelector extends Group implements IEditSelector {
 
     public editor: IEditor
+
     public get dragging(): boolean { return !!this.originList }
     public get running(): boolean { return this.editor.config.useSelector }
 
-    public hoverWireframe: IWireframe = new Wireframe()
-    public targetWireframe: IWireframe = new Wireframe()
+    public hoverStroker: IStroker = new Stroker()
+    public targetStroker: IStroker = new Stroker()
 
-    public selectBox = new SelectBox()
-    public selectBounds: IBounds = new Bounds()
+    public bounds: IBounds = new Bounds()
+    public selectBox: ISelectBox = new SelectBox()
 
     protected originList: ILeafList
-    protected lastDown: IUI
+    protected lastDownLeaf: IUI
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -30,27 +33,41 @@ export class EditSelector extends Group implements IEditSelector {
     constructor(editor: IEditor) {
         super()
         this.editor = editor
-        this.addMany(this.targetWireframe, this.hoverWireframe, this.selectBox)
+        this.addMany(this.targetStroker, this.hoverStroker, this.selectBox)
         this.__listenEvents()
     }
 
+    // hover / select
 
-    protected findOneEditable(path: LeafList): IUI {
-        return path.list.find((leaf) => leaf.editable) as IUI
+    protected onHover(): void {
+        if (this.running && !this.dragging && !this.editor.dragging) {
+            this.hoverStroker.setTarget(this.editor.hoverTarget, this.editor.config)
+        }
     }
 
-    protected inEditLayer(target: ILeaf): boolean {
-        return target.leafer === this.editor.leafer
+
+    protected onSelect(): void {
+        if (this.running) {
+            const { config, list } = this.editor
+            const { stroke, strokeWidth } = config
+            this.targetStroker.setTarget(list, { stroke, strokeWidth: Math.max(1, strokeWidth / 2) })
+            this.hoverStroker.target = null
+        }
     }
 
-    public allowSelect(e: DragEvent) {
-        return (!this.editor.leafList.length && !this.inEditLayer(e.target)) || (e.shiftKey && !this.findOneEditable(e.path))
-    }
 
+    // move / down
+
+    protected onPointerMove(e: PointerEvent): void {
+        if (this.running) {
+            const find = e.shiftKey ? this.findDeepOne(e) : findOne(e.path)
+            this.editor.hoverTarget = this.editor.hasItem(find) ? null : find
+        }
+    }
 
     protected onBeforeDown(e: PointerEvent): void {
         if (this.running && !e.middle) {
-            const find = this.lastDown = this.findOneEditable(e.path)
+            const find = this.lastDownLeaf = findOne(e.path)
 
             if (find) {
 
@@ -64,7 +81,7 @@ export class EditSelector extends Group implements IEditSelector {
                 this.editor.updateLayout()
                 find.leafer.interaction.updateDownData()
 
-            } else if (!this.inEditLayer(e.target)) {
+            } else if (this.allow(e.target)) {
 
                 if (!e.shiftKey) this.editor.target = null
 
@@ -73,39 +90,32 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     protected onTap(e: PointerEvent): void {
-        if (this.running && !e.middle && e.shiftKey && !this.lastDown) {
-            const options = { exclude: new LeafList(this.editor.editBox.rect) }
-            const find = this.findOneEditable(e.target.leafer.interaction.findPath(e, options))
+        if (this.running && e.shiftKey && !e.middle && !this.lastDownLeaf) {
+            const find = this.findDeepOne(e)
             if (find) this.editor.shiftItem(find)
         }
-        this.lastDown = null
+        this.lastDownLeaf = null
     }
+
+    // drag
 
     protected onDragStart(e: DragEvent): void {
         if (this.running && this.allowSelect(e)) {
             const { editor } = this
-            const { stroke, strokeWidth, selectBox: selectArea } = editor.config
+            const { stroke, strokeWidth, selectBox } = editor.config
             const { x, y } = e.getInner(this)
 
-            this.selectBounds.set(x, y)
+            this.bounds.set(x, y)
 
-            this.selectBox.setStyle({ visible: true, stroke, strokeWidth, x, y }, selectArea)
-            this.selectBox.setBounds(this.selectBounds.get())
+            this.selectBox.setStyle({ visible: true, stroke, strokeWidth, x, y }, selectBox)
+            this.selectBox.setBounds(this.bounds.get())
 
             this.originList = editor.leafList.clone()
         }
     }
 
-    protected onAutoMove(e: MoveEvent): void {
-        if (this.dragging) {
-            const { x, y } = e.getLocalMove(this)
-            this.selectBounds.x += x
-            this.selectBounds.y += y
-        }
-    }
-
     protected onDrag(e: DragEvent): void {
-        if (this.editor.editBox.dragging) {
+        if (this.editor.dragging) {
             this.onDragEnd()
             return
         }
@@ -114,11 +124,11 @@ export class EditSelector extends Group implements IEditSelector {
             const { editor } = this
             const total = e.getInnerTotal(this)
 
-            const dragBounds = this.selectBounds.clone().unsign()
-            const list = new LeafList(editor.app.find(findBounds, dragBounds))
+            const dragBounds = this.bounds.clone().unsign()
+            const list = new LeafList(editor.app.find(SelectHelper.findBounds, dragBounds))
 
-            this.selectBounds.width = total.x
-            this.selectBounds.height = total.y
+            this.bounds.width = total.x
+            this.bounds.height = total.y
 
             this.selectBox.setBounds(dragBounds.get())
 
@@ -144,23 +154,27 @@ export class EditSelector extends Group implements IEditSelector {
         if (this.dragging) this.originList = null, this.selectBox.visible = false
     }
 
-    protected onSelect(): void {
-        if (this.running) {
-            const { config, list } = this.editor
-            const { stroke, strokeWidth } = config
-            this.targetWireframe.setTarget(list, { stroke, strokeWidth: Math.max(1, strokeWidth / 2) })
-            this.hoverWireframe.target = null
+    protected onAutoMove(e: MoveEvent): void {
+        if (this.dragging) {
+            const { x, y } = e.getLocalMove(this)
+            this.bounds.x += x
+            this.bounds.y += y
         }
     }
 
-    protected onHover(): void {
-        if (this.running && !this.dragging && !this.editor.dragging) {
-            this.hoverWireframe.setTarget(this.editor.hoverTarget, this.editor.config)
-        }
+    // helper
+
+    protected allow(target: ILeaf): boolean {
+        return target.leafer !== this.editor.leafer
     }
 
-    protected onPointerMove(e: PointerEvent): void {
-        if (this.running) this.editor.hoverTarget = this.findOneEditable(e.path)
+    protected allowSelect(e: DragEvent) {
+        return (!this.editor.selected && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
+    }
+
+    protected findDeepOne(e: PointerEvent): IUI {
+        const options = { exclude: new LeafList(this.editor.editBox.rect) }
+        return findOne(e.target.leafer.interaction.findPath(e, options)) as IUI
     }
 
     protected __listenEvents(): void {
@@ -195,7 +209,7 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     public destroy(): void {
-        this.editor = this.originList = this.lastDown = null
+        this.editor = this.originList = this.lastDownLeaf = null
         this.__removeListenEvents()
         super.destroy()
     }

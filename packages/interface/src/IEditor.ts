@@ -11,6 +11,8 @@ export interface IEditor extends IGroup {
 
     leafList: ILeafList
     readonly list: IUI[]
+
+    readonly selected: boolean
     readonly multiple: boolean
 
     targetSimulate: IUI
@@ -24,7 +26,7 @@ export interface IEditor extends IGroup {
 
     targetEventIds: IEventListenerId[]
 
-    hasItem(item: IUI): void
+    hasItem(item: IUI): boolean
     shiftItem(item: IUI): void
     addItem(item: IUI): void
     removeItem(item: IUI): void

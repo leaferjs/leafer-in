@@ -31,11 +31,14 @@ export class Editor extends Group implements IEditor {
     @targetAttr(onTarget)
     public target: IUI | IUI[] | ILeafList
 
-    public get multiple(): boolean { return this.leafList.length > 1 }
-    public get element() { return this.multiple ? this.targetSimulate : this.leafList.list[0] as IUI }
-
     public leafList: ILeafList = new LeafList() // from target
     public get list(): IUI[] { return this.leafList.list as IUI[] }
+
+    public get selected(): boolean { return !!this.list.length }
+    public get multiple(): boolean { return this.list.length > 1 }
+
+    public get element() { return this.multiple ? this.targetSimulate : this.leafList.list[0] as IUI }
+
 
     public targetSimulate: IUI = new Rect({ visible: false })
 

@@ -1,10 +1,13 @@
-import { Group, Rect } from '@leafer-ui/core'
 import { IBoundsData, IGroupInputData, IRect, IRectInputData } from '@leafer-ui/interface'
+import { Group, Rect } from '@leafer-ui/core'
 
-export class SelectBox extends Group {
+import { ISelectBox } from '@leafer-in/interface'
 
-    public strokeArea: IRect = new Rect({ strokeAlign: 'center' })
-    public fillArea: IRect = new Rect()
+
+export class SelectBox extends Group implements ISelectBox {
+
+    protected strokeArea: IRect = new Rect({ strokeAlign: 'center' })
+    protected fillArea: IRect = new Rect()
 
     constructor(data?: IGroupInputData) {
         super(data)

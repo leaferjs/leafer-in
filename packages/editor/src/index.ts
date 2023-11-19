@@ -1,8 +1,13 @@
 export { Editor } from './Editor'
-export { EditEvent as EditorEvent } from './event/EditEvent'
-export { EditMoveEvent as EditorMoveEvent } from './event/EditMoveEvent'
-export { EditScaleEvent as EditorResizeEvent } from './event/EditScaleEvent'
-export { EditRotateEvent as EditorRotateEvent } from './event/EditRotateEvent'
-export { EditSkewEvent as EditorSkewEvent } from './event/EditSkewEvent'
-export { LineEditTool as LineTool } from './tool/LineEditTool'
-export { EditTool as RectTool } from './tool/EditTool'
+
+export { EditEvent } from './event/EditEvent'
+export { EditMoveEvent } from './event/EditMoveEvent'
+export { EditScaleEvent } from './event/EditScaleEvent'
+export { EditRotateEvent } from './event/EditRotateEvent'
+export { EditSkewEvent } from './event/EditSkewEvent'
+
+export { LineEditTool } from './tool/LineEditTool'
+export { EditTool } from './tool/EditTool'
+
+export { EditHelper } from './helper/EditHelper'
+export { SelectHelper } from './helper/SelectHelper'

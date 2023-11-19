@@ -1,19 +1,17 @@
-import { IBounds, IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
-import { Bounds, Paint, UI } from '@leafer-ui/core'
+import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
+import { Paint, UI } from '@leafer-ui/core'
 
-import { IWireframe } from '@leafer-in/interface'
+import { IStroker } from '@leafer-in/interface'
 
 import { targetAttr } from '../decorator/data'
 
 
-export class Wireframe extends UI implements IWireframe {
+export class Stroker extends UI implements IStroker {
 
     @targetAttr(onTarget)
     public target: IUI | IUI[]
 
     public list: IUI[] = []
-
-    public bounds: IBounds = new Bounds()
 
     constructor() {
         super()
@@ -51,8 +49,8 @@ export class Wireframe extends UI implements IWireframe {
 
 }
 
-function onTarget(wireFrame: Wireframe): void {
-    const value = wireFrame.target
-    wireFrame.list = value ? (value instanceof Array ? value : [value]) : []
-    wireFrame.forceUpdate()
+function onTarget(stroker: Stroker): void {
+    const value = stroker.target
+    stroker.list = value ? (value instanceof Array ? value : [value]) : []
+    stroker.forceUpdate()
 }
