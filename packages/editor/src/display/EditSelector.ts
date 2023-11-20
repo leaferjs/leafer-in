@@ -102,12 +102,12 @@ export class EditSelector extends Group implements IEditSelector {
     protected onDragStart(e: DragEvent): void {
         if (this.running && this.allowDrag(e)) {
             const { editor } = this
-            const { stroke, strokeWidth, selectBox } = editor.config
+            const { stroke, strokeWidth, area } = editor.config
             const { x, y } = e.getInner(this)
 
             this.bounds.set(x, y)
 
-            this.selectBox.setStyle({ visible: true, stroke, strokeWidth, x, y }, selectBox)
+            this.selectBox.setStyle({ visible: true, stroke, strokeWidth, x, y }, area)
             this.selectBox.setBounds(this.bounds.get())
 
             this.originList = editor.leafList.clone()

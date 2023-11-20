@@ -192,7 +192,7 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
     }
 
-    public scaleOf(origin: IPointData, scaleX: number, scaleY?: number, _resize?: boolean): void {
+    public scaleOf(origin: IPointData, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
 
@@ -223,7 +223,7 @@ export class Editor extends Group implements IEditor {
         if (this.multiple) element.rotateOf(origin, rotation)
     }
 
-    public skewOf(origin: IPointData, skewX: number, skewY?: number, _resize?: boolean): void {
+    public skewOf(origin: IPointData, skewX: number, skewY = 0, _resize?: boolean): void {
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
 

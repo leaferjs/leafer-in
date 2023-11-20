@@ -87,7 +87,7 @@ export interface IEditorConfig {
     rect?: IRectInputData
 
     selector?: boolean
-    selectBox?: IRectInputData
+    area?: IRectInputData
 
     hideOnMove?: boolean
     hideHover?: boolean
