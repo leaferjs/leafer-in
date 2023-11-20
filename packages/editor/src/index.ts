@@ -1,5 +1,11 @@
 export { Editor } from './Editor'
 
+export { EditBox } from './display/EditBox'
+export { EditPoint } from './display/EditPoint'
+export { EditSelector } from './display/EditSelector'
+export { SelectBox } from './display/SelectBox'
+export { Stroker } from './display/Stroker'
+
 export { EditEvent } from './event/EditEvent'
 export { EditMoveEvent } from './event/EditMoveEvent'
 export { EditScaleEvent } from './event/EditScaleEvent'
@@ -10,4 +16,5 @@ export { LineEditTool } from './tool/LineEditTool'
 export { EditTool } from './tool/EditTool'
 
 export { EditHelper } from './helper/EditHelper'
+export { EditDataHelper } from './helper/EditDataHelper'
 export { SelectHelper } from './helper/SelectHelper'

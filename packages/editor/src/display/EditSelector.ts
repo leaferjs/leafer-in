@@ -16,7 +16,7 @@ export class EditSelector extends Group implements IEditSelector {
     public editor: IEditor
 
     public get dragging(): boolean { return !!this.originList }
-    public get running(): boolean { return this.editor.config.useSelector }
+    public get running(): boolean { return this.editor.config.selector }
 
     public hoverStroker: IStroker = new Stroker()
     public targetStroker: IStroker = new Stroker()
@@ -40,11 +40,12 @@ export class EditSelector extends Group implements IEditSelector {
     // hover / select
 
     protected onHover(): void {
-        if (this.running && !this.dragging && !this.editor.dragging) {
-            this.hoverStroker.setTarget(this.editor.hoverTarget, this.editor.config)
+        const { editor } = this
+        if (this.running && !this.dragging && !editor.dragging) {
+            const { stroke, strokeWidth, hideHover } = editor.config
+            this.hoverStroker.setTarget(hideHover ? null : this.editor.hoverTarget, { stroke, strokeWidth })
         }
     }
-
 
     protected onSelect(): void {
         if (this.running) {
@@ -54,7 +55,6 @@ export class EditSelector extends Group implements IEditSelector {
             this.hoverStroker.target = null
         }
     }
-
 
     // move / down
 
@@ -100,7 +100,7 @@ export class EditSelector extends Group implements IEditSelector {
     // drag
 
     protected onDragStart(e: DragEvent): void {
-        if (this.running && this.allowSelect(e)) {
+        if (this.running && this.allowDrag(e)) {
             const { editor } = this
             const { stroke, strokeWidth, selectBox } = editor.config
             const { x, y } = e.getInner(this)
@@ -168,8 +168,8 @@ export class EditSelector extends Group implements IEditSelector {
         return target.leafer !== this.editor.leafer
     }
 
-    protected allowSelect(e: DragEvent) {
-        return (!this.editor.selected && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
+    protected allowDrag(e: DragEvent) {
+        return (!this.editor.hasTarget && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
     }
 
     protected findDeepOne(e: PointerEvent): IUI {

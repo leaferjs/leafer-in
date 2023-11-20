@@ -12,9 +12,11 @@ export interface IEditor extends IGroup {
     leafList: ILeafList
     readonly list: IUI[]
 
-    readonly selected: boolean
+    readonly hasTarget: boolean
     readonly multiple: boolean
+    readonly single: boolean
 
+    element: IUI
     targetSimulate: IUI
 
     selector: IEditSelector
@@ -31,9 +33,10 @@ export interface IEditor extends IGroup {
     addItem(item: IUI): void
     removeItem(item: IUI): void
 
-    getTool(value: IUI | IUI[]): IEditTool
-    getEditSize(ui: ILeaf): IEditSize
     update(): void
+    updateEditTool(): void
+
+    getEditSize(ui: ILeaf): IEditSize
 
     onMove(e: IDragEvent): void
     onScale(e: IDragEvent): void
@@ -48,10 +51,14 @@ export interface IEditor extends IGroup {
 
     toTop(): void
     toBottom(): void
+
+    listenTargetEvents(): void
+    removeTargetEvents(): void
 }
 
 export interface IEditTool {
     tag: string
+    scaleOfEvent: boolean
     getMirrorData(editor: IEditor): IPointData
     onMove(e: IEditMoveEvent): void
     onScale(e: IEditScaleEvent): void
@@ -62,7 +69,7 @@ export interface IEditTool {
 
 export interface IEditorConfig {
     type?: 'pc' | 'mobile'
-    resizeType?: 'auto' | IEditSize
+    editSize?: 'auto' | IEditSize
 
     around?: IAround
     lockRatio?: boolean
@@ -79,10 +86,11 @@ export interface IEditorConfig {
     rotatePoint?: IRectInputData
     rect?: IRectInputData
 
-    useSelector?: boolean
+    selector?: boolean
     selectBox?: IRectInputData
 
     hideOnMove?: boolean
+    hideHover?: boolean
 
     moveCursor?: ICursorType
     resizeCursor?: ICursorType[]
@@ -123,7 +131,7 @@ export interface IEditScaleEvent extends IEditEvent {
     readonly scaleY?: number
     readonly resize?: boolean
 
-    readonly dragEvent?: IDragEvent
+    dragEvent?: IDragEvent
     readonly direction?: IDirection8
 
     readonly lockRatio?: boolean

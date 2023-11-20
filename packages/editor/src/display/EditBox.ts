@@ -1,4 +1,4 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData } from '@leafer-in/interface'
+import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent } from '@leafer-ui/interface'
 import { Group, Rect, DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -13,7 +13,7 @@ export class EditBox extends Group implements IEditBox {
     public editor: IEditor
     public dragging: boolean
 
-    public rect: IRect = new Rect({ hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
+    public rect: IRect = new Rect({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
     public circle: IEditPoint = new EditPoint({ name: 'circle', around: 'center', strokeAlign: 'outside', hitRadius: 10, cursor: 'crosshair' }) // rotate point
 
     public resizePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
@@ -48,7 +48,7 @@ export class EditBox extends Group implements IEditBox {
                 this.listenPointEvents(resizeLine, 'resize', i)
             }
 
-            resizePoint = new EditPoint({ around: 'center', strokeAlign: 'outside', hitRadius: 5 })
+            resizePoint = new EditPoint({ name: 'resize-point', around: 'center', strokeAlign: 'outside', hitRadius: 5 })
             resizePoints.push(resizePoint)
             this.listenPointEvents(resizePoint, 'resize', i)
         }
@@ -57,27 +57,7 @@ export class EditBox extends Group implements IEditBox {
         this.addMany(...rotatePoints, rect, circle, ...resizeLines, ...resizePoints)
     }
 
-
-    public listenPointEvents(point: IEditPoint, type: IEditPointType, direction: IDirection8): void {
-        const { editor } = this
-        point.direction = direction
-        point.pointType = type
-        point.on_(DragEvent.START, () => { this.dragging = true })
-        point.on_(DragEvent.DRAG, this.onDrag, this)
-        point.on_(DragEvent.END, () => { this.dragging = false })
-        point.on_(PointerEvent.LEAVE, () => this.enterPoint = null)
-        if (point.name !== 'circle') point.on_(PointerEvent.ENTER, (e) => { this.enterPoint = point, updateCursor(editor, e) })
-    }
-
-    protected onDrag(e: DragEvent): void {
-        const { editor } = this
-        const point = e.current as IEditPoint
-        if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
-            if (editor.config.rotateable) editor.onRotate(e)
-        } else {
-            editor.onScale(e)
-        }
-    }
+    // update
 
     public update(bounds: IBoundsData): void {
         const { config } = this.editor
@@ -156,20 +136,74 @@ export class EditBox extends Group implements IEditBox {
         ]
     }
 
+    // drag
+
+    protected onDragStart(e: DragEvent): void {
+        this.dragging = true
+        if (e.target.name === 'rect') this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 // move
+    }
+
+    protected onDragEnd(e: DragEvent): void {
+        this.dragging = false
+        if (e.target.name === 'rect') this.editor.opacity = 1 // move
+    }
+
+    protected onDrag(e: DragEvent): void {
+        const { editor } = this
+        const point = e.current as IEditPoint
+        if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
+            if (editor.config.rotateable) editor.onRotate(e)
+        } else {
+            editor.onScale(e)
+        }
+    }
+
+    public onArrow(e: IKeyEvent): void {
+        if (this.editor.hasTarget) {
+            const move = { x: 0, y: 0 }
+            const distance = e.shiftKey ? 10 : 1
+            switch (e.code) {
+                case 'ArrowDown':
+                    move.y = distance
+                    break
+                case 'ArrowUp':
+                    move.y = -distance
+                    break
+                case 'ArrowLeft':
+                    move.x = -distance
+                    break
+                case 'ArrowRight':
+                    move.x = distance
+            }
+            if (move.x || move.y) this.editor.move(move.x, move.y)
+        }
+    }
+
     protected onDoubleClick(): void {
-        const { list } = this.editor
-        if (list.length === 1 && list[0].isBranch) {
+        const { editor } = this
+        if (editor.single && editor.element.isBranch) {
             //list[0].hitChildren = true
         }
+    }
+
+    public listenPointEvents(point: IEditPoint, type: IEditPointType, direction: IDirection8): void {
+        const { editor } = this
+        point.direction = direction
+        point.pointType = type
+        point.on_(DragEvent.START, this.onDragStart, this)
+        point.on_(DragEvent.DRAG, this.onDrag, this)
+        point.on_(DragEvent.END, this.onDragEnd, this)
+        point.on_(PointerEvent.LEAVE, () => this.enterPoint = null)
+        if (point.name !== 'circle') point.on_(PointerEvent.ENTER, (e) => { this.enterPoint = point, updateCursor(editor, e) })
     }
 
     protected __listenEvents(): void {
         const { rect, editor } = this
         this.__eventIds = [
-            editor.on_(EditEvent.SELECT, () => { this.visible = !!editor.leafList.length }),
-            rect.on_(DragEvent.START, () => { this.dragging = true, this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 }),
+            editor.on_(EditEvent.SELECT, () => { this.visible = editor.hasTarget }),
+            rect.on_(DragEvent.START, this.onDragStart, this),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
-            rect.on_(DragEvent.END, () => { this.dragging = false, this.editor.opacity = 1 }),
+            rect.on_(DragEvent.END, this.onDragEnd, this),
             rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor)),
             rect.on_(PointerEvent.DOUBLE_CLICK, this.onDoubleClick, this)
         ]

@@ -1,7 +1,7 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize } from '@leafer-ui/interface'
-import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix } from '@leafer-ui/core'
+import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, KeyEvent } from '@leafer-ui/core'
 
-import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool } from '@leafer-in/interface'
+import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditScaleEvent } from '@leafer-in/interface'
 
 import { EditMoveEvent } from './event/EditMoveEvent'
 import { EditScaleEvent } from './event/EditScaleEvent'
@@ -12,13 +12,13 @@ import { EditSelector } from './display/EditSelector'
 import { EditBox } from './display/EditBox'
 
 import { config } from './config'
-import { getTool } from './tool'
+import { getEditTool } from './tool'
 
-import { onTarget } from './editor/target'
-import { onHover } from './editor/hover'
-import { getAround, getResizeData, getRotateData, getSkewData } from './editor/data'
+import { onTarget, onHover } from './editor/target'
 import { targetAttr } from './decorator/data'
 import { EditHelper } from './helper/EditHelper'
+import { EditDataHelper } from './helper/EditDataHelper'
+import { updateCursor } from './editor/cursor'
 
 
 export class Editor extends Group implements IEditor {
@@ -34,11 +34,11 @@ export class Editor extends Group implements IEditor {
     public leafList: ILeafList = new LeafList() // from target
     public get list(): IUI[] { return this.leafList.list as IUI[] }
 
-    public get selected(): boolean { return !!this.list.length }
+    public get hasTarget(): boolean { return !!this.list.length }
     public get multiple(): boolean { return this.list.length > 1 }
+    public get single(): boolean { return this.list.length === 1 }
 
-    public get element() { return this.multiple ? this.targetSimulate : this.leafList.list[0] as IUI }
-
+    public get element() { return this.multiple ? this.targetSimulate : this.list[0] as IUI }
 
     public targetSimulate: IUI = new Rect({ visible: false })
 
@@ -56,7 +56,6 @@ export class Editor extends Group implements IEditor {
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
         this.addMany(this.selector, this.editBox)
     }
-
 
     // item
 
@@ -76,23 +75,23 @@ export class Editor extends Group implements IEditor {
         this.hasItem(item) ? this.removeItem(item) : this.addItem(item)
     }
 
-
     // update
-
-    public getTool(value: IUI | IUI[]): IEditTool {
-        return getTool(value)
-    }
-
-    public getEditSize(ui: IUI): IEditSize {
-        let { resizeType } = this.config
-        return resizeType === 'auto' ? ui.editSize : resizeType
-    }
 
     public update(): void {
         if (!this.target) return
         this.editTool.update(this)
     }
 
+    public updateEditTool(): void {
+        this.editTool = getEditTool(this.list)
+    }
+
+    // get
+
+    public getEditSize(ui: IUI): IEditSize {
+        let { editSize } = this.config
+        return editSize === 'auto' ? ui.editSize : editSize
+    }
 
     // operate
 
@@ -114,15 +113,21 @@ export class Editor extends Group implements IEditor {
         let { around, lockRatio } = this.config
         if (e.shiftKey) lockRatio = true
 
-        const { origin, scaleX, scaleY } = getResizeData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, getAround(around, e.altKey))
+        const data = EditDataHelper.getScaleData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, EditDataHelper.getAround(around, e.altKey))
 
-        this.scaleOf(origin, scaleX, scaleY)
+        if (this.editTool.scaleOfEvent) {
+            data.dragEvent = e
+            this.scaleOfEvent(data)
+        } else {
+            this.scaleOf(data.origin, data.scaleX, data.scaleY)
+        }
+
     }
 
     public onRotate(e: DragEvent | RotateEvent): void {
         const { skewable, around, rotateGap } = this.config
-        const { direction } = e.current as IEditPoint
-        if (skewable && direction % 2) return this.onSkew(e as DragEvent)
+        const { direction, name } = e.current as IEditPoint
+        if (skewable && direction % 2 && name !== 'resize-point') return this.onSkew(e as DragEvent)
 
         const { element } = this
         let origin: IPointData, rotation: number
@@ -131,16 +136,20 @@ export class Editor extends Group implements IEditor {
             rotation = e.rotation, origin = element.getInnerPoint(e)
         } else {
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
+            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
             rotation = data.rotation
             origin = data.origin
         }
+
+
 
         rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
         if (!rotation) return
 
         const mirror = this.editTool.getMirrorData(this)
         if (mirror.x + mirror.y === 1) rotation = -rotation
+
+
 
         this.rotateOf(origin, rotation)
     }
@@ -150,7 +159,7 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const { around, rotateGap } = this.config
         element.updateLayout()
-        let { origin, skewX, skewY } = getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), getAround(around, e.altKey))
+        let { origin, skewX, skewY } = EditDataHelper.getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), EditDataHelper.getAround(around, e.altKey))
 
         if (skewX) skewX = MathHelper.getGapRotation(skewX, rotateGap, element.skewX)
         if (skewY) skewY = MathHelper.getGapRotation(skewY, rotateGap, element.skewY)
@@ -172,6 +181,15 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
 
         if (this.multiple) element.move(x, y)
+    }
+
+    public scaleOfEvent(data: IEditScaleEvent): void {
+        const { element } = this
+        const worldOrigin = element.getWorldPoint(data.origin)
+        const event = new EditScaleEvent(EditScaleEvent.SCALE, { ...data, target: element, editor: this, worldOrigin })
+
+        this.editTool.onScale(event)
+        this.emitEvent(event)
     }
 
     public scaleOf(origin: IPointData, scaleX: number, scaleY?: number, _resize?: boolean): void {
@@ -259,6 +277,27 @@ export class Editor extends Group implements IEditor {
         if (this.list.length) {
             EditHelper.toBottom(this.list)
             this.leafList.update()
+        }
+    }
+
+    // event 
+
+    public listenTargetEvents(): void {
+        if (!this.targetEventIds.length) {
+            const { leafer } = this.list[0]
+            this.targetEventIds = [
+                leafer.on_(RenderEvent.START, this.update, this),
+                leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e: KeyEvent) => { updateCursor(this, e) }),
+                leafer.on_(KeyEvent.DOWN, this.editBox.onArrow, this.editBox)
+            ]
+        }
+    }
+
+    public removeTargetEvents(): void {
+        const { targetEventIds } = this
+        if (targetEventIds.length) {
+            this.off_(targetEventIds)
+            targetEventIds.length = 0
         }
     }
 

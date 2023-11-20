@@ -1,11 +1,13 @@
 import { IPointData } from '@leafer-ui/interface'
-import { IEditor, IEditResizeEvent, IEditRotateEvent, IEditTool, IEditSkewEvent, IEditMoveEvent } from '@leafer-in/interface'
+import { IEditor, IEditScaleEvent, IEditRotateEvent, IEditTool, IEditSkewEvent, IEditMoveEvent } from '@leafer-in/interface'
 
 export class EditTool implements IEditTool {
 
     static list: IEditTool[] = []
 
     public tag = 'EditTool'
+
+    public scaleOfEvent: boolean
 
     getMirrorData(editor: IEditor): IPointData {
         const { scaleX, scaleY } = editor.editBox
@@ -17,20 +19,20 @@ export class EditTool implements IEditTool {
 
     onMove(e: IEditMoveEvent): void {
         const { moveX, moveY, editor } = e
-        const { app, leafList } = editor
+        const { app, list } = editor
         app.lockLayout()
-        leafList.forEach(target => {
+        list.forEach(target => {
             const move = target.getLocalPoint({ x: moveX, y: moveY }, null, true)
             target.move(move.x, move.y)
         })
         app.unlockLayout()
     }
 
-    onScale(e: IEditResizeEvent): void {
+    onScale(e: IEditScaleEvent): void {
         const { scaleX, scaleY, transform, worldOrigin, editor } = e
-        const { app, leafList } = editor
+        const { app, list } = editor
         app.lockLayout()
-        leafList.forEach(target => {
+        list.forEach(target => {
             const resize = editor.getEditSize(target) === 'size'
             if (transform) {
                 target.transform(transform, resize)
@@ -43,9 +45,9 @@ export class EditTool implements IEditTool {
 
     onRotate(e: IEditRotateEvent): void {
         const { rotation, worldOrigin, editor } = e
-        const { app, leafList } = editor
+        const { app, list } = editor
         app.lockLayout()
-        leafList.forEach(target => {
+        list.forEach(target => {
             target.rotateOf(target.getInnerPoint(worldOrigin), rotation)
         })
         app.unlockLayout()
@@ -53,9 +55,9 @@ export class EditTool implements IEditTool {
 
     onSkew(e: IEditSkewEvent): void {
         const { skewX, skewY, transform, worldOrigin, editor } = e
-        const { app, leafList } = editor
+        const { app, list } = editor
         app.lockLayout()
-        leafList.forEach(target => {
+        list.forEach(target => {
             const resize = editor.getEditSize(target) === 'size'
             if (transform) {
                 target.transform(transform, resize)
@@ -67,16 +69,11 @@ export class EditTool implements IEditTool {
     }
 
     update(editor: IEditor) {
-        const { targetSimulate, leafList } = editor
+        const { targetSimulate, element } = editor
 
-        let target = leafList.list[0]
+        if (editor.multiple) targetSimulate.parent.updateLayout()
 
-        if (editor.multiple) {
-            target = targetSimulate
-            targetSimulate.parent.updateLayout()
-        }
-
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getLayoutBounds('box', editor, true)
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = element.getLayoutBounds('box', editor, true)
         editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         editor.editBox.update({ x: 0, y: 0, width, height })
     }

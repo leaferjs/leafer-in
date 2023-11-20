@@ -1,7 +1,9 @@
 import { IAround, IDragEvent, IMatrixData } from '@leafer-ui/interface'
-import { IDirection8, IEditResizeEvent as IEditScaleEvent } from '@leafer-in/interface'
+
+import { IDirection8, IEditScaleEvent } from '@leafer-in/interface'
 
 import { EditEvent } from './EditEvent'
+
 
 export class EditScaleEvent extends EditEvent implements IEditScaleEvent {
 

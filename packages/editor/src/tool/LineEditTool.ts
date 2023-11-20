@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditResizeEvent, ILine, IPointData, IEditSkewEvent } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditScaleEvent, ILine, IPointData, IEditSkewEvent } from '@leafer-in/interface'
 
 import { EditTool } from './EditTool'
 
@@ -7,7 +7,9 @@ const { left, right } = IDirection8
 
 export class LineEditTool extends EditTool {
 
-    public tag = 'Line'
+    public tag = 'LineEditTool'
+
+    public scaleOfEvent = true
 
     getMirrorData(_editor: IEditor): IPointData {
         return {
@@ -16,7 +18,7 @@ export class LineEditTool extends EditTool {
         }
     }
 
-    onScale(e: IEditResizeEvent): void {
+    onScale(e: IEditScaleEvent): void {
         const { direction, dragEvent, lockRatio, around } = e
         const target = e.target as ILine
 
@@ -77,7 +79,7 @@ export class LineEditTool extends EditTool {
 
         for (let i = 0; i < 8; i++) {
             if (i < 4) resizeLines[i].visible = false
-            resizePoints[i].visible = rotatePoints[i].visible = i === left || i === right
+            resizePoints[i].visible = rotatePoints[i].visible = (i === left || i === right)
         }
 
         circle.visible = false

@@ -1,17 +1,16 @@
 import { IEditor, IUI } from '@leafer-in/interface'
 
-import { RenderEvent, KeyEvent, LeafList } from '@leafer-ui/core'
+import { LeafList } from '@leafer-ui/core'
 
 import { simulate } from './simulate'
-import { updateCursor, updateMoveCursor } from './cursor'
-import { arrowKey } from './arrowKey'
+import { updateMoveCursor } from './cursor'
 import { EditEvent } from '../event/EditEvent'
 
 
 export function onTarget(editor: IEditor): void {
-    const value = editor.target
-    if (value) {
-        editor.leafList = value instanceof LeafList ? value : new LeafList(value instanceof Array ? value : [value as IUI])
+    const { target } = editor
+    if (target) {
+        editor.leafList = target instanceof LeafList ? target : new LeafList(target instanceof Array ? target : target as IUI)
     } else {
         editor.leafList.reset()
     }
@@ -19,37 +18,25 @@ export function onTarget(editor: IEditor): void {
     editor.emitEvent(new EditEvent(EditEvent.SELECT, { editor }))
     editor.targetSimulate.parent = null
 
-    if (editor.leafList.length) {
+    if (editor.hasTarget) {
         editor.waitLeafer(() => {
             editor.app.selector.list = new LeafList()
-            editor.editTool = editor.getTool(editor.leafList.list as IUI[])
             if (editor.multiple) simulate(editor)
 
-            editor.update()
             updateMoveCursor(editor)
-            listenTargetEvents(editor)
+
+            editor.updateEditTool()
+            editor.update()
+            editor.listenTargetEvents()
         })
     } else {
-        removeTargetEvents(editor)
+        editor.removeTargetEvents()
     }
 }
 
-function listenTargetEvents(editor: IEditor): void {
-    if (!editor.targetEventIds.length) {
-        const { leafer } = editor.leafList.list[0]
-        editor.targetEventIds = [
-            leafer.on_(RenderEvent.START, editor.update, editor),
-            leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e: KeyEvent) => { updateCursor(editor, e) }),
-            leafer.on_(KeyEvent.DOWN, (e) => { arrowKey(e, editor) })
-        ]
-    }
-}
 
-function removeTargetEvents(editor: IEditor): void {
-    const { targetEventIds } = editor
-    if (targetEventIds.length) {
-        const { app } = targetEventIds[0].current
-        if (app) app.off_(editor.targetEventIds)
-        targetEventIds.length = 0
-    }
+
+export function onHover(editor: IEditor): void {
+    editor.emitEvent(new EditEvent(EditEvent.HOVER, { editor }))
+
 }

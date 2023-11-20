@@ -3,6 +3,10 @@ import { IEditorConfig } from '@leafer-in/interface'
 export const config: IEditorConfig = {
     type: 'pc',
 
+    selector: true,
+
+    editSize: 'auto',
+
     stroke: '#836DFF',
     strokeWidth: 2,
 
@@ -12,12 +16,7 @@ export const config: IEditorConfig = {
 
     rotateGap: 45,
 
-    useSelector: true,
-    hideOnMove: false,
-
     moveCursor: 'move',
-    resizeType: 'auto',
-
     resizeCursor: ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'],
     rotateCursor: ['ne-resize', 'e-resize', 'se-resize', 's-resize', 'sw-resize', 'w-resize', 'nw-resize', 'n-resize'],
 
