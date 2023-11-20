@@ -86,6 +86,8 @@ export const EditDataHelper = {
                 break
             case bottomLeft:
                 origin = { x: 1, y: 0 }
+            default:
+                origin = { x: 0.5, y: 0.5 }
         }
 
         toPoint(around || origin, bounds, origin)
