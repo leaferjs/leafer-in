@@ -56,6 +56,10 @@ export class EditSelector extends Group implements IEditSelector {
         }
     }
 
+    public update(): void {
+        if (this.running) this.targetStroker.forceUpdate()
+    }
+
     // move / down
 
     protected onPointerMove(e: PointerEvent): void {

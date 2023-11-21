@@ -80,6 +80,7 @@ export class Editor extends Group implements IEditor {
     public update(): void {
         if (!this.target) return
         this.editTool.update(this)
+        this.selector.update()
     }
 
     public updateEditTool(): void {
@@ -141,15 +142,11 @@ export class Editor extends Group implements IEditor {
             origin = data.origin
         }
 
-
-
         rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
         if (!rotation) return
 
         const mirror = this.editTool.getMirrorData(this)
         if (mirror.x + mirror.y === 1) rotation = -rotation
-
-
 
         this.rotateOf(origin, rotation)
     }
@@ -157,13 +154,9 @@ export class Editor extends Group implements IEditor {
 
     public onSkew(e: DragEvent): void {
         const { element } = this
-        const { around, rotateGap } = this.config
-        element.updateLayout()
-        let { origin, skewX, skewY } = EditDataHelper.getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), EditDataHelper.getAround(around, e.altKey))
+        const { around } = this.config
 
-        if (skewX) skewX = MathHelper.getGapRotation(skewX, rotateGap, element.skewX)
-        if (skewY) skewY = MathHelper.getGapRotation(skewY, rotateGap, element.skewY)
-
+        const { origin, skewX, skewY } = EditDataHelper.getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), EditDataHelper.getAround(around, e.altKey))
         if (!skewX && !skewY) return
 
         this.skewOf(origin, skewX, skewY)
@@ -230,9 +223,10 @@ export class Editor extends Group implements IEditor {
         let transform: Matrix
 
         if (this.multiple) {
-            transform = new Matrix(element.localTransform)
+            const childMatrix = { ...element.localTransform }
             element.skewOf(origin, skewX, skewY)
-            transform.divideParent(element.localTransform)
+            transform = new Matrix(element.localTransform)
+            transform.divide(childMatrix)
         }
 
         const event = new EditSkewEvent(EditSkewEvent.SKEW, {

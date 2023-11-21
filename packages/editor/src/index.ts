@@ -18,3 +18,13 @@ export { EditTool } from './tool/EditTool'
 export { EditHelper } from './helper/EditHelper'
 export { EditDataHelper } from './helper/EditDataHelper'
 export { SelectHelper } from './helper/SelectHelper'
+
+
+import { IEditorConfig } from '@leafer-ui/interface'
+import { Creator } from '@leafer-ui/core'
+import { IEditor } from '@leafer-in/interface'
+import { Editor } from './Editor'
+
+Creator.editor = function (options?: IEditorConfig): IEditor {
+    return new Editor(options)
+}

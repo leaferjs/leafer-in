@@ -15,4 +15,6 @@ export interface IEditSelector extends IGroup {
 
     selectBox: ISelectBox
     bounds: IBounds
+
+    update(): void
 }

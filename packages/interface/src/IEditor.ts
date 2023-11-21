@@ -1,56 +1,18 @@
-import { IGroup, IUI, IRectInputData, IEditSize, ICursorType, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IRotateEvent, IStroke, IFill, ILeafList, IMatrixData, ILeaf } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, ILeafList, IMatrixData, IEditorBase } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelector } from './IEditSelector'
 
 
-export interface IEditor extends IGroup {
-    config: IEditorConfig
-
-    hoverTarget: IUI
-    target: IUI | IUI[] | ILeafList
-
+export interface IEditor extends IEditorBase {
     leafList: ILeafList
-    readonly list: IUI[]
 
-    readonly hasTarget: boolean
-    readonly multiple: boolean
-    readonly single: boolean
-
-    element: IUI
     targetSimulate: IUI
 
     selector: IEditSelector
     editBox: IEditBox
-
-    readonly dragging: boolean
-
     editTool: IEditTool
 
     targetEventIds: IEventListenerId[]
-
-    hasItem(item: IUI): boolean
-    shiftItem(item: IUI): void
-    addItem(item: IUI): void
-    removeItem(item: IUI): void
-
-    update(): void
-    updateEditTool(): void
-
-    getEditSize(ui: ILeaf): IEditSize
-
-    onMove(e: IDragEvent): void
-    onScale(e: IDragEvent): void
-    onRotate(e: IDragEvent | IRotateEvent): void
-    onSkew(e: IDragEvent): void
-
-    group(): void
-    ungroup(): void
-
-    lock(): void
-    unlock(): void
-
-    toTop(): void
-    toBottom(): void
 
     listenTargetEvents(): void
     removeTargetEvents(): void
@@ -65,40 +27,6 @@ export interface IEditTool {
     onRotate(e: IEditRotateEvent): void
     onSkew(e: IEditSkewEvent): void
     update(editor: IEditor): void
-}
-
-export interface IEditorConfig {
-    type?: 'pc' | 'mobile'
-    editSize?: 'auto' | IEditSize
-
-    around?: IAround
-    lockRatio?: boolean
-    rotateGap?: number
-
-    stroke?: IStroke
-    strokeWidth?: number
-
-    pointFill?: IFill
-    pointSize?: number
-    pointRadius?: number
-
-    point?: IRectInputData | IRectInputData[]
-    rotatePoint?: IRectInputData
-    rect?: IRectInputData
-
-    selector?: boolean
-    area?: IRectInputData
-
-    hideOnMove?: boolean
-    hideHover?: boolean
-
-    moveCursor?: ICursorType
-    resizeCursor?: ICursorType[]
-    rotateCursor?: ICursorType[]
-
-    rotateable?: boolean
-    resizeable?: boolean
-    skewable?: boolean
 }
 
 export enum IDirection8 {
