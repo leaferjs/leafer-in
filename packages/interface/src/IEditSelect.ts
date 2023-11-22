@@ -1,10 +1,10 @@
 import { IGroup, IBounds } from '@leafer-ui/interface'
 
 import { IStroker } from './IStroker'
-import { ISelectBox } from './ISelectBox'
+import { ISelectArea } from './ISelectArea'
 import { IEditor } from './IEditor'
 
-export interface IEditSelector extends IGroup {
+export interface IEditSelect extends IGroup {
     editor: IEditor
 
     dragging: boolean
@@ -13,7 +13,7 @@ export interface IEditSelector extends IGroup {
     hoverStroker: IStroker
     targetStroker: IStroker
 
-    selectBox: ISelectBox
+    selectArea: ISelectArea
     bounds: IBounds
 
     update(): void

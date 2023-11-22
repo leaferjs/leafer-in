@@ -5,7 +5,7 @@ import { Group, Matrix } from '@leafer-ui/core'
 const order = (a: ILeaf, b: ILeaf) => a.parent.children.indexOf(a) - b.parent.children.indexOf(b)
 const reverseOrder = (a: ILeaf, b: ILeaf) => b.parent.children.indexOf(b) - a.parent.children.indexOf(a)
 
-export const EditHelper = {
+export const EditorHelper = {
 
     group(list: IUI[], element?: IUI, group?: IGroup): IGroup {
         list.sort(reverseOrder)

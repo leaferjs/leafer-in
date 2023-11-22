@@ -1,5 +1,5 @@
 import { IBoundsData, IPointData, IAround } from '@leafer-ui/interface'
-import { IEditScaleEvent, IDirection8, IEditSkewEvent, IEditRotateEvent } from '@leafer-in/interface'
+import { IEditorScaleEvent, IDirection8, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
 import { AroundHelper, PointHelper } from '@leafer-ui/core'
 
@@ -9,7 +9,7 @@ const { toPoint } = AroundHelper
 
 export const EditDataHelper = {
 
-    getScaleData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean, around: IAround): IEditScaleEvent {
+    getScaleData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean, around: IAround): IEditorScaleEvent {
         let origin: IPointData, scaleX: number = 1, scaleY: number = 1
         const { width, height } = bounds
 
@@ -71,7 +71,7 @@ export const EditDataHelper = {
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
 
-    getRotateData(bounds: IBoundsData, direction: IDirection8, current: IPointData, last: IPointData, around: IAround): IEditRotateEvent {
+    getRotateData(bounds: IBoundsData, direction: IDirection8, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
         let origin: IPointData
 
         switch (direction) {
@@ -95,7 +95,7 @@ export const EditDataHelper = {
         return { origin, rotation: PointHelper.getRotation(last, origin, current) }
     },
 
-    getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditSkewEvent {
+    getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditorSkewEvent {
         let origin: IPointData, skewX = 0, skewY = 0
         let last: IPointData
 

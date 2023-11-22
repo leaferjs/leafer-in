@@ -1,10 +1,10 @@
 import { IUI, IPointData } from '@leafer-ui/interface'
 import { Event } from '@leafer-ui/core'
 
-import { IEditor, IEditEvent } from '@leafer-in/interface'
+import { IEditor, IEditorEvent } from '@leafer-in/interface'
 
 
-export class EditEvent extends Event implements IEditEvent {
+export class EditorEvent extends Event implements IEditorEvent {
 
     static SELECT = 'editor.select'
     static HOVER = 'editor.hover'
@@ -15,7 +15,7 @@ export class EditEvent extends Event implements IEditEvent {
     readonly worldOrigin: IPointData
     declare readonly origin: IPointData
 
-    constructor(type: string, data?: IEditEvent) {
+    constructor(type: string, data?: IEditorEvent) {
         super(type)
         if (data) Object.assign(this, data)
     }

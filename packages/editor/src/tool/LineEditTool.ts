@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditScaleEvent, ILine, IPointData, IEditSkewEvent } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditorScaleEvent, ILine, IPointData, IEditorSkewEvent } from '@leafer-in/interface'
 
 import { EditTool } from './EditTool'
 
@@ -18,8 +18,8 @@ export class LineEditTool extends EditTool {
         }
     }
 
-    onScale(e: IEditScaleEvent): void {
-        const { direction, dragEvent, lockRatio, around } = e
+    onScaleWithDrag(e: IEditorScaleEvent): void {
+        const { drag, direction, lockRatio, around } = e
         const target = e.target as ILine
 
         const fromPoint = { x: 0, y: 0 }
@@ -27,7 +27,7 @@ export class LineEditTool extends EditTool {
 
         target.rotation = 0
 
-        let { x, y } = dragEvent.getInnerMove(target)
+        let { x, y } = drag.getInnerMove(target)
 
         if (lockRatio) {
             if (Math.abs(x) > Math.abs(y)) {
@@ -69,7 +69,7 @@ export class LineEditTool extends EditTool {
 
     }
 
-    onSkew(_e: IEditSkewEvent): void {
+    onSkew(_e: IEditorSkewEvent): void {
 
     }
 

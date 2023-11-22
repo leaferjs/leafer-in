@@ -1,17 +1,17 @@
 import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId } from '@leafer-ui/interface'
 import { Bounds, PointerEvent, DragEvent, MoveEvent, LeafList, Group, ZoomEvent } from '@leafer-ui/core'
 
-import { IEditSelector, IEditor, ISelectBox, IStroker } from '@leafer-in/interface'
+import { IEditSelect, IEditor, ISelectArea, IStroker } from '@leafer-in/interface'
 
 import { Stroker } from './Stroker'
-import { SelectBox } from './SelectBox'
-import { SelectHelper } from '../helper/SelectHelper'
-import { EditEvent } from '../event/EditEvent'
+import { SelectArea } from './SelectArea'
+import { EditSelectHelper } from '../helper/EditSelectHelper'
+import { EditorEvent } from '../event/EditorEvent'
 
 
-const { findOne } = SelectHelper
+const { findOne } = EditSelectHelper
 
-export class EditSelector extends Group implements IEditSelector {
+export class EditSelect extends Group implements IEditSelect {
 
     public editor: IEditor
 
@@ -22,7 +22,7 @@ export class EditSelector extends Group implements IEditSelector {
     public targetStroker: IStroker = new Stroker()
 
     public bounds: IBounds = new Bounds()
-    public selectBox: ISelectBox = new SelectBox()
+    public selectArea: ISelectArea = new SelectArea()
 
     protected originList: ILeafList
     protected lastDownLeaf: IUI
@@ -33,7 +33,7 @@ export class EditSelector extends Group implements IEditSelector {
     constructor(editor: IEditor) {
         super()
         this.editor = editor
-        this.addMany(this.targetStroker, this.hoverStroker, this.selectBox)
+        this.addMany(this.targetStroker, this.hoverStroker, this.selectArea)
         this.__listenEvents()
     }
 
@@ -111,8 +111,8 @@ export class EditSelector extends Group implements IEditSelector {
 
             this.bounds.set(x, y)
 
-            this.selectBox.setStyle({ visible: true, stroke, strokeWidth, x, y }, area)
-            this.selectBox.setBounds(this.bounds.get())
+            this.selectArea.setStyle({ visible: true, stroke, strokeWidth, x, y }, area)
+            this.selectArea.setBounds(this.bounds.get())
 
             this.originList = editor.leafList.clone()
         }
@@ -129,12 +129,12 @@ export class EditSelector extends Group implements IEditSelector {
             const total = e.getInnerTotal(this)
 
             const dragBounds = this.bounds.clone().unsign()
-            const list = new LeafList(editor.app.find(SelectHelper.findBounds, dragBounds))
+            const list = new LeafList(editor.app.find(EditSelectHelper.findBounds, dragBounds))
 
             this.bounds.width = total.x
             this.bounds.height = total.y
 
-            this.selectBox.setBounds(dragBounds.get())
+            this.selectArea.setBounds(dragBounds.get())
 
             if (list.length) {
 
@@ -155,7 +155,7 @@ export class EditSelector extends Group implements IEditSelector {
     }
 
     protected onDragEnd(): void {
-        if (this.dragging) this.originList = null, this.selectBox.visible = false
+        if (this.dragging) this.originList = null, this.selectArea.visible = false
     }
 
     protected onAutoMove(e: MoveEvent): void {
@@ -187,8 +187,8 @@ export class EditSelector extends Group implements IEditSelector {
 
             const { app } = editor
             this.__eventIds = [
-                editor.on_(EditEvent.HOVER, this.onHover, this),
-                editor.on_(EditEvent.SELECT, this.onSelect, this),
+                editor.on_(EditorEvent.HOVER, this.onHover, this),
+                editor.on_(EditorEvent.SELECT, this.onSelect, this),
 
                 app.on_(PointerEvent.MOVE, this.onPointerMove, this),
                 app.on_(PointerEvent.BEFORE_DOWN, this.onBeforeDown, this),

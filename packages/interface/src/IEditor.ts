@@ -1,6 +1,6 @@
 import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, ILeafList, IMatrixData, IEditorBase } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
-import { IEditSelector } from './IEditSelector'
+import { IEditSelect } from './IEditSelect'
 
 
 export interface IEditor extends IEditorBase {
@@ -8,7 +8,7 @@ export interface IEditor extends IEditorBase {
 
     targetSimulate: IUI
 
-    selector: IEditSelector
+    selector: IEditSelect
     editBox: IEditBox
     editTool: IEditTool
 
@@ -20,12 +20,12 @@ export interface IEditor extends IEditorBase {
 
 export interface IEditTool {
     tag: string
-    scaleOfEvent: boolean
     getMirrorData(editor: IEditor): IPointData
-    onMove(e: IEditMoveEvent): void
-    onScale(e: IEditScaleEvent): void
-    onRotate(e: IEditRotateEvent): void
-    onSkew(e: IEditSkewEvent): void
+    onMove(e: IEditorMoveEvent): void
+    onScale(e: IEditorScaleEvent): void
+    onScaleWithDrag?(e: IEditorScaleEvent): void
+    onRotate(e: IEditorRotateEvent): void
+    onSkew(e: IEditorSkewEvent): void
     update(editor: IEditor): void
 }
 
@@ -40,38 +40,36 @@ export enum IDirection8 {
     left
 }
 
-export interface IEditEvent extends IEvent {
+export interface IEditorEvent extends IEvent {
     readonly target?: IUI
     readonly editor?: IEditor
     readonly worldOrigin?: IPointData
     readonly origin?: IPointData
 }
-export interface IEditMoveEvent extends IEditEvent {
+export interface IEditorMoveEvent extends IEditorEvent {
     readonly moveX: number
     readonly moveY: number
 }
 
-export interface IEditScaleEvent extends IEditEvent {
+export interface IEditorScaleEvent extends IEditorEvent {
     // scaleOf(origin, scaleX, scaleY, resize) / transform(transform, resize)
-    transform?: IMatrixData
-
     readonly scaleX?: number
     readonly scaleY?: number
-    readonly resize?: boolean
+    transform?: IMatrixData
 
-    dragEvent?: IDragEvent
     readonly direction?: IDirection8
-
     readonly lockRatio?: boolean
     readonly around?: IAround
+
+    drag?: IDragEvent
 }
 
-export interface IEditRotateEvent extends IEditEvent {
+export interface IEditorRotateEvent extends IEditorEvent {
     // rotateOf(origin, rotation)
     readonly rotation?: number
 }
 
-export interface IEditSkewEvent extends IEditEvent {
+export interface IEditorSkewEvent extends IEditorEvent {
     // skewOf(origin, skewX, skewY)
     transform?: IMatrixData
     readonly skewX?: number

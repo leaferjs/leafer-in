@@ -2,7 +2,7 @@ import { AnswerType, IBounds, ILeafList, IUI } from '@leafer-ui/interface'
 
 const { No, Yes, NoAndSkip, YesAndSkip } = AnswerType
 
-export const SelectHelper = {
+export const EditSelectHelper = {
 
     findOne(path: ILeafList): IUI {
         return path.list.find((leaf) => leaf.editable) as IUI

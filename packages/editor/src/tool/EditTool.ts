@@ -1,5 +1,5 @@
 import { IPointData } from '@leafer-ui/interface'
-import { IEditor, IEditScaleEvent, IEditRotateEvent, IEditTool, IEditSkewEvent, IEditMoveEvent } from '@leafer-in/interface'
+import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 
 export class EditTool implements IEditTool {
 
@@ -17,7 +17,7 @@ export class EditTool implements IEditTool {
         }
     }
 
-    onMove(e: IEditMoveEvent): void {
+    onMove(e: IEditorMoveEvent): void {
         const { moveX, moveY, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -28,7 +28,7 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
-    onScale(e: IEditScaleEvent): void {
+    onScale(e: IEditorScaleEvent): void {
         const { scaleX, scaleY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -43,7 +43,7 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
-    onRotate(e: IEditRotateEvent): void {
+    onRotate(e: IEditorRotateEvent): void {
         const { rotation, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -53,7 +53,7 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
-    onSkew(e: IEditSkewEvent): void {
+    onSkew(e: IEditorSkewEvent): void {
         const { skewX, skewY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()

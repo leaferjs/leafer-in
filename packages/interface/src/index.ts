@@ -1,8 +1,8 @@
 export * from '@leafer-ui/interface'
 
-export { IEditor, IEditTool, IDirection8, IEditScaleEvent, IEditRotateEvent, IEditSkewEvent, IEditEvent, IEditMoveEvent } from './IEditor'
+export { IEditor, IEditTool, IDirection8, IEditorScaleEvent, IEditorRotateEvent, IEditorSkewEvent, IEditorEvent, IEditorMoveEvent } from './IEditor'
 export { IStroker } from './IStroker'
 export { IEditBox } from './IEditBox'
-export { ISelectBox } from './ISelectBox'
-export { IEditSelector } from './IEditSelector'
+export { ISelectArea } from './ISelectArea'
+export { IEditSelect } from './IEditSelect'
 export { IEditPoint, IEditPointType } from './IEditPoint'

@@ -4,7 +4,7 @@ import { LeafList } from '@leafer-ui/core'
 
 import { simulate } from './simulate'
 import { updateMoveCursor } from './cursor'
-import { EditEvent } from '../event/EditEvent'
+import { EditorEvent } from '../event/EditorEvent'
 
 
 export function onTarget(editor: IEditor): void {
@@ -15,7 +15,7 @@ export function onTarget(editor: IEditor): void {
         editor.leafList.reset()
     }
 
-    editor.emitEvent(new EditEvent(EditEvent.SELECT, { editor }))
+    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor }))
     editor.targetSimulate.parent = null
 
     if (editor.hasTarget) {
@@ -37,6 +37,6 @@ export function onTarget(editor: IEditor): void {
 
 
 export function onHover(editor: IEditor): void {
-    editor.emitEvent(new EditEvent(EditEvent.HOVER, { editor }))
+    editor.emitEvent(new EditorEvent(EditorEvent.HOVER, { editor }))
 
 }
