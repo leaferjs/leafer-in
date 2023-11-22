@@ -1,6 +1,7 @@
 import { IEditorConfig } from '@leafer-in/interface'
 
 export const config: IEditorConfig = {
+    showRotatePoint: true,
 
     selector: true,
     boxSelect: true,
