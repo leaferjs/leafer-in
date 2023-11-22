@@ -1,4 +1,4 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent } from '@leafer-ui/interface'
+import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup } from '@leafer-ui/interface'
 import { Group, Rect, DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -14,13 +14,14 @@ export class EditBox extends Group implements IEditBox {
     public dragging: boolean
 
     public rect: IRect = new Rect({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
-    public circle: IEditPoint = new EditPoint({ name: 'circle', around: 'center', strokeAlign: 'outside', hitRadius: 10, cursor: 'crosshair' }) // rotate point
+    public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'outside', hitRadius: 5, cursor: 'crosshair' }) // rotate point
 
     public resizePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public rotatePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public resizeLines: IEditPoint[] = [] // top, right, bottom, left
 
     public enterPoint: IEditPoint
+    public buttons: IGroup = new Group({ around: 'center', hitSelf: false })
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -34,7 +35,7 @@ export class EditBox extends Group implements IEditBox {
 
     public create() {
         let rotatePoint: IEditPoint, resizeLine: IEditPoint, resizePoint: IEditPoint
-        const { resizePoints, rotatePoints, resizeLines, rect, circle } = this
+        const { resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
         const arounds: IAround[] = [{ x: 1, y: 1 }, 'center', { x: 0, y: 1 }, 'center', { x: 0, y: 0 }, 'center', { x: 1, y: 0 }, 'center']
 
         for (let i = 0; i < 8; i++) {
@@ -53,20 +54,24 @@ export class EditBox extends Group implements IEditBox {
             this.listenPointEvents(resizePoint, 'resize', i)
         }
 
+        buttons.add(circle)
         this.listenPointEvents(circle, 'rotate', 2)
-        this.addMany(...rotatePoints, rect, circle, ...resizeLines, ...resizePoints)
+
+        this.addMany(...rotatePoints, rect, buttons, ...resizeLines, ...resizePoints)
     }
 
     // update
 
     public update(bounds: IBoundsData): void {
-        const { config } = this.editor
+        const { config, list } = this.editor
         const { width, height } = bounds
         const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
-        const { type, resizeable, rotateable, stroke, strokeWidth } = config
+        const { showRotatePoint, showMiddlePoints, resizeable, rotateable, stroke, strokeWidth } = config
 
         const points = this.getDirection8Points(bounds)
         const pointsStyle = this.getDirection8PointsStyle()
+
+        this.visible = list[0] && !list[0].locked // check locked
 
         let point: IPointData, style: IRectInputData, rotateP: IRect, resizeP: IRect, resizeL: IRect
 
@@ -84,10 +89,10 @@ export class EditBox extends Group implements IEditBox {
             rotateP.visible = rotateable && resizeable
 
             if (i % 2) {
-                resizeP.visible = type === 'mobile'
+                resizeP.visible = !!showMiddlePoints
                 rotateP.visible = false
             } else {
-                rotateP.visible = type !== 'mobile'
+                rotateP.visible = !showMiddlePoints
             }
 
 
@@ -104,18 +109,39 @@ export class EditBox extends Group implements IEditBox {
 
         }
 
+        // rotate
         style = config.rotatePoint || style
-
-        // primary rotate
-
         circle.set(style)
-        circle.x = points[1].x
-        if (!style.y) circle.y = points[1].y - (12 + (resizeP.height + circle.height) / 2)
-        circle.visible = rotateable && type === 'mobile'
+        circle.visible = rotateable && !!showRotatePoint
 
+        // rect
         rect.set(config.rect || { stroke, strokeWidth })
         rect.set({ ...bounds, visible: true })
+
+        // buttons
+        this.layoutButtons()
     }
+
+    protected layoutButtons(): void {
+        const { buttons, resizePoints } = this
+        const { buttonsPosition, buttonsMargin } = this.editor.config
+
+        let point: IEditPoint, scale = 1, maxHeight = 0
+        buttons.children.forEach(child => maxHeight = Math.max(maxHeight, child.height))
+
+        if (buttonsPosition === 'bottom') {
+            point = resizePoints[5]
+        } else {
+            point = resizePoints[1]
+            scale = -1
+        }
+
+        const margin = (buttonsMargin + (point.height + maxHeight) / 2) * scale
+
+        buttons.x = point.x
+        buttons.y = point.y + margin
+    }
+
 
     public getDirection8PointsStyle(): IRectInputData[] {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius, point } = this.editor.config

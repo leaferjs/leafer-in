@@ -16,7 +16,7 @@ export class EditSelect extends Group implements IEditSelect {
     public editor: IEditor
 
     public get dragging(): boolean { return !!this.originList }
-    public get running(): boolean { return this.editor.config.selector }
+    public get running(): boolean { return this.editor.config.selector && this.editor.hittable }
 
     public hoverStroker: IStroker = new Stroker()
     public targetStroker: IStroker = new Stroker()
@@ -104,7 +104,7 @@ export class EditSelect extends Group implements IEditSelect {
     // drag
 
     protected onDragStart(e: DragEvent): void {
-        if (this.running && this.allowDrag(e)) {
+        if (this.running && this.editor.config.boxSelect && this.allowDrag(e)) {
             const { editor } = this
             const { stroke, strokeWidth, area } = editor.config
             const { x, y } = e.getInner(this)

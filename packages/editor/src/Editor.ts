@@ -43,6 +43,8 @@ export class Editor extends Group implements IEditor {
     public targetSimulate: IUI = new Rect({ visible: false })
 
     public editBox: IEditBox = new EditBox(this)
+    public get buttons() { return this.editBox.buttons }
+
     public editTool: IEditTool
     public selector: EditSelect = new EditSelect(this)
 
@@ -64,7 +66,7 @@ export class Editor extends Group implements IEditor {
     }
 
     public addItem(item: IUI): void {
-        if (!this.hasItem(item)) this.leafList.add(item), this.target = this.leafList.list as IUI[]
+        if (!this.hasItem(item) && !item.locked) this.leafList.add(item), this.target = this.leafList.list as IUI[]
     }
 
     public removeItem(item: IUI): void {
@@ -252,10 +254,12 @@ export class Editor extends Group implements IEditor {
 
     public lock(): void {
         this.list.forEach(leaf => leaf.locked = true)
+        this.update()
     }
 
     public unlock(): void {
         this.list.forEach(leaf => leaf.locked = false)
+        this.update()
     }
 
     // level

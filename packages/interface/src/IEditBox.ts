@@ -10,6 +10,8 @@ export interface IEditBox extends IGroup {
     circle: IEditPoint
     rect: IRect
 
+    buttons: IGroup
+
     resizePoints: IEditPoint[]
     rotatePoints: IEditPoint[]
     resizeLines: IEditPoint[]
