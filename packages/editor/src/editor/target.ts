@@ -16,15 +16,11 @@ export function onTarget(editor: IEditor): void {
     }
 
     editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor }))
-    editor.targetSimulate.parent = null
 
     if (editor.hasTarget) {
         editor.waitLeafer(() => {
-            editor.app.selector.list = new LeafList()
             if (editor.multiple) simulate(editor)
-
             updateMoveCursor(editor)
-
             editor.updateEditTool()
             editor.update()
             editor.listenTargetEvents()

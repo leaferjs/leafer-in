@@ -69,9 +69,9 @@ export class EditTool implements IEditTool {
     }
 
     update(editor: IEditor) {
-        const { targetSimulate, element } = editor
+        const { simulateTarget, element } = editor
 
-        if (editor.multiple) targetSimulate.parent.updateLayout()
+        if (editor.multiple) simulateTarget.parent.updateLayout()
 
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = element.getLayoutBounds('box', editor, true)
         editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })

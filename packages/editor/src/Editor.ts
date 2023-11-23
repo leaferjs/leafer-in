@@ -38,9 +38,8 @@ export class Editor extends Group implements IEditor {
     public get multiple(): boolean { return this.list.length > 1 }
     public get single(): boolean { return this.list.length === 1 }
 
-    public get element() { return this.multiple ? this.targetSimulate : this.list[0] as IUI }
-
-    public targetSimulate: IUI = new Rect({ visible: false })
+    public get element() { return this.multiple ? this.simulateTarget : this.list[0] as IUI }
+    public simulateTarget: IUI = new Rect({ visible: false })
 
     public editBox: IEditBox = new EditBox(this)
     public get buttons() { return this.editBox.buttons }
@@ -196,8 +195,7 @@ export class Editor extends Group implements IEditor {
         if (this.multiple) {
             const childMatrix = { ...element.localTransform }
             element.scaleOf(origin, scaleX, scaleY)
-            transform = new Matrix(element.localTransform)
-            transform.divide(childMatrix)
+            transform = new Matrix(element.localTransform).divide(childMatrix)
         }
 
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, { target: element, editor: this, worldOrigin, scaleX, scaleY, transform })
@@ -227,8 +225,7 @@ export class Editor extends Group implements IEditor {
         if (this.multiple) {
             const childMatrix = { ...element.localTransform }
             element.skewOf(origin, skewX, skewY)
-            transform = new Matrix(element.localTransform)
-            transform.divide(childMatrix)
+            transform = new Matrix(element.localTransform).divide(childMatrix)
         }
 
         const event = new EditorSkewEvent(EditorSkewEvent.SKEW, {
@@ -301,8 +298,8 @@ export class Editor extends Group implements IEditor {
 
     public destroy(): void {
         if (!this.destroyed) {
-            this.targetSimulate.destroy()
-            this.target = this.hoverTarget = this.targetSimulate = null
+            this.simulateTarget.destroy()
+            this.target = this.hoverTarget = this.simulateTarget = null
             super.destroy()
         }
     }

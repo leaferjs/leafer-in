@@ -104,7 +104,7 @@ export class EditSelect extends Group implements IEditSelect {
     // drag
 
     protected onDragStart(e: DragEvent): void {
-        if (this.running && this.editor.config.boxSelect && this.allowDrag(e)) {
+        if (this.running && this.allowDrag(e)) {
             const { editor } = this
             const { stroke, strokeWidth, area } = editor.config
             const { x, y } = e.getInner(this)
@@ -173,7 +173,11 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected allowDrag(e: DragEvent) {
-        return (!this.editor.hasTarget && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
+        if (this.editor.config.boxSelect && !e.target.draggable) {
+            return (!this.editor.hasTarget && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
+        } else {
+            return false
+        }
     }
 
     protected findDeepOne(e: PointerEvent): IUI {
@@ -186,6 +190,8 @@ export class EditSelect extends Group implements IEditSelect {
         editor.waitLeafer(() => {
 
             const { app } = editor
+            app.selector.proxy = editor
+
             this.__eventIds = [
                 editor.on_(EditorEvent.HOVER, this.onHover, this),
                 editor.on_(EditorEvent.SELECT, this.onSelect, this),

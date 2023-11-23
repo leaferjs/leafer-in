@@ -6,7 +6,7 @@ import { IEditSelect } from './IEditSelect'
 export interface IEditor extends IEditorBase {
     leafList: ILeafList
 
-    targetSimulate: IUI
+    simulateTarget: IUI
 
     selector: IEditSelect
     editBox: IEditBox

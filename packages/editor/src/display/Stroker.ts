@@ -34,7 +34,7 @@ export class Stroker extends UI implements IStroker {
         if (list.length) {
 
             let leaf: IUI
-            const { stroke } = this.__
+            const { stroke, strokeWidth } = this.__
             const { bounds } = options
 
             for (let i = 0; i < list.length; i++) {
@@ -51,6 +51,7 @@ export class Stroker extends UI implements IStroker {
 
                             canvas.setWorld(matrix, options.matrix)
                             canvas.beginPath()
+                            this.__.strokeWidth = strokeWidth
 
                             const { x, y, width, height } = leaf.__layout.boxBounds
                             canvas.rect(x * aScaleX, y * aScaleY, width * aScaleX, height * aScaleY)
@@ -63,11 +64,14 @@ export class Stroker extends UI implements IStroker {
                         canvas.setWorld(leaf.__world, options.matrix)
                         canvas.beginPath()
                         leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+                        this.__.strokeWidth = strokeWidth / abs(leaf.__world.scaleX)
                     }
 
                     typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
                 }
             }
+
+            this.__.strokeWidth = strokeWidth
         }
     }
 
