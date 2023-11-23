@@ -127,7 +127,7 @@ export class EditBox extends Group implements IEditBox {
 
     protected layoutButtons(): void {
         const { buttons, resizePoints } = this
-        const { buttonsDirection, buttonsFixed, buttonsMargin } = this.editor.config
+        const { buttonsDirection, buttonsFixed, buttonsMargin, showMiddlePoints } = this.editor.config
 
         const { flippedX, flippedY } = this
         let index = fourDirection.indexOf(buttonsDirection)
@@ -140,12 +140,15 @@ export class EditBox extends Group implements IEditBox {
         const useX = direction % 2  // left / right
         const sign = (!direction || direction === 3) ? -1 : 1 // top / left = -1
 
+        const useWidth = index % 2 // left / right  origin direction
+        const margin = (buttonsMargin + (useWidth ? ((showMiddlePoints ? point.width : 0) + buttons.boxBounds.width) : ((showMiddlePoints ? point.height : 0) + buttons.boxBounds.height)) / 2) * sign
+
         if (useX) {
-            buttons.x = point.x + (buttonsMargin + (point.width + buttons.boxBounds.width) / 2) * sign
+            buttons.x = point.x + margin
             buttons.y = point.y
         } else {
             buttons.x = point.x
-            buttons.y = point.y + (buttonsMargin + (point.height + buttons.boxBounds.height) / 2) * sign
+            buttons.y = point.y + margin
         }
 
         if (buttonsFixed) {
