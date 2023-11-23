@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditorScaleEvent, ILine, IPointData, IEditorSkewEvent } from '@leafer-in/interface'
+import { IDirection8, IEditor, IEditorScaleEvent, ILine, IEditorSkewEvent } from '@leafer-in/interface'
 
 import { EditTool } from './EditTool'
 
@@ -10,13 +10,6 @@ export class LineEditTool extends EditTool {
     public tag = 'LineEditTool'
 
     public scaleOfEvent = true
-
-    getMirrorData(_editor: IEditor): IPointData {
-        return {
-            x: 0,
-            y: 0
-        }
-    }
 
     onScaleWithDrag(e: IEditorScaleEvent): void {
         const { drag, direction, lockRatio, around } = e

@@ -1,32 +1,32 @@
 import { ICursorType, IUIEvent } from '@leafer-ui/interface'
 import { IDirection8, IEditor } from '@leafer-in/interface'
 
+import { EditDataHelper } from '../helper/EditDataHelper'
+
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
-    const point = editor.editBox.enterPoint
-    if (!point || !editor.leafList.length || !editor.editBox.visible) return
+    const { editBox } = editor, point = editBox.enterPoint
+    if (!point || !editor.hasTarget || !editBox.visible) return
 
-    let { rotation } = editor.editBox
+    let { rotation } = editBox
     let { resizeCursor, rotateCursor, resizeable, } = editor.config
-    const mirror = editor.editTool.getMirrorData(editor)
     const { direction, pointType } = point
 
-    editor.editBox.enterPoint = point
+    editBox.enterPoint = point
     const isResizePoint = pointType === 'resize'
 
     if (isResizePoint && (e.metaKey || e.ctrlKey || !resizeable)) resizeCursor = rotateCursor
 
-    if (mirror.x || mirror.y) {
-        mirrorCursors(resizeCursor = [...resizeCursor], mirror.x, mirror.y)
-        mirrorCursors(rotateCursor = [...rotateCursor], mirror.y, mirror.x)
-        if (mirror.x + mirror.y === 1) rotation = -rotation
+    if (editBox.flipped) {
+        const { flippedX, flippedY } = editBox
+        mirrorCursors(resizeCursor = [...resizeCursor], flippedX, flippedY)
+        mirrorCursors(rotateCursor = [...rotateCursor], flippedY, flippedX)
+        if (editBox.flippedOne) rotation = -rotation
     }
 
-    let index = (direction + Math.round(rotation / 45)) % 8
-    if (index < 0) index += 8
-
+    const index = EditDataHelper.getRotateDirection(direction, rotation)
     point.cursor = isResizePoint ? resizeCursor[index] : rotateCursor[index]
 }
 
@@ -35,7 +35,7 @@ export function updateMoveCursor(editor: IEditor): void {
 }
 
 
-export function mirrorCursors(mirror: ICursorType[], mirrorX: number, mirrorY: number): void {
+export function mirrorCursors(mirror: ICursorType[], mirrorX: boolean, mirrorY: boolean): void {
     if (mirrorX) {
         const topCursor = mirror[top], topLeftCursor = mirror[topLeft], topRightCursor = mirror[topRight]
         mirror[top] = mirror[bottom]

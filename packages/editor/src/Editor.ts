@@ -131,7 +131,7 @@ export class Editor extends Group implements IEditor {
         const { direction, name } = e.current as IEditPoint
         if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
 
-        const { element } = this
+        const { element, editBox } = this
         let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
@@ -146,8 +146,7 @@ export class Editor extends Group implements IEditor {
         rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
         if (!rotation) return
 
-        const mirror = this.editTool.getMirrorData(this)
-        if (mirror.x + mirror.y === 1) rotation = -rotation
+        if (editBox.flippedOne) rotation = -rotation
 
         this.rotateOf(origin, rotation)
     }

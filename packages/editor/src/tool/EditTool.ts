@@ -1,4 +1,3 @@
-import { IPointData } from '@leafer-ui/interface'
 import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 
 export class EditTool implements IEditTool {
@@ -6,16 +5,6 @@ export class EditTool implements IEditTool {
     static list: IEditTool[] = []
 
     public tag = 'EditTool'
-
-    public scaleOfEvent: boolean
-
-    getMirrorData(editor: IEditor): IPointData {
-        const { scaleX, scaleY } = editor.editBox
-        return {
-            x: scaleX < 0 ? 1 : 0, // 1 = mirrorX
-            y: scaleY < 0 ? 1 : 0
-        }
-    }
 
     onMove(e: IEditorMoveEvent): void {
         const { moveX, moveY, editor } = e

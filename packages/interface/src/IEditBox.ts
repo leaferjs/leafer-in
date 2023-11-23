@@ -16,6 +16,11 @@ export interface IEditBox extends IGroup {
     rotatePoints: IEditPoint[]
     resizeLines: IEditPoint[]
 
+    readonly flipped: boolean
+    readonly flippedX: boolean
+    readonly flippedY: boolean
+    readonly flippedOne: boolean
+
     enterPoint: IEditPoint
 
     update(bounds: IBoundsData): void

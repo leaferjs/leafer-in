@@ -20,7 +20,6 @@ export interface IEditor extends IEditorBase {
 
 export interface IEditTool {
     tag: string
-    getMirrorData(editor: IEditor): IPointData
     onMove(e: IEditorMoveEvent): void
     onScale(e: IEditorScaleEvent): void
     onScaleWithDrag?(e: IEditorScaleEvent): void

@@ -1,27 +1,37 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup } from '@leafer-ui/interface'
-import { Group, Rect, DragEvent, PointerEvent } from '@leafer-ui/core'
+import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox } from '@leafer-ui/interface'
+import { Group, DragEvent, PointerEvent, Box } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
 import { updateCursor, updateMoveCursor } from '../editor/cursor'
 import { EditorEvent } from '../event/EditorEvent'
 import { EditPoint } from './EditPoint'
+import { EditDataHelper } from '../helper/EditDataHelper'
 
+
+const fourDirection = ['top', 'right', 'bottom', 'left']
 
 export class EditBox extends Group implements IEditBox {
 
     public editor: IEditor
     public dragging: boolean
 
-    public rect: IRect = new Rect({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
-    public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'outside', hitRadius: 5, cursor: 'crosshair' }) // rotate point
+    public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
+    public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'outside', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
+
+    public buttons: IGroup = new Group({ around: 'center', hitSelf: false })
 
     public resizePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public rotatePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public resizeLines: IEditPoint[] = [] // top, right, bottom, left
 
+    // fliped
+    public get flipped(): boolean { return this.flippedX || this.flippedY }
+    public get flippedX(): boolean { return this.scaleX < 0 }
+    public get flippedY(): boolean { return this.scaleY < 0 }
+    public get flippedOne(): boolean { return this.scaleX * this.scaleY < 0 }
+
     public enterPoint: IEditPoint
-    public buttons: IGroup = new Group({ around: 'center', hitSelf: false })
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -104,9 +114,8 @@ export class EditBox extends Group implements IEditBox {
         }
 
         // rotate
-        style = config.rotatePoint || style
-        circle.set(style)
         circle.visible = rotateable && !!showRotatePoint
+        circle.set(config.rotatePoint || pointsStyle[0])
 
         // rect
         rect.set(config.rect || { stroke, strokeWidth })
@@ -118,22 +127,33 @@ export class EditBox extends Group implements IEditBox {
 
     protected layoutButtons(): void {
         const { buttons, resizePoints } = this
-        const { buttonsPosition, buttonsMargin } = this.editor.config
+        const { buttonsDirection, buttonsFixed, buttonsMargin } = this.editor.config
 
-        let point: IEditPoint, scale = 1, maxHeight = 0
-        buttons.children.forEach(child => maxHeight = Math.max(maxHeight, child.height))
+        const { flippedX, flippedY } = this
+        let index = fourDirection.indexOf(buttonsDirection)
+        if ((index % 2 && flippedX) || ((index + 1) % 2 && flippedY)) {
+            if (buttonsFixed) index = (index + 2) % 4 // flip x / y
+        }
+        const direction = buttonsFixed ? EditDataHelper.getRotateDirection(index, this.flippedOne ? this.rotation : -this.rotation, 4) : index
 
-        if (buttonsPosition === 'bottom') {
-            point = resizePoints[5]
+        const point = resizePoints[direction * 2 + 1] // 4 map 8 direction
+        const useX = direction % 2  // left / right
+        const sign = (!direction || direction === 3) ? -1 : 1 // top / left = -1
+
+        if (useX) {
+            buttons.x = point.x + (buttonsMargin + (point.width + buttons.boxBounds.width) / 2) * sign
+            buttons.y = point.y
         } else {
-            point = resizePoints[1]
-            scale = -1
+            buttons.x = point.x
+            buttons.y = point.y + (buttonsMargin + (point.height + buttons.boxBounds.height) / 2) * sign
         }
 
-        const margin = (buttonsMargin + (point.height + maxHeight) / 2) * scale
+        if (buttonsFixed) {
+            buttons.rotation = (direction - index) * 90
+            buttons.scaleX = flippedX ? -1 : 1
+            buttons.scaleY = flippedY ? -1 : 1
+        }
 
-        buttons.x = point.x
-        buttons.y = point.y + margin
     }
 
 
