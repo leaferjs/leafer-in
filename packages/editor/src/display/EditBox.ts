@@ -36,7 +36,7 @@ export class EditBox extends Group implements IEditBox {
     public create() {
         let rotatePoint: IEditPoint, resizeLine: IEditPoint, resizePoint: IEditPoint
         const { resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
-        const arounds: IAround[] = [{ x: 1, y: 1 }, 'center', { x: 0, y: 1 }, 'center', { x: 0, y: 0 }, 'center', { x: 1, y: 0 }, 'center']
+        const arounds: IAround[] = [{ x: 1, y: 1 }, { x: 0.5, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 0.5 }, { x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0.5 }]
 
         for (let i = 0; i < 8; i++) {
             rotatePoint = new EditPoint({ around: arounds[i], width: 15, height: 15, hitFill: "all" })
@@ -44,7 +44,7 @@ export class EditBox extends Group implements IEditBox {
             this.listenPointEvents(rotatePoint, 'rotate', i)
 
             if (i % 2) {
-                resizeLine = new EditPoint({ around: 'center', width: 10, height: 10, hitFill: "all" })
+                resizeLine = new EditPoint({ name: 'resize-line', around: 'center', width: 10, height: 10, hitFill: "all" })
                 resizeLines.push(resizeLine)
                 this.listenPointEvents(resizeLine, 'resize', i)
             }
@@ -83,20 +83,14 @@ export class EditBox extends Group implements IEditBox {
             resizeP.set(style)
             resizeP.set(point), rotateP.set(point), resizeL.set(point)
 
-
             // visible 
             resizeP.visible = resizeL.visible = resizeable || rotateable
             rotateP.visible = rotateable && resizeable
 
-            if (i % 2) {
-                resizeP.visible = !!showMiddlePoints
-                rotateP.visible = false
-            } else {
-                rotateP.visible = !showMiddlePoints
-            }
-
-
             if (i % 2) { // top,  right, bottom, left
+
+                resizeP.visible = rotateP.visible = !!showMiddlePoints
+
                 if (((i + 1) / 2) % 2) { // top, bottom
                     resizeL.width = width
                     if (resizeP.width > width - 30) resizeP.visible = false

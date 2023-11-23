@@ -129,7 +129,7 @@ export class Editor extends Group implements IEditor {
     public onRotate(e: DragEvent | RotateEvent): void {
         const { skewable, around, rotateGap } = this.config
         const { direction, name } = e.current as IEditPoint
-        if (skewable && direction % 2 && name !== 'resize-point') return this.onSkew(e as DragEvent)
+        if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
 
         const { element } = this
         let origin: IPointData, rotation: number
