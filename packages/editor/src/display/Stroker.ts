@@ -1,10 +1,14 @@
 import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
-import { Paint, UI } from '@leafer-ui/core'
+import { Paint, UI, MatrixHelper } from '@leafer-ui/core'
 
 import { IStroker } from '@leafer-in/interface'
 
 import { targetAttr } from '../decorator/data'
 
+
+const matrix = MatrixHelper.get()
+const { abs } = Math
+const { copy, scale } = MatrixHelper
 
 export class Stroker extends UI implements IStroker {
 
@@ -17,8 +21,6 @@ export class Stroker extends UI implements IStroker {
         super()
         this.hittable = false
         this.strokeAlign = 'center'
-        this.noBounds = true
-        this.width = this.height = 10000
     }
 
     public setTarget(target: IUI | IUI[], style: IRectInputData): void {
@@ -28,17 +30,44 @@ export class Stroker extends UI implements IStroker {
     }
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {
-        if (this.list.length) {
-            const { strokeWidth, stroke } = this.__
-            this.list.forEach(target => {
-                canvas.setWorld(target.__world, options.matrix)
-                canvas.beginPath()
-                target.__.__pathForRender ? target.__drawRenderPath(canvas) : target.__drawPathByBox(canvas)
-                const { scaleX, scaleY } = target.__world
-                this.__.strokeWidth = strokeWidth / Math.abs(Math.max(scaleX, scaleY))
-                typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
-            })
-            this.__.strokeWidth = strokeWidth
+        const { list } = this
+        if (list.length) {
+
+            let leaf: IUI
+            const { stroke } = this.__
+            const { bounds } = options
+
+            for (let i = 0; i < list.length; i++) {
+                leaf = list[i]
+                if (bounds && bounds.hit(leaf.__world, options.matrix)) {
+
+                    let drewPath: boolean
+
+                    if (leaf.__.editSize === 'scale') {
+                        const aScaleX = abs(leaf.__world.scaleX), aScaleY = abs(leaf.__world.scaleY)
+                        if (aScaleX !== aScaleY) { // need no scale stroke
+                            copy(matrix, leaf.__world)
+                            scale(matrix, 1 / aScaleX, 1 / aScaleY)
+
+                            canvas.setWorld(matrix, options.matrix)
+                            canvas.beginPath()
+
+                            const { x, y, width, height } = leaf.__layout.boxBounds
+                            canvas.rect(x * aScaleX, y * aScaleY, width * aScaleX, height * aScaleY)
+
+                            drewPath = true
+                        }
+                    }
+
+                    if (!drewPath) {
+                        canvas.setWorld(leaf.__world, options.matrix)
+                        canvas.beginPath()
+                        leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+                    }
+
+                    typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
+                }
+            }
         }
     }
 
