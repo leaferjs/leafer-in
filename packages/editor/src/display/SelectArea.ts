@@ -18,7 +18,7 @@ export class SelectArea extends Group implements ISelectArea {
     public setStyle(style: IRectInputData, userStyle?: IRectInputData): void {
         const { visible, stroke, strokeWidth } = style
         this.visible = visible
-        this.strokeArea.reset({ ...(userStyle || { stroke, strokeWidth }) })
+        this.strokeArea.reset({ stroke, strokeWidth, ...(userStyle || {}) })
         this.fillArea.reset({ visible: userStyle ? false : true, fill: stroke, opacity: 0.2 })
     }
 

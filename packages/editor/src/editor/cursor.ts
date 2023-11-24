@@ -11,13 +11,13 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
     if (!point || !editor.hasTarget || !editBox.visible) return
 
     let { rotation } = editBox
-    let { resizeCursor, rotateCursor, resizeable, } = editor.config
+    let { resizeCursor, rotateCursor, resizeable, rotateable } = editor.config
     const { direction, pointType } = point
 
     editBox.enterPoint = point
     const isResizePoint = pointType === 'resize'
 
-    if (isResizePoint && (e.metaKey || e.ctrlKey || !resizeable)) resizeCursor = rotateCursor
+    if (isResizePoint && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) resizeCursor = rotateCursor
 
     if (editBox.flipped) {
         const { flippedX, flippedY } = editBox

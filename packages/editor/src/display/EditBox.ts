@@ -87,7 +87,7 @@ export class EditBox extends Group implements IEditBox {
 
         for (let i = 0; i < 8; i++) {
 
-            point = points[i], style = pointsStyle[i % pointsStyle.length]
+            point = points[i], style = this.getPointStyle(pointsStyle[i % pointsStyle.length])
             resizeP = resizePoints[i], rotateP = rotatePoints[i], resizeL = resizeLines[Math.floor(i / 2)]
 
             resizeP.set(style)
@@ -115,10 +115,10 @@ export class EditBox extends Group implements IEditBox {
 
         // rotate
         circle.visible = rotateable && !!showRotatePoint
-        circle.set(config.rotatePoint || pointsStyle[0])
+        circle.set(this.getPointStyle(config.rotatePoint || pointsStyle[0]))
 
         // rect
-        rect.set(config.rect || { stroke, strokeWidth })
+        rect.set({ stroke, strokeWidth, ...(config.rect || {}) })
         rect.set({ ...bounds, visible: true })
 
         // buttons
@@ -159,10 +159,15 @@ export class EditBox extends Group implements IEditBox {
 
     }
 
+    public getPointStyle(userStyle?: IRectInputData): IRectInputData {
+        const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.config
+        const defaultStyle = { fill: pointFill, stroke, strokeWidth, width: pointSize, height: pointSize, cornerRadius: pointRadius }
+        return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
+    }
 
     public getDirection8PointsStyle(): IRectInputData[] {
-        const { stroke, strokeWidth, pointFill, pointSize, pointRadius, point } = this.editor.config
-        return point instanceof Array ? point : [point || { fill: pointFill, stroke, strokeWidth, width: pointSize, height: pointSize, cornerRadius: pointRadius }]
+        const { point } = this.editor.config
+        return point instanceof Array ? point : [point]
     }
 
     public getDirection8Points(bounds: IBoundsData): IPointData[] {
