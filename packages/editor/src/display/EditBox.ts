@@ -76,10 +76,11 @@ export class EditBox extends Group implements IEditBox {
         const { config, list } = this.editor
         const { width, height } = bounds
         const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
-        const { showRotatePoint, showMiddlePoints, resizeable, rotateable, stroke, strokeWidth } = config
+        const { middlePoint, resizeable, rotateable, stroke, strokeWidth } = config
 
         const points = this.getDirection8Points(bounds)
-        const pointsStyle = this.getDirection8PointsStyle()
+        const pointsStyle = this.getPointsStyle()
+        const middlePointsStyle = this.getMiddlePointsStyle()
 
         this.visible = list[0] && !list[0].locked // check locked
 
@@ -87,7 +88,7 @@ export class EditBox extends Group implements IEditBox {
 
         for (let i = 0; i < 8; i++) {
 
-            point = points[i], style = this.getPointStyle(pointsStyle[i % pointsStyle.length])
+            point = points[i], style = this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length])
             resizeP = resizePoints[i], rotateP = rotatePoints[i], resizeL = resizeLines[Math.floor(i / 2)]
 
             resizeP.set(style)
@@ -99,7 +100,7 @@ export class EditBox extends Group implements IEditBox {
 
             if (i % 2) { // top,  right, bottom, left
 
-                resizeP.visible = rotateP.visible = !!showMiddlePoints
+                resizeP.visible = rotateP.visible = !!middlePoint
 
                 if (((i + 1) / 2) % 2) { // top, bottom
                     resizeL.width = width
@@ -109,12 +110,14 @@ export class EditBox extends Group implements IEditBox {
                     resizeP.rotation = 90
                     if (resizeP.width > height - 30) resizeP.visible = false
                 }
+            } else {
+                resizeP.rotation = (i / 2) * 90
             }
 
         }
 
         // rotate
-        circle.visible = rotateable && !!showRotatePoint
+        circle.visible = rotateable && !!config.rotatePoint
         circle.set(this.getPointStyle(config.rotatePoint || pointsStyle[0]))
 
         // rect
@@ -127,7 +130,7 @@ export class EditBox extends Group implements IEditBox {
 
     protected layoutButtons(): void {
         const { buttons, resizePoints } = this
-        const { buttonsDirection, buttonsFixed, buttonsMargin, showMiddlePoints } = this.editor.config
+        const { buttonsDirection, buttonsFixed, buttonsMargin, middlePoint } = this.editor.config
 
         const { flippedX, flippedY } = this
         let index = fourDirection.indexOf(buttonsDirection)
@@ -141,7 +144,7 @@ export class EditBox extends Group implements IEditBox {
         const sign = (!direction || direction === 3) ? -1 : 1 // top / left = -1
 
         const useWidth = index % 2 // left / right  origin direction
-        const margin = (buttonsMargin + (useWidth ? ((showMiddlePoints ? point.width : 0) + buttons.boxBounds.width) : ((showMiddlePoints ? point.height : 0) + buttons.boxBounds.height)) / 2) * sign
+        const margin = (buttonsMargin + (useWidth ? ((middlePoint ? point.width : 0) + buttons.boxBounds.width) : ((middlePoint ? point.height : 0) + buttons.boxBounds.height)) / 2) * sign
 
         if (useX) {
             buttons.x = point.x + margin
@@ -165,9 +168,14 @@ export class EditBox extends Group implements IEditBox {
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
-    public getDirection8PointsStyle(): IRectInputData[] {
+    public getPointsStyle(): IRectInputData[] {
         const { point } = this.editor.config
         return point instanceof Array ? point : [point]
+    }
+
+    public getMiddlePointsStyle(): IRectInputData[] {
+        const { middlePoint } = this.editor.config
+        return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }
 
     public getDirection8Points(bounds: IBoundsData): IPointData[] {
