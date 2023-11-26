@@ -21,7 +21,7 @@ export const EditorHelper = {
         group.hitChildren = false
 
         app.lockLayout()
-        list.forEach(child => group.drop(child))
+        list.forEach(child => child.dropTo(group))
         app.unlockLayout()
 
         return group
@@ -37,7 +37,7 @@ export const EditorHelper = {
                 const { parent, children } = leaf
                 while (children.length) {
                     ungroupList.push(children[0])
-                    parent.drop(children[0], parent.children.indexOf(leaf))
+                    children[0].dropTo(parent, parent.children.indexOf(leaf))
                 }
                 leaf.remove()
             } else {
