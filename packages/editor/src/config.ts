@@ -1,9 +1,6 @@
 import { IEditorConfig } from '@leafer-in/interface'
 
 export const config: IEditorConfig = {
-    selector: true,
-    boxSelect: true,
-
     editSize: 'auto',
 
     stroke: '#836DFF',
@@ -21,6 +18,10 @@ export const config: IEditorConfig = {
     moveCursor: 'move',
     resizeCursor: ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'],
     rotateCursor: ['ne-resize', 'e-resize', 'se-resize', 's-resize', 'sw-resize', 'w-resize', 'nw-resize', 'n-resize'],
+
+    selector: true,
+    hover: true,
+    boxSelect: true,
 
     resizeable: true,
     rotateable: true,

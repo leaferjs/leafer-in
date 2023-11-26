@@ -42,8 +42,8 @@ export class EditSelect extends Group implements IEditSelect {
     protected onHover(): void {
         const { editor } = this
         if (this.running && !this.dragging && !editor.dragging) {
-            const { stroke, strokeWidth, hideHover } = editor.config
-            this.hoverStroker.setTarget(hideHover ? null : this.editor.hoverTarget, { stroke, strokeWidth })
+            const { stroke, strokeWidth, hover } = editor.config
+            this.hoverStroker.setTarget(hover ? this.editor.hoverTarget : null, { stroke, strokeWidth })
         }
     }
 
