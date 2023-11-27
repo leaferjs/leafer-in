@@ -16,7 +16,8 @@ export class EditSelect extends Group implements IEditSelect {
     public editor: IEditor
 
     public get dragging(): boolean { return !!this.originList }
-    public get running(): boolean { return this.editor.hittable && this.editor.config.selector && (this.app && !this.app.interaction.moveMode) }
+    public get running(): boolean { return this.editor.hittable && this.editor.config.selector }
+    public get isMoveMode(): boolean { return this.app && this.app.interaction.moveMode }
 
     public hoverStroker: IStroker = new Stroker()
     public targetStroker: IStroker = new Stroker()
@@ -65,14 +66,16 @@ export class EditSelect extends Group implements IEditSelect {
     // move / down
 
     protected onPointerMove(e: PointerEvent): void {
-        if (this.running) {
+        if (this.running && !this.isMoveMode) {
             const find = e.shiftKey ? this.findDeepOne(e) : findOne(e.path)
             this.editor.hoverTarget = this.editor.hasItem(find) ? null : find
+        } if (this.isMoveMode) {
+            this.editor.hoverTarget = null //  move.dragEmpty
         }
     }
 
     protected onBeforeDown(e: PointerEvent): void {
-        if (this.running && !e.middle) {
+        if (this.running && !this.isMoveMode && !e.middle) {
             const find = this.lastDownLeaf = findOne(e.path)
 
             if (find) {
@@ -99,7 +102,10 @@ export class EditSelect extends Group implements IEditSelect {
         if (this.running && e.shiftKey && !e.middle && !this.lastDownLeaf) {
             const find = this.findDeepOne(e)
             if (find) this.editor.shiftItem(find)
+        } else if (this.isMoveMode) {
+            this.editor.target = null  // move.dragEmpty
         }
+
         this.lastDownLeaf = null
     }
 
