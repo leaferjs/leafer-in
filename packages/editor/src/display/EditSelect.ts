@@ -16,7 +16,7 @@ export class EditSelect extends Group implements IEditSelect {
     public editor: IEditor
 
     public get dragging(): boolean { return !!this.originList }
-    public get running(): boolean { return this.editor.config.selector && this.editor.hittable }
+    public get running(): boolean { return this.editor.hittable && this.editor.config.selector && (this.app && !this.app.interaction.moveMode) }
 
     public hoverStroker: IStroker = new Stroker()
     public targetStroker: IStroker = new Stroker()
@@ -44,6 +44,8 @@ export class EditSelect extends Group implements IEditSelect {
         if (this.running && !this.dragging && !editor.dragging) {
             const { stroke, strokeWidth, hover } = editor.config
             this.hoverStroker.setTarget(hover ? this.editor.hoverTarget : null, { stroke, strokeWidth })
+        } else {
+            this.hoverStroker.target = null
         }
     }
 

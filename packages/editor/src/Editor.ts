@@ -79,9 +79,10 @@ export class Editor extends Group implements IEditor {
     // update
 
     public update(): void {
-        if (!this.target) return
-        this.editTool.update(this)
-        this.selector.update()
+        if (this.target) {
+            this.editTool.update(this)
+            this.selector.update()
+        }
     }
 
     public updateEditTool(): void {
