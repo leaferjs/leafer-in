@@ -1,7 +1,7 @@
 import { IGroup, ILeaf } from '@leafer-ui/interface'
-import { IEditor } from '@leafer-in/interface'
-
 import { Bounds } from '@leafer-ui/core'
+
+import { IEditor } from '@leafer-in/interface'
 
 
 export function simulate(editor: IEditor) {

@@ -1,7 +1,7 @@
 import { IBoundsData, IPointData, IAround } from '@leafer-ui/interface'
-import { IEditorScaleEvent, IDirection8, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
-
 import { AroundHelper, PointHelper } from '@leafer-ui/core'
+
+import { IEditorScaleEvent, IDirection8, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8

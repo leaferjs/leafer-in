@@ -1,6 +1,6 @@
-import { IEditor, IUI } from '@leafer-in/interface'
-
 import { LeafList } from '@leafer-ui/core'
+
+import { IEditor, IUI } from '@leafer-in/interface'
 
 import { simulate } from './simulate'
 import { updateMoveCursor } from './cursor'

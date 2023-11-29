@@ -1,7 +1,7 @@
 import { IUI } from '@leafer-ui/interface'
-import { IEditTool } from '@leafer-in/interface'
-
 import { Line } from '@leafer-ui/core'
+
+import { IEditTool } from '@leafer-in/interface'
 
 import { EditTool } from './EditTool'
 import { LineEditTool } from './LineEditTool'

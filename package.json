@@ -31,6 +31,7 @@
   ],
   "dependencies": {
     "@leafer-in/interface": "1.0.0-rc.6",
-    "@leafer-in/editor": "1.0.0-rc.6"
+    "@leafer-in/editor": "1.0.0-rc.6",
+    "@leafer-in/html": "1.0.0-rc.6"
   }
 }
