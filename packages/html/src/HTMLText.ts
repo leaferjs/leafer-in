@@ -28,13 +28,14 @@ export class HTMLText extends Image implements IImage {
             const div = document.createElement('div')
             const { style } = div
 
+            style.all = 'initial'
             style.position = 'absolute'
             style.visibility = 'hidden'
             div.innerHTML = this.text
             document.body.appendChild(div)
 
             const { width, height } = div.getBoundingClientRect()
-            const italicWidth = 20 // add italic width
+            const italicWidth = 10 // add italic width
 
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width + italicWidth}" height="${height}">
                         <foreignObject width="${width + italicWidth}" height="${height}">
