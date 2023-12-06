@@ -137,7 +137,7 @@ export const EditDataHelper = {
 
 
     getAround(around: IAround, altKey: boolean): IAround {
-        return (altKey && !around) ? AroundHelper.center : around
+        return (altKey && !around) ? 'center' : around
     },
 
     getRotateDirection(direction: number, rotation: number, totalDirection = 8): number {
