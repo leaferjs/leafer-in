@@ -1,5 +1,5 @@
 import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox } from '@leafer-ui/interface'
-import { Group, DragEvent, PointerEvent, Box } from '@leafer-ui/core'
+import { Group, DragEvent, PointerEvent, Box, AroundHelper } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
@@ -78,19 +78,18 @@ export class EditBox extends Group implements IEditBox {
         const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
         const { middlePoint, resizeable, rotateable, stroke, strokeWidth } = config
 
-        const points = this.getDirection8Points(bounds)
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
 
         this.visible = list[0] && !list[0].locked // check locked
 
-        let point: IPointData, style: IRectInputData, rotateP: IRect, resizeP: IRect, resizeL: IRect
+        let point = {} as IPointData, style: IRectInputData, rotateP: IRect, resizeP: IRect, resizeL: IRect
 
         for (let i = 0; i < 8; i++) {
 
-            point = points[i], style = this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length])
+            AroundHelper.toPoint(AroundHelper.directionData[i], bounds, point)
+            style = this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length])
             resizeP = resizePoints[i], rotateP = rotatePoints[i], resizeL = resizeLines[Math.floor(i / 2)]
-
             resizeP.set(style)
             resizeP.set(point), rotateP.set(point), resizeL.set(point)
 
@@ -176,20 +175,6 @@ export class EditBox extends Group implements IEditBox {
     public getMiddlePointsStyle(): IRectInputData[] {
         const { middlePoint } = this.editor.config
         return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
-    }
-
-    public getDirection8Points(bounds: IBoundsData): IPointData[] {
-        const { x, y, width, height } = bounds
-        return [ // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
-            { x, y },
-            { x: x + width / 2, y },
-            { x: x + width, y },
-            { x: x + width, y: y + height / 2 },
-            { x: x + width, y: y + height },
-            { x: x + width / 2, y: y + height },
-            { x, y: y + height },
-            { x, y: y + height / 2 }
-        ]
     }
 
     // drag
