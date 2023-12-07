@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup } from '@leafer-ui/interface'
 import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, KeyEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent } from '@leafer-in/interface'
@@ -238,13 +238,15 @@ export class Editor extends Group implements IEditor {
 
     // group
 
-    public group(): void {
-        if (this.multiple) this.target = EditorHelper.group(this.list, this.element)
+    public group(group?: IGroup): IGroup {
+        if (this.multiple) this.target = EditorHelper.group(this.list, this.element, group)
+        return this.target as IGroup
     }
 
 
-    public ungroup(): void {
+    public ungroup(): IUI[] {
         if (this.list.length) this.target = EditorHelper.ungroup(this.list)
+        return this.list
     }
 
     // lock
