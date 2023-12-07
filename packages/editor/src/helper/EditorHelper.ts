@@ -52,43 +52,14 @@ export const EditorHelper = {
     toTop(list: IUI[]): void {
         list.sort(order)
         list.forEach(leaf => {
-            let zIndex
-            const { parent } = leaf
-            if (parent) {
-                const { children } = parent
-                const top = children.length - 1
-                const zIndexOfTop = children[top].__.zIndex
-                const current = children.indexOf(leaf)
-                if (current !== top) {
-                    children.splice(current, 1)
-                    children.push(leaf)
-                    zIndex = zIndexOfTop + 1
-                } else {
-                    zIndex = zIndexOfTop
-                }
-                leaf.zIndex = zIndex
-            }
+            if (leaf.parent) leaf.parent.add(leaf)
         })
     },
 
     toBottom(list: IUI[]): void {
         list.sort(reverseOrder)
         list.forEach(leaf => {
-            let zIndex
-            const { parent } = leaf
-            if (parent) {
-                const { children } = parent
-                const zIndexOfBottom = children[0].__.zIndex
-                const current = children.indexOf(leaf)
-                if (current !== 0) {
-                    children.splice(current, 1)
-                    children.unshift(leaf)
-                    zIndex = zIndexOfBottom - 1
-                } else {
-                    zIndex = zIndexOfBottom
-                }
-                leaf.zIndex = zIndex
-            }
+            if (leaf.parent) leaf.parent.addAt(leaf, 0)
         })
     }
 
