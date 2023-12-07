@@ -7,7 +7,7 @@ import { updateMoveCursor } from './cursor'
 import { EditorEvent } from '../event/EditorEvent'
 
 
-export function onTarget(editor: IEditor): void {
+export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
     const { target } = editor
     if (target) {
         editor.leafList = target instanceof LeafList ? target : new LeafList(target instanceof Array ? target : target as IUI)
@@ -15,7 +15,7 @@ export function onTarget(editor: IEditor): void {
         editor.leafList.reset()
     }
 
-    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor }))
+    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor, value: target, oldValue }))
 
     if (editor.hasTarget) {
         editor.waitLeafer(() => {
@@ -31,8 +31,7 @@ export function onTarget(editor: IEditor): void {
 }
 
 
-
-export function onHover(editor: IEditor): void {
-    editor.emitEvent(new EditorEvent(EditorEvent.HOVER, { editor }))
+export function onHover(editor: IEditor, oldValue: IUI): void {
+    editor.emitEvent(new EditorEvent(EditorEvent.HOVER, { editor, value: editor.hoverTarget, oldValue }))
 
 }

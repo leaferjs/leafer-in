@@ -7,7 +7,10 @@ export function targetAttr(fn: IFunction) {
         const privateKey = '_' + key
         defineKey(target, key, {
             get() { return (this as IObject)[privateKey] },
-            set(value: unknown) { if ((this as IObject)[privateKey] !== value) (this as IObject)[privateKey] = value, fn(this) }
+            set(value: unknown) {
+                const old = (this as IObject)[privateKey]
+                if (old !== value) (this as IObject)[privateKey] = value, fn(this, old)
+            }
         } as ThisType<ILeaf>)
     }
 }

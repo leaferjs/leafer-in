@@ -12,6 +12,9 @@ export class EditorEvent extends Event implements IEditorEvent {
     declare readonly target: IUI
     readonly editor: IEditor
 
+    readonly value: IUI | IUI[]
+    readonly oldValue: IUI | IUI[]
+
     readonly worldOrigin: IPointData
     declare readonly origin: IPointData
 

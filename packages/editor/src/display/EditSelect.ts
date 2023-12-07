@@ -151,11 +151,13 @@ export class EditSelect extends Group implements IEditSelect {
                 this.originList.forEach(item => { if (!list.has(item)) selectList.push(item) })
                 list.forEach(item => { if (!this.originList.has(item)) selectList.push(item) })
 
-                editor.target = selectList as IUI[]
+                if (selectList.length !== editor.list.length || editor.list.some((child, index) => child !== selectList[index])) {
+                    editor.target = selectList as IUI[]
+                }
 
             } else {
 
-                editor.target = this.originList
+                editor.target = this.originList.list as IUI[]
                 if (editor.leafList.length) editor.update()
 
             }

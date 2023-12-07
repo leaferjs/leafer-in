@@ -42,6 +42,10 @@ export enum IDirection8 {
 export interface IEditorEvent extends IEvent {
     readonly target?: IUI
     readonly editor?: IEditor
+
+    readonly value?: IUI | IUI[]
+    readonly oldValue?: IUI | IUI[]
+
     readonly worldOrigin?: IPointData
     readonly origin?: IPointData
 }
