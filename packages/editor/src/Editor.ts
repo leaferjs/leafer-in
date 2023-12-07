@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup } from '@leafer-ui/interface'
-import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, KeyEvent, Box } from '@leafer-ui/core'
+import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, KeyEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent } from '@leafer-in/interface'
 
