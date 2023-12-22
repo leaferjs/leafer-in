@@ -52,7 +52,7 @@ export class HTMLText extends Image implements IImage {
                         </foreignObject>
                     </svg>`
 
-            this.__.url = 'data:image/svg+xml,' + encodeURIComponent(svg)
+            this.__.__setImageFill('data:image/svg+xml,' + encodeURIComponent(svg))
             this.__.__htmlChanged = false
 
             div.remove()
