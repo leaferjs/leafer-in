@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/interface",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "description": "@leafer-in/interface",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "leaferjs"
   ],
   "dependencies": {
-    "@leafer-ui/interface": "1.0.0-rc.8",
-    "@leafer/interface": "1.0.0-rc.8"
+    "@leafer-ui/interface": "1.0.0-rc.9",
+    "@leafer/interface": "1.0.0-rc.9"
   }
 }
