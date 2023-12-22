@@ -18,6 +18,10 @@ export const EditDataHelper = {
             pointMove.y *= 2
         }
 
+        // 防止变为0
+        if (Math.abs(pointMove.x) === width) pointMove.x += 0.1
+        if (Math.abs(pointMove.y) === height) pointMove.y += 0.1
+
         const topScale = (-pointMove.y + height) / height
         const rightScale = (pointMove.x + width) / width
         const bottomScale = (pointMove.y + height) / height
