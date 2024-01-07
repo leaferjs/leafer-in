@@ -238,8 +238,8 @@ export class Editor extends Group implements IEditor {
 
     // group
 
-    public group(group?: IGroup): IGroup {
-        if (this.multiple) this.target = EditorHelper.group(this.list, this.element, group)
+    public group(userGroup?: IGroup | IGroupInputData): IGroup {
+        if (this.multiple) this.target = EditorHelper.group(this.list, this.element, userGroup)
         return this.target as IGroup
     }
 
