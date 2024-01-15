@@ -1,5 +1,5 @@
 import { IString } from '@leafer-ui/interface'
-import { ImageData } from '@leafer-ui/core'
+import { ImageData } from '@leafer-ui/draw'
 
 import { IHTMLTextData } from '@leafer-in/interface'
 

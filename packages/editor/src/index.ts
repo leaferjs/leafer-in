@@ -1,3 +1,5 @@
+export * from '@leafer-in/scale'
+
 export { Editor } from './Editor'
 
 export { EditBox } from './display/EditBox'

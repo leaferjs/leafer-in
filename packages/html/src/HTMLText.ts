@@ -1,5 +1,5 @@
 import { IString, IImage } from '@leafer-ui/interface'
-import { Image, boundsType, registerUI, dataProcessor } from '@leafer-ui/core'
+import { Image, boundsType, registerUI, dataProcessor } from '@leafer-ui/draw'
 
 import { IHTMLTextData, IHTMLTextInputData } from '@leafer-in/interface'
 
