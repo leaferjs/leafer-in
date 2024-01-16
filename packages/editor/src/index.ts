@@ -1,4 +1,4 @@
-export * from '@leafer-in/scale'
+export * from '@leafer-ui/scale'
 
 export { Editor } from './Editor'
 
