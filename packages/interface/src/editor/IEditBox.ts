@@ -5,7 +5,8 @@ import { IEditPoint } from './IEditPoint'
 export interface IEditBox extends IGroup {
 
     editor: IEditor
-    dragging?: boolean
+    dragging: boolean
+    moving: boolean
 
     circle: IEditPoint
     rect: IRect

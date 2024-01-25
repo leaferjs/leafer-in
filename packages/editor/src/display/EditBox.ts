@@ -15,6 +15,7 @@ export class EditBox extends Group implements IEditBox {
 
     public editor: IEditor
     public dragging: boolean
+    public moving: boolean
 
     public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
     public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'center', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
@@ -80,6 +81,7 @@ export class EditBox extends Group implements IEditBox {
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
+        const showPoints = width > 20 || height > 20
 
         this.visible = list[0] && !list[0].locked // check locked
 
@@ -94,8 +96,8 @@ export class EditBox extends Group implements IEditBox {
             resizeP.set(point), rotateP.set(point), resizeL.set(point)
 
             // visible 
-            resizeP.visible = resizeL.visible = resizeable || rotateable
-            rotateP.visible = rotateable && resizeable
+            resizeP.visible = resizeL.visible = showPoints && (resizeable || rotateable)
+            rotateP.visible = showPoints && rotateable && resizeable
 
             if (i % 2) { // top,  right, bottom, left
 
@@ -116,7 +118,7 @@ export class EditBox extends Group implements IEditBox {
         }
 
         // rotate
-        circle.visible = rotateable && !!config.rotatePoint
+        circle.visible = showPoints && rotateable && !!config.rotatePoint
         circle.set(this.getPointStyle(config.rotatePoint || pointsStyle[0]))
 
         // rect
@@ -124,6 +126,7 @@ export class EditBox extends Group implements IEditBox {
         rect.set({ ...bounds, visible: true })
 
         // buttons
+        this.buttons.visible = showPoints
         this.layoutButtons()
     }
 
@@ -181,16 +184,21 @@ export class EditBox extends Group implements IEditBox {
 
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
-        if (e.target.name === 'rect') this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 // move
+        if (e.target.name === 'rect') {
+            this.moving = true
+            this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 // move
+        }
     }
 
     protected onDragEnd(e: DragEvent): void {
         this.dragging = false
+        this.moving = false
         if (e.target.name === 'rect') this.editor.opacity = 1 // move
     }
 
     protected onDrag(e: DragEvent): void {
         const { editor } = this
+        updateCursor(editor, e)
         const point = e.current as IEditPoint
         if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
             if (editor.config.rotateable) editor.onRotate(e)
