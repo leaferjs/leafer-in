@@ -194,14 +194,16 @@ export class EditBox extends Group implements IEditBox {
         this.dragging = false
         this.moving = false
         if (e.target.name === 'rect') this.editor.opacity = 1 // move
+
     }
 
     protected onDrag(e: DragEvent): void {
         const { editor } = this
-        updateCursor(editor, e)
-        const point = e.current as IEditPoint
+        const point = this.enterPoint = e.current as IEditPoint
         if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
             if (editor.config.rotateable) editor.onRotate(e)
+            updateCursor(editor, e)
+            this.app.interaction.setCursor(point.cursor)
         } else {
             editor.onScale(e)
         }
