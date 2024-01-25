@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IMatrix, IFunction } from '@leafer-ui/interface'
 import { Group, Rect, DragEvent, RotateEvent, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, KeyEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent } from '@leafer-in/interface'
@@ -80,7 +80,7 @@ export class Editor extends Group implements IEditor {
 
     public update(): void {
         if (this.target) {
-            this.editTool.update(this)
+            if (this.editTool) this.editTool.update(this)
             this.selector.update()
         }
     }
@@ -132,7 +132,7 @@ export class Editor extends Group implements IEditor {
         const { direction, name } = e.current as IEditPoint
         if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
 
-        const { element, editBox } = this
+        const { element } = this
         let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
@@ -147,7 +147,7 @@ export class Editor extends Group implements IEditor {
         rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
         if (!rotation) return
 
-        if (editBox.flippedOne) rotation = -rotation
+        if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
 
         this.rotateOf(origin, rotation)
     }
@@ -186,6 +186,7 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
     }
 
+
     public scaleOf(origin: IPointData, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
@@ -193,9 +194,9 @@ export class Editor extends Group implements IEditor {
         let transform: Matrix
 
         if (this.multiple) {
-            const childMatrix = { ...element.localTransform }
+            const oldMatrix = new Matrix(element.worldTransform)
             element.scaleOf(origin, scaleX, scaleY)
-            transform = new Matrix(element.localTransform).divide(childMatrix)
+            transform = new Matrix(element.worldTransform).divide(oldMatrix) // world change transform
         }
 
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, { target: element, editor: this, worldOrigin, scaleX, scaleY, transform })
@@ -208,12 +209,19 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
 
-        const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { target: element, editor: this, worldOrigin, rotation })
+
+        let transform: Matrix
+
+        if (this.multiple) {
+            const oldMatrix = new Matrix(element.worldTransform)
+            element.rotateOf(origin, rotation)
+            transform = new Matrix(element.worldTransform).divide(oldMatrix) // world change transform
+        }
+
+        const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { target: element, editor: this, worldOrigin, rotation, transform })
 
         this.editTool.onRotate(event)
         this.emitEvent(event)
-
-        if (this.multiple) element.rotateOf(origin, rotation)
     }
 
     public skewOf(origin: IPointData, skewX: number, skewY = 0, _resize?: boolean): void {
@@ -223,9 +231,9 @@ export class Editor extends Group implements IEditor {
         let transform: Matrix
 
         if (this.multiple) {
-            const childMatrix = { ...element.localTransform }
+            const oldMatrix = new Matrix(element.worldTransform)
             element.skewOf(origin, skewX, skewY)
-            transform = new Matrix(element.localTransform).divide(childMatrix)
+            transform = new Matrix(element.worldTransform).divide(oldMatrix) // world change transform
         }
 
         const event = new EditorSkewEvent(EditorSkewEvent.SKEW, {

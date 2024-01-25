@@ -69,6 +69,7 @@ export interface IEditorScaleEvent extends IEditorEvent {
 
 export interface IEditorRotateEvent extends IEditorEvent {
     // rotateOf(origin, rotation)
+    transform?: IMatrixData
     readonly rotation?: number
 }
 

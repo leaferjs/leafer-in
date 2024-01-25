@@ -17,7 +17,7 @@ export class EditBox extends Group implements IEditBox {
     public dragging: boolean
 
     public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
-    public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'outside', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
+    public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'center', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
 
     public buttons: IGroup = new Group({ around: 'center', hitSelf: false })
 
@@ -59,7 +59,7 @@ export class EditBox extends Group implements IEditBox {
                 this.listenPointEvents(resizeLine, 'resize', i)
             }
 
-            resizePoint = new EditPoint({ name: 'resize-point', around: 'center', strokeAlign: 'outside', hitRadius: 5 })
+            resizePoint = new EditPoint({ name: 'resize-point', around: 'center', strokeAlign: 'center', hitRadius: 5 })
             resizePoints.push(resizePoint)
             this.listenPointEvents(resizePoint, 'resize', i)
         }

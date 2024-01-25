@@ -1,6 +1,9 @@
 import { IDirection8, IEditor, IEditorScaleEvent, ILine, IEditorSkewEvent } from '@leafer-in/interface'
 
+import { getPointData } from '@leafer-ui/core'
+
 import { EditTool } from './EditTool'
+
 
 
 const { left, right } = IDirection8
@@ -15,7 +18,7 @@ export class LineEditTool extends EditTool {
         const { drag, direction, lockRatio, around } = e
         const target = e.target as ILine
 
-        const fromPoint = { x: 0, y: 0 }
+        const fromPoint = getPointData()
         const { toPoint } = target
 
         target.rotation = 0

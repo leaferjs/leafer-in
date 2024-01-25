@@ -7,7 +7,7 @@ export const config: IEditorConfig = {
     strokeWidth: 2,
 
     pointFill: '#FFFFFF',
-    pointSize: 8,
+    pointSize: 10,
     pointRadius: 16,
 
     rotateGap: 45,
