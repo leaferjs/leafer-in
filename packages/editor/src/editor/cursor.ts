@@ -1,23 +1,27 @@
 import { IUIEvent } from '@leafer-ui/interface'
+
 import { IEditor } from '@leafer-in/interface'
+
+import { EditDataHelper } from '../helper/EditDataHelper'
 
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const { editBox } = editor, point = editBox.enterPoint
     if (!point || !editor.hasTarget || !editBox.visible) return
 
-    let { rotation } = editBox, showResizeCursor: boolean
-    const { resizeCursor, rotateCursor, resizeable, rotateable } = editor.config
-    const { direction, pointType } = point
+    let { rotation } = editBox
+    const { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editor.config
+    const { pointType } = point, { flippedX, flippedY } = editBox
 
-    const isResizePoint = showResizeCursor = pointType === 'resize'
-    if (isResizePoint && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResizeCursor = false
-    if (editBox.flippedOne) rotation = -rotation
+    let showResize = pointType === 'resize'
+    if (showResize && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResize = false
+    const showSkew = skewable && !showResize && point.name === 'resize-line'
 
-    const { url, x, y } = showResizeCursor ? resizeCursor : rotateCursor
-    rotation += (direction + 1) * 45
+    const { url, x, y } = showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor)
+    rotation += (EditDataHelper.getFlipDirection(point.direction, flippedX, flippedY) + 1) * 45
 
     point.cursor = { url: toDataURL(url, rotation), x, y }
+    editor.app.interaction.setCursor(point.cursor)
 }
 
 export function updateMoveCursor(editor: IEditor): void {

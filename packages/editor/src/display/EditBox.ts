@@ -50,7 +50,7 @@ export class EditBox extends Group implements IEditBox {
         const arounds: IAround[] = [{ x: 1, y: 1 }, { x: 0.5, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 0.5 }, { x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0.5 }]
 
         for (let i = 0; i < 8; i++) {
-            rotatePoint = new EditPoint({ around: arounds[i], width: 15, height: 15, hitFill: "all" })
+            rotatePoint = new EditPoint({ name: 'rotate-point', around: arounds[i], width: 15, height: 15, hitFill: "all" })
             rotatePoints.push(rotatePoint)
             this.listenPointEvents(rotatePoint, 'rotate', i)
 
@@ -203,7 +203,6 @@ export class EditBox extends Group implements IEditBox {
         if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
             if (editor.config.rotateable) editor.onRotate(e)
             updateCursor(editor, e)
-            this.app.interaction.setCursor(point.cursor)
         } else {
             editor.onScale(e)
         }

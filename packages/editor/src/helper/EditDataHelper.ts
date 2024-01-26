@@ -148,6 +148,32 @@ export const EditDataHelper = {
         direction = (direction + Math.round(rotation / (360 / totalDirection))) % totalDirection
         if (direction < 0) direction += totalDirection
         return direction
+    },
+
+    getFlipDirection(direction: IDirection8, flipedX: boolean, flipedY: boolean): IDirection8 {
+        if (flipedX) {
+            switch (direction) {
+                case left: direction = right; break
+                case topLeft: direction = topRight; break
+                case bottomLeft: direction = bottomRight; break
+                case right: direction = left; break
+                case topRight: direction = topLeft; break
+                case bottomRight: direction = bottomLeft; break
+            }
+        }
+
+        if (flipedY) {
+            switch (direction) {
+                case top: direction = bottom; break
+                case topLeft: direction = bottomLeft; break
+                case topRight: direction = bottomRight; break
+                case bottom: direction = top; break
+                case bottomLeft: direction = topLeft; break
+                case bottomRight: direction = topRight; break
+            }
+        }
+
+        return direction
     }
 
 }
