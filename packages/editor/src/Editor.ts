@@ -149,7 +149,7 @@ export class Editor extends Group implements IEditor {
 
         if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
 
-        this.rotateOf(origin, rotation)
+        this.rotateOf(origin, MathHelper.float(rotation, 2))
     }
 
 

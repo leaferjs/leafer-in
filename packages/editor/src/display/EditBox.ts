@@ -101,7 +101,7 @@ export class EditBox extends Group implements IEditBox {
 
             if (i % 2) { // top,  right, bottom, left
 
-                resizeP.visible = rotateP.visible = !!middlePoint
+                resizeP.visible = rotateP.visible = showPoints && !!middlePoint
 
                 if (((i + 1) / 2) % 2) { // top, bottom
                     resizeL.width = width

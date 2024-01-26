@@ -17,11 +17,11 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
     if (showResize && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResize = false
     const showSkew = skewable && !showResize && point.name === 'resize-line'
 
-    const { url, x, y } = showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor)
+    const cursor = showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor)
     rotation += (EditDataHelper.getFlipDirection(point.direction, flippedX, flippedY) + 1) * 45
 
+    const { url, x, y } = cursor
     point.cursor = { url: toDataURL(url, rotation), x, y }
-    editor.app.interaction.setCursor(point.cursor)
 }
 
 export function updateMoveCursor(editor: IEditor): void {
