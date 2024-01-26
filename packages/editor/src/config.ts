@@ -1,4 +1,6 @@
 import { IEditorConfig } from '@leafer-in/interface'
+import { resizeSVG, rotateSVG } from './svg'
+
 
 export const config: IEditorConfig = {
     editSize: 'auto',
@@ -16,8 +18,8 @@ export const config: IEditorConfig = {
     buttonsMargin: 12,
 
     moveCursor: 'move',
-    resizeCursor: ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'],
-    rotateCursor: ['ne-resize', 'e-resize', 'se-resize', 's-resize', 'sw-resize', 'w-resize', 'nw-resize', 'n-resize'],
+    resizeCursor: { url: resizeSVG, x: 15, y: 15 },
+    rotateCursor: { url: rotateSVG, x: 15, y: 15 },
 
     selector: true,
     hover: true,
