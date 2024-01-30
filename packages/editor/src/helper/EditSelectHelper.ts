@@ -1,6 +1,7 @@
-import { AnswerType, IBounds, ILeafList, IUI } from '@leafer-ui/interface'
+import { IBounds, ILeafList, IUI } from '@leafer-ui/interface'
+import { Answer } from '@leafer-ui/core'
 
-const { No, Yes, NoAndSkip, YesAndSkip } = AnswerType
+const { No, Yes, NoAndSkip, YesAndSkip } = Answer
 
 export const EditSelectHelper = {
 
@@ -8,7 +9,7 @@ export const EditSelectHelper = {
         return path.list.find((leaf) => leaf.editable) as IUI
     },
 
-    findBounds(leaf: IUI, bounds: IBounds): AnswerType {
+    findBounds(leaf: IUI, bounds: IBounds): Answer {
         if (leaf.__.hittable && !leaf.__.locked && bounds.hit(leaf.__world)) {
 
             if (leaf.__.editable) {
