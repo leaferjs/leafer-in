@@ -67,7 +67,7 @@ export class Stroker extends UI implements IStroker {
                         this.__.strokeWidth = strokeWidth / abs(leaf.__world.scaleX)
                     }
 
-                    typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
+                    typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
                 }
             }
 
