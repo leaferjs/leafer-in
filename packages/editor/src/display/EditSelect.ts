@@ -88,7 +88,7 @@ export class EditSelect extends Group implements IEditSelect {
 
                 // change down data
                 this.editor.updateLayout()
-                this.app.interaction.updateDownData(null, { findList: [this.editor.editBox.rect] })
+                if (!find.locked) this.app.interaction.updateDownData(null, { findList: [this.editor.editBox.rect] })
 
             } else if (this.allow(e.target)) {
 

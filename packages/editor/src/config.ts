@@ -18,9 +18,9 @@ export const config: IEditorConfig = {
     buttonsMargin: 12,
 
     moveCursor: 'move',
-    resizeCursor: { url: resizeSVG, x: 15, y: 15 },
-    rotateCursor: { url: rotateSVG, x: 15, y: 15 },
-    skewCursor: { url: skewSVG, x: 15, y: 15 },
+    resizeCursor: { url: resizeSVG, x: 12, y: 12 },
+    rotateCursor: { url: rotateSVG, x: 12, y: 12 },
+    skewCursor: { url: skewSVG, x: 12, y: 12 },
 
     selector: true,
     hover: true,

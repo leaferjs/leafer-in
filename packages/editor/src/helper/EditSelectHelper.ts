@@ -10,7 +10,7 @@ export const EditSelectHelper = {
     },
 
     findBounds(leaf: IUI, bounds: IBounds): Answer {
-        if (leaf.__.hittable && !leaf.__.locked && bounds.hit(leaf.__world)) {
+        if (leaf.__.hittable && leaf.__.visible && !leaf.__.locked && bounds.hit(leaf.__world)) {
 
             if (leaf.__.editable) {
                 if (leaf.isBranch && !leaf.__.hitChildren) {
