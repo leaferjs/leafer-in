@@ -1,0 +1,33 @@
+{
+  "name": "@leafer-in/arrow",
+  "version": "1.0.0-rc.12",
+  "description": "@leafer-in/arrow",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "main": "dist/arrow.esm.js",
+  "unpkg": "dist/arrow.js",
+  "jsdelivr": "dist/arrow.js",
+  "types": "types/index.d.ts",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/in.git"
+  },
+  "homepage": "https://github.com/leaferjs/in/tree/main/packages/arrow",
+  "bugs": "https://github.com/leaferjs/in/issues",
+  "keywords": [
+    "leafer arrow",
+    "leafer-arrow",
+    "leafer-in",
+    "arrow",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "dependencies": {
+    "@leafer-ui/draw": "1.0.0-rc.12"
+  },
+  "devDependencies": {
+     "@leafer-ui/interface": "1.0.0-rc.12",
+     "@leafer-in/interface": "1.0.0-rc.12"
+  }
+}
