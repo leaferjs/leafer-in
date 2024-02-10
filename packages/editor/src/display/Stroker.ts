@@ -63,7 +63,13 @@ export class Stroker extends UI implements IStroker {
                     if (!drewPath) {
                         canvas.setWorld(leaf.__world, options.matrix)
                         canvas.beginPath()
-                        leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+
+                        if (leaf.__.__useArrow) {
+                            leaf.__drawPath(canvas)
+                        } else {
+                            leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+                        }
+
                         this.__.strokeWidth = strokeWidth / abs(leaf.__world.scaleX)
                     }
 

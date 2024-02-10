@@ -17,6 +17,7 @@ export class Arrow extends Line implements IArrow {
 
     constructor(data?: IArrowInputData) {
         super(data)
+        this.__.__useArrow = true
     }
 
 }
