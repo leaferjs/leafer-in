@@ -1,6 +1,6 @@
 {
   "name": "leafer-in",
-  "version": "1.0.0-rc.12",
+  "version": "1.0.0-rc.17",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "main": "src/index.ts",
@@ -30,9 +30,9 @@
     "engine"
   ],
   "dependencies": {
-    "@leafer-in/interface": "1.0.0-rc.12",
-    "@leafer-in/editor": "1.0.0-rc.12",
-    "@leafer-in/html": "1.0.0-rc.12",
-    "@leafer-in/arrow": "1.0.0-rc.12"
+    "@leafer-in/interface": "1.0.0-rc.17",
+    "@leafer-in/editor": "1.0.0-rc.17",
+    "@leafer-in/html": "1.0.0-rc.17",
+    "@leafer-in/arrow": "1.0.0-rc.17"
   }
 }
