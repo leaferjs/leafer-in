@@ -1,8 +1,5 @@
 import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
-import { LeafHelper } from '@leafer-ui/core'
 
-
-const { transformWorld, zoomOfWorld, skewOfWorld, rotateOfWorld, moveWorld } = LeafHelper
 
 export class EditTool implements IEditTool {
 
@@ -15,7 +12,7 @@ export class EditTool implements IEditTool {
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
-            moveWorld(target, moveX, moveY)
+            target.moveWorld(moveX, moveY)
         })
         app.unlockLayout()
     }
@@ -27,9 +24,9 @@ export class EditTool implements IEditTool {
         list.forEach(target => {
             const resize = editor.getEditSize(target) === 'size'
             if (transform) {
-                transformWorld(target, transform, resize)
+                target.transformWorld(transform, resize)
             } else {
-                zoomOfWorld(target, worldOrigin, scaleX, scaleY, resize)
+                target.scaleOfWorld(worldOrigin, scaleX, scaleY, resize)
             }
         })
         app.unlockLayout()
@@ -42,9 +39,9 @@ export class EditTool implements IEditTool {
         list.forEach(target => {
             const resize = editor.getEditSize(target) === 'size'
             if (transform) {
-                transformWorld(target, transform, resize)
+                target.transformWorld(transform, resize)
             } else {
-                rotateOfWorld(target, worldOrigin, rotation)
+                target.rotateOfWorld(worldOrigin, rotation)
             }
         })
         app.unlockLayout()
@@ -57,9 +54,9 @@ export class EditTool implements IEditTool {
         list.forEach(target => {
             const resize = editor.getEditSize(target) === 'size'
             if (transform) {
-                transformWorld(target, transform, resize)
+                target.transformWorld(transform, resize)
             } else {
-                skewOfWorld(target, worldOrigin, skewX, skewY, resize)
+                target.skewOfWorld(worldOrigin, skewX, skewY, resize)
             }
         })
         app.unlockLayout()
