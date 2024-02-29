@@ -1,0 +1,33 @@
+{
+  "name": "@leafer-in/view",
+  "version": "1.0.0-rc.17",
+  "description": "@leafer-in/view",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "main": "dist/view.esm.js",
+  "unpkg": "dist/view.js",
+  "jsdelivr": "dist/view.js",
+  "types": "types/index.d.ts",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/in.git"
+  },
+  "homepage": "https://github.com/leaferjs/in/tree/main/packages/view",
+  "bugs": "https://github.com/leaferjs/in/issues",
+  "keywords": [
+    "leafer view",
+    "leafer-view",
+    "leafer-in",
+    "view",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "dependencies": {
+    "@leafer-ui/draw": "1.0.0-rc.17"
+  },
+  "devDependencies": {
+     "@leafer-ui/interface": "1.0.0-rc.17",
+     "@leafer-in/interface": "1.0.0-rc.17"
+  }
+}
