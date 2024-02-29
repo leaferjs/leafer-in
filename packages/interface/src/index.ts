@@ -11,3 +11,7 @@ export { IEditPoint, IEditPointType } from './editor/IEditPoint'
 // html
 
 export { IHTMLTextData, IHTMLTextInputData } from './html/IHTMLTextData'
+
+// scroll
+
+export { IScrollBar, IScrollBarConfig, IScrollBarTheme } from './scroll/IScrollBar'

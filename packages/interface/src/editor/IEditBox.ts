@@ -1,5 +1,5 @@
 import { IGroup, IRect, IBoundsData, IKeyEvent } from '@leafer-ui/interface'
-import { IEditor } from '@leafer-in/interface'
+import { IEditor } from './IEditor'
 import { IEditPoint } from './IEditPoint'
 
 export interface IEditBox extends IGroup {

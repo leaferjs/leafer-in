@@ -1,5 +1,5 @@
-import { Leafer, Bounds, LeafBoundsHelper } from '@leafer-ui/draw'
 import { ILeaf, IBoundsData, IZoomType, IFourNumber, IPointData } from '@leafer-ui/interface'
+import { Leafer, Bounds, LeafBoundsHelper } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
 
