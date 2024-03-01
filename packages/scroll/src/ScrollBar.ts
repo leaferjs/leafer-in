@@ -1,4 +1,4 @@
-import { IBounds, IBox, IBoxInputData, IEventListenerId, IGroup } from '@leafer-ui/interface'
+import { IApp, IBounds, IBox, IBoxInputData, IEventListenerId, IGroup } from '@leafer-ui/interface'
 import { DragEvent, Group, RenderEvent, Box, Bounds } from '@leafer-ui/core'
 
 import { IScrollBar, IScrollBarConfig, IScrollBarTheme } from '@leafer-in/interface'
@@ -22,9 +22,13 @@ export class ScrollBar extends Group implements IScrollBar {
 
     constructor(target: IGroup, config?: IScrollBarConfig) {
         super()
+        if (target.isApp) {
+            (target as IApp).sky.add(this)
+            target = (target as IApp).tree
+        }
         this.target = target
         if (config) this.config = config
-        this.changeTheme((config && config.theme) || 'black')
+        this.changeTheme((config && config.theme) || 'light')
         this.waitLeafer(this.__listenEvents, this)
     }
 
@@ -33,7 +37,7 @@ export class ScrollBar extends Group implements IScrollBar {
 
         if (typeof theme === 'string') {
             style = { fill: 'black', stroke: 'rgba(255,255,255,0.8)' }
-            if (theme === 'white') {
+            if (theme === 'dark') {
                 style.fill = 'white'
                 style.stroke = 'rgba(0,0,0,0.2)'
             }
@@ -47,10 +51,11 @@ export class ScrollBar extends Group implements IScrollBar {
         if (!style.height) style.height = style.width
         this.scrollXBar.set({ ...style, visible: false })
         this.scrollYBar.set({ ...style, visible: false })
+        if (this.leafer) this.update()
     }
 
 
-    public update(check: boolean): void {
+    public update(check?: boolean): void {
         if (this.dragScrolling) return
 
         const { zoomLayer, canvas } = this.target.leafer

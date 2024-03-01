@@ -5,7 +5,7 @@ export interface IScrollBarConfig {
     theme?: IScrollBarTheme
 }
 
-export type IScrollBarTheme = 'black' | 'white' | IBoxInputData
+export type IScrollBarTheme = 'light' | 'dark' | IBoxInputData
 
 export interface IScrollBar extends IGroup {
     config: IScrollBarConfig
