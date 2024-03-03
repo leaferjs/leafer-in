@@ -10,18 +10,17 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
     const limitBounds = this.canvas.bounds.clone().shrink(padding ? padding : 30), bounds = new Bounds()
     const center: IPointData = { x: limitBounds.x + limitBounds.width / 2, y: limitBounds.y + limitBounds.height / 2 }
 
-    let scale: number
+    let changeScale: number
+    const { scaleX } = this.__
 
     if (typeof zoomType === 'string') {
 
-        const { scaleX } = this.__
-
         switch (zoomType) {
             case 'in':
-                scale = getZoomScale(scaleX, 'in')
+                changeScale = getZoomScale(scaleX, 'in')
                 break
             case 'out':
-                scale = getZoomScale(scaleX, 'out')
+                changeScale = getZoomScale(scaleX, 'out')
                 break
             case 'fit':
                 zoomType = this.boxBounds
@@ -37,13 +36,13 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
         }
 
     } else if (typeof zoomType === 'number') {
-        scale = zoomType
+        changeScale = zoomType / scaleX
     }
 
 
-    if (scale) {
+    if (changeScale) {
 
-        zoomLayer.scaleOfWorld(center, this.validScale(scale))
+        if (changeScale !== 1) zoomLayer.scaleOfWorld(center, this.validScale(changeScale))
 
     } else if (typeof zoomType === 'object') {
 
