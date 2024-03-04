@@ -1,5 +1,5 @@
 import { IApp, IBounds, IBox, IBoxInputData, IEventListenerId, IGroup } from '@leafer-ui/interface'
-import { DragEvent, Group, RenderEvent, Box, Bounds } from '@leafer-ui/core'
+import { DragEvent, Group, RenderEvent, Box, Bounds, ResizeEvent } from '@leafer-ui/core'
 
 import { IScrollBar, IScrollBarConfig, IScrollBarTheme } from '@leafer-in/interface'
 
@@ -16,6 +16,8 @@ export class ScrollBar extends Group implements IScrollBar {
     public ratioY: number
     public dragScrolling: boolean
     public scrollBounds: IBounds
+
+    public get isOutside() { return true }
 
     protected __dragOut: boolean
     protected __eventIds: IEventListenerId[]
@@ -47,7 +49,7 @@ export class ScrollBar extends Group implements IScrollBar {
 
         if (!this.scrollXBar) this.addMany(this.scrollXBar = new Box(), this.scrollYBar = new Box())
 
-        style = Object.assign({ strokeAlign: 'center', opacity: 0.5, width: 6, cornerRadius: 3, hoverStyle: { opacity: 0.6 }, pressStyle: { opacity: 0.7 } }, style)
+        style = Object.assign({ strokeAlign: 'center', opacity: 0.5, width: 6, cornerRadius: 3, hoverStyle: { opacity: 0.6 }, pressStyle: { opacity: 0.7 } } as IBoxInputData, style)
         if (!style.height) style.height = style.width
         this.scrollXBar.set({ ...style, visible: false })
         this.scrollYBar.set({ ...style, visible: false })
@@ -118,7 +120,8 @@ export class ScrollBar extends Group implements IScrollBar {
             scrollYBar.on_(DragEvent.DRAG, this.onDrag, this),
             scrollXBar.on_(DragEvent.END, this.onDragEnd, this),
             scrollYBar.on_(DragEvent.END, this.onDragEnd, this),
-            this.target.on_(RenderEvent.BEFORE, () => this.update(true))
+            this.target.on_(RenderEvent.BEFORE, () => this.update(true)),
+            this.target.leafer.on_(ResizeEvent.RESIZE, () => this.update())
         ]
     }
 
