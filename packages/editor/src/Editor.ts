@@ -99,6 +99,7 @@ export class Editor extends Group implements IEditor {
     // operate
 
     public onMove(e: DragEvent): void {
+        if (!this.config.moveable) return
         const move = e.getLocalMove(this.element)
 
         if (e.shiftKey) {

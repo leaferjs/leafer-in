@@ -124,6 +124,7 @@ export class EditBox extends Group implements IEditBox {
         // rect
         rect.set({ stroke, strokeWidth, ...(config.rect || {}) })
         rect.set({ ...bounds, visible: true })
+        rect.hittable = config.moveable
 
         // buttons
         this.buttons.visible = showPoints

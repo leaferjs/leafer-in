@@ -26,6 +26,7 @@ export const config: IEditorConfig = {
     hover: true,
     boxSelect: true,
 
+    moveable: true,
     resizeable: true,
     rotateable: true,
     skewable: true
