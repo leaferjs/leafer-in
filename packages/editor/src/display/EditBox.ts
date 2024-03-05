@@ -210,7 +210,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        if (this.editor.hasTarget) {
+        if (this.editor.hasTarget && this.editor.config.keyEvent) {
             const move = { x: 0, y: 0 }
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {

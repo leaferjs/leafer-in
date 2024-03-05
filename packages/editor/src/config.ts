@@ -4,6 +4,7 @@ import { resizeSVG, rotateSVG, skewSVG } from './svg'
 
 export const config: IEditorConfig = {
     editSize: 'auto',
+    keyEvent: true,
 
     stroke: '#836DFF',
     strokeWidth: 2,
