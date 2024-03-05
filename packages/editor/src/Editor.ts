@@ -99,7 +99,6 @@ export class Editor extends Group implements IEditor {
     // operate
 
     public onMove(e: DragEvent): void {
-        if (!this.config.moveable) return
         const move = e.getLocalMove(this.element)
 
         if (e.shiftKey) {
@@ -168,6 +167,8 @@ export class Editor extends Group implements IEditor {
     // transform
 
     public move(x: number, y: number): void {
+        if (!this.config.moveable) return
+
         const { element } = this
         const world = element.getWorldPointByLocal({ x, y }, null, true)
         const event = new EditorMoveEvent(EditorMoveEvent.MOVE, { target: element, editor: this, moveX: world.x, moveY: world.y })
