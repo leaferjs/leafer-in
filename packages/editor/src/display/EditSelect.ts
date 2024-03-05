@@ -158,7 +158,6 @@ export class EditSelect extends Group implements IEditSelect {
             } else {
 
                 editor.target = this.originList.list as IUI[]
-                if (editor.leafList.length) editor.update()
 
             }
         }
