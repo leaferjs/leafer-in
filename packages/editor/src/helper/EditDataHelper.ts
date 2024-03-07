@@ -9,7 +9,7 @@ const { toPoint } = AroundHelper
 
 export const EditDataHelper = {
 
-    getScaleData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean, around: IAround): IEditorScaleEvent {
+    getScaleData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean | 'corner', around: IAround): IEditorScaleEvent {
         let origin: IPointData, scaleX: number = 1, scaleY: number = 1
         const { width, height } = bounds
 
@@ -66,8 +66,11 @@ export const EditDataHelper = {
         }
 
         if (lockRatio) {
-            if (scaleX !== 1) scaleY = scaleX
-            else scaleX = scaleY
+            const unlockSide = lockRatio === 'corner' && direction % 2
+            if (!unlockSide) {
+                if (scaleY !== 1) scaleX = scaleY
+                else scaleY = scaleX
+            }
         }
 
         toPoint(around || origin, bounds, origin)

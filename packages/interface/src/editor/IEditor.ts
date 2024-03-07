@@ -61,7 +61,7 @@ export interface IEditorScaleEvent extends IEditorEvent {
     transform?: IMatrixData
 
     readonly direction?: IDirection8
-    readonly lockRatio?: boolean
+    readonly lockRatio?: boolean | 'corner'
     readonly around?: IAround
 
     drag?: IDragEvent
