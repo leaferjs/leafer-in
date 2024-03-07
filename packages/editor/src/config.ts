@@ -18,6 +18,8 @@ export const config: IEditorConfig = {
     buttonsDirection: 'bottom',
     buttonsMargin: 12,
 
+    hideOnSmall: true,
+
     moveCursor: 'move',
     resizeCursor: { url: resizeSVG, x: 12, y: 12 },
     rotateCursor: { url: rotateSVG, x: 12, y: 12 },

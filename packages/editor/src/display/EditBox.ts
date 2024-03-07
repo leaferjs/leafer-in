@@ -77,11 +77,12 @@ export class EditBox extends Group implements IEditBox {
         const { config, list } = this.editor
         const { width, height } = bounds
         const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
-        const { middlePoint, resizeable, rotateable, stroke, strokeWidth } = config
+        const { middlePoint, resizeable, rotateable, stroke, strokeWidth, hideOnSmall } = config
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
-        const showPoints = width > 20 || height > 20
+        const smallSize = typeof hideOnSmall === 'number' ? hideOnSmall : 10
+        const showPoints = !(hideOnSmall && width < smallSize && height < smallSize)
 
         this.visible = list[0] && !list[0].locked // check locked
 
