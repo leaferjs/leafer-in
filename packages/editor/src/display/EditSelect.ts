@@ -81,13 +81,16 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onTap(e: PointerEvent): void {
-        if (this.editor.config.select === PointerEvent.TAP) this.checkAndSelect(e)
+        const { editor } = this
+        const { select, continuousSelect } = editor.config
+        if (select === PointerEvent.TAP) this.checkAndSelect(e)
 
-        if (this.running && e.shiftKey && !e.middle && !this.lastDownLeaf) {
+        if (this.running && (e.shiftKey || continuousSelect) && !e.middle && !this.lastDownLeaf) {
             const find = this.findDeepOne(e)
-            if (find) this.editor.shiftItem(find)
+            if (find) editor.shiftItem(find)
+            else if (!e.shiftKey && continuousSelect) editor.target = null
         } else if (this.isMoveMode) {
-            this.editor.target = null  // move.dragEmpty
+            editor.target = null  // move.dragEmpty
         }
 
         this.lastDownLeaf = null
@@ -100,7 +103,7 @@ export class EditSelect extends Group implements IEditSelect {
 
             if (find) {
 
-                if (e.shiftKey) {
+                if (e.shiftKey || editor.config.continuousSelect) {
                     editor.shiftItem(find)
                 } else {
                     editor.target = find
