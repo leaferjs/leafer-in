@@ -26,6 +26,7 @@ export const config: IEditorConfig = {
     skewCursor: { url: skewSVG, x: 12, y: 12 },
 
     selector: true,
+    select: 'pointer.down',
     hover: true,
     boxSelect: true,
 

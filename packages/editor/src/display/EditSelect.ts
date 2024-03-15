@@ -66,39 +66,23 @@ export class EditSelect extends Group implements IEditSelect {
     // move / down
 
     protected onPointerMove(e: PointerEvent): void {
-        if (this.running && !this.isMoveMode) {
+        const { app, editor } = this
+        if (this.running && !this.isMoveMode && app.config.pointer.hover && !app.interaction.dragging) {
             const find = e.shiftKey ? this.findDeepOne(e) : findOne(e.path)
-            this.editor.hoverTarget = this.editor.hasItem(find) ? null : find
+            editor.hoverTarget = editor.hasItem(find) ? null : find
         } if (this.isMoveMode) {
-            this.editor.hoverTarget = null //  move.dragEmpty
+            editor.hoverTarget = null //  move.dragEmpty
         }
     }
 
     protected onBeforeDown(e: PointerEvent): void {
-        if (this.running && !this.isMoveMode && !e.middle) {
-            const find = this.lastDownLeaf = findOne(e.path)
-
-            if (find) {
-
-                if (e.shiftKey) {
-                    this.editor.shiftItem(find)
-                } else {
-                    this.editor.target = find
-                }
-
-                // change down data
-                this.editor.updateLayout()
-                if (!find.locked) this.app.interaction.updateDownData(e, { findList: [this.editor.editBox.rect] }, this.editor.config.dualEvent)
-
-            } else if (this.allow(e.target)) {
-
-                if (!e.shiftKey) this.editor.target = null
-
-            }
-        }
+        if (this.editor.config.select !== PointerEvent.DOWN) return
+        this.checkAndSelect(e, true)
     }
 
     protected onTap(e: PointerEvent): void {
+        if (this.editor.config.select === PointerEvent.TAP) this.checkAndSelect(e)
+
         if (this.running && e.shiftKey && !e.middle && !this.lastDownLeaf) {
             const find = this.findDeepOne(e)
             if (find) this.editor.shiftItem(find)
@@ -107,6 +91,33 @@ export class EditSelect extends Group implements IEditSelect {
         }
 
         this.lastDownLeaf = null
+    }
+
+    protected checkAndSelect(e: PointerEvent, isDownType?: boolean): void { // pointer.down or tap
+        if (this.running && !this.isMoveMode && !e.middle) {
+            const { editor } = this
+            const find = this.lastDownLeaf = findOne(e.path)
+
+            if (find) {
+
+                if (e.shiftKey) {
+                    editor.shiftItem(find)
+                } else {
+                    editor.target = find
+                }
+
+                // change down data
+                if (isDownType) {
+                    editor.updateLayout()
+                    if (!find.locked) this.app.interaction.updateDownData(e, { findList: [editor.editBox.rect] }, editor.config.dualEvent)
+                }
+
+            } else if (this.allow(e.target)) {
+
+                if (!e.shiftKey) editor.target = null
+
+            }
+        }
     }
 
     // drag
