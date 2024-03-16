@@ -99,13 +99,10 @@ export class ScrollBar extends Group implements IScrollBar {
         this.__dragOut = this.app.config.move.dragOut
         this.app.config.move.dragOut = false
 
-        if (e.current === this.scrollXBar) {
-            this.target.moveWorld(-e.moveX / this.ratioX, 0)
-            this.scrollXBar.moveWorld(e.moveX, 0)
-        } else {
-            this.target.moveWorld(0, -e.moveY / this.ratioY)
-            this.scrollYBar.moveWorld(0, e.moveY)
-        }
+        const scrollX = e.current === this.scrollXBar
+        const move = this.target.leafer.validMove(scrollX ? -e.moveX / this.ratioX : 0, scrollX ? 0 : -e.moveY / this.ratioY)
+        this.target.moveWorld(move.x, move.y)
+        e.current.moveWorld(move.x && -move.x * this.ratioX, move.y && -move.y * this.ratioY)
     }
 
     protected onDragEnd(): void {
