@@ -42,7 +42,7 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
 
     if (changeScale) {
 
-        if (changeScale !== 1) zoomLayer.scaleOfWorld(center, this.validScale(changeScale))
+        if (changeScale !== 1) zoomLayer.scaleOfWorld(center, this.getValidScale(changeScale))
 
     } else if (typeof zoomType === 'object') {
 
@@ -66,7 +66,7 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
 
         } else {
 
-            const fitScale = this.validScale(Math.min(limitBounds.width / width, limitBounds.height / height))
+            const fitScale = this.getValidScale(Math.min(limitBounds.width / width, limitBounds.height / height))
             moveX += (limitBounds.width - width * fitScale) / 2
             moveY += (limitBounds.height - height * fitScale) / 2
 
