@@ -1,13 +1,17 @@
-import { IUIEvent } from '@leafer-ui/interface'
+import { IObject, IUIEvent } from '@leafer-ui/interface'
 
 import { IEditor } from '@leafer-in/interface'
+import { MathHelper } from '@leafer-ui/core'
 
 import { EditDataHelper } from '../helper/EditDataHelper'
 
 
+const cacheCursors: IObject = {}
+
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const { editBox } = editor, point = editBox.enterPoint
     if (!point || !editor.hasTarget || !editBox.visible) return
+    if (point.name === 'circle') return // 独立旋转按钮
 
     let { rotation } = editBox
     const { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editor.config
@@ -19,9 +23,16 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
 
     const cursor = showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor)
     rotation += (EditDataHelper.getFlipDirection(point.direction, flippedX, flippedY) + 1) * 45
+    rotation = Math.round(MathHelper.formatRotation(rotation, true) / 2) * 2
 
     const { url, x, y } = cursor
-    point.cursor = { url: toDataURL(url, rotation), x, y }
+    const key = url + rotation
+
+    if (cacheCursors[key]) {
+        point.cursor = cacheCursors[key]
+    } else {
+        cacheCursors[key] = point.cursor = { url: toDataURL(url, rotation), x, y }
+    }
 }
 
 export function updateMoveCursor(editor: IEditor): void {

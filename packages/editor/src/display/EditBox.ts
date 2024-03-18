@@ -98,7 +98,7 @@ export class EditBox extends Group implements IEditBox {
 
             // visible 
             resizeP.visible = resizeL.visible = showPoints && (resizeable || rotateable)
-            rotateP.visible = showPoints && rotateable && resizeable
+            rotateP.visible = showPoints && rotateable && resizeable && !config.rotatePoint
 
             if (i % 2) { // top,  right, bottom, left
 
@@ -204,10 +204,10 @@ export class EditBox extends Group implements IEditBox {
         const point = this.enterPoint = e.current as IEditPoint
         if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
             if (editor.config.rotateable) editor.onRotate(e)
-            updateCursor(editor, e)
         } else {
             editor.onScale(e)
         }
+        updateCursor(editor, e)
     }
 
     public onArrow(e: IKeyEvent): void {
