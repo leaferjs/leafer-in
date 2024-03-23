@@ -1,8 +1,9 @@
 import { IBoxInputData, IFourNumber, IGroup } from '@leafer-ui/interface'
 
 export interface IScrollBarConfig {
-    padding?: IFourNumber
     theme?: IScrollBarTheme
+    padding?: IFourNumber
+    minSize?: number
 }
 
 export type IScrollBarTheme = 'light' | 'dark' | IBoxInputData

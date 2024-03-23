@@ -1,5 +1,5 @@
 import { IApp, IBounds, IBox, IBoxInputData, IEventListenerId, IGroup } from '@leafer-ui/interface'
-import { DragEvent, Group, RenderEvent, Box, Bounds, ResizeEvent } from '@leafer-ui/core'
+import { DragEvent, Group, RenderEvent, Box, Bounds, ResizeEvent, DataHelper } from '@leafer-ui/core'
 
 import { IScrollBar, IScrollBarConfig, IScrollBarTheme } from '@leafer-in/interface'
 
@@ -7,7 +7,11 @@ import { IScrollBar, IScrollBarConfig, IScrollBarTheme } from '@leafer-in/interf
 export class ScrollBar extends Group implements IScrollBar {
 
     public target: IGroup
-    public config: IScrollBarConfig = {}
+    public config: IScrollBarConfig = {
+        theme: 'light',
+        padding: 0,
+        minSize: 30
+    }
 
     public scrollXBar: IBox
     public scrollYBar: IBox
@@ -22,15 +26,15 @@ export class ScrollBar extends Group implements IScrollBar {
     protected __dragOut: boolean
     protected __eventIds: IEventListenerId[]
 
-    constructor(target: IGroup, config?: IScrollBarConfig) {
+    constructor(target: IGroup, userConfig?: IScrollBarConfig) {
         super()
         if (target.isApp) {
             (target as IApp).sky.add(this)
             target = (target as IApp).tree
         }
         this.target = target
-        if (config) this.config = config
-        this.changeTheme((config && config.theme) || 'light')
+        if (userConfig) DataHelper.assign(this.config, userConfig)
+        this.changeTheme(this.config.theme)
         this.waitLeafer(this.__listenEvents, this)
     }
 
@@ -60,13 +64,14 @@ export class ScrollBar extends Group implements IScrollBar {
     public update(check?: boolean): void {
         if (this.dragScrolling) return
 
+        const { minSize, padding } = this.config
         const { zoomLayer, canvas } = this.target.leafer
         const { worldRenderBounds } = zoomLayer
 
         if (check && this.scrollBounds && this.scrollBounds.isSame(worldRenderBounds)) return
         this.scrollBounds = new Bounds(worldRenderBounds)
 
-        const bounds = canvas.bounds.clone().shrink(this.config.padding || 0)
+        const bounds = canvas.bounds.clone().shrink(padding)
         const totalBounds = bounds.clone().add(worldRenderBounds)
 
         const ratioX = this.ratioX = bounds.width / totalBounds.width
@@ -82,14 +87,14 @@ export class ScrollBar extends Group implements IScrollBar {
         scrollXBar.set({
             x: x + width * scrollRatioX,
             y: y + height + 2,
-            width: width * ratioX,
+            width: Math.max(width * ratioX, minSize),
             visible: showScrollXBar
         })
 
         scrollYBar.set({
             x: x + width + 2,
             y: y + height * scrollRatioY,
-            height: height * ratioY,
+            height: Math.max(height * ratioY, minSize),
             visible: showScrollYBar
         })
     }
