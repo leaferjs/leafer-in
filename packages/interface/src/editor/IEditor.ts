@@ -45,6 +45,8 @@ export interface IEditorEvent extends IEvent {
 
     readonly value?: IUI | IUI[]
     readonly oldValue?: IUI | IUI[]
+    readonly list?: IUI[]
+    readonly oldList?: IUI[]
 
     readonly worldOrigin?: IPointData
     readonly origin?: IPointData
