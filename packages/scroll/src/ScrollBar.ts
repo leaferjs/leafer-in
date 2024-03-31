@@ -10,7 +10,7 @@ export class ScrollBar extends Group implements IScrollBar {
     public config: IScrollBarConfig = {
         theme: 'light',
         padding: 0,
-        minSize: 30
+        minSize: 10
     }
 
     public scrollXBar: IBox
