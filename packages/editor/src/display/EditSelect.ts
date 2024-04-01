@@ -76,14 +76,14 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onBeforeDown(e: PointerEvent): void {
-        if (this.editor.config.select !== PointerEvent.DOWN) return
-        this.checkAndSelect(e, true)
+        const { select } = this.editor.config
+        if (select === 'press') this.checkAndSelect(e, true)
     }
 
     protected onTap(e: PointerEvent): void {
         const { editor } = this
         const { select, continuousSelect } = editor.config
-        if (select === PointerEvent.TAP) this.checkAndSelect(e)
+        if (select === 'tap') this.checkAndSelect(e)
 
         if (this.running && (e.shiftKey || continuousSelect) && !e.middle && !this.lastDownLeaf) {
             const find = this.findDeepOne(e)
