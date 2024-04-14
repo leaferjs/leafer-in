@@ -100,8 +100,11 @@ export class Editor extends Group implements IEditor {
 
     public onMove(e: DragEvent): void {
         const move = e.getLocalMove(this.element)
+        const { lockMove } = this.config
 
-        if (e.shiftKey) {
+        if (lockMove === 'x') move.y = 0
+        else if (lockMove === 'y') move.x = 0
+        else if (e.shiftKey) {
             if (Math.abs(move.x) > Math.abs(move.y)) move.y = 0
             else move.x = 0
         }
