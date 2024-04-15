@@ -1,7 +1,7 @@
 import { IObject, IUIEvent } from '@leafer-ui/interface'
 
 import { IEditor } from '@leafer-in/interface'
-import { MathHelper } from '@leafer-ui/core'
+import { MathHelper } from '@leafer-ui/draw'
 
 import { EditDataHelper } from '../helper/EditDataHelper'
 

@@ -1,5 +1,5 @@
 import { IGroup, IGroupInputData, ILeaf, IUI } from '@leafer-ui/interface'
-import { Group, Matrix } from '@leafer-ui/core'
+import { Group, Matrix } from '@leafer-ui/draw'
 
 
 const order = (a: ILeaf, b: ILeaf) => a.parent.children.indexOf(a) - b.parent.children.indexOf(b)

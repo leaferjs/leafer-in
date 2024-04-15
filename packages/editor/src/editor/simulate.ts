@@ -1,5 +1,5 @@
 import { IGroup, ILeaf } from '@leafer-ui/interface'
-import { Bounds } from '@leafer-ui/core'
+import { Bounds } from '@leafer-ui/draw'
 
 import { IEditor } from '@leafer-in/interface'
 

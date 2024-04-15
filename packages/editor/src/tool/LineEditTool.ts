@@ -1,6 +1,6 @@
 import { IDirection8, IEditor, IEditorScaleEvent, ILine, IEditorSkewEvent } from '@leafer-in/interface'
 
-import { getPointData } from '@leafer-ui/core'
+import { getPointData } from '@leafer-ui/draw'
 
 import { EditTool } from './EditTool'
 

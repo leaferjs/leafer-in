@@ -1,5 +1,6 @@
 import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId } from '@leafer-ui/interface'
-import { Bounds, PointerEvent, DragEvent, MoveEvent, LeafList, Group, ZoomEvent } from '@leafer-ui/core'
+import { Bounds, LeafList, Group } from '@leafer-ui/draw'
+import { PointerEvent, DragEvent, MoveEvent, ZoomEvent } from '@leafer-ui/core'
 
 import { IEditSelect, IEditor, ISelectArea, IStroker } from '@leafer-in/interface'
 

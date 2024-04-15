@@ -1,4 +1,4 @@
-import { LeafList } from '@leafer-ui/core'
+import { LeafList } from '@leafer-ui/draw'
 
 import { IEditor, IUI } from '@leafer-in/interface'
 

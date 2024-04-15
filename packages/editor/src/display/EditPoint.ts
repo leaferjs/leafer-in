@@ -1,4 +1,4 @@
-import { Box } from '@leafer-ui/core'
+import { Box } from '@leafer-ui/draw'
 
 import { IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
 

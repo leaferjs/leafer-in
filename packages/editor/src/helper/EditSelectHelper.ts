@@ -1,5 +1,5 @@
 import { IBounds, ILeafList, IUI } from '@leafer-ui/interface'
-import { Answer } from '@leafer-ui/core'
+import { Answer } from '@leafer-ui/draw'
 
 const { No, Yes, NoAndSkip, YesAndSkip } = Answer
 

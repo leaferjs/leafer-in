@@ -1,5 +1,6 @@
 import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox } from '@leafer-ui/interface'
-import { Group, DragEvent, PointerEvent, Box, AroundHelper } from '@leafer-ui/core'
+import { Group, Box, AroundHelper } from '@leafer-ui/draw'
+import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
 

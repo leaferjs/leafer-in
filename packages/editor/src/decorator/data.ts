@@ -1,5 +1,5 @@
 import { IFunction, ILeaf, IObject } from '@leafer-ui/interface'
-import { defineKey } from '@leafer-ui/core'
+import { defineKey } from '@leafer-ui/draw'
 
 
 export function targetAttr(fn: IFunction) {

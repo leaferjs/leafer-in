@@ -1,5 +1,5 @@
 import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
-import { Paint, UI, MatrixHelper } from '@leafer-ui/core'
+import { Paint, UI, MatrixHelper } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
 

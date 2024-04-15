@@ -1,5 +1,5 @@
 import { IBoundsData, IGroupInputData, IRect, IRectInputData } from '@leafer-ui/interface'
-import { Group, Rect } from '@leafer-ui/core'
+import { Group, Rect } from '@leafer-ui/draw'
 
 import { ISelectArea } from '@leafer-in/interface'
 

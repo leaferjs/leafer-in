@@ -25,10 +25,8 @@
   ],
   "dependencies": {
     "@leafer-ui/core": "1.0.0-rc.20",
-    "@leafer-ui/scale": "1.0.0-rc.20"
-  },
-  "devDependencies": {
-     "@leafer-ui/interface": "1.0.0-rc.20",
-     "@leafer-in/interface": "1.0.0-rc.20"
+    "@leafer-ui/scale": "1.0.0-rc.20",
+    "@leafer-ui/interface": "1.0.0-rc.20",
+    "@leafer-in/interface": "1.0.0-rc.20"
   }
 }
