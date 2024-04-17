@@ -59,6 +59,16 @@ export class Editor extends Group implements IEditor {
         this.addMany(this.selector, this.editBox)
     }
 
+    // select 
+
+    public select(target: IUI | IUI[]): void {
+        this.target = target
+    }
+
+    public cancel(): void {
+        this.target = null
+    }
+
     // item
 
     public hasItem(item: IUI): boolean {
