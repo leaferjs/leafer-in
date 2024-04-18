@@ -3,13 +3,13 @@ import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewE
 
 export class EditTool implements IEditTool {
 
-    static list: IEditTool[] = []
+    public get tag() { return 'EditTool' }
 
-    public tag = 'EditTool'
+    public entering: boolean
 
     // 操作
 
-    onMove(e: IEditorMoveEvent): void {
+    public onMove(e: IEditorMoveEvent): void {
         const { moveX, moveY, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -19,7 +19,7 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
-    onScale(e: IEditorScaleEvent): void {
+    public onScale(e: IEditorScaleEvent): void {
         const { scaleX, scaleY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -34,7 +34,7 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
-    onRotate(e: IEditorRotateEvent): void {
+    public onRotate(e: IEditorRotateEvent): void {
         const { rotation, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -49,7 +49,7 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
-    onSkew(e: IEditorSkewEvent): void {
+    public onSkew(e: IEditorSkewEvent): void {
         const { skewX, skewY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -66,15 +66,15 @@ export class EditTool implements IEditTool {
 
     // 状态
 
-    load(_editor: IEditor): void {
+    public load(_editor: IEditor): void {
 
     }
 
-    unload(_editor: IEditor): void {
+    public unload(_editor: IEditor): void {
 
     }
 
-    update(editor: IEditor) {
+    public update(editor: IEditor) {
         const { simulateTarget, element } = editor
 
         if (editor.multiple) simulateTarget.parent.updateLayout()
@@ -86,12 +86,12 @@ export class EditTool implements IEditTool {
 
     // 细节
 
-    enter(): void {
-
+    public enter(): void {
+        this.entering = true
     }
 
-    exit(): void {
-
+    public exit(): void {
+        this.entering = false
     }
 
 }

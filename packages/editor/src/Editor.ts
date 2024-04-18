@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject } from '@leafer-ui/interface'
 import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent } from '@leafer-ui/core'
 
@@ -13,13 +13,13 @@ import { EditSelect } from './display/EditSelect'
 import { EditBox } from './display/EditBox'
 
 import { config } from './config'
-import { getEditTool } from './tool'
 
 import { onTarget, onHover } from './editor/target'
 import { targetAttr } from './decorator/data'
 import { EditorHelper } from './helper/EditorHelper'
 import { EditDataHelper } from './helper/EditDataHelper'
 import { updateCursor } from './editor/cursor'
+import { EditToolCreator } from './tool/EditToolCreator'
 
 
 export class Editor extends Group implements IEditor {
@@ -46,6 +46,8 @@ export class Editor extends Group implements IEditor {
     public get buttons() { return this.editBox.buttons }
 
     public editTool: IEditTool
+    public editToolList: IObject = {}
+
     public selector: EditSelect = new EditSelect(this)
 
     public get dragging(): boolean { return this.editBox.dragging }
@@ -58,6 +60,11 @@ export class Editor extends Group implements IEditor {
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
         this.addMany(this.selector, this.editBox)
     }
+
+    static registerTool(tool: IObject) {
+        EditToolCreator.register(tool)
+    }
+
 
     // select 
 
@@ -97,8 +104,10 @@ export class Editor extends Group implements IEditor {
     }
 
     public updateEditTool(): void {
-        if (this.editTool) this.editTool.unload(this)
-        this.editTool = getEditTool(this.list)
+        let tool = this.editTool
+        if (tool) tool.unload(this)
+        const tag = this.single ? this.list[0].getEditTool() : 'EditTool'
+        this.editToolList[tag] = this.editTool = this.editToolList[tag] || EditToolCreator.get(tag)
         this.editTool.load(this)
     }
 

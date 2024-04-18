@@ -20,6 +20,7 @@ export interface IEditor extends IEditorBase {
 
 export interface IEditTool {
     tag: string
+    entering: boolean
 
     // 操作
     onMove(e: IEditorMoveEvent): void

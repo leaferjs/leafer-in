@@ -28,6 +28,7 @@ export const config: IEditorConfig = {
     selector: true,
     hover: true,
     select: 'press',
+    enter: 'double',
     boxSelect: true,
 
     moveable: true,

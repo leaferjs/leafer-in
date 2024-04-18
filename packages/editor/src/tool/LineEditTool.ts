@@ -10,7 +10,7 @@ const { left, right } = IDirection8
 
 export class LineEditTool extends EditTool {
 
-    public tag = 'LineEditTool'
+    public get tag() { return 'LineEditTool' }
 
     public scaleOfEvent = true
 
