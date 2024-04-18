@@ -27,7 +27,7 @@ export const PathArrowModule: IPathArrowModule = {
             switch (command) {
                 case M:  // moveto(x, y)
                 case L:  // lineto(x, y)
-                    if (count < 2 || i + 3 === len) {
+                    if (count < 2 || i + 6 >= len) { // 3 + 3 可能是两个连续L命令结束
                         copyFrom(now, data[i + 1], data[i + 2])
                         if (!count && useStartArrow) copy(first, now)
                     }
