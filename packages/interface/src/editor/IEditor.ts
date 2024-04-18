@@ -20,12 +20,22 @@ export interface IEditor extends IEditorBase {
 
 export interface IEditTool {
     tag: string
+
+    // 操作
     onMove(e: IEditorMoveEvent): void
     onScale(e: IEditorScaleEvent): void
     onScaleWithDrag?(e: IEditorScaleEvent): void
     onRotate(e: IEditorRotateEvent): void
     onSkew(e: IEditorSkewEvent): void
+
+    // 状态
+    load(editor: IEditor): void
+    unload(editor: IEditor): void
     update(editor: IEditor): void
+
+    // 细节
+    enter(): void
+    exit(): void
 }
 
 export enum IDirection8 {

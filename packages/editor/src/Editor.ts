@@ -97,7 +97,9 @@ export class Editor extends Group implements IEditor {
     }
 
     public updateEditTool(): void {
+        if (this.editTool) this.editTool.unload(this)
         this.editTool = getEditTool(this.list)
+        this.editTool.load(this)
     }
 
     // get

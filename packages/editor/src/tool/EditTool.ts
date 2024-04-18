@@ -7,6 +7,8 @@ export class EditTool implements IEditTool {
 
     public tag = 'EditTool'
 
+    // 操作
+
     onMove(e: IEditorMoveEvent): void {
         const { moveX, moveY, editor } = e
         const { app, list } = editor
@@ -62,6 +64,16 @@ export class EditTool implements IEditTool {
         app.unlockLayout()
     }
 
+    // 状态
+
+    load(_editor: IEditor): void {
+
+    }
+
+    unload(_editor: IEditor): void {
+
+    }
+
     update(editor: IEditor) {
         const { simulateTarget, element } = editor
 
@@ -70,6 +82,16 @@ export class EditTool implements IEditTool {
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = element.getLayoutBounds('box', editor, true)
         editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         editor.editBox.update({ x: 0, y: 0, width, height })
+    }
+
+    // 细节
+
+    enter(): void {
+
+    }
+
+    exit(): void {
+
     }
 
 }
