@@ -204,7 +204,7 @@ export class EditSelect extends Group implements IEditSelect {
         }
     }
 
-    protected findDeepOne(e: PointerEvent): IUI {
+    public findDeepOne(e: PointerEvent): IUI {
         const options = { exclude: new LeafList(this.editor.editBox.rect) }
         return findOne(e.target.leafer.interaction.findPath(e, options)) as IUI
     }

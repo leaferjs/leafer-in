@@ -86,11 +86,11 @@ export class EditTool implements IEditTool {
 
     // 细节
 
-    public enter(): void {
+    public openInner(_editor: IEditor): void {
         this.entering = true
     }
 
-    public exit(): void {
+    public closeInner(_editor: IEditor): void {
         this.entering = false
     }
 

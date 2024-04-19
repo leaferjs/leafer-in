@@ -1,5 +1,5 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox } from '@leafer-ui/interface'
-import { Group, Box, AroundHelper } from '@leafer-ui/draw'
+import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox, ILeafList } from '@leafer-ui/interface'
+import { Group, Box, AroundHelper, LeafList } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -232,12 +232,28 @@ export class EditBox extends Group implements IEditBox {
         }
     }
 
-    protected onDoubleClick(): void {
+
+    protected onDoubleTap(e: PointerEvent): void {
+        if (this.editor.config.openInner === 'double') this.openInner(e)
+    }
+
+    protected onLongPress(e: PointerEvent): void {
+        if (this.editor.config.openInner === 'long') this.openInner(e)
+    }
+
+    protected openInner(e: PointerEvent): void {
         const { editor } = this
-        if (editor.single && editor.element.isBranch) {
-            //list[0].hitChildren = true
+        if (editor.single) {
+            const { element } = editor
+            if (element.isBranch) {
+                editor.openGroup(element as IGroup)
+                editor.target = editor.selector.findDeepOne(e)
+            } else {
+                editor.editTool.openInner(editor)
+            }
         }
     }
+
 
     public listenPointEvents(point: IEditPoint, type: IEditPointType, direction: IDirection8): void {
         const { editor } = this
@@ -258,7 +274,8 @@ export class EditBox extends Group implements IEditBox {
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
             rect.on_(DragEvent.END, this.onDragEnd, this),
             rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor)),
-            rect.on_(PointerEvent.DOUBLE_CLICK, this.onDoubleClick, this)
+            rect.on_(PointerEvent.DOUBLE_TAP, this.onDoubleTap, this),
+            rect.on_(PointerEvent.LONG_PRESS, this.onLongPress, this)
         ]
     }
 

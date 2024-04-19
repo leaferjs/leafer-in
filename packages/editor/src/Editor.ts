@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject } from '@leafer-ui/interface'
-import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent } from '@leafer-ui/draw'
+import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent } from '@leafer-in/interface'
@@ -41,6 +41,7 @@ export class Editor extends Group implements IEditor {
 
     public get element() { return this.multiple ? this.simulateTarget : this.list[0] as IUI }
     public simulateTarget: IUI = new Rect({ visible: false })
+    public openedGroups: ILeafList = new LeafList()
 
     public editBox: IEditBox = new EditBox(this)
     public get buttons() { return this.editBox.buttons }
@@ -278,10 +279,28 @@ export class Editor extends Group implements IEditor {
         return this.target as IGroup
     }
 
-
     public ungroup(): IUI[] {
         if (this.list.length) this.target = EditorHelper.ungroup(this.list)
         return this.list
+    }
+
+    public openGroup(group: IGroup): void {
+        this.openedGroups.add(group)
+        group.hitChildren = true
+    }
+
+    public closeGroup(group: IGroup): void {
+        this.openedGroups.remove(group)
+        group.hitChildren = false
+    }
+
+    public checkOpenedGroups(): void {
+        const opened = this.openedGroups
+        if (opened.length) {
+            let { list } = opened
+            if (this.hasTarget) list = [], opened.forEach(item => this.list.every(leaf => !LeafHelper.hasParent(leaf, item)) && list.push(item))
+            list.forEach(item => this.closeGroup(item as IGroup))
+        }
     }
 
     // lock

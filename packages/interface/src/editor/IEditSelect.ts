@@ -1,4 +1,4 @@
-import { IGroup, IBounds } from '@leafer-ui/interface'
+import { IGroup, IUI, IBounds, IPointerEvent } from '@leafer-ui/interface'
 
 import { IStroker } from './IStroker'
 import { ISelectArea } from './ISelectArea'
@@ -16,5 +16,6 @@ export interface IEditSelect extends IGroup {
     selectArea: ISelectArea
     bounds: IBounds
 
+    findDeepOne(e: IPointerEvent): IUI
     update(): void
 }

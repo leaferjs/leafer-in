@@ -7,12 +7,15 @@ export interface IEditor extends IEditorBase {
     leafList: ILeafList
 
     simulateTarget: IUI
+    openedGroups: ILeafList
 
     selector: IEditSelect
     editBox: IEditBox
     editTool: IEditTool
 
     targetEventIds: IEventListenerId[]
+
+    checkOpenedGroups(): void
 
     listenTargetEvents(): void
     removeTargetEvents(): void
@@ -35,8 +38,8 @@ export interface IEditTool {
     update(editor: IEditor): void
 
     // 细节
-    enter(): void
-    exit(): void
+    openInner(editor: IEditor): void
+    closeInner(editor: IEditor): void
 }
 
 export enum IDirection8 {

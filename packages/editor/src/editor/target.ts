@@ -16,6 +16,7 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
     }
 
     editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor, value: target, oldValue }))
+    editor.checkOpenedGroups()
 
     if (editor.hasTarget) {
         editor.waitLeafer(() => {
