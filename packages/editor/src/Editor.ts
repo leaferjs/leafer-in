@@ -101,7 +101,7 @@ export class Editor extends Group implements IEditor {
 
     public update(): void {
         if (this.hasTarget) {
-            if (this.innerEditor) {
+            if (this.innerEditing) {
                 this.innerEditor.update(this)
             } else {
                 if (this.editTool) this.editTool.update(this)
