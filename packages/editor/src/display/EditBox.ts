@@ -249,7 +249,7 @@ export class EditBox extends Group implements IEditBox {
                 editor.openGroup(element as IGroup)
                 editor.target = editor.selector.findDeepOne(e)
             } else {
-                editor.editTool.openInner(editor)
+                editor.openInnerEditor()
             }
         }
     }

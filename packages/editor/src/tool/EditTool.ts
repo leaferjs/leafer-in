@@ -5,8 +5,6 @@ export class EditTool implements IEditTool {
 
     public get tag() { return 'EditTool' }
 
-    public entering: boolean
-
     // 操作
 
     public onMove(e: IEditorMoveEvent): void {
@@ -82,16 +80,6 @@ export class EditTool implements IEditTool {
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = element.getLayoutBounds('box', editor, true)
         editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         editor.editBox.update({ x: 0, y: 0, width, height })
-    }
-
-    // 细节
-
-    public openInner(_editor: IEditor): void {
-        this.entering = true
-    }
-
-    public closeInner(_editor: IEditor): void {
-        this.entering = false
     }
 
 }

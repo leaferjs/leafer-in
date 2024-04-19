@@ -23,7 +23,6 @@ export interface IEditor extends IEditorBase {
 
 export interface IEditTool {
     tag: string
-    entering: boolean
 
     // 操作
     onMove(e: IEditorMoveEvent): void
@@ -36,10 +35,13 @@ export interface IEditTool {
     load(editor: IEditor): void
     unload(editor: IEditor): void
     update(editor: IEditor): void
+}
 
-    // 细节
-    openInner(editor: IEditor): void
-    closeInner(editor: IEditor): void
+export interface IInnerEditor {
+    tag: string
+    load(editor: IEditor): void
+    unload(editor: IEditor): void
+    update(editor: IEditor): void
 }
 
 export enum IDirection8 {

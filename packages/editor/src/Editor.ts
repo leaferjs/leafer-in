@@ -2,7 +2,7 @@ import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSiz
 import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent } from '@leafer-ui/core'
 
-import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent } from '@leafer-in/interface'
+import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor } from '@leafer-in/interface'
 
 import { EditorMoveEvent } from './event/EditorMoveEvent'
 import { EditorScaleEvent } from './event/EditorScaleEvent'
@@ -47,11 +47,13 @@ export class Editor extends Group implements IEditor {
     public get buttons() { return this.editBox.buttons }
 
     public editTool: IEditTool
+    public innerEditor: IInnerEditor
     public editToolList: IObject = {}
 
     public selector: EditSelect = new EditSelect(this)
 
     public get dragging(): boolean { return this.editBox.dragging }
+    public innerEditing: boolean
 
     public targetEventIds: IEventListenerId[] = []
 
@@ -99,8 +101,12 @@ export class Editor extends Group implements IEditor {
 
     public update(): void {
         if (this.hasTarget) {
-            if (this.editTool) this.editTool.update(this)
-            this.selector.update()
+            if (this.innerEditor) {
+                this.innerEditor.update(this)
+            } else {
+                if (this.editTool) this.editTool.update(this)
+                this.selector.update()
+            }
         }
     }
 
@@ -111,6 +117,7 @@ export class Editor extends Group implements IEditor {
         this.editToolList[tag] = this.editTool = this.editToolList[tag] || EditToolCreator.get(tag)
         this.editTool.load(this)
     }
+
 
     // get
 
@@ -301,6 +308,26 @@ export class Editor extends Group implements IEditor {
             if (this.hasTarget) list = [], opened.forEach(item => this.list.every(leaf => !LeafHelper.hasParent(leaf, item)) && list.push(item))
             list.forEach(item => this.closeGroup(item as IGroup))
         }
+    }
+
+    // inner
+
+    public openInnerEditor(): void {
+        const tag = this.element.getInnerEditor()
+        if (tag) {
+            if (EditToolCreator.list[tag]) {
+                this.innerEditing = true
+                this.visible = this.app.tree.hitChildren = false
+                this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag)
+                this.innerEditor.load(this)
+            }
+        }
+    }
+
+    public closeInnerEditor(): void {
+        this.innerEditing = false
+        this.visible = this.app.tree.hitChildren = true
+        if (this.innerEditor) this.innerEditor.unload(this)
     }
 
     // lock
