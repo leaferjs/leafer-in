@@ -69,7 +69,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected onPointerMove(e: PointerEvent): void {
         const { app, editor } = this
         if (this.running && !this.isMoveMode && app.config.pointer.hover && !app.interaction.dragging) {
-            const find = e.shiftKey ? this.findDeepOne(e) : findOne(e.path)
+            const find = (e.shiftKey || editor.single) ? this.findDeepOne(e) : findOne(e.path)
             editor.hoverTarget = editor.hasItem(find) ? null : find
         } if (this.isMoveMode) {
             editor.hoverTarget = null //  move.dragEmpty
@@ -100,7 +100,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected checkAndSelect(e: PointerEvent, isDownType?: boolean): void { // pointer.down or tap
         if (this.running && !this.isMoveMode && !e.middle) {
             const { editor } = this
-            const find = this.lastDownLeaf = findOne(e.path)
+            const find = this.lastDownLeaf = editor.single ? this.findDeepOne(e) : findOne(e.path)
 
             if (find) {
 
