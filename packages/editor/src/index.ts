@@ -31,10 +31,12 @@ Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor
 EditToolCreator.register(EditTool)
 EditToolCreator.register(LineEditTool)
 
-Line.prototype.getEditTool = function (): string {
-    if (!this.points && !this.pathInputed) {
-        return 'LineEditTool'
-    } else {
-        return 'EditTool'
+Object.defineProperty(Line.prototype, 'editTool', {
+    get(): string {
+        if (!this.points && !this.pathInputed) {
+            return 'LineEditTool'
+        } else {
+            return 'EditTool'
+        }
     }
-}
+})
