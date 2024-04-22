@@ -46,7 +46,9 @@ export class Editor extends Group implements IEditor {
     public editBox: IEditBox = new EditBox(this)
     public get buttons() { return this.editBox.buttons }
 
-    public editTool: IEditTool
+    private _editTool: IEditTool
+    public get editTool(): IEditTool { return this._editTool }
+
     public innerEditor: IInnerEditor
     public editToolList: IObject = {}
 
@@ -113,8 +115,8 @@ export class Editor extends Group implements IEditor {
     public updateEditTool(): void {
         let tool = this.editTool
         if (tool) tool.unload(this)
-        const tag = this.single ? this.list[0].getEditTool() : 'EditTool'
-        this.editToolList[tag] = this.editTool = this.editToolList[tag] || EditToolCreator.get(tag)
+        const tag = this.single ? this.list[0].editTool as string : 'EditTool'
+        this.editToolList[tag] = this._editTool = this.editToolList[tag] || EditToolCreator.get(tag)
         this.editTool.load(this)
     }
 
@@ -313,7 +315,7 @@ export class Editor extends Group implements IEditor {
     // inner
 
     public openInnerEditor(): void {
-        const tag = this.element.getInnerEditor()
+        const tag = this.element.editInner
         if (tag) {
             if (EditToolCreator.list[tag]) {
                 this.innerEditing = true
