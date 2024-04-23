@@ -66,11 +66,6 @@ export class Editor extends Group implements IEditor {
         this.addMany(this.selector, this.editBox)
     }
 
-    static registerEditTool(tool: IObject) {
-        EditToolCreator.register(tool)
-    }
-
-
     // select 
 
     public select(target: IUI | IUI[]): void {

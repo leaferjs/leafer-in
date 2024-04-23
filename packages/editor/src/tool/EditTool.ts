@@ -1,8 +1,16 @@
+import { IObject } from '@leafer-ui/interface'
+
 import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
-import { registerEditTool } from './EditToolCreator'
+import { registerEditTool, EditToolCreator } from './EditToolCreator'
+
 
 @registerEditTool()
 export class EditTool implements IEditTool {
+
+    static registerEditTool(tool: IObject) {
+        EditToolCreator.register(tool)
+    }
+
 
     public get tag() { return 'EditTool' }
 

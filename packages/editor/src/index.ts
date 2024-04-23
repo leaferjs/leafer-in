@@ -14,7 +14,7 @@ export { EditorScaleEvent } from './event/EditorScaleEvent'
 export { EditorRotateEvent } from './event/EditorRotateEvent'
 export { EditorSkewEvent } from './event/EditorSkewEvent'
 
-export { EditToolCreator, EditTool, LineEditTool } from './tool'
+export { registerEditTool, EditToolCreator, EditTool, LineEditTool } from './tool'
 
 export { EditorHelper } from './helper/EditorHelper'
 export { EditDataHelper } from './helper/EditDataHelper'
