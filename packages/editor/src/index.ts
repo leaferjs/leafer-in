@@ -24,19 +24,9 @@ import { IEditor, IEditorConfig } from '@leafer-in/interface'
 import { Creator, Line } from '@leafer-ui/draw'
 
 import { Editor } from './Editor'
-import { EditToolCreator, EditTool, LineEditTool } from './tool'
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
 
-EditToolCreator.register(EditTool)
-EditToolCreator.register(LineEditTool)
-
 Object.defineProperty(Line.prototype, 'editTool', {
-    get(): string {
-        if (!this.points && !this.pathInputed) {
-            return 'LineEditTool'
-        } else {
-            return 'EditTool'
-        }
-    }
+    get(): string { return (this.points || this.pathInputed) ? 'EditTool' : 'LineEditTool' }
 })

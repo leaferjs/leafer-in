@@ -3,11 +3,13 @@ import { IDirection8, IEditor, IEditorScaleEvent, ILine, IEditorSkewEvent } from
 import { getPointData } from '@leafer-ui/draw'
 
 import { EditTool } from './EditTool'
+import { registerEditTool } from './EditToolCreator'
 
 
 
 const { left, right } = IDirection8
 
+@registerEditTool()
 export class LineEditTool extends EditTool {
 
     public get tag() { return 'LineEditTool' }

@@ -6,6 +6,12 @@ import { IEditTool } from '@leafer-in/interface'
 
 const debug = Debug.get('EditToolCreator')
 
+export function registerEditTool() {
+    return (target: IObject) => {
+        EditToolCreator.register(target)
+    }
+}
+
 export const EditToolCreator = {
 
     list: {} as IObject,

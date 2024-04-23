@@ -1,6 +1,7 @@
 import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
+import { registerEditTool } from './EditToolCreator'
 
-
+@registerEditTool()
 export class EditTool implements IEditTool {
 
     public get tag() { return 'EditTool' }

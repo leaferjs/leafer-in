@@ -66,7 +66,7 @@ export class Editor extends Group implements IEditor {
         this.addMany(this.selector, this.editBox)
     }
 
-    static registerTool(tool: IObject) {
+    static registerEditTool(tool: IObject) {
         EditToolCreator.register(tool)
     }
 
