@@ -1,4 +1,4 @@
-import { IGroup, IRect, IBoundsData, IKeyEvent } from '@leafer-ui/interface'
+import { IGroup, IRect, IBoundsData, IKeyEvent, IBoxInputData } from '@leafer-ui/interface'
 import { IEditor } from './IEditor'
 import { IEditPoint } from './IEditPoint'
 
@@ -23,6 +23,10 @@ export interface IEditBox extends IGroup {
     readonly flippedOne: boolean
 
     enterPoint: IEditPoint
+
+    getPointStyle(userStyle?: IBoxInputData): IBoxInputData
+    getPointsStyle(): IBoxInputData[]
+    getMiddlePointsStyle(): IBoxInputData[]
 
     update(bounds: IBoundsData): void
     onArrow(e: IKeyEvent): void

@@ -1,5 +1,5 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox, ILeafList } from '@leafer-ui/interface'
-import { Group, Box, AroundHelper, LeafList } from '@leafer-ui/draw'
+import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData } from '@leafer-ui/interface'
+import { Group, Box, AroundHelper } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -167,18 +167,18 @@ export class EditBox extends Group implements IEditBox {
 
     }
 
-    public getPointStyle(userStyle?: IRectInputData): IRectInputData {
+    public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.config
         const defaultStyle = { fill: pointFill, stroke, strokeWidth, width: pointSize, height: pointSize, cornerRadius: pointRadius }
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
-    public getPointsStyle(): IRectInputData[] {
+    public getPointsStyle(): IBoxInputData[] {
         const { point } = this.editor.config
         return point instanceof Array ? point : [point]
     }
 
-    public getMiddlePointsStyle(): IRectInputData[] {
+    public getMiddlePointsStyle(): IBoxInputData[] {
         const { middlePoint } = this.editor.config
         return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }

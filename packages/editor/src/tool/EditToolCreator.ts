@@ -1,7 +1,7 @@
 import { IObject } from '@leafer-ui/interface'
 import { Debug } from '@leafer-ui/draw'
 
-import { IEditTool } from '@leafer-in/interface'
+import { IEditTool, IEditor } from '@leafer-in/interface'
 
 
 const debug = Debug.get('EditToolCreator')
@@ -21,8 +21,8 @@ export const EditToolCreator = {
         list[tag] ? debug.repeat(tag) : (list[tag] = EditTool)
     },
 
-    get(tag: string): IEditTool {
-        return new list[tag]()
+    get(tag: string, editor: IEditor): IEditTool {
+        return new list[tag](editor)
     }
 
 }

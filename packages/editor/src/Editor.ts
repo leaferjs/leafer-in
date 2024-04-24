@@ -99,20 +99,20 @@ export class Editor extends Group implements IEditor {
     public update(): void {
         if (this.hasTarget) {
             if (this.innerEditing) {
-                this.innerEditor.update(this)
+                this.innerEditor.update()
             } else {
-                if (this.editTool) this.editTool.update(this)
+                if (this.editTool) this.editTool.update()
                 this.selector.update()
             }
         }
     }
 
     public updateEditTool(): void {
-        let tool = this.editTool
-        if (tool) tool.unload(this)
+        const tool = this.editTool
+        if (tool) tool.unload()
         const tag = this.single ? this.list[0].editTool as string : 'EditTool'
-        this.editToolList[tag] = this._editTool = this.editToolList[tag] || EditToolCreator.get(tag)
-        this.editTool.load(this)
+        this._editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+        this.editTool.load()
     }
 
 
@@ -315,8 +315,8 @@ export class Editor extends Group implements IEditor {
             if (EditToolCreator.list[tag]) {
                 this.innerEditing = true
                 this.visible = this.app.tree.hitChildren = false
-                this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag)
-                this.innerEditor.load(this)
+                this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
+                this.innerEditor.load()
             }
         }
     }
@@ -324,7 +324,7 @@ export class Editor extends Group implements IEditor {
     public closeInnerEditor(): void {
         this.innerEditing = false
         this.visible = this.app.tree.hitChildren = true
-        if (this.innerEditor) this.innerEditor.unload(this)
+        if (this.innerEditor) this.innerEditor.unload()
     }
 
     // lock
@@ -379,6 +379,8 @@ export class Editor extends Group implements IEditor {
     public destroy(): void {
         if (!this.destroyed) {
             this.simulateTarget.destroy()
+            Object.values(this.editToolList).forEach(item => item.destroy())
+            this.editToolList = {}
             this.target = this.hoverTarget = this.simulateTarget = null
             super.destroy()
         }

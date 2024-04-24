@@ -23,6 +23,9 @@ export interface IEditor extends IEditorBase {
 
 export interface IEditTool {
     tag: string
+    editor: IEditor
+
+    create(): void
 
     // 操作
     onMove(e: IEditorMoveEvent): void
@@ -32,16 +35,19 @@ export interface IEditTool {
     onSkew(e: IEditorSkewEvent): void
 
     // 状态
-    load(editor: IEditor): void
-    unload(editor: IEditor): void
-    update(editor: IEditor): void
+    load(): void
+    unload(): void
+    update(): void
+
+    destroy(): void
 }
 
 export interface IInnerEditor {
     tag: string
-    load(editor: IEditor): void
-    unload(editor: IEditor): void
-    update(editor: IEditor): void
+    editor: IEditor
+    load(): void
+    unload(): void
+    update(): void
 }
 
 export enum IDirection8 {

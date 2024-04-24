@@ -14,6 +14,17 @@ export class EditTool implements IEditTool {
 
     public get tag() { return 'EditTool' }
 
+    public editor: IEditor
+
+
+    constructor(editor: IEditor) {
+        this.editor = editor
+        this.create()
+    }
+
+
+    public create(): void { }
+
     // 操作
 
     public onMove(e: IEditorMoveEvent): void {
@@ -73,15 +84,10 @@ export class EditTool implements IEditTool {
 
     // 状态
 
-    public load(_editor: IEditor): void {
+    public load(): void { }
 
-    }
-
-    public unload(_editor: IEditor): void {
-
-    }
-
-    public update(editor: IEditor) {
+    public update(): void {
+        const { editor } = this
         const { simulateTarget, element } = editor
 
         if (editor.multiple) simulateTarget.parent.updateLayout()
@@ -89,6 +95,12 @@ export class EditTool implements IEditTool {
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = element.getLayoutBounds('box', editor, true)
         editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         editor.editBox.update({ x: 0, y: 0, width, height })
+    }
+
+    public unload(): void { }
+
+    public destroy(): void {
+        this.editor = null
     }
 
 }

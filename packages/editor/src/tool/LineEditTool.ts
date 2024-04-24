@@ -1,4 +1,4 @@
-import { IDirection8, IEditor, IEditorScaleEvent, ILine, IEditorSkewEvent } from '@leafer-in/interface'
+import { IDirection8, IEditorScaleEvent, ILine, IEditorSkewEvent } from '@leafer-in/interface'
 
 import { getPointData } from '@leafer-ui/draw'
 
@@ -71,9 +71,9 @@ export class LineEditTool extends EditTool {
 
     }
 
-    update(editor: IEditor) {
-        const { rotatePoints, resizeLines, resizePoints } = editor.editBox
-        super.update(editor)
+    update() {
+        const { rotatePoints, resizeLines, resizePoints } = this.editor.editBox
+        super.update()
 
         for (let i = 0; i < 8; i++) {
             if (i < 4) resizeLines[i].visible = false
