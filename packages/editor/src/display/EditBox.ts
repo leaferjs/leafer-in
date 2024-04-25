@@ -18,8 +18,7 @@ export class EditBox extends Group implements IEditBox {
     public dragging: boolean
     public moving: boolean
 
-    public view: IGroup = new Group()  // 放置编辑工具控制点
-    public innerView: IGroup = new Group() // 放置内部编辑器控制点
+    public view: IGroup = new Group()  // 放置默认编辑工具控制点
 
     public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
     public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'center', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
@@ -50,7 +49,7 @@ export class EditBox extends Group implements IEditBox {
 
     public create() {
         let rotatePoint: IEditPoint, resizeLine: IEditPoint, resizePoint: IEditPoint
-        const { view, innerView, resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
+        const { view, resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
         const arounds: IAround[] = [{ x: 1, y: 1 }, { x: 0.5, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 0.5 }, { x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0.5 }]
 
         for (let i = 0; i < 8; i++) {
@@ -73,7 +72,7 @@ export class EditBox extends Group implements IEditBox {
         this.listenPointEvents(circle, 'rotate', 2)
 
         view.addMany(...rotatePoints, rect, buttons, ...resizeLines, ...resizePoints)
-        this.addMany(view, innerView)
+        this.add(view)
     }
 
     // update
