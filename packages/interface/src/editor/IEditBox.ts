@@ -8,6 +8,9 @@ export interface IEditBox extends IGroup {
     dragging: boolean
     moving: boolean
 
+    view: IGroup // 放置编辑工具控制点
+    innerView: IGroup // 放置内部编辑器控制点
+
     circle: IEditPoint
     rect: IRect
 

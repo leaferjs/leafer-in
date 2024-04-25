@@ -18,6 +18,9 @@ export class EditBox extends Group implements IEditBox {
     public dragging: boolean
     public moving: boolean
 
+    public view: IGroup = new Group()  // 放置编辑工具控制点
+    public innerView: IGroup = new Group() // 放置内部编辑器控制点
+
     public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
     public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'center', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
 
@@ -47,7 +50,7 @@ export class EditBox extends Group implements IEditBox {
 
     public create() {
         let rotatePoint: IEditPoint, resizeLine: IEditPoint, resizePoint: IEditPoint
-        const { resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
+        const { view, innerView, resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
         const arounds: IAround[] = [{ x: 1, y: 1 }, { x: 0.5, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 0.5 }, { x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0.5 }]
 
         for (let i = 0; i < 8; i++) {
@@ -61,7 +64,7 @@ export class EditBox extends Group implements IEditBox {
                 this.listenPointEvents(resizeLine, 'resize', i)
             }
 
-            resizePoint = new EditPoint({ name: 'resize-point', around: 'center', strokeAlign: 'center', hitRadius: 5 })
+            resizePoint = new EditPoint({ name: 'resize-point', hitRadius: 5 })
             resizePoints.push(resizePoint)
             this.listenPointEvents(resizePoint, 'resize', i)
         }
@@ -69,12 +72,15 @@ export class EditBox extends Group implements IEditBox {
         buttons.add(circle)
         this.listenPointEvents(circle, 'rotate', 2)
 
-        this.addMany(...rotatePoints, rect, buttons, ...resizeLines, ...resizePoints)
+        view.addMany(...rotatePoints, rect, buttons, ...resizeLines, ...resizePoints)
+        this.addMany(view, innerView)
     }
 
     // update
 
     public update(bounds: IBoundsData): void {
+        if (!this.view.visible) return
+
         const { config, list } = this.editor
         const { width, height } = bounds
         const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
@@ -169,7 +175,7 @@ export class EditBox extends Group implements IEditBox {
 
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.config
-        const defaultStyle = { fill: pointFill, stroke, strokeWidth, width: pointSize, height: pointSize, cornerRadius: pointRadius }
+        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius } as IBoxInputData
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 

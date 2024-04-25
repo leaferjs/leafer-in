@@ -12,6 +12,8 @@ export function registerEditTool() {
     }
 }
 
+export const registerInnerEditor = registerEditTool
+
 export const EditToolCreator = {
 
     list: {} as IObject,

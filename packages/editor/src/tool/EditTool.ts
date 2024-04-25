@@ -1,29 +1,19 @@
-import { IObject } from '@leafer-ui/interface'
+import { IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 
-import { IEditor, IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
 import { registerEditTool, EditToolCreator } from './EditToolCreator'
+import { InnerEditor } from './InnerEditor'
 
 
 @registerEditTool()
-export class EditTool implements IEditTool {
+export class EditTool extends InnerEditor implements IEditTool {
 
-    static registerEditTool(tool: IObject) {
-        EditToolCreator.register(tool)
+    static registerEditTool() {
+        EditToolCreator.register(this)
     }
 
 
     public get tag() { return 'EditTool' }
 
-    public editor: IEditor
-
-
-    constructor(editor: IEditor) {
-        this.editor = editor
-        this.create()
-    }
-
-
-    public create(): void { }
 
     // 操作
 
@@ -84,23 +74,26 @@ export class EditTool implements IEditTool {
 
     // 状态
 
-    public load(): void { }
+    public load(): void {
+        this.editBox.view.visible = true
+        this.onLoad()
+    }
 
     public update(): void {
-        const { editor } = this
-        const { simulateTarget, element } = editor
+        const { editor, editBox } = this
 
+        const { simulateTarget, element } = editor
         if (editor.multiple) simulateTarget.parent.updateLayout()
 
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = element.getLayoutBounds('box', editor, true)
-        editor.editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
-        editor.editBox.update({ x: 0, y: 0, width, height })
+        editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
+        editBox.update({ x: 0, y: 0, width, height })
+        this.onUpdate()
     }
 
-    public unload(): void { }
-
-    public destroy(): void {
-        this.editor = null
+    public unload(): void {
+        this.editBox.view.visible = false
+        this.onUnload()
     }
 
 }

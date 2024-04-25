@@ -14,19 +14,40 @@ export { EditorScaleEvent } from './event/EditorScaleEvent'
 export { EditorRotateEvent } from './event/EditorRotateEvent'
 export { EditorSkewEvent } from './event/EditorSkewEvent'
 
-export { registerEditTool, EditToolCreator, EditTool, LineEditTool } from './tool'
+export { EditToolCreator, registerEditTool, registerInnerEditor } from './tool/EditToolCreator'
+export { InnerEditor } from './tool/InnerEditor'
+export { EditTool } from './tool/EditTool'
+export { LineEditTool } from './tool/LineEditTool'
 
 export { EditorHelper } from './helper/EditorHelper'
 export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
-import { IEditor, IEditorConfig } from '@leafer-in/interface'
-import { Creator, Line } from '@leafer-ui/draw'
+import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
+import { Creator, UI, Line, defineKey } from '@leafer-ui/draw'
 
 import { Editor } from './Editor'
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
 
-Object.defineProperty(Line.prototype, 'editTool', {
-    get(): string { return (this.points || this.pathInputed) ? 'EditTool' : 'LineEditTool' }
+UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): void {
+    defineKey(this.prototype, 'editConfig', {
+        get(): IEditorConfig { return typeof config === 'function' ? config(this) : config }
+    })
+}
+
+UI.setEditTool = function (toolName: string | IEditToolFunction): void {
+    defineKey(this.prototype, 'editTool', {
+        get(): string { return typeof toolName === 'string' ? toolName : toolName(this) }
+    })
+}
+
+UI.setEditInner = function (editorName: string | IEditToolFunction): void {
+    defineKey(this.prototype, 'editInner', {
+        get(): string { return typeof editorName === 'string' ? editorName : editorName(this) }
+    })
+}
+
+Line.setEditTool(function (line: Line): string {
+    return (line.points || line.pathInputed) ? 'EditTool' : 'LineEditTool'
 })

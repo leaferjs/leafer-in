@@ -98,12 +98,9 @@ export class Editor extends Group implements IEditor {
 
     public update(): void {
         if (this.hasTarget) {
-            if (this.innerEditing) {
-                this.innerEditor.update()
-            } else {
-                if (this.editTool) this.editTool.update()
-                this.selector.update()
-            }
+            if (this.innerEditing) this.innerEditor.update()
+            this.editTool.update()
+            this.selector.update()
         }
     }
 
@@ -313,8 +310,8 @@ export class Editor extends Group implements IEditor {
         const tag = this.element.editInner
         if (tag) {
             if (EditToolCreator.list[tag]) {
+                this.editTool.unload()
                 this.innerEditing = true
-                this.visible = this.app.tree.hitChildren = false
                 this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
                 this.innerEditor.load()
             }
@@ -323,8 +320,8 @@ export class Editor extends Group implements IEditor {
 
     public closeInnerEditor(): void {
         this.innerEditing = false
-        this.visible = this.app.tree.hitChildren = true
-        if (this.innerEditor) this.innerEditor.unload()
+        this.innerEditor.unload()
+        this.editTool.load()
     }
 
     // lock

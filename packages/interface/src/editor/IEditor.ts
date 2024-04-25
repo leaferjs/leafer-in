@@ -21,33 +21,36 @@ export interface IEditor extends IEditorBase {
     removeTargetEvents(): void
 }
 
-export interface IEditTool {
-    tag: string
-    editor: IEditor
-
-    create(): void
-
+export interface IEditTool extends IInnerEditor {
     // 操作
     onMove(e: IEditorMoveEvent): void
     onScale(e: IEditorScaleEvent): void
     onScaleWithDrag?(e: IEditorScaleEvent): void
     onRotate(e: IEditorRotateEvent): void
     onSkew(e: IEditorSkewEvent): void
-
-    // 状态
-    load(): void
-    unload(): void
-    update(): void
-
-    destroy(): void
 }
 
 export interface IInnerEditor {
     tag: string
+
     editor: IEditor
+    editBox: IEditBox
+
+    onCreate(): void
+    create(): void
+
+    // 状态
+    onLoad(): void
     load(): void
+
+    onLoad(): void
     unload(): void
+
+    onUpdate(): void
     update(): void
+
+    onDestroy(): void
+    destroy(): void
 }
 
 export enum IDirection8 {
