@@ -32,30 +32,38 @@ export class Editor extends Group implements IEditor {
     @targetAttr(onTarget)
     public target: IUI | IUI[]
 
-    public leafList: ILeafList = new LeafList() // from target
-    public get list(): IUI[] { return this.leafList.list as IUI[] }
+    // 列表
 
-    public get hasTarget(): boolean { return !!this.list.length }
+    public get list(): IUI[] { return this.leafList.list as IUI[] }
+    public leafList: ILeafList = new LeafList() // from target
+    public openedGroupList: ILeafList = new LeafList()
+
+    // 状态
+
+    public get editing(): boolean { return !!this.list.length }
+    public innerEditing: boolean
+    public get groupOpening(): boolean { return !!this.openedGroupList.length }
+
     public get multiple(): boolean { return this.list.length > 1 }
     public get single(): boolean { return this.list.length === 1 }
 
+    public get dragging(): boolean { return this.editBox.dragging }
+
+    // 组件
+
     public get element() { return this.multiple ? this.simulateTarget : this.list[0] as IUI }
     public simulateTarget: IUI = new Rect({ visible: false })
-    public openedGroups: ILeafList = new LeafList()
 
     public editBox: IEditBox = new EditBox(this)
     public get buttons() { return this.editBox.buttons }
 
-    private _editTool: IEditTool
-    public get editTool(): IEditTool { return this._editTool }
+    public editTool: IEditTool
 
     public innerEditor: IInnerEditor
     public editToolList: IObject = {}
 
     public selector: EditSelect = new EditSelect(this)
 
-    public get dragging(): boolean { return this.editBox.dragging }
-    public innerEditing: boolean
 
     public targetEventIds: IEventListenerId[] = []
 
@@ -97,7 +105,7 @@ export class Editor extends Group implements IEditor {
     // update
 
     public update(): void {
-        if (this.hasTarget) {
+        if (this.editing) {
             if (this.innerEditing) this.innerEditor.update()
             this.editTool.update()
             this.selector.update()
@@ -107,8 +115,8 @@ export class Editor extends Group implements IEditor {
     public updateEditTool(): void {
         const tool = this.editTool
         if (tool) tool.unload()
-        const tag = this.single ? this.list[0].editTool as string : 'EditTool'
-        this._editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+        const tag = this.single ? this.list[0].editOuter as string : 'EditTool'
+        this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
         this.editTool.load()
     }
 
@@ -286,20 +294,20 @@ export class Editor extends Group implements IEditor {
     }
 
     public openGroup(group: IGroup): void {
-        this.openedGroups.add(group)
+        this.openedGroupList.add(group)
         group.hitChildren = true
     }
 
     public closeGroup(group: IGroup): void {
-        this.openedGroups.remove(group)
+        this.openedGroupList.remove(group)
         group.hitChildren = false
     }
 
     public checkOpenedGroups(): void {
-        const opened = this.openedGroups
+        const opened = this.openedGroupList
         if (opened.length) {
             let { list } = opened
-            if (this.hasTarget) list = [], opened.forEach(item => this.list.every(leaf => !LeafHelper.hasParent(leaf, item)) && list.push(item))
+            if (this.editing) list = [], opened.forEach(item => this.list.every(leaf => !LeafHelper.hasParent(leaf, item)) && list.push(item))
             list.forEach(item => this.closeGroup(item as IGroup))
         }
     }

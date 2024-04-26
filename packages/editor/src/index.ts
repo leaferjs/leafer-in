@@ -36,7 +36,7 @@ UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): voi
     })
 }
 
-UI.setEditTool = function (toolName: string | IEditToolFunction): void {
+UI.setEditOuter = function (toolName: string | IEditToolFunction): void {
     defineKey(this.prototype, 'editTool', {
         get(): string { return typeof toolName === 'string' ? toolName : toolName(this) }
     })
@@ -48,6 +48,6 @@ UI.setEditInner = function (editorName: string | IEditToolFunction): void {
     })
 }
 
-Line.setEditTool(function (line: Line): string {
+Line.setEditOuter(function (line: Line): string {
     return (line.points || line.pathInputed) ? 'EditTool' : 'LineEditTool'
 })

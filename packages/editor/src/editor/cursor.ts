@@ -10,7 +10,7 @@ const cacheCursors: IObject = {}
 
 export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const { editBox } = editor, point = editBox.enterPoint
-    if (!point || !editor.hasTarget || !editBox.visible) return
+    if (!point || !editor.editing || !editBox.visible) return
     if (point.name === 'circle') return // 独立旋转按钮
 
     let { rotation } = editBox

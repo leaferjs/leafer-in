@@ -217,7 +217,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        if (this.editor.hasTarget && this.editor.config.keyEvent) {
+        if (this.editor.editing && this.editor.config.keyEvent) {
             const move = { x: 0, y: 0 }
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
@@ -274,7 +274,7 @@ export class EditBox extends Group implements IEditBox {
     protected __listenEvents(): void {
         const { rect, editor } = this
         this.__eventIds = [
-            editor.on_(EditorEvent.SELECT, () => { this.visible = editor.hasTarget }),
+            editor.on_(EditorEvent.SELECT, () => { this.visible = editor.editing }),
             rect.on_(DragEvent.START, this.onDragStart, this),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
             rect.on_(DragEvent.END, this.onDragEnd, this),

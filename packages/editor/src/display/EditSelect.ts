@@ -198,7 +198,7 @@ export class EditSelect extends Group implements IEditSelect {
 
     protected allowDrag(e: DragEvent) {
         if (this.editor.config.boxSelect && !e.target.draggable) {
-            return (!this.editor.hasTarget && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
+            return (!this.editor.editing && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
         } else {
             return false
         }

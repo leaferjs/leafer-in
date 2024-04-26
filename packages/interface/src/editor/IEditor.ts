@@ -1,17 +1,15 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, ILeafList, IMatrixData, IEditorBase } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
 
 
 export interface IEditor extends IEditorBase {
-    leafList: ILeafList
-
     simulateTarget: IUI
-    openedGroups: ILeafList
 
     selector: IEditSelect
     editBox: IEditBox
     editTool: IEditTool
+    innerEditor: IInnerEditor
 
     targetEventIds: IEventListenerId[]
 
