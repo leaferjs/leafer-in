@@ -315,21 +315,25 @@ export class Editor extends Group implements IEditor {
     // inner
 
     public openInnerEditor(): void {
-        const tag = this.element.editInner
-        if (tag) {
-            if (EditToolCreator.list[tag]) {
-                this.editTool.unload()
-                this.innerEditing = true
-                this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
-                this.innerEditor.load()
+        if (this.single) {
+            const tag = this.element.editInner
+            if (tag) {
+                if (EditToolCreator.list[tag]) {
+                    this.editTool.unload()
+                    this.innerEditing = true
+                    this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
+                    this.innerEditor.load()
+                }
             }
         }
     }
 
     public closeInnerEditor(): void {
-        this.innerEditing = false
-        this.innerEditor.unload()
-        this.editTool.load()
+        if (this.innerEditing) {
+            this.innerEditing = false
+            this.innerEditor.unload()
+            this.editTool.load()
+        }
     }
 
     // lock

@@ -37,7 +37,7 @@ UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): voi
 }
 
 UI.setEditOuter = function (toolName: string | IEditToolFunction): void {
-    defineKey(this.prototype, 'editTool', {
+    defineKey(this.prototype, 'editOuter', {
         get(): string { return typeof toolName === 'string' ? toolName : toolName(this) }
     })
 }
