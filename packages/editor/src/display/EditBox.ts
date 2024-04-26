@@ -80,10 +80,10 @@ export class EditBox extends Group implements IEditBox {
     public update(bounds: IBoundsData): void {
         if (!this.view.visible) return
 
-        const { config, list } = this.editor
+        const { mergeConfig, list } = this.editor
         const { width, height } = bounds
         const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
-        const { middlePoint, resizeable, rotateable, stroke, strokeWidth, hideOnSmall } = config
+        const { middlePoint, resizeable, rotateable, stroke, strokeWidth, hideOnSmall } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
@@ -104,7 +104,7 @@ export class EditBox extends Group implements IEditBox {
 
             // visible 
             resizeP.visible = resizeL.visible = showPoints && (resizeable || rotateable)
-            rotateP.visible = showPoints && rotateable && resizeable && !config.rotatePoint
+            rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
 
             if (i % 2) { // top,  right, bottom, left
 
@@ -125,13 +125,13 @@ export class EditBox extends Group implements IEditBox {
         }
 
         // rotate
-        circle.visible = showPoints && rotateable && !!config.rotatePoint
-        circle.set(this.getPointStyle(config.rotatePoint || pointsStyle[0]))
+        circle.visible = showPoints && rotateable && !!mergeConfig.rotatePoint
+        circle.set(this.getPointStyle(mergeConfig.rotatePoint || pointsStyle[0]))
 
         // rect
-        rect.set({ stroke, strokeWidth, ...(config.rect || {}) })
+        rect.set({ stroke, strokeWidth, ...(mergeConfig.rect || {}) })
         rect.set({ ...bounds, visible: true })
-        rect.hittable = config.moveable
+        rect.hittable = mergeConfig.moveable
 
         // buttons
         this.buttons.visible = showPoints
@@ -140,7 +140,7 @@ export class EditBox extends Group implements IEditBox {
 
     protected layoutButtons(): void {
         const { buttons, resizePoints } = this
-        const { buttonsDirection, buttonsFixed, buttonsMargin, middlePoint } = this.editor.config
+        const { buttonsDirection, buttonsFixed, buttonsMargin, middlePoint } = this.editor.mergeConfig
 
         const { flippedX, flippedY } = this
         let index = fourDirection.indexOf(buttonsDirection)
@@ -173,18 +173,18 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
-        const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.config
+        const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.mergeConfig
         const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius } as IBoxInputData
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
     public getPointsStyle(): IBoxInputData[] {
-        const { point } = this.editor.config
+        const { point } = this.editor.mergeConfig
         return point instanceof Array ? point : [point]
     }
 
     public getMiddlePointsStyle(): IBoxInputData[] {
-        const { middlePoint } = this.editor.config
+        const { middlePoint } = this.editor.mergeConfig
         return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }
 
@@ -194,7 +194,7 @@ export class EditBox extends Group implements IEditBox {
         this.dragging = true
         if (e.target.name === 'rect') {
             this.moving = true
-            this.editor.opacity = this.editor.config.hideOnMove ? 0 : 1 // move
+            this.editor.opacity = this.editor.mergeConfig.hideOnMove ? 0 : 1 // move
         }
     }
 
@@ -208,8 +208,8 @@ export class EditBox extends Group implements IEditBox {
     protected onDrag(e: DragEvent): void {
         const { editor } = this
         const point = this.enterPoint = e.current as IEditPoint
-        if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.config.resizeable) {
-            if (editor.config.rotateable) editor.onRotate(e)
+        if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.mergeConfig.resizeable) {
+            if (editor.mergeConfig.rotateable) editor.onRotate(e)
         } else {
             editor.onScale(e)
         }
@@ -217,7 +217,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        if (this.editor.editing && this.editor.config.keyEvent) {
+        if (this.editor.editing && this.editor.mergeConfig.keyEvent) {
             const move = { x: 0, y: 0 }
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
@@ -239,11 +239,11 @@ export class EditBox extends Group implements IEditBox {
 
 
     protected onDoubleTap(e: PointerEvent): void {
-        if (this.editor.config.openInner === 'double') this.openInner(e)
+        if (this.editor.mergeConfig.openInner === 'double') this.openInner(e)
     }
 
     protected onLongPress(e: PointerEvent): void {
-        if (this.editor.config.openInner === 'long') this.openInner(e)
+        if (this.editor.mergeConfig.openInner === 'long') this.openInner(e)
     }
 
     protected openInner(e: PointerEvent): void {

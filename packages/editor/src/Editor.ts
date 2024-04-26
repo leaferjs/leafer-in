@@ -25,6 +25,7 @@ import { EditToolCreator } from './tool/EditToolCreator'
 export class Editor extends Group implements IEditor {
 
     public config = config
+    public mergeConfig = config // 实际使用
 
     @targetAttr(onHover)
     public hoverTarget: IUI
@@ -117,6 +118,8 @@ export class Editor extends Group implements IEditor {
         if (tool) tool.unload()
         const tag = this.single ? this.list[0].editOuter as string : 'EditTool'
         this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+        const { editConfig } = this.element
+        this.mergeConfig = this.single && editConfig ? { ...this.mergeConfig, ...editConfig } : this.config
         this.editTool.load()
     }
 
@@ -124,7 +127,7 @@ export class Editor extends Group implements IEditor {
     // get
 
     public getEditSize(ui: IUI): IEditSize {
-        let { editSize } = this.config
+        let { editSize } = this.mergeConfig
         return editSize === 'auto' ? ui.editSize : editSize
     }
 
@@ -132,7 +135,7 @@ export class Editor extends Group implements IEditor {
 
     public onMove(e: DragEvent): void {
         const move = e.getLocalMove(this.element)
-        const { lockMove } = this.config
+        const { lockMove } = this.mergeConfig
 
         if (lockMove === 'x') move.y = 0
         else if (lockMove === 'y') move.x = 0
@@ -148,7 +151,7 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const { direction } = e.current as IEditPoint
 
-        let { around, lockRatio } = this.config
+        let { around, lockRatio } = this.mergeConfig
         if (e.shiftKey) lockRatio = true
 
         const data = EditDataHelper.getScaleData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, EditDataHelper.getAround(around, e.altKey))
@@ -163,7 +166,7 @@ export class Editor extends Group implements IEditor {
     }
 
     public onRotate(e: DragEvent | RotateEvent): void {
-        const { skewable, around, rotateGap } = this.config
+        const { skewable, around, rotateGap } = this.mergeConfig
         const { direction, name } = e.current as IEditPoint
         if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
 
@@ -190,7 +193,7 @@ export class Editor extends Group implements IEditor {
 
     public onSkew(e: DragEvent): void {
         const { element } = this
-        const { around } = this.config
+        const { around } = this.mergeConfig
 
         const { origin, skewX, skewY } = EditDataHelper.getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), EditDataHelper.getAround(around, e.altKey))
         if (!skewX && !skewY) return
@@ -202,7 +205,7 @@ export class Editor extends Group implements IEditor {
     // transform
 
     public move(x: number, y: number): void {
-        if (!this.config.moveable) return
+        if (!this.mergeConfig.moveable) return
 
         const { element } = this
         const world = element.getWorldPointByLocal({ x, y }, null, true)

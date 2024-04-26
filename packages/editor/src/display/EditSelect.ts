@@ -17,7 +17,7 @@ export class EditSelect extends Group implements IEditSelect {
     public editor: IEditor
 
     public get dragging(): boolean { return !!this.originList }
-    public get running(): boolean { const { editor } = this; return this.hittable && editor.visible && editor.hittable && editor.config.selector }
+    public get running(): boolean { const { editor } = this; return this.hittable && editor.visible && editor.hittable && editor.mergeConfig.selector }
     public get isMoveMode(): boolean { return this.app && this.app.interaction.moveMode }
 
     public hoverStroker: IStroker = new Stroker()
@@ -44,7 +44,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected onHover(): void {
         const { editor } = this
         if (this.running && !this.dragging && !editor.dragging) {
-            const { stroke, strokeWidth, hover } = editor.config
+            const { stroke, strokeWidth, hover } = editor.mergeConfig
             this.hoverStroker.setTarget(hover ? this.editor.hoverTarget : null, { stroke, strokeWidth })
         } else {
             this.hoverStroker.target = null
@@ -53,7 +53,7 @@ export class EditSelect extends Group implements IEditSelect {
 
     protected onSelect(): void {
         if (this.running) {
-            const { config, list } = this.editor
+            const { mergeConfig: config, list } = this.editor
             const { stroke, strokeWidth } = config
             this.targetStroker.setTarget(list, { stroke, strokeWidth: Math.max(1, strokeWidth / 2) })
             this.hoverStroker.target = null
@@ -77,13 +77,13 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onBeforeDown(e: PointerEvent): void {
-        const { select } = this.editor.config
+        const { select } = this.editor.mergeConfig
         if (select === 'press') this.checkAndSelect(e, true)
     }
 
     protected onTap(e: PointerEvent): void {
         const { editor } = this
-        const { select, continuousSelect } = editor.config
+        const { select, continuousSelect } = editor.mergeConfig
         if (select === 'tap') this.checkAndSelect(e)
 
         if (this.running && (e.shiftKey || continuousSelect) && !e.middle && !this.lastDownLeaf) {
@@ -104,7 +104,7 @@ export class EditSelect extends Group implements IEditSelect {
 
             if (find) {
 
-                if (e.shiftKey || editor.config.continuousSelect) {
+                if (e.shiftKey || editor.mergeConfig.continuousSelect) {
                     editor.shiftItem(find)
                 } else {
                     editor.target = find
@@ -113,7 +113,7 @@ export class EditSelect extends Group implements IEditSelect {
                 // change down data
                 if (isDownType) {
                     editor.updateLayout()
-                    if (!find.locked) this.app.interaction.updateDownData(e, { findList: [editor.editBox.rect] }, editor.config.dualEvent)
+                    if (!find.locked) this.app.interaction.updateDownData(e, { findList: [editor.editBox.rect] }, editor.mergeConfig.dualEvent)
                 }
 
             } else if (this.allow(e.target)) {
@@ -129,7 +129,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected onDragStart(e: DragEvent): void {
         if (this.running && this.allowDrag(e)) {
             const { editor } = this
-            const { stroke, area } = editor.config
+            const { stroke, area } = editor.mergeConfig
             const { x, y } = e.getInner(this)
 
             this.bounds.set(x, y)
@@ -197,7 +197,7 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected allowDrag(e: DragEvent) {
-        if (this.editor.config.boxSelect && !e.target.draggable) {
+        if (this.editor.mergeConfig.boxSelect && !e.target.draggable) {
             return (!this.editor.editing && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
         } else {
             return false
