@@ -1,4 +1,4 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup } from '@leafer-ui/interface'
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
 
@@ -33,6 +33,9 @@ export interface IInnerEditor {
 
     editor: IEditor
     editBox: IEditBox
+    view: IGroup
+
+    eventIds: IEventListenerId[]
 
     onCreate(): void
     create(): void

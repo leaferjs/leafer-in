@@ -1,7 +1,8 @@
+import { IGroup, IEventListenerId } from '@leafer-ui/interface'
 import { IInnerEditor, IEditor, IEditBox } from '@leafer-in/interface'
 
+import { Group } from '@leafer-ui/draw'
 import { EditToolCreator } from './EditToolCreator'
-
 
 export class InnerEditor implements IInnerEditor {
 
@@ -15,6 +16,10 @@ export class InnerEditor implements IInnerEditor {
     public editor: IEditor
     public get editBox(): IEditBox { return this.editor.editBox }
 
+    public view: IGroup
+
+    public eventIds: IEventListenerId[]
+
 
     constructor(editor: IEditor) {
         this.editor = editor
@@ -23,7 +28,10 @@ export class InnerEditor implements IInnerEditor {
 
 
     public onCreate(): void { }
-    public create(): void { this.onCreate() }
+    public create(): void {
+        this.view = new Group()
+        this.onCreate()
+    }
 
 
     // 状态
@@ -46,7 +54,11 @@ export class InnerEditor implements IInnerEditor {
     public onDestroy(): void { }
     public destroy(): void {
         this.onDestroy()
-        this.editor = null
+        if (this.editor) {
+            if (this.view) this.view.destroy()
+            if (this.eventIds) this.editor.off_(this.eventIds)
+            this.editor = this.view = this.eventIds = null
+        }
     }
 
 }

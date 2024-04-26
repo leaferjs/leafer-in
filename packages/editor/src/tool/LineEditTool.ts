@@ -71,10 +71,8 @@ export class LineEditTool extends EditTool {
 
     }
 
-    update() {
+    onUpdate() {
         const { rotatePoints, resizeLines, resizePoints } = this.editor.editBox
-        super.update()
-
         for (let i = 0; i < 8; i++) {
             if (i < 4) resizeLines[i].visible = false
             resizePoints[i].visible = rotatePoints[i].visible = (i === left || i === right)
