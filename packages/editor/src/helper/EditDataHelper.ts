@@ -67,10 +67,7 @@ export const EditDataHelper = {
 
         if (lockRatio) {
             const unlockSide = lockRatio === 'corner' && direction % 2
-            if (!unlockSide) {
-                if (scaleY !== 1) scaleX = scaleY
-                else scaleY = scaleX
-            }
+            if (!unlockSide) scaleX = scaleY = Math.sqrt(scaleX * scaleY)
         }
 
         toPoint(around || origin, bounds, origin)
