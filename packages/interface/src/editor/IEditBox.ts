@@ -30,7 +30,10 @@ export interface IEditBox extends IGroup {
     getPointsStyle(): IBoxInputData[]
     getMiddlePointsStyle(): IBoxInputData[]
 
+    load(): void
     update(bounds: IBoundsData): void
+    unload(): void
+
     onArrow(e: IKeyEvent): void
 
 }

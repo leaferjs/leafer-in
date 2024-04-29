@@ -65,6 +65,7 @@ export class Editor extends Group implements IEditor {
 
     public selector: EditSelect = new EditSelect(this)
 
+    public dragStartPoint: IPointData
 
     public targetEventIds: IEventListenerId[] = []
 
@@ -115,12 +116,20 @@ export class Editor extends Group implements IEditor {
 
     public updateEditTool(): void {
         const tool = this.editTool
-        if (tool) tool.unload()
-        const tag = this.single ? this.list[0].editOuter as string : 'EditTool'
-        this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
-        const { editConfig } = this.element
-        this.mergeConfig = this.single && editConfig ? { ...this.mergeConfig, ...editConfig } : this.config
-        this.editTool.load()
+        if (tool) {
+            this.editBox.unload()
+            tool.unload()
+            this.editTool = null
+        }
+
+        if (this.editing) {
+            const tag = this.single ? this.list[0].editOuter as string : 'EditTool'
+            this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+            const { editConfig } = this.element
+            this.mergeConfig = this.single && editConfig ? { ...this.mergeConfig, ...editConfig } : this.config
+            this.editBox.load()
+            this.editTool.load()
+        }
     }
 
 
@@ -134,17 +143,17 @@ export class Editor extends Group implements IEditor {
     // operate
 
     public onMove(e: DragEvent): void {
-        const move = e.getLocalMove(this.element)
+        const total = { x: e.totalX, y: e.totalY }
         const { lockMove } = this.mergeConfig
 
-        if (lockMove === 'x') move.y = 0
-        else if (lockMove === 'y') move.x = 0
+        if (lockMove === 'x') total.y = 0
+        else if (lockMove === 'y') total.x = 0
         else if (e.shiftKey) {
-            if (Math.abs(move.x) > Math.abs(move.y)) move.y = 0
-            else move.x = 0
+            if (Math.abs(total.x) > Math.abs(total.y)) total.y = 0
+            else total.x = 0
         }
 
-        this.move(move.x, move.y)
+        this.move(DragEvent.getValidMove(this.element, this.dragStartPoint, total))
     }
 
     public onScale(e: DragEvent): void {
@@ -204,11 +213,11 @@ export class Editor extends Group implements IEditor {
 
     // transform
 
-    public move(x: number, y: number): void {
+    public move(x: number | IPointData, y = 0): void {
         if (!this.mergeConfig.moveable) return
 
         const { element } = this
-        const world = element.getWorldPointByLocal({ x, y }, null, true)
+        const world = element.getWorldPointByLocal(typeof x === 'object' ? { ...x } : { x, y }, null, true)
         const event = new EditorMoveEvent(EditorMoveEvent.MOVE, { target: element, editor: this, moveX: world.x, moveY: world.y })
 
         this.editTool.onMove(event)
@@ -336,6 +345,7 @@ export class Editor extends Group implements IEditor {
             this.innerEditing = false
             this.innerEditor.unload()
             this.editTool.load()
+            this.innerEditor = null
         }
     }
 
@@ -393,7 +403,7 @@ export class Editor extends Group implements IEditor {
             this.simulateTarget.destroy()
             Object.values(this.editToolList).forEach(item => item.destroy())
             this.editToolList = {}
-            this.target = this.hoverTarget = this.simulateTarget = null
+            this.target = this.hoverTarget = this.simulateTarget = this.editTool = this.innerEditor = null
             super.destroy()
         }
     }

@@ -11,6 +11,7 @@ export interface IEditor extends IEditorBase {
     editTool: IEditTool
     innerEditor: IInnerEditor
 
+    dragStartPoint: IPointData
     targetEventIds: IEventListenerId[]
 
     checkOpenedGroups(): void

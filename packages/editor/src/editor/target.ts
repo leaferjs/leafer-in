@@ -27,6 +27,7 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
             editor.listenTargetEvents()
         })
     } else {
+        editor.updateEditTool()
         editor.removeTargetEvents()
     }
 }

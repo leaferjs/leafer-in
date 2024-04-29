@@ -1,4 +1,4 @@
-import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId } from '@leafer-ui/interface'
+import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId, IPointerEvent } from '@leafer-ui/interface'
 import { Bounds, LeafList, Group } from '@leafer-ui/draw'
 import { PointerEvent, DragEvent, MoveEvent, ZoomEvent } from '@leafer-ui/core'
 
@@ -27,7 +27,7 @@ export class EditSelect extends Group implements IEditSelect {
     public selectArea: ISelectArea = new SelectArea()
 
     protected originList: ILeafList
-    protected lastDownLeaf: IUI
+    protected needRemoveItem: IUI
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -69,7 +69,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected onPointerMove(e: PointerEvent): void {
         const { app, editor } = this
         if (this.running && !this.isMoveMode && app.config.pointer.hover && !app.interaction.dragging) {
-            const find = (e.shiftKey || editor.single) ? this.findDeepOne(e) : findOne(e.path)
+            const find = this.findUI(e)
             editor.hoverTarget = editor.hasItem(find) ? null : find
         } if (this.isMoveMode) {
             editor.hoverTarget = null //  move.dragEmpty
@@ -78,42 +78,35 @@ export class EditSelect extends Group implements IEditSelect {
 
     protected onBeforeDown(e: PointerEvent): void {
         const { select } = this.editor.mergeConfig
-        if (select === 'press') this.checkAndSelect(e, true)
+        if (select === 'press') this.checkAndSelect(e)
     }
 
     protected onTap(e: PointerEvent): void {
         const { editor } = this
-        const { select, continuousSelect } = editor.mergeConfig
+        const { select } = editor.mergeConfig
         if (select === 'tap') this.checkAndSelect(e)
 
-        if (this.running && (e.shiftKey || continuousSelect) && !e.middle && !this.lastDownLeaf) {
-            const find = this.findDeepOne(e)
-            if (find) editor.shiftItem(find)
-            else if (!e.shiftKey && continuousSelect) editor.target = null
+        if (this.needRemoveItem) {
+            editor.removeItem(this.needRemoveItem)
         } else if (this.isMoveMode) {
             editor.target = null  // move.dragEmpty
         }
 
-        this.lastDownLeaf = null
     }
 
-    protected checkAndSelect(e: PointerEvent, isDownType?: boolean): void { // pointer.down or tap
-        if (this.running && !this.isMoveMode && !e.middle) {
+    protected checkAndSelect(e: PointerEvent): void { // pointer.down or tap
+        this.needRemoveItem = null
+
+        if (this.allowSelect(e)) {
             const { editor } = this
-            const find = this.lastDownLeaf = editor.single ? this.findDeepOne(e) : findOne(e.path)
+            const find = this.findUI(e)
 
             if (find) {
-
-                if (e.shiftKey || editor.mergeConfig.continuousSelect) {
-                    editor.shiftItem(find)
+                if (this.isMultipleSelect(e)) {
+                    if (editor.hasItem(find)) this.needRemoveItem = find // 等待tap事件再实际移除
+                    else editor.addItem(find)
                 } else {
                     editor.target = find
-                }
-
-                // change down data
-                if (isDownType) {
-                    editor.updateLayout()
-                    if (!find.locked) this.app.interaction.updateDownData(e, { findList: [editor.editBox.rect] }, editor.mergeConfig.dualEvent)
                 }
 
             } else if (this.allow(e.target)) {
@@ -127,7 +120,7 @@ export class EditSelect extends Group implements IEditSelect {
     // drag
 
     protected onDragStart(e: DragEvent): void {
-        if (this.running && this.allowDrag(e)) {
+        if (this.allowDrag(e)) {
             const { editor } = this
             const { stroke, area } = editor.mergeConfig
             const { x, y } = e.getInner(this)
@@ -197,16 +190,28 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected allowDrag(e: DragEvent) {
-        if (this.editor.mergeConfig.boxSelect && !e.target.draggable) {
+        if (this.running && this.editor.mergeConfig.boxSelect && !e.target.draggable) {
             return (!this.editor.editing && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
         } else {
             return false
         }
     }
 
+    protected allowSelect(e: IPointerEvent): boolean {
+        return this.running && !this.isMoveMode && !e.middle
+    }
+
     public findDeepOne(e: PointerEvent): IUI {
         const options = { exclude: new LeafList(this.editor.editBox.rect) }
         return findOne(e.target.leafer.interaction.findPath(e, options)) as IUI
+    }
+
+    public findUI(e: PointerEvent): IUI {
+        return this.isMultipleSelect(e) ? this.findDeepOne(e) : findOne(e.path)
+    }
+
+    public isMultipleSelect(e: IPointerEvent): boolean {
+        return e.shiftKey || this.editor.mergeConfig.continuousSelect
     }
 
     protected __listenEvents(): void {
@@ -243,7 +248,7 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     public destroy(): void {
-        this.editor = this.originList = this.lastDownLeaf = null
+        this.editor = this.originList = this.needRemoveItem = null
         this.__removeListenEvents()
         super.destroy()
     }

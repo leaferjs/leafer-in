@@ -1,4 +1,4 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IRectInputData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData } from '@leafer-ui/interface'
+import { IRect, IAround, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData } from '@leafer-ui/interface'
 import { Group, Box, AroundHelper } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
@@ -75,67 +75,89 @@ export class EditBox extends Group implements IEditBox {
         this.add(view)
     }
 
-    // update
-
-    public update(bounds: IBoundsData): void {
-        if (!this.view.visible) return
-
-        const { mergeConfig, list } = this.editor
-        const { width, height } = bounds
-        const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
-        const { middlePoint, resizeable, rotateable, stroke, strokeWidth, hideOnSmall } = mergeConfig
+    public load(): void {
+        const { mergeConfig, element, single } = this.editor
+        const { rect, circle, resizePoints } = this
+        const { stroke, strokeWidth, moveable } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
-        const smallSize = typeof hideOnSmall === 'number' ? hideOnSmall : 10
-        const showPoints = !(hideOnSmall && width < smallSize && height < smallSize)
 
-        this.visible = list[0] && !list[0].locked // check locked
-
-        let point = {} as IPointData, style: IRectInputData, rotateP: IRect, resizeP: IRect, resizeL: IRect
+        let resizeP: IRect
 
         for (let i = 0; i < 8; i++) {
-
-            AroundHelper.toPoint(AroundHelper.directionData[i], bounds, point)
-            style = this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length])
-            resizeP = resizePoints[i], rotateP = rotatePoints[i], resizeL = resizeLines[Math.floor(i / 2)]
-            resizeP.set(style)
-            resizeP.set(point), rotateP.set(point), resizeL.set(point)
-
-            // visible 
-            resizeP.visible = resizeL.visible = showPoints && (resizeable || rotateable)
-            rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
-
-            if (i % 2) { // top,  right, bottom, left
-
-                resizeP.visible = rotateP.visible = showPoints && !!middlePoint
-
-                if (((i + 1) / 2) % 2) { // top, bottom
-                    resizeL.width = width
-                    if (resizeP.width > width - 30) resizeP.visible = false
-                } else {
-                    resizeL.height = height
-                    resizeP.rotation = 90
-                    if (resizeP.width > height - 30) resizeP.visible = false
-                }
-            } else {
-                resizeP.rotation = (i / 2) * 90
-            }
-
+            resizeP = resizePoints[i]
+            resizeP.set(this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length]))
+            if (!(i % 2)) resizeP.rotation = (i / 2) * 90
         }
 
         // rotate
-        circle.visible = showPoints && rotateable && !!mergeConfig.rotatePoint
         circle.set(this.getPointStyle(mergeConfig.rotatePoint || pointsStyle[0]))
 
         // rect
         rect.set({ stroke, strokeWidth, ...(mergeConfig.rect || {}) })
-        rect.set({ ...bounds, visible: true })
-        rect.hittable = mergeConfig.moveable
+        rect.hittable = !single && moveable
 
-        // buttons
-        this.buttons.visible = showPoints
-        this.layoutButtons()
+        // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
+        element.syncEventer = (single && moveable) ? rect : null
+        this.app.interaction.bottomList = (single && moveable) ? [{ target: rect, proxy: element }] : null
+
+        this.visible = !element.locked
+    }
+
+    public update(bounds: IBoundsData): void {
+        if (this.view.worldOpacity) {
+            const { mergeConfig } = this.editor
+            const { width, height } = bounds
+            const { rect, circle, resizePoints, rotatePoints, resizeLines } = this
+            const { middlePoint, resizeable, rotateable, hideOnSmall } = mergeConfig
+
+            const smallSize = typeof hideOnSmall === 'number' ? hideOnSmall : 10
+            const showPoints = !(hideOnSmall && width < smallSize && height < smallSize)
+
+            let point = {} as IPointData, rotateP: IRect, resizeP: IRect, resizeL: IRect
+
+            for (let i = 0; i < 8; i++) {
+
+                AroundHelper.toPoint(AroundHelper.directionData[i], bounds, point)
+                resizeP = resizePoints[i]
+                rotateP = rotatePoints[i]
+                resizeL = resizeLines[Math.floor(i / 2)]
+                resizeP.set(point)
+                rotateP.set(point)
+                resizeL.set(point)
+
+                // visible 
+                resizeP.visible = resizeL.visible = showPoints && (resizeable || rotateable)
+                rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
+
+                if (i % 2) { // top,  right, bottom, left
+
+                    resizeP.visible = rotateP.visible = showPoints && !!middlePoint
+
+                    if (((i + 1) / 2) % 2) { // top, bottom
+                        resizeL.width = width
+                        if (resizeP.width > width - 30) resizeP.visible = false
+                    } else {
+                        resizeL.height = height
+                        resizeP.rotation = 90
+                        if (resizeP.width > height - 30) resizeP.visible = false
+                    }
+                }
+
+            }
+
+            // rotate
+            circle.visible = showPoints && rotateable && !!mergeConfig.rotatePoint
+
+            // rect
+            rect.set({ ...bounds, visible: true })
+
+            // buttons
+            const buttonVisible = showPoints && (circle.visible || this.buttons.children.length > 1)
+            this.buttons.visible = buttonVisible
+            if (buttonVisible) this.layoutButtons()
+        }
     }
 
     protected layoutButtons(): void {
@@ -172,6 +194,11 @@ export class EditBox extends Group implements IEditBox {
 
     }
 
+    public unload(): void {
+        this.visible = false
+    }
+
+
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.mergeConfig
         const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius } as IBoxInputData
@@ -188,20 +215,26 @@ export class EditBox extends Group implements IEditBox {
         return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }
 
+    protected onSelect(e: EditorEvent): void {
+        if (e.oldList.length === 1) e.oldList[0].syncEventer = this.app.interaction.bottomList = null
+    }
+
     // drag
 
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
-        if (e.target.name === 'rect') {
+        if (e.current.name === 'rect') {
+            const { editor } = this
             this.moving = true
-            this.editor.opacity = this.editor.mergeConfig.hideOnMove ? 0 : 1 // move
+            editor.dragStartPoint = { x: editor.element.x, y: editor.element.y }
+            editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
         }
     }
 
     protected onDragEnd(e: DragEvent): void {
         this.dragging = false
         this.moving = false
-        if (e.target.name === 'rect') this.editor.opacity = 1 // move
+        if (e.current.name === 'rect') this.editor.opacity = 1 // move
 
     }
 
@@ -233,7 +266,7 @@ export class EditBox extends Group implements IEditBox {
                 case 'ArrowRight':
                     move.x = distance
             }
-            if (move.x || move.y) this.editor.move(move.x, move.y)
+            this.editor.move(move)
         }
     }
 
@@ -274,7 +307,7 @@ export class EditBox extends Group implements IEditBox {
     protected __listenEvents(): void {
         const { rect, editor } = this
         this.__eventIds = [
-            editor.on_(EditorEvent.SELECT, () => { this.visible = editor.editing }),
+            editor.on_(EditorEvent.SELECT, this.onSelect, this),
             rect.on_(DragEvent.START, this.onDragStart, this),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
             rect.on_(DragEvent.END, this.onDragEnd, this),

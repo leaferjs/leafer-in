@@ -16,6 +16,7 @@ export interface IEditSelect extends IGroup {
     selectArea: ISelectArea
     bounds: IBounds
 
+    findUI(e: IPointerEvent): IUI
     findDeepOne(e: IPointerEvent): IUI
     update(): void
 }
