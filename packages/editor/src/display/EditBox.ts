@@ -1,8 +1,8 @@
 import { IRect, IAround, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData } from '@leafer-ui/interface'
-import { Group, Box, AroundHelper } from '@leafer-ui/draw'
+import { Group, Box, AroundHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
-import { IEditBox, IEditor, IDirection8, IEditPoint, IEditPointType } from '@leafer-in/interface'
+import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
 import { updateCursor, updateMoveCursor } from '../editor/cursor'
 import { EditorEvent } from '../event/EditorEvent'
@@ -293,7 +293,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
 
-    public listenPointEvents(point: IEditPoint, type: IEditPointType, direction: IDirection8): void {
+    public listenPointEvents(point: IEditPoint, type: IEditPointType, direction: Direction9): void {
         const { editor } = this
         point.direction = direction
         point.pointType = type

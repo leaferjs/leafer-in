@@ -1,4 +1,5 @@
 import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup } from '@leafer-ui/interface'
+
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
 
@@ -55,17 +56,6 @@ export interface IInnerEditor {
     destroy(): void
 }
 
-export enum IDirection8 {
-    topLeft,
-    top,
-    topRight,
-    right,
-    bottomRight,
-    bottom,
-    bottomLeft,
-    left
-}
-
 export interface IEditorEvent extends IEvent {
     readonly target?: IUI
     readonly editor?: IEditor
@@ -89,7 +79,7 @@ export interface IEditorScaleEvent extends IEditorEvent {
     readonly scaleY?: number
     transform?: IMatrixData
 
-    readonly direction?: IDirection8
+    readonly direction?: number
     readonly lockRatio?: boolean | 'corner'
     readonly around?: IAround
 

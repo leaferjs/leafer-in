@@ -24,8 +24,7 @@ export class Stroker extends UI implements IStroker {
     }
 
     public setTarget(target: IUI | IUI[], style: IRectInputData): void {
-        const { stroke, strokeWidth } = style
-        this.set({ stroke, strokeWidth })
+        this.set(style)
         this.target = target
     }
 
@@ -34,7 +33,7 @@ export class Stroker extends UI implements IStroker {
         if (list.length) {
 
             let leaf: IUI
-            const { stroke, strokeWidth } = this.__
+            const { stroke, strokeWidth, fill } = this.__
             const { bounds } = options
 
             for (let i = 0; i < list.length; i++) {
@@ -73,7 +72,8 @@ export class Stroker extends UI implements IStroker {
                         this.__.strokeWidth = strokeWidth / abs(leaf.__world.scaleX)
                     }
 
-                    typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
+                    if (stroke) typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
+                    if (fill) typeof fill === 'string' ? Paint.fill(fill, this, canvas) : Paint.fills(fill, this, canvas)
                 }
             }
 

@@ -1,6 +1,7 @@
 import { IAround, IDragEvent, IMatrixData } from '@leafer-ui/interface'
 
-import { IDirection8, IEditorScaleEvent } from '@leafer-in/interface'
+import { IEditorScaleEvent } from '@leafer-in/interface'
+import { Direction9 } from '@leafer-ui/draw'
 
 import { EditorEvent } from './EditorEvent'
 
@@ -16,7 +17,7 @@ export class EditorScaleEvent extends EditorEvent implements IEditorScaleEvent {
 
     readonly drag: IDragEvent
 
-    readonly direction: IDirection8
+    readonly direction: Direction9
     readonly lockRatio: boolean
     readonly around: IAround
 

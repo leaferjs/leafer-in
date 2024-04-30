@@ -1,15 +1,15 @@
 import { IBoundsData, IPointData, IAround } from '@leafer-ui/interface'
-import { AroundHelper, PointHelper } from '@leafer-ui/draw'
+import { AroundHelper, PointHelper, Direction9 } from '@leafer-ui/draw'
 
-import { IEditorScaleEvent, IDirection8, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
+import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
 
-const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = IDirection8
+const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = Direction9
 const { toPoint } = AroundHelper
 
 export const EditDataHelper = {
 
-    getScaleData(bounds: IBoundsData, direction: IDirection8, pointMove: IPointData, lockRatio: boolean | 'corner', around: IAround): IEditorScaleEvent {
+    getScaleData(bounds: IBoundsData, direction: Direction9, pointMove: IPointData, lockRatio: boolean | 'corner', around: IAround): IEditorScaleEvent {
         let origin: IPointData, scaleX: number = 1, scaleY: number = 1
         const { width, height } = bounds
 
@@ -75,7 +75,7 @@ export const EditDataHelper = {
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
 
-    getRotateData(bounds: IBoundsData, direction: IDirection8, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
+    getRotateData(bounds: IBoundsData, direction: Direction9, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
         let origin: IPointData
 
         switch (direction) {
@@ -100,7 +100,7 @@ export const EditDataHelper = {
         return { origin, rotation: PointHelper.getRotation(last, origin, current) }
     },
 
-    getSkewData(bounds: IBoundsData, direction: IDirection8, move: IPointData, around: IAround): IEditorSkewEvent {
+    getSkewData(bounds: IBoundsData, direction: Direction9, move: IPointData, around: IAround): IEditorSkewEvent {
         let origin: IPointData, skewX = 0, skewY = 0
         let last: IPointData
 
@@ -150,7 +150,7 @@ export const EditDataHelper = {
         return direction
     },
 
-    getFlipDirection(direction: IDirection8, flipedX: boolean, flipedY: boolean): IDirection8 {
+    getFlipDirection(direction: Direction9, flipedX: boolean, flipedY: boolean): Direction9 {
         if (flipedX) {
             switch (direction) {
                 case left: direction = right; break
