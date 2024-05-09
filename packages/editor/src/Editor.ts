@@ -135,20 +135,16 @@ export class Editor extends Group implements IEditor {
 
     // get
 
-    public getEditSize(ui: IUI): IEditSize {
-        let { editSize } = this.mergeConfig
-        return editSize === 'auto' ? ui.editSize : editSize
+    public getEditSize(_ui: IUI): IEditSize {
+        return this.mergeConfig.editSize
     }
 
     // operate
 
     public onMove(e: DragEvent): void {
         const total = { x: e.totalX, y: e.totalY }
-        const { lockMove } = this.mergeConfig
 
-        if (lockMove === 'x') total.y = 0
-        else if (lockMove === 'y') total.x = 0
-        else if (e.shiftKey) {
+        if (e.shiftKey) {
             if (Math.abs(total.x) > Math.abs(total.y)) total.y = 0
             else total.x = 0
         }
@@ -214,7 +210,7 @@ export class Editor extends Group implements IEditor {
     // transform
 
     public move(x: number | IPointData, y = 0): void {
-        if (!this.mergeConfig.moveable) return
+        if (!this.mergeConfig.moveable || this.element.locked) return
 
         const { element } = this
         const world = element.getWorldPointByLocal(typeof x === 'object' ? { ...x } : { x, y }, null, true)
