@@ -40,26 +40,22 @@ export class Stroker extends UI implements IStroker {
                 leaf = list[i]
                 if (bounds && bounds.hit(leaf.__world, options.matrix)) {
 
-                    let drewPath: boolean
+                    const aScaleX = abs(leaf.__world.scaleX), aScaleY = abs(leaf.__world.scaleY)
 
-                    if (leaf.__.editSize === 'scale') {
-                        const aScaleX = abs(leaf.__world.scaleX), aScaleY = abs(leaf.__world.scaleY)
-                        if (aScaleX !== aScaleY) { // need no scale stroke
-                            copy(matrix, leaf.__world)
-                            scale(matrix, 1 / aScaleX, 1 / aScaleY)
+                    if (aScaleX !== aScaleY) { // need no scale stroke, use rect path
 
-                            canvas.setWorld(matrix, options.matrix)
-                            canvas.beginPath()
-                            this.__.strokeWidth = strokeWidth
+                        copy(matrix, leaf.__world)
+                        scale(matrix, 1 / aScaleX, 1 / aScaleY)
 
-                            const { x, y, width, height } = leaf.__layout.boxBounds
-                            canvas.rect(x * aScaleX, y * aScaleY, width * aScaleX, height * aScaleY)
+                        canvas.setWorld(matrix, options.matrix)
+                        canvas.beginPath()
+                        this.__.strokeWidth = strokeWidth
 
-                            drewPath = true
-                        }
-                    }
+                        const { x, y, width, height } = leaf.__layout.boxBounds
+                        canvas.rect(x * aScaleX, y * aScaleY, width * aScaleX, height * aScaleY)
 
-                    if (!drewPath) {
+                    } else {
+
                         canvas.setWorld(leaf.__world, options.matrix)
                         canvas.beginPath()
 
@@ -70,6 +66,7 @@ export class Stroker extends UI implements IStroker {
                         }
 
                         this.__.strokeWidth = strokeWidth / abs(leaf.__world.scaleX)
+
                     }
 
                     if (stroke) typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
