@@ -1,4 +1,4 @@
-import { IRect, IAround, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData } from '@leafer-ui/interface'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign } from '@leafer-ui/interface'
 import { Group, Box, AroundHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
@@ -50,7 +50,7 @@ export class EditBox extends Group implements IEditBox {
     public create() {
         let rotatePoint: IEditPoint, resizeLine: IEditPoint, resizePoint: IEditPoint
         const { view, resizePoints, rotatePoints, resizeLines, rect, circle, buttons } = this
-        const arounds: IAround[] = [{ x: 1, y: 1 }, { x: 0.5, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 0.5 }, { x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0.5 }]
+        const arounds: IAlign[] = ['bottom-right', 'bottom', 'bottom-left', 'left', 'top-left', 'top', 'top-right', 'right']
 
         for (let i = 0; i < 8; i++) {
             rotatePoint = new EditPoint({ name: 'rotate-point', around: arounds[i], width: 15, height: 15, hitFill: "all" })
