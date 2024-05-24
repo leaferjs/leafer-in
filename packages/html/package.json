@@ -4,10 +4,16 @@
   "description": "@leafer-in/html",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
+  "type": "module",
   "main": "dist/html.esm.js",
+  "exports": {
+    "import": "./dist/html.esm.js",
+    "require": "./dist/html.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
   "unpkg": "dist/html.js",
   "jsdelivr": "dist/html.js",
-  "types": "types/index.d.ts",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

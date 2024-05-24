@@ -4,10 +4,16 @@
   "description": "@leafer-in/arrow",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
+  "type": "module",
   "main": "dist/arrow.esm.js",
+  "exports": {
+    "import": "./dist/arrow.esm.js",
+    "require": "./dist/arrow.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
   "unpkg": "dist/arrow.js",
   "jsdelivr": "dist/arrow.js",
-  "types": "types/index.d.ts",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

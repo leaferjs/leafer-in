@@ -4,10 +4,16 @@
   "description": "@leafer-in/view",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
+  "type": "module",
   "main": "dist/view.esm.js",
+  "exports": {
+    "import": "./dist/view.esm.js",
+    "require": "./dist/view.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
   "unpkg": "dist/view.js",
   "jsdelivr": "dist/view.js",
-  "types": "types/index.d.ts",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

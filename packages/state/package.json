@@ -4,10 +4,16 @@
   "description": "@leafer-in/state",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
+  "type": "module",
   "main": "dist/state.esm.js",
+  "exports": {
+    "import": "./dist/state.esm.js",
+    "require": "./dist/state.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
   "unpkg": "dist/state.js",
   "jsdelivr": "dist/state.js",
-  "types": "types/index.d.ts",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

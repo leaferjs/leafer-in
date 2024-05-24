@@ -4,10 +4,16 @@
   "description": "@leafer-in/scroll",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
+  "type": "module",
   "main": "dist/scroll.esm.js",
+  "exports": {
+    "import": "./dist/scroll.esm.js",
+    "require": "./dist/scroll.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
   "unpkg": "dist/scroll.js",
   "jsdelivr": "dist/scroll.js",
-  "types": "types/index.d.ts",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
