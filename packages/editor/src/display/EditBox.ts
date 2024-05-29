@@ -151,6 +151,7 @@ export class EditBox extends Group implements IEditBox {
             circle.visible = showPoints && rotateable && !!mergeConfig.rotatePoint
 
             // rect
+            if (rect.path) rect.path = null // line可能会变成path优先模式
             rect.set({ ...bounds, visible: true })
 
             // buttons

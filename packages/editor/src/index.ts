@@ -24,7 +24,7 @@ export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
 import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
-import { Creator, UI, Line, defineKey } from '@leafer-ui/draw'
+import { Creator, UI, defineKey } from '@leafer-ui/draw'
 
 import { Editor } from './Editor'
 
@@ -47,7 +47,3 @@ UI.setEditInner = function (editorName: string | IEditToolFunction): void {
         get(): string { return typeof editorName === 'string' ? editorName : editorName(this) }
     })
 }
-
-Line.setEditOuter(function (line: Line): string {
-    return (line.points || line.pathInputed) ? 'EditTool' : 'LineEditTool'
-})
