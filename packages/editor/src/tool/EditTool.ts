@@ -32,7 +32,7 @@ export class EditTool extends InnerEditor implements IEditTool {
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
-            const resize = editor.getEditSize(target) === 'size'
+            const resize = editor.getEditSize(target) !== 'scale'
             if (transform) {
                 target.transformWorld(transform, resize)
             } else {
@@ -47,7 +47,7 @@ export class EditTool extends InnerEditor implements IEditTool {
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
-            const resize = editor.getEditSize(target) === 'size'
+            const resize = editor.getEditSize(target) !== 'scale'
             if (transform) {
                 target.transformWorld(transform, resize)
             } else {
@@ -62,7 +62,7 @@ export class EditTool extends InnerEditor implements IEditTool {
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
-            const resize = editor.getEditSize(target) === 'size'
+            const resize = editor.getEditSize(target) !== 'scale'
             if (transform) {
                 target.transformWorld(transform, resize)
             } else {
