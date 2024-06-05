@@ -1,4 +1,5 @@
 export { Arrow } from './Arrow'
+export { ArrowData } from './data/ArrowData'
 export { PathArrowModule } from './PathArrowModule'
 export { PathMatrixHelper } from './PathMatrixHelper'
 

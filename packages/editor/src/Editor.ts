@@ -157,7 +157,7 @@ export class Editor extends Group implements IEditor {
         const { direction } = e.current as IEditPoint
 
         let { around, lockRatio } = this.mergeConfig
-        if (e.shiftKey) lockRatio = true
+        if (e.shiftKey || element.lockRatio) lockRatio = true
 
         const data = EditDataHelper.getScaleData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, EditDataHelper.getAround(around, e.altKey))
 
