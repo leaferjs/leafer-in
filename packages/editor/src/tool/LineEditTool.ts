@@ -82,16 +82,12 @@ export class LineEditTool extends EditTool {
         }
     }
 
-    getFromToByPoints(points: number[] | IPointData[]): IFromToData {
-        return typeof points[0] === 'object' ?
-            {
-                from: { ...points[0] },
-                to: { ...(points as IPointData[])[1] }
-            } :
-            {
-                from: { x: (points as number[])[0], y: (points as number[])[1] },
-                to: { x: (points as number[])[2], y: (points as number[])[3] }
-            }
+    getFromToByPoints(points: number[]): IFromToData {
+        return {
+            from: { x: points[0], y: points[1] },
+            to: { x: points[2], y: points[3] }
+        }
+
     }
 
     dragPoint(fromPoint: IPointData, toPoint: IPointData, isDragFrom: boolean, around: IAround, movePoint: IPointData): void {
