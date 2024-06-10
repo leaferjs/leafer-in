@@ -225,6 +225,8 @@ export class Editor extends Group implements IEditor {
     }
 
     public scaleWithDrag(data: IEditorScaleEvent): void {
+        if (!this.mergeConfig.resizeable || this.element.locked) return
+
         const { element } = this
         const worldOrigin = element.getWorldPoint(data.origin)
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, { ...data, target: element, editor: this, worldOrigin })
@@ -235,6 +237,8 @@ export class Editor extends Group implements IEditor {
 
 
     public scaleOf(origin: IPointData, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
+        if (!this.mergeConfig.resizeable || this.element.locked) return
+
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
 
@@ -253,6 +257,8 @@ export class Editor extends Group implements IEditor {
     }
 
     public rotateOf(origin: IPointData, rotation: number): void {
+        if (!this.mergeConfig.rotateable || this.element.locked) return
+
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
 
@@ -272,6 +278,8 @@ export class Editor extends Group implements IEditor {
     }
 
     public skewOf(origin: IPointData, skewX: number, skewY = 0, _resize?: boolean): void {
+        if (!this.mergeConfig.skewable || this.element.locked) return
+
         const { element } = this
         const worldOrigin = element.getWorldPoint(origin)
 
