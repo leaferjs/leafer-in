@@ -1,6 +1,6 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject } from '@leafer-ui/interface'
 import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper } from '@leafer-ui/draw'
-import { DragEvent, RotateEvent, KeyEvent } from '@leafer-ui/core'
+import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor } from '@leafer-in/interface'
 
@@ -154,20 +154,29 @@ export class Editor extends Group implements IEditor {
         this.move(DragEvent.getValidMove(this.element, this.dragStartPoint, total))
     }
 
-    public onScale(e: DragEvent): void {
+    public onScale(e: DragEvent | ZoomEvent): void {
         const { element } = this
-        const { direction } = e.current as IEditPoint
 
-        let { around, lockRatio } = this.mergeConfig
-        if (e.shiftKey || element.lockRatio) lockRatio = true
-
-        const data = EditDataHelper.getScaleData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, EditDataHelper.getAround(around, e.altKey))
-
-        if (this.editTool.onScaleWithDrag) {
-            data.drag = e
-            this.scaleWithDrag(data)
+        if (e instanceof ZoomEvent) {
+            if (this.mergeConfig.resizeable === 'zoom') {
+                e.stop()
+                this.scaleOf(element.getInnerPoint(e), e.scale, e.scale)
+            }
         } else {
-            this.scaleOf(data.origin, data.scaleX, data.scaleY)
+
+            const { direction } = e.current as IEditPoint
+            let { around, lockRatio } = this.mergeConfig
+            if (e.shiftKey || element.lockRatio) lockRatio = true
+
+            const data = EditDataHelper.getScaleData(element.boxBounds, direction, e.getInnerMove(element), lockRatio, EditDataHelper.getAround(around, e.altKey))
+
+            if (this.editTool.onScaleWithDrag) {
+                data.drag = e
+                this.scaleWithDrag(data)
+            } else {
+                this.scaleOf(data.origin, data.scaleX, data.scaleY)
+            }
+
         }
 
     }
@@ -181,7 +190,10 @@ export class Editor extends Group implements IEditor {
         let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
-            rotation = e.rotation, origin = element.getInnerPoint(e)
+            if (this.mergeConfig.rotateable === 'rotate') {
+                e.stop()
+                rotation = e.rotation, origin = element.getInnerPoint(e)
+            } else return
         } else {
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
             const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))

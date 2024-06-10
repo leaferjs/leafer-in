@@ -1,6 +1,6 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign } from '@leafer-ui/interface'
 import { Group, Box, AroundHelper, Direction9 } from '@leafer-ui/draw'
-import { DragEvent, PointerEvent } from '@leafer-ui/core'
+import { DragEvent, PointerEvent, RotateEvent, ZoomEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
@@ -128,7 +128,7 @@ export class EditBox extends Group implements IEditBox {
                 resizeL.set(point)
 
                 // visible 
-                resizeP.visible = resizeL.visible = showPoints && (resizeable || rotateable)
+                resizeP.visible = resizeL.visible = showPoints && !!(resizeable || rotateable)
                 rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
 
                 if (i % 2) { // top,  right, bottom, left
@@ -309,9 +309,14 @@ export class EditBox extends Group implements IEditBox {
         const { rect, editor } = this
         this.__eventIds = [
             editor.on_(EditorEvent.SELECT, this.onSelect, this),
+
             rect.on_(DragEvent.START, this.onDragStart, this),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
             rect.on_(DragEvent.END, this.onDragEnd, this),
+
+            rect.on_(ZoomEvent.BEFORE_ZOOM, editor.onScale, editor, true),
+            rect.on_(RotateEvent.BEFORE_ROTATE, editor.onRotate, editor, true),
+
             rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor)),
             rect.on_(PointerEvent.DOUBLE_TAP, this.onDoubleTap, this),
             rect.on_(PointerEvent.LONG_PRESS, this.onLongPress, this)
