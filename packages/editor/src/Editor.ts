@@ -20,6 +20,8 @@ import { EditorHelper } from './helper/EditorHelper'
 import { EditDataHelper } from './helper/EditDataHelper'
 import { updateCursor } from './editor/cursor'
 import { EditToolCreator } from './tool/EditToolCreator'
+import { InnerEditorEvent } from './event/InnerEditorEvent'
+import { EditorGroupEvent } from './event/EditorGroupEvent'
 
 
 export class Editor extends Group implements IEditor {
@@ -292,23 +294,32 @@ export class Editor extends Group implements IEditor {
     // group
 
     public group(userGroup?: IGroup | IGroupInputData): IGroup {
-        if (this.multiple) this.target = EditorHelper.group(this.list, this.element, userGroup)
+        if (this.multiple) {
+            this.target = EditorHelper.group(this.list, this.element, userGroup)
+            this.emitGroupEvent(EditorGroupEvent.GROUP, this.target as IGroup)
+        }
         return this.target as IGroup
     }
 
     public ungroup(): IUI[] {
-        if (this.list.length) this.target = EditorHelper.ungroup(this.list)
+        const { list } = this
+        if (list.length) {
+            this.target = EditorHelper.ungroup(list)
+            list.forEach(item => item.isBranch && this.emitGroupEvent(EditorGroupEvent.UNGROUP, item as IGroup))
+        }
         return this.list
     }
 
     public openGroup(group: IGroup): void {
         this.openedGroupList.add(group)
         group.hitChildren = true
+        this.emitGroupEvent(EditorGroupEvent.OPEN, group)
     }
 
     public closeGroup(group: IGroup): void {
         this.openedGroupList.remove(group)
         group.hitChildren = false
+        this.emitGroupEvent(EditorGroupEvent.CLOSE, group)
     }
 
     public checkOpenedGroups(): void {
@@ -320,18 +331,28 @@ export class Editor extends Group implements IEditor {
         }
     }
 
+    public emitGroupEvent(type: string, group: IGroup): void {
+        const event = new EditorGroupEvent(type, { editTarget: group })
+        this.emitEvent(event)
+        group.emitEvent(event)
+    }
+
     // inner
 
-    public openInnerEditor(): void {
+    public openInnerEditor(target?: IUI): void {
+        if (target) this.target = target
         if (this.single) {
-            const tag = this.element.editInner
-            if (tag) {
-                if (EditToolCreator.list[tag]) {
-                    this.editTool.unload()
-                    this.innerEditing = true
-                    this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
-                    this.innerEditor.load()
-                }
+            const editTarget = this.element
+            const tag = editTarget.editInner
+            if (tag && EditToolCreator.list[tag]) {
+                this.editTool.unload()
+                this.innerEditing = true
+                this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
+                this.innerEditor.editTarget = editTarget
+
+                this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
+                this.innerEditor.load()
+                this.emitInnerEvent(InnerEditorEvent.OPEN)
             }
         }
     }
@@ -339,10 +360,22 @@ export class Editor extends Group implements IEditor {
     public closeInnerEditor(): void {
         if (this.innerEditing) {
             this.innerEditing = false
+
+            this.emitInnerEvent(InnerEditorEvent.BEFORE_CLOSE)
             this.innerEditor.unload()
+            this.emitInnerEvent(InnerEditorEvent.CLOSE)
+
             this.editTool.load()
             this.innerEditor = null
         }
+    }
+
+    public emitInnerEvent(type: string): void {
+        const { innerEditor } = this
+        const { editTarget } = innerEditor
+        const event = new InnerEditorEvent(type, { editTarget, innerEditor })
+        this.emitEvent(event)
+        editTarget.emitEvent(event)
     }
 
     // lock

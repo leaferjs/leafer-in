@@ -32,6 +32,7 @@ export interface IEditTool extends IInnerEditor {
 
 export interface IInnerEditor {
     tag: string
+    editTarget: IUI
 
     editor: IEditor
     editBox: IEditBox
@@ -68,6 +69,17 @@ export interface IEditorEvent extends IEvent {
     readonly worldOrigin?: IPointData
     readonly origin?: IPointData
 }
+
+export interface IInnerEditorEvent extends IEditorEvent {
+    editTarget: IUI
+    innerEditor: IInnerEditor
+}
+
+export interface IEditorGroupEvent extends IEditorEvent {
+    editTarget: IUI
+}
+
+
 export interface IEditorMoveEvent extends IEditorEvent {
     readonly moveX: number
     readonly moveY: number

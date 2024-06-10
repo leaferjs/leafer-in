@@ -8,6 +8,7 @@ export { EditSelect } from './display/EditSelect'
 export { SelectArea } from './display/SelectArea'
 export { Stroker } from './display/Stroker'
 
+export { InnerEditorEvent } from './event/InnerEditorEvent'
 export { EditorEvent } from './event/EditorEvent'
 export { EditorMoveEvent } from './event/EditorMoveEvent'
 export { EditorScaleEvent } from './event/EditorScaleEvent'

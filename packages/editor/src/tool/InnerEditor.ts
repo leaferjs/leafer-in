@@ -1,4 +1,4 @@
-import { IGroup, IEventListenerId } from '@leafer-ui/interface'
+import { IGroup, IEventListenerId, IUI } from '@leafer-ui/interface'
 import { IInnerEditor, IEditor, IEditBox } from '@leafer-in/interface'
 
 import { Group } from '@leafer-ui/draw'
@@ -12,6 +12,8 @@ export class InnerEditor implements IInnerEditor {
 
 
     public get tag() { return 'InnerEditor' }
+
+    public editTarget: IUI
 
     public editor: IEditor
     public get editBox(): IEditBox { return this.editor.editBox }
