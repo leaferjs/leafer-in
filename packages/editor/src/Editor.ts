@@ -329,6 +329,18 @@ export class Editor extends Group implements IEditor {
             if (this.editing) list = [], opened.forEach(item => this.list.every(leaf => !LeafHelper.hasParent(leaf, item)) && list.push(item))
             list.forEach(item => this.closeGroup(item as IGroup))
         }
+        if (this.editing && !this.selector.dragging) this.checkDeepSelect()
+    }
+
+    public checkDeepSelect(): void {
+        let parent: IGroup, { list } = this
+        for (let i = 0; i < list.length; i++) {
+            parent = list[i].parent
+            while (parent && !parent.hitChildren) {
+                this.openGroup(parent)
+                parent = parent.parent
+            }
+        }
     }
 
     public emitGroupEvent(type: string, group: IGroup): void {
