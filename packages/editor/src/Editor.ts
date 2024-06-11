@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign } from '@leafer-ui/interface'
 import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent } from '@leafer-ui/core'
 
@@ -248,11 +248,11 @@ export class Editor extends Group implements IEditor {
     }
 
 
-    public scaleOf(origin: IPointData, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
+    public scaleOf(origin: IPointData | IAlign, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
         if (!this.mergeConfig.resizeable || this.element.locked) return
 
         const { element } = this
-        const worldOrigin = element.getWorldPoint(origin)
+        const worldOrigin = element.getWorldPoint(LeafHelper.getInnerOrigin(element, origin))
 
         let transform: Matrix
 
@@ -268,11 +268,11 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
     }
 
-    public rotateOf(origin: IPointData, rotation: number): void {
+    public rotateOf(origin: IPointData | IAlign, rotation: number): void {
         if (!this.mergeConfig.rotateable || this.element.locked) return
 
         const { element } = this
-        const worldOrigin = element.getWorldPoint(origin)
+        const worldOrigin = element.getWorldPoint(LeafHelper.getInnerOrigin(element, origin))
 
 
         let transform: Matrix
@@ -289,11 +289,11 @@ export class Editor extends Group implements IEditor {
         this.emitEvent(event)
     }
 
-    public skewOf(origin: IPointData, skewX: number, skewY = 0, _resize?: boolean): void {
+    public skewOf(origin: IPointData | IAlign, skewX: number, skewY = 0, _resize?: boolean): void {
         if (!this.mergeConfig.skewable || this.element.locked) return
 
         const { element } = this
-        const worldOrigin = element.getWorldPoint(origin)
+        const worldOrigin = element.getWorldPoint(LeafHelper.getInnerOrigin(element, origin))
 
         let transform: Matrix
 
