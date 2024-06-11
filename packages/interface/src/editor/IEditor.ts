@@ -76,7 +76,7 @@ export interface IInnerEditorEvent extends IEditorEvent {
 }
 
 export interface IEditorGroupEvent extends IEditorEvent {
-    editTarget: IUI
+    editTarget: IGroup
 }
 
 

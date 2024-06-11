@@ -1,6 +1,6 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject } from '@leafer-ui/interface'
 import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper } from '@leafer-ui/draw'
-import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
+import { DragEvent, RotateEvent, KeyEvent, ZoomEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor } from '@leafer-in/interface'
 
@@ -324,6 +324,7 @@ export class Editor extends Group implements IEditor {
     public ungroup(): IUI[] {
         const { list } = this
         if (list.length) {
+            list.forEach(item => item.isBranch && this.emitGroupEvent(EditorGroupEvent.BEFORE_UNGROUP, item as IGroup))
             this.target = EditorHelper.ungroup(list)
             list.forEach(item => item.isBranch && this.emitGroupEvent(EditorGroupEvent.UNGROUP, item as IGroup))
         }
