@@ -44,6 +44,7 @@ export class EditBox extends Group implements IEditBox {
         this.editor = editor
         this.visible = false
         this.create()
+        this.rect.syncEventer = editor // rect的事件不会冒泡，需要手动传递给editor
         this.__listenEvents()
     }
 
