@@ -1,0 +1,36 @@
+{
+  "name": "@leafer-in/resize",
+  "version": "1.0.0-rc.25",
+  "description": "@leafer-in/resize",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/resize.esm.js",
+  "exports": {
+    "import": "./dist/resize.esm.js",
+    "require": "./dist/resize.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/resize.js",
+  "jsdelivr": "dist/resize.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/in.git"
+  },
+  "homepage": "https://github.com/leaferjs/in/tree/main/packages/resize",
+  "bugs": "https://github.com/leaferjs/in/issues",
+  "keywords": [
+    "leafer resize",
+    "leafer-resize",
+    "leafer-in",
+    "resize",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "dependencies": {
+    "@leafer-ui/draw": "1.0.0-rc.25",
+    "@leafer-ui/interface": "1.0.0-rc.25"
+  }
+}
