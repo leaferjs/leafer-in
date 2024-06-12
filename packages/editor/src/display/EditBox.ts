@@ -103,10 +103,11 @@ export class EditBox extends Group implements IEditBox {
         element.syncEventer = (single && moveable) ? rect : null
         this.app.interaction.bottomList = (single && moveable) ? [{ target: rect, proxy: element }] : null
 
-        this.visible = !element.locked
     }
 
     public update(bounds: IBoundsData): void {
+        this.visible = !this.editor.element.locked
+
         if (this.view.worldOpacity) {
             const { mergeConfig } = this.editor
             const { width, height } = bounds
