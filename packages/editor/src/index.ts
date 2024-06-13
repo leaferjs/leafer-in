@@ -8,12 +8,14 @@ export { EditSelect } from './display/EditSelect'
 export { SelectArea } from './display/SelectArea'
 export { Stroker } from './display/Stroker'
 
-export { InnerEditorEvent } from './event/InnerEditorEvent'
+
 export { EditorEvent } from './event/EditorEvent'
 export { EditorMoveEvent } from './event/EditorMoveEvent'
 export { EditorScaleEvent } from './event/EditorScaleEvent'
 export { EditorRotateEvent } from './event/EditorRotateEvent'
 export { EditorSkewEvent } from './event/EditorSkewEvent'
+export { EditorGroupEvent } from './event/EditorGroupEvent'
+export { InnerEditorEvent } from './event/InnerEditorEvent'
 
 export { EditToolCreator, registerEditTool, registerInnerEditor } from './tool/EditToolCreator'
 export { InnerEditor } from './tool/InnerEditor'
