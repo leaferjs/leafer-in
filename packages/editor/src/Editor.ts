@@ -27,7 +27,11 @@ import { EditorGroupEvent } from './event/EditorGroupEvent'
 export class Editor extends Group implements IEditor {
 
     public config = config
-    public mergeConfig = config // 实际使用
+
+    public get mergeConfig(): IEditorConfig {
+        const { element, config } = this
+        return this.single && element.editConfig ? { ...config, ...element.editConfig } : config // 实时合并，后期可优化
+    }
 
     @targetAttr(onHover)
     public hoverTarget: IUI
@@ -127,8 +131,6 @@ export class Editor extends Group implements IEditor {
         if (this.editing) {
             const tag = this.single ? this.list[0].editOuter as string : 'EditTool'
             this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
-            const { editConfig } = this.element
-            this.mergeConfig = this.single && editConfig ? { ...this.mergeConfig, ...editConfig } : this.config
             this.editBox.load()
             this.editTool.load()
         }
