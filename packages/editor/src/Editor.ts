@@ -18,6 +18,7 @@ import { onTarget, onHover } from './editor/target'
 import { targetAttr } from './decorator/data'
 import { EditorHelper } from './helper/EditorHelper'
 import { EditDataHelper } from './helper/EditDataHelper'
+import { simulate } from './editor/simulate'
 import { updateCursor } from './editor/cursor'
 import { EditToolCreator } from './tool/EditToolCreator'
 import { InnerEditorEvent } from './event/InnerEditorEvent'
@@ -118,6 +119,11 @@ export class Editor extends Group implements IEditor {
             this.editTool.update()
             this.selector.update()
         }
+    }
+
+    public updateEditBox(): void {
+        if (this.multiple) simulate(this)
+        this.update()
     }
 
     public updateEditTool(): void {
