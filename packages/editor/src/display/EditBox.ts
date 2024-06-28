@@ -219,7 +219,10 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onSelect(e: EditorEvent): void {
-        if (e.oldList.length === 1) e.oldList[0].syncEventer = this.app.interaction.bottomList = null
+        if (e.oldList.length === 1) {
+            e.oldList[0].syncEventer = null
+            if (this.app) this.app.interaction.bottomList = null
+        }
     }
 
     // drag
