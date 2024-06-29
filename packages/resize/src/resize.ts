@@ -9,14 +9,6 @@ import { scaleResize, scaleResizeFontSize, scaleResizeGroup, scaleResizePath, sc
 const leaf = Leaf.prototype
 
 leaf.scaleResize = function (scaleX: number, scaleY = scaleX, noResize?: boolean): void {
-    if (scaleX !== 1) {
-        //const { widthRange, heightRange } = this.__
-    }
-
-    if (scaleY !== 1) {
-
-    }
-
     const data = this as UI
     if (noResize || (data.editConfig && data.editConfig.editSize === 'scale')) {
         data.scaleX *= scaleX
@@ -36,13 +28,13 @@ leaf.__scaleResize = function (scaleX: number, scaleY: number): void {
 
 leaf.resizeWidth = function (width: number): void {
     const scale = width / this.getBounds('box', 'local').width
-    this.scaleOf(this.boxBounds, scale, this.__.lockRatio ? scale : 1, true)
+    this.scaleOf(this.__layout.boxBounds, scale, this.__.lockRatio ? scale : 1, true)
 }
 
 
 leaf.resizeHeight = function (height: number): void {
     const scale = height / this.getBounds('box', 'local').height
-    this.scaleOf(this.boxBounds, this.__.lockRatio ? scale : 1, scale, true)
+    this.scaleOf(this.__layout.boxBounds, this.__.lockRatio ? scale : 1, scale, true)
 }
 
 
