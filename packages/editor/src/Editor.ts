@@ -11,6 +11,7 @@ import { EditorSkewEvent } from './event/EditorSkewEvent'
 
 import { EditSelect } from './display/EditSelect'
 import { EditBox } from './display/EditBox'
+import { EditMask } from './display/EditMask'
 
 import { config } from './config'
 
@@ -71,6 +72,7 @@ export class Editor extends Group implements IEditor {
     public editToolList: IObject = {}
 
     public selector: EditSelect = new EditSelect(this)
+    public editMask: EditMask = new EditMask(this)
 
     public dragStartPoint: IPointData
 
@@ -80,7 +82,7 @@ export class Editor extends Group implements IEditor {
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
-        this.addMany(this.selector, this.editBox)
+        this.addMany(this.editMask, this.selector, this.editBox)
     }
 
     // select 
