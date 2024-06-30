@@ -9,8 +9,8 @@ export interface IEditor extends IEditorBase {
 
     selector: IEditSelect
     editBox: IEditBox
-    editTool: IEditTool
-    innerEditor: IInnerEditor
+    editTool?: IEditTool
+    innerEditor?: IInnerEditor
 
     dragStartPoint: IPointData
     targetEventIds: IEventListenerId[]

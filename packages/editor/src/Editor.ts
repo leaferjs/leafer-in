@@ -35,10 +35,10 @@ export class Editor extends Group implements IEditor {
     }
 
     @targetAttr(onHover)
-    public hoverTarget: IUI
+    public hoverTarget?: IUI
 
     @targetAttr(onTarget)
-    public target: IUI | IUI[]
+    public target?: IUI | IUI[]
 
     // 列表
 
@@ -65,9 +65,9 @@ export class Editor extends Group implements IEditor {
     public editBox: IEditBox = new EditBox(this)
     public get buttons() { return this.editBox.buttons }
 
-    public editTool: IEditTool
+    public editTool?: IEditTool
 
-    public innerEditor: IInnerEditor
+    public innerEditor?: IInnerEditor
     public editToolList: IObject = {}
 
     public selector: EditSelect = new EditSelect(this)

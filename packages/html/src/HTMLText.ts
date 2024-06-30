@@ -15,7 +15,7 @@ export class HTMLText extends Image implements IImage {
     declare public __: IHTMLTextData
 
     @boundsType('')
-    public text: IString
+    public text?: IString
 
     constructor(data?: IHTMLTextInputData) {
         super(data)
