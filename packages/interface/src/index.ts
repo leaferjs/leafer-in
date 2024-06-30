@@ -14,3 +14,7 @@ export { IHTMLTextData, IHTMLTextInputData } from './html/IHTMLTextData'
 // scroll
 
 export { IScrollBar, IScrollBarConfig, IScrollBarTheme } from './scroll/IScrollBar'
+
+// flow
+
+export { IFlowWrapDrawData, IFlowDrawData, IGapBoundsData, IFlowAlignToAxisAlignMap, IFlowParseData } from './flow'
