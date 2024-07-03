@@ -1,5 +1,6 @@
 import { IApp, IBounds, IBox, IBoxInputData, IEventListenerId, IGroup } from '@leafer-ui/interface'
-import { DragEvent, Group, RenderEvent, Box, Bounds, ResizeEvent, DataHelper } from '@leafer-ui/core'
+import { Group, RenderEvent, ResizeEvent, Box, Bounds, DataHelper } from '@leafer-ui/draw'
+import { DragEvent } from '@leafer-ui/core'
 
 import { IScrollBar, IScrollBarConfig, IScrollBarTheme } from '@leafer-in/interface'
 
