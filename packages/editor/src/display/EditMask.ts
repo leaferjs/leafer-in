@@ -23,7 +23,7 @@ export class EditMask extends UI {
             const { width, height } = rect.__
 
             canvas.resetTransform()
-            canvas.fillWorld(canvas.bounds, mask)
+            canvas.fillWorld(canvas.bounds, mask === true ? 'rgba(0,0,0,0.8)' : mask)
             canvas.setWorld(rect.__world, options.matrix)
             canvas.clearRect(0, 0, width, height)
         }
