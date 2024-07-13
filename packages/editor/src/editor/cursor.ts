@@ -12,6 +12,10 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const { editBox } = editor, point = editBox.enterPoint
     if (!point || !editor.editing || !editBox.visible) return
     if (point.name === 'circle') return // 独立旋转按钮
+    if (point.pointType === 'button') {
+        if (!point.cursor) point.cursor = 'pointer'
+        return
+    }
 
     let { rotation } = editBox
     const { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editor.mergeConfig
