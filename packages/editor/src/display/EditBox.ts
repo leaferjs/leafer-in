@@ -163,7 +163,7 @@ export class EditBox extends Group implements IEditBox {
 
     protected layoutCircle(config: IEditorConfig): void {
         const { circleDirection, circleMargin, buttonsMargin, buttonsDirection, middlePoint } = config
-        const direction = fourDirection.indexOf(circleDirection || (this.buttons.children.length && buttonsDirection === 'bottom') ? 'top' : 'bottom')
+        const direction = fourDirection.indexOf(circleDirection || ((this.buttons.children.length && buttonsDirection === 'bottom') ? 'top' : 'bottom'))
         this.setButtonPosition(this.circle, direction, circleMargin || buttonsMargin, !!middlePoint)
     }
 
