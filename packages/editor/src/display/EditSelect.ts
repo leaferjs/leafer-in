@@ -1,4 +1,4 @@
-import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId, IPointerEvent } from '@leafer-ui/interface'
+import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId, IPointerEvent, IFunction } from '@leafer-ui/interface'
 import { Bounds, LeafList, Group } from '@leafer-ui/draw'
 import { PointerEvent, DragEvent, MoveEvent, ZoomEvent } from '@leafer-ui/core'
 
@@ -29,8 +29,9 @@ export class EditSelect extends Group implements IEditSelect {
     protected originList: ILeafList
     protected needRemoveItem: IUI
 
-    protected __eventIds: IEventListenerId[] = []
+    protected waitSelect: IFunction // 手机端延迟选中，防止多点触屏误选元素
 
+    protected __eventIds: IEventListenerId[] = []
 
     constructor(editor: IEditor) {
         super()
@@ -77,14 +78,22 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onBeforeDown(e: PointerEvent): void {
-        const { select } = this.editor.mergeConfig
-        if (select === 'press') this.checkAndSelect(e)
+        const { select, resizeable } = this.editor.mergeConfig
+        if (select === 'press') {
+            if (resizeable === 'zoom') {
+                this.waitSelect = () => this.checkAndSelect(e)
+            } else {
+                this.checkAndSelect(e)
+            }
+        }
     }
 
     protected onTap(e: PointerEvent): void {
         const { editor } = this
         const { select } = editor.mergeConfig
+
         if (select === 'tap') this.checkAndSelect(e)
+        else if (this.waitSelect) this.waitSelect()
 
         if (this.needRemoveItem) {
             editor.removeItem(this.needRemoveItem)
@@ -120,6 +129,8 @@ export class EditSelect extends Group implements IEditSelect {
     // drag
 
     protected onDragStart(e: DragEvent): void {
+        if (this.waitSelect) this.waitSelect()
+
         if (this.allowDrag(e)) {
             const { editor } = this
             const { stroke, area } = editor.mergeConfig
@@ -229,7 +240,7 @@ export class EditSelect extends Group implements IEditSelect {
                 app.on_(PointerEvent.BEFORE_DOWN, this.onBeforeDown, this),
                 app.on_(PointerEvent.TAP, this.onTap, this),
 
-                app.on_(DragEvent.START, this.onDragStart, this),
+                app.on_(DragEvent.START, this.onDragStart, this, true), // 采用捕获事件，需要比EditBox中的dragStart早触发
                 app.on_(DragEvent.DRAG, this.onDrag, this),
                 app.on_(DragEvent.END, this.onDragEnd, this),
 
