@@ -1,6 +1,6 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig } from '@leafer-ui/interface'
 import { Group, Box, AroundHelper, Direction9 } from '@leafer-ui/draw'
-import { DragEvent, PointerEvent, RotateEvent, ZoomEvent } from '@leafer-ui/core'
+import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
@@ -95,7 +95,7 @@ export class EditBox extends Group implements IEditBox {
 
         // rect
         rect.set({ stroke, strokeWidth, ...(mergeConfig.rect || {}) })
-        rect.hittable = !single && moveable
+        rect.hittable = !single && !!moveable
 
         // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
         element.syncEventer = (single && moveable) ? rect : null
@@ -324,9 +324,6 @@ export class EditBox extends Group implements IEditBox {
             rect.on_(DragEvent.START, this.onDragStart, this),
             rect.on_(DragEvent.DRAG, editor.onMove, editor),
             rect.on_(DragEvent.END, this.onDragEnd, this),
-
-            rect.on_(ZoomEvent.BEFORE_ZOOM, editor.onScale, editor, true),
-            rect.on_(RotateEvent.BEFORE_ROTATE, editor.onRotate, editor, true),
 
             rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor)),
             rect.on_(PointerEvent.DOUBLE_TAP, this.onDoubleTap, this),
