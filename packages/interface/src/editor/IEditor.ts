@@ -1,4 +1,4 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject } from '@leafer-ui/interface'
+import { IUI, IPointData, IBoundsData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, ILayoutBoundsData } from '@leafer-ui/interface'
 
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
@@ -13,6 +13,7 @@ export interface IEditor extends IEditorBase {
     innerEditor?: IInnerEditor
 
     dragStartPoint: IPointData
+    dragStartBounds: ILayoutBoundsData
     targetEventIds: IEventListenerId[]
 
     checkOpenedGroups(): void

@@ -1,4 +1,4 @@
-import { IBoundsData, IPointData, IAround, IAlign } from '@leafer-ui/interface'
+import { IBoundsData, IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
 import { AroundHelper, PointHelper, Direction9 } from '@leafer-ui/draw'
 
 import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
@@ -9,23 +9,40 @@ const { toPoint } = AroundHelper
 
 export const EditDataHelper = {
 
-    getScaleData(bounds: IBoundsData, direction: Direction9, pointMove: IPointData, lockRatio: boolean | 'corner', around: IAround): IEditorScaleEvent {
+    getScaleData(element: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
-        const { width, height } = bounds
+
+        const { boxBounds } = element
+        const { width, height } = startBounds
 
         if (around) {
-            pointMove.x *= 2
-            pointMove.y *= 2
+            totalMove.x *= 2
+            totalMove.y *= 2
         }
 
-        // 防止变为0
-        if (Math.abs(pointMove.x) === width) pointMove.x += 0.1
-        if (Math.abs(pointMove.y) === height) pointMove.y += 0.1
 
-        const topScale = (-pointMove.y + height) / height
-        const rightScale = (pointMove.x + width) / width
-        const bottomScale = (pointMove.y + height) / height
-        const leftScale = (-pointMove.x + width) / width
+        // 获取已经改变的比例
+        const originChangedScaleX = element.scaleX / startBounds.scaleX
+        const originChangedScaleY = element.scaleY / startBounds.scaleY
+        const signX = originChangedScaleX < 0 ? -1 : 1
+        const signY = originChangedScaleY < 0 ? -1 : 1
+
+        const changedScaleX = scaleMode ? originChangedScaleX : signX * boxBounds.width / width
+        const changedScaleY = scaleMode ? originChangedScaleY : signY * boxBounds.height / height
+
+        totalMove.x *= scaleMode ? originChangedScaleX : signX
+        totalMove.y *= scaleMode ? originChangedScaleY : signY
+
+
+        // 防止变为0
+        if (Math.abs(totalMove.x) === width) totalMove.x += 0.1
+        if (Math.abs(totalMove.y) === height) totalMove.y += 0.1
+
+
+        const topScale = (-totalMove.y + height) / height
+        const rightScale = (totalMove.x + width) / width
+        const bottomScale = (totalMove.y + height) / height
+        const leftScale = (-totalMove.x + width) / width
 
         switch (direction) {
             case top:
@@ -74,7 +91,18 @@ export const EditDataHelper = {
             }
         }
 
-        toPoint(around || align, bounds, origin)
+
+        scaleX /= changedScaleX
+        scaleY /= changedScaleY
+
+        if (!flipable) {
+            const { worldTransform } = element
+            if (scaleX < 0) scaleX = 1 / boxBounds.width / worldTransform.scaleX
+            if (scaleY < 0) scaleY = 1 / boxBounds.height / worldTransform.scaleY
+        }
+
+
+        toPoint(around || align, boxBounds, origin)
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },

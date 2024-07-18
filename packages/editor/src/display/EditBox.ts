@@ -235,11 +235,13 @@ export class EditBox extends Group implements IEditBox {
 
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
+        const { editor } = this
         if (e.current.name === 'rect') {
-            const { editor } = this
             this.moving = true
             editor.dragStartPoint = { x: editor.element.x, y: editor.element.y }
             editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
+        } else if ((e.current as IEditPoint).pointType === 'resize') {
+            editor.dragStartBounds = { ...editor.element.getLayoutBounds('box', 'local') }
         }
     }
 

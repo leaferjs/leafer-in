@@ -33,6 +33,7 @@ export const config: IEditorConfig = {
 
     moveable: true,
     resizeable: true,
+    flipable: true,
     rotateable: true,
     skewable: true
 }
