@@ -69,7 +69,7 @@ export class EditSelect extends Group implements IEditSelect {
 
     protected onPointerMove(e: PointerEvent): void {
         const { app, editor } = this
-        if (this.running && !this.isMoveMode && app.config.pointer.hover && !app.interaction.dragging) {
+        if (this.running && !this.isMoveMode && app.interaction.canHover && !app.interaction.dragging) {
             const find = this.findUI(e)
             editor.hoverTarget = editor.hasItem(find) ? null : find
         } if (this.isMoveMode) {
@@ -78,9 +78,9 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onBeforeDown(e: PointerEvent): void {
-        const { select, resizeable } = this.editor.mergeConfig
+        const { select } = this.editor.mergeConfig
         if (select === 'press') {
-            if (resizeable === 'zoom') {
+            if (this.app.config.mobile) {
                 this.waitSelect = () => this.checkAndSelect(e)
             } else {
                 this.checkAndSelect(e)
