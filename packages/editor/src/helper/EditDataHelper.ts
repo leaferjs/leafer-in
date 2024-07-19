@@ -1,18 +1,19 @@
 import { IBoundsData, IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
-import { AroundHelper, PointHelper, Direction9 } from '@leafer-ui/draw'
+import { AroundHelper, MathHelper, PointHelper, Direction9 } from '@leafer-ui/draw'
 
 import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = Direction9
 const { toPoint } = AroundHelper
+const { within } = MathHelper
 
 export const EditDataHelper = {
 
     getScaleData(element: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
 
-        const { boxBounds } = element
+        const { boxBounds, widthRange, heightRange } = element
         const { width, height } = startBounds
 
         if (around) {
@@ -95,10 +96,22 @@ export const EditDataHelper = {
         scaleX /= changedScaleX
         scaleY /= changedScaleY
 
+
         if (!flipable) {
             const { worldTransform } = element
             if (scaleX < 0) scaleX = 1 / boxBounds.width / worldTransform.scaleX
             if (scaleY < 0) scaleY = 1 / boxBounds.height / worldTransform.scaleY
+        }
+
+
+        if (widthRange) {
+            const nowWidth = boxBounds.width * element.scaleX
+            scaleX = within(nowWidth * scaleX, widthRange) / nowWidth
+        }
+
+        if (heightRange) {
+            const nowHeight = boxBounds.height * element.scaleY
+            scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
 
 
