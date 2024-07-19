@@ -222,7 +222,7 @@ export class Editor extends Group implements IEditor {
         } else {
 
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (around || 'center'))
+            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (element.around || element.origin || around || 'center'))
             rotation = data.rotation
             origin = data.origin
 
