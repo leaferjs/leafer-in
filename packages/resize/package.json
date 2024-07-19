@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/resize",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "@leafer-in/resize",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "leaferjs"
   ],
   "dependencies": {
-    "@leafer-ui/draw": "1.0.0",
-    "@leafer-ui/interface": "1.0.0"
+    "@leafer-ui/draw": "1.0.1",
+    "@leafer-ui/interface": "1.0.1"
   }
 }
