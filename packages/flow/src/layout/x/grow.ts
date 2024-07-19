@@ -50,7 +50,8 @@ function assignRemainSpace(list: IUI[], totalSpace: number, countGrow: number): 
 
 
 export function resizeWidth(child: IUI, local: IBoundsData, size: number): number {
-    const { widthRange, lockRatio } = child.__, realSize = widthRange ? within(size, widthRange.min, widthRange.max) : size
+    const { widthRange, lockRatio } = child.__
+    const realSize = widthRange ? within(size, widthRange) : size
     const scale = realSize / local.width
     child.scaleResize(scale, lockRatio ? scale : 1)
     local.width = realSize
