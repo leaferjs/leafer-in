@@ -78,6 +78,8 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onBeforeDown(e: PointerEvent): void {
+        if (e.multiTouch) return
+
         const { select } = this.editor.mergeConfig
         if (select === 'press') {
             if (this.app.config.mobile) {
@@ -89,6 +91,8 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onTap(e: PointerEvent): void {
+        if (e.multiTouch) return
+
         const { editor } = this
         const { select } = editor.mergeConfig
 
@@ -129,6 +133,7 @@ export class EditSelect extends Group implements IEditSelect {
     // drag
 
     protected onDragStart(e: DragEvent): void {
+        if (e.multiTouch) return
         if (this.waitSelect) this.waitSelect()
 
         if (this.allowDrag(e)) {
@@ -146,10 +151,8 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected onDrag(e: DragEvent): void {
-        if (this.editor.dragging) {
-            this.onDragEnd()
-            return
-        }
+        if (e.multiTouch) return
+        if (this.editor.dragging) return this.onDragEnd(e)
 
         if (this.dragging) {
             const { editor } = this
@@ -182,7 +185,9 @@ export class EditSelect extends Group implements IEditSelect {
         }
     }
 
-    protected onDragEnd(): void {
+    protected onDragEnd(e: DragEvent): void {
+        if (e.multiTouch) return
+
         if (this.dragging) this.originList = null, this.selectArea.visible = false
     }
 

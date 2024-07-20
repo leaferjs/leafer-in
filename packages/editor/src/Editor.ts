@@ -160,7 +160,8 @@ export class Editor extends Group implements IEditor {
 
             if (e.moveType !== 'drag') {
                 const { moveable, resizeable } = this.mergeConfig
-                if (moveable === 'move') e.stop(), this.move(e.moveX, e.moveY)
+                const move = e.getLocalMove(this.element)
+                if (moveable === 'move') e.stop(), this.move(move.x, move.y)
                 else if (resizeable === 'zoom') e.stop()
             }
 
