@@ -8,7 +8,7 @@
   "unpkg": "dist/text-editor.js",
   "jsdelivr": "dist/text-editor.js",
   "types": "types/index.d.ts",
-  "files": ["types","dist"],
+  "files": ["src","types","dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/leaferjs/in.git"

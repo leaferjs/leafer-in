@@ -4,11 +4,17 @@
   "description": "@leafer-in/flow",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
+  "type": "module",
   "main": "dist/flow.esm.js",
+  "exports": {
+    "import": "./dist/flow.esm.js",
+    "require": "./dist/flow.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
   "unpkg": "dist/flow.js",
   "jsdelivr": "dist/flow.js",
-  "types": "types/index.d.ts",
-  "files": ["types","dist"],
+  "files": ["src","types","dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/leaferjs/in.git"
