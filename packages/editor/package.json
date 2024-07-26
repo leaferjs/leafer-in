@@ -30,9 +30,9 @@
     "leaferjs"
   ],
   "dependencies": {
-    "@leafer-ui/core": "1.0.1",
-    "@leafer-ui/interface": "1.0.1",
-    "@leafer-in/resize": "1.0.1",
-    "@leafer-in/interface": "1.0.1"
+    "@leafer-ui/core": "^1.0.1",
+    "@leafer-ui/interface": "^1.0.1",
+    "@leafer-in/resize": "^1.0.1",
+    "@leafer-in/interface": "^1.0.1"
   }
 }
