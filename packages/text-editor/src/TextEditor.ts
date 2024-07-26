@@ -19,6 +19,7 @@ export class TextEditor extends InnerEditor {
 
     public eventIds: IEventListenerId[] = []
 
+    protected inBody: boolean
     protected _keyEvent: boolean
 
     public onLoad(): void {
@@ -44,9 +45,10 @@ export class TextEditor extends InnerEditor {
         this.textScale = Math.max(Math.abs(scaleX), Math.abs(scaleY))
 
         const fontSize = text.fontSize * this.textScale
-        if (fontSize < 12) this.textScale *= 12 / fontSize;
+        if (fontSize < 12) this.textScale *= 12 / fontSize
 
-        (editor.app.view as any).appendChild(div)
+        const { view } = editor.app;
+        (this.inBody = view instanceof HTMLCanvasElement) ? document.body.appendChild(div) : (view as HTMLDivElement).appendChild(div)
 
         // events 
 
@@ -98,7 +100,7 @@ export class TextEditor extends InnerEditor {
     public onUpdate() {
         const { editTarget: text, textScale } = this
         const { style } = this.editDom
-        const { x, y } = text.app.tree.clientBounds
+        const { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
         const { a, b, c, d, e, f } = new Matrix(text.worldTransform).scale(1 / textScale)
 
         style.transform = `matrix(${a},${b},${c},${d},${e},${f})`
