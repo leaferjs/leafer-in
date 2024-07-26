@@ -28,7 +28,7 @@ import { EditorGroupEvent } from './event/EditorGroupEvent'
 
 export class Editor extends Group implements IEditor {
 
-    public config = config
+    public config = DataHelper.clone(config)
 
     public get mergeConfig(): IEditorConfig {
         const { element, config } = this
