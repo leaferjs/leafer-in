@@ -5,7 +5,7 @@ import { PathScaler } from './PathScaler'
 
 
 const matrix = MatrixHelper.get()
-const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = Direction9
+const { topLeft, top, topRight, right, bottom, left } = Direction9
 
 export function scaleResize(leaf: ILeaf, scaleX: number, scaleY: number): void {
     if (leaf.pathInputed) {
