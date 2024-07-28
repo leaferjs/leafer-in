@@ -86,7 +86,20 @@ export const EditDataHelper = {
         if (lockRatio) {
             const unlockSide = lockRatio === 'corner' && direction % 2
             if (!unlockSide) {
-                const scale = Math.sqrt(Math.abs(scaleX * scaleY))
+                let scale: number
+                switch (direction) {
+                    case top:
+                    case bottom:
+                        scale = scaleY
+                        break
+                    case left:
+                    case right:
+                        scale = scaleX
+                        break
+                    default:
+                        scale = Math.sqrt(Math.abs(scaleX * scaleY))
+
+                }
                 scaleX = scaleX < 0 ? -scale : scale
                 scaleY = scaleY < 0 ? -scale : scale
             }
