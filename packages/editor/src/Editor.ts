@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, ILayoutBoundsData } from '@leafer-ui/interface'
-import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper } from '@leafer-ui/draw'
+import { Group, Rect, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor } from '@leafer-in/interface'
@@ -52,6 +52,7 @@ export class Editor extends Group implements IEditor {
     public get editing(): boolean { return !!this.list.length }
     public innerEditing: boolean
     public get groupOpening(): boolean { return !!this.openedGroupList.length }
+    public resizeDirection?: Direction9
 
     public get multiple(): boolean { return this.list.length > 1 }
     public get single(): boolean { return this.list.length === 1 }

@@ -1,10 +1,11 @@
 import { IBranch, ILeaf, ILine, IPolygon, IText } from '@leafer-ui/interface'
-import { MatrixHelper } from '@leafer-ui/draw'
+import { Direction9, MatrixHelper } from '@leafer-ui/draw'
 
 import { PathScaler } from './PathScaler'
 
 
 const matrix = MatrixHelper.get()
+const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = Direction9
 
 export function scaleResize(leaf: ILeaf, scaleX: number, scaleY: number): void {
     if (leaf.pathInputed) {
@@ -17,13 +18,39 @@ export function scaleResize(leaf: ILeaf, scaleX: number, scaleY: number): void {
 }
 
 export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number): void {
-    const { width, height } = leaf.__localBoxBounds
-    if (scaleX !== 1) {
+    const { app } = leaf
+    const editor = app && app.editor
+
+    if (editor.editing) {
+
+        let { width, height } = leaf.__localBoxBounds
+        width *= (scaleY - scaleX) * (leaf.scaleX < 0 ? -1 : 1)
+        height *= (scaleX - scaleY) * (leaf.scaleY < 0 ? -1 : 1)
+
+        switch (editor.resizeDirection) {
+            case top:
+            case bottom:
+                leaf.fontSize *= scaleY
+                leaf.x -= width / 2
+                break
+            case left:
+            case right:
+                leaf.fontSize *= scaleX
+                leaf.y -= height / 2
+                break
+            case topLeft:
+            case topRight:
+                leaf.fontSize *= scaleX
+                leaf.y -= height
+                break
+            default: // bottomLeft / bottomRight / other
+                leaf.fontSize *= scaleX
+        }
+
+    } else {
+
         leaf.fontSize *= scaleX
-        leaf.y -= height * (scaleX - scaleY) / 2
-    } else if (scaleY !== 1) {
-        leaf.fontSize *= scaleY
-        leaf.x -= width * (scaleY - scaleX) / 2
+
     }
 }
 

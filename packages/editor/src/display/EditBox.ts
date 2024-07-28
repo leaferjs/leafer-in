@@ -242,6 +242,7 @@ export class EditBox extends Group implements IEditBox {
             editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
         } else if ((e.current as IEditPoint).pointType === 'resize') {
             editor.dragStartBounds = { ...editor.element.getLayoutBounds('box', 'local') }
+            editor.resizeDirection = (e.current as IEditPoint).direction
         }
     }
 
@@ -249,6 +250,7 @@ export class EditBox extends Group implements IEditBox {
         this.dragging = false
         this.moving = false
         if (e.current.name === 'rect') this.editor.opacity = 1 // move
+        this.editor.resizeDirection = undefined
 
     }
 
