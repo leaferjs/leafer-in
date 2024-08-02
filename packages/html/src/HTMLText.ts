@@ -17,13 +17,17 @@ export class HTMLText extends Image implements IImage {
     @boundsType('')
     public text?: IString
 
+    public get editInner(): string { return 'TextEditor' }
+
     constructor(data?: IHTMLTextInputData) {
         super(data)
     }
 
     public __updateBoxBounds(): void {
 
-        if (this.__.__htmlChanged) {
+        const data = this.__
+
+        if (data.__htmlChanged) {
 
             const div = document.createElement('div')
             const { style } = div
@@ -35,10 +39,10 @@ export class HTMLText extends Image implements IImage {
             document.body.appendChild(div)
 
             const { width, height } = div.getBoundingClientRect()
-            const italicWidth = 10 // add italic width
+            const realWidth = width + 10 // add italic width
 
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width + italicWidth}" height="${height}">
-                        <foreignObject width="${width + italicWidth}" height="${height}">
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${realWidth}" height="${height}">
+                        <foreignObject width="${realWidth}" height="${height}">
                             <style>
                                 * {
                                     margin: 0;
@@ -52,8 +56,12 @@ export class HTMLText extends Image implements IImage {
                         </foreignObject>
                     </svg>`
 
-            this.__.__setImageFill('data:image/svg+xml,' + encodeURIComponent(svg))
-            this.__.__htmlChanged = false
+            data.__setImageFill('data:image/svg+xml,' + encodeURIComponent(svg))
+
+            data.__naturalWidth = realWidth / data.pixelRatio
+            data.__naturalHeight = height / data.pixelRatio
+
+            data.__htmlChanged = false
 
             div.remove()
         }

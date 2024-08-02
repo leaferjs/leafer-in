@@ -1,5 +1,5 @@
 import { IText, IEventListenerId } from '@leafer-in/interface'
-import { Matrix, PointerEvent } from '@leafer-ui/core'
+import { Matrix, PointerEvent, Text } from '@leafer-ui/core'
 import { InnerEditor, registerInnerEditor } from '@leafer-in/editor'
 import { updateStyle } from './updateStyle'
 
@@ -20,32 +20,43 @@ export class TextEditor extends InnerEditor {
     public eventIds: IEventListenerId[] = []
 
     protected inBody: boolean
+    protected isHTMLText: boolean
     protected _keyEvent: boolean
 
     public onLoad(): void {
         const { editor } = this
         const { config } = editor.app
 
-        this._keyEvent = config.keyEvent
-        config.keyEvent = false
-
         const text = this.editTarget
         text.visible = false
+
+        this.isHTMLText = !(text instanceof Text) // HTMLText
+        this._keyEvent = config.keyEvent
+        config.keyEvent = false
 
         const div = this.editDom = document.createElement('div')
         const { style } = div
         div.contentEditable = 'true'
-        div.innerText = text.text
-
         style.position = 'fixed' // 防止文本输入到边界时产生滚动
         style.transformOrigin = 'left top'
         style.boxSizing = 'border-box'
 
-        const { scaleX, scaleY } = text.worldTransform
-        this.textScale = Math.max(Math.abs(scaleX), Math.abs(scaleY))
+        if (this.isHTMLText) {
 
-        const fontSize = text.fontSize * this.textScale
-        if (fontSize < 12) this.textScale *= 12 / fontSize
+            div.innerHTML = text.text
+            this.textScale = 1
+
+        } else {
+
+            div.innerText = text.text
+
+            const { scaleX, scaleY } = text.worldTransform
+            this.textScale = Math.max(Math.abs(scaleX), Math.abs(scaleY))
+
+            const fontSize = text.fontSize * this.textScale
+            if (fontSize < 12) this.textScale *= 12 / fontSize
+
+        }
 
         const { view } = editor.app;
         (this.inBody = view instanceof HTMLCanvasElement) ? document.body.appendChild(div) : (view as HTMLDivElement).appendChild(div)
@@ -53,7 +64,14 @@ export class TextEditor extends InnerEditor {
         // events 
 
         this.eventIds = [
-            editor.app.on_(PointerEvent.DOWN, (e: PointerEvent) => { if (e.origin.target !== div) editor.closeInnerEditor() })
+            editor.app.on_(PointerEvent.DOWN, (e: PointerEvent) => {
+                let { target } = e.origin, find: boolean
+                while (target) {
+                    if (target === div) find = true
+                    target = target.parentElement
+                }
+                if (!find) editor.closeInnerEditor()
+            })
         ]
 
         this.onFocus = this.onFocus.bind(this)
@@ -86,7 +104,8 @@ export class TextEditor extends InnerEditor {
     }
 
     protected onInput(): void {
-        this.editTarget.text = this.editDom.innerText.replace(/\n\n/, '\n')
+        const { editDom } = this
+        this.editTarget.text = this.isHTMLText ? editDom.innerHTML : editDom.innerText.replace(/\n\n/, '\n')
     }
 
     protected onFocus(): void {
@@ -108,7 +127,7 @@ export class TextEditor extends InnerEditor {
         style.top = y - window.scrollY + 'px'
         style.width = text.width * textScale + (text.__.__autoWidth ? 20 : 0) + 'px'
         style.height = text.height * textScale + (text.__.__autoHeight ? 20 : 0) + 'px'
-        updateStyle(this.editDom, text, this.textScale)
+        this.isHTMLText || updateStyle(this.editDom, text, this.textScale)
     }
 
     public onUnload(): void {
