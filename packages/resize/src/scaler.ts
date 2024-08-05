@@ -23,7 +23,9 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number)
 
     if (editor.editing) {
 
-        let { width, height } = leaf.__localBoxBounds
+        const layout = leaf.__layout
+
+        let { width, height } = layout.boxBounds
         width *= (scaleY - scaleX) * (leaf.scaleX < 0 ? -1 : 1)
         height *= (scaleX - scaleY) * (leaf.scaleY < 0 ? -1 : 1)
 
@@ -31,17 +33,17 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number)
             case top:
             case bottom:
                 leaf.fontSize *= scaleY
-                leaf.x -= width / 2
+                layout.affectScaleOrRotation ? leaf.moveInner(-width / 2, 0) : leaf.x -= width / 2
                 break
             case left:
             case right:
                 leaf.fontSize *= scaleX
-                leaf.y -= height / 2
+                layout.affectScaleOrRotation ? leaf.moveInner(0, -height / 2) : leaf.y -= height / 2
                 break
             case topLeft:
             case topRight:
                 leaf.fontSize *= scaleX
-                leaf.y -= height
+                layout.affectScaleOrRotation ? leaf.moveInner(0, -height) : leaf.y -= height
                 break
             default: // bottomLeft / bottomRight / other
                 leaf.fontSize *= scaleX
