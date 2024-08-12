@@ -37,8 +37,9 @@ export const alignToInnerYMap: IFlowAlignToAxisAlignMap = {
 }
 
 export function alignContent(box: IBox, content: IBoundsData, align: IFlowAlign): void {
-    AlignHelper.toPoint(align as any, content, box.__layout.contentBounds, point)
     const data = box.__
-    content.x = data.__autoWidth ? 0 : point.x
-    content.y = data.__autoHeight ? 0 : point.y
+    const { contentBounds } = box.__layout
+    AlignHelper.toPoint(align as any, content, contentBounds, point)
+    content.x = data.__autoWidth ? contentBounds.x : point.x
+    content.y = data.__autoHeight ? contentBounds.y : point.y
 }
