@@ -187,7 +187,7 @@ export class Editor extends Group implements IEditor {
 
         if (e instanceof ZoomEvent) {
 
-            if (resizeable === 'zoom') e.stop(), this.scaleOf(element.getInnerPoint(e), e.scale, e.scale)
+            if (resizeable === 'zoom') e.stop(), this.scaleOf(element.getBoxPoint(e), e.scale, e.scale)
 
         } else {
 
@@ -218,13 +218,13 @@ export class Editor extends Group implements IEditor {
 
         if (e instanceof RotateEvent) {
 
-            if (rotateable === 'rotate') e.stop(), rotation = e.rotation, origin = element.getInnerPoint(e)
+            if (rotateable === 'rotate') e.stop(), rotation = e.rotation, origin = element.getBoxPoint(e)
             else return
 
         } else {
 
             const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getInner(element), element.getInnerPoint(last), e.shiftKey ? null : (element.around || element.origin || around || 'center'))
+            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getBoxPoint(element), element.getBoxPoint(last), e.shiftKey ? null : (element.around || element.origin || around || 'center'))
             rotation = data.rotation
             origin = data.origin
 

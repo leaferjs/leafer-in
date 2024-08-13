@@ -128,7 +128,7 @@ export const EditDataHelper = {
         }
 
 
-        toPoint(around || align, boxBounds, origin)
+        toPoint(around || align, boxBounds, origin, true)
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
@@ -153,7 +153,7 @@ export const EditDataHelper = {
                 align = 'center'
         }
 
-        toPoint(around || align, bounds, origin)
+        toPoint(around || align, bounds, origin, true)
 
         return { origin, rotation: PointHelper.getRotation(last, origin, current) }
     },
@@ -184,12 +184,12 @@ export const EditDataHelper = {
                 skewY = 1
         }
 
-        const { x, y, width, height } = bounds
+        const { width, height } = bounds
 
-        last.x = x + last.x * width
-        last.y = y + last.y * height
+        last.x = last.x * width
+        last.y = last.y * height
 
-        toPoint(around || align, bounds, origin)
+        toPoint(around || align, bounds, origin, true)
 
         const rotation = PointHelper.getRotation(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
         skewX ? skewX = -rotation : skewY = rotation

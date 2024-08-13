@@ -139,7 +139,7 @@ export class EditSelect extends Group implements IEditSelect {
         if (this.allowDrag(e)) {
             const { editor } = this
             const { stroke, area } = editor.mergeConfig
-            const { x, y } = e.getInner(this)
+            const { x, y } = e.getInnerPoint(this)
 
             this.bounds.set(x, y)
 
