@@ -21,39 +21,40 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number)
     const { app } = leaf
     const editor = app && app.editor
 
+    let fontScale = scaleX
+
     if (editor.editing) {
 
         const layout = leaf.__layout
 
         let { width, height } = layout.boxBounds
-        width *= (scaleY - scaleX) * (leaf.scaleX < 0 ? -1 : 1)
-        height *= (scaleX - scaleY) * (leaf.scaleY < 0 ? -1 : 1)
+        width *= scaleY - scaleX
+        height *= scaleX - scaleY
 
         switch (editor.resizeDirection) {
             case top:
             case bottom:
-                leaf.fontSize *= scaleY
+                fontScale = scaleY
                 layout.affectScaleOrRotation ? leaf.moveInner(-width / 2, 0) : leaf.x -= width / 2
                 break
             case left:
             case right:
-                leaf.fontSize *= scaleX
                 layout.affectScaleOrRotation ? leaf.moveInner(0, -height / 2) : leaf.y -= height / 2
                 break
             case topLeft:
             case topRight:
-                leaf.fontSize *= scaleX
                 layout.affectScaleOrRotation ? leaf.moveInner(0, -height) : leaf.y -= height
                 break
-            default: // bottomLeft / bottomRight / other
-                leaf.fontSize *= scaleX
         }
 
-    } else {
-
-        leaf.fontSize *= scaleX
-
     }
+
+    leaf.fontSize *= fontScale
+
+    const data = leaf.__
+    if (!data.__autoWidth) leaf.width *= fontScale
+    if (!data.__autoHeight) leaf.height *= fontScale
+
 }
 
 export function scaleResizePath(leaf: ILeaf, scaleX: number, scaleY: number): void {

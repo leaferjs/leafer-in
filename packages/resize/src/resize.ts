@@ -41,7 +41,7 @@ leaf.resizeHeight = function (height: number): void {
 // UI
 
 Text.prototype.__scaleResize = function (scaleX: number, scaleY: number): void {
-    if (this.__.__autoSize && (this.__.resizeFontSize || (this.editConfig && this.editConfig.editSize === 'font-size'))) {
+    if (this.__.resizeFontSize || (this.editConfig && this.editConfig.editSize === 'font-size')) {
         scaleResizeFontSize(this, scaleX, scaleY)
     } else {
         scaleResize(this, scaleX, scaleY)
