@@ -1,0 +1,37 @@
+{
+  "name": "@leafer-in/animate",
+  "version": "1.0.2",
+  "description": "@leafer-in/animate",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/animate.esm.js",
+  "exports": {
+    "import": "./dist/animate.esm.js",
+    "require": "./dist/animate.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/animate.js",
+  "jsdelivr": "dist/animate.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/in.git"
+  },
+  "homepage": "https://github.com/leaferjs/in/tree/main/packages/animate",
+  "bugs": "https://github.com/leaferjs/in/issues",
+  "keywords": [
+    "leafer animate",
+    "leafer-animate",
+    "leafer-in",
+    "animate",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "dependencies": {
+    "@leafer-ui/draw": "^1.0.2",
+    "@leafer-ui/interface": "^1.0.2",
+    "@leafer-in/interface": "^1.0.2"
+  }
+}
