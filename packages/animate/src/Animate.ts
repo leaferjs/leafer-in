@@ -50,6 +50,9 @@ export class Animate implements IAnimate {
     public autoplay: boolean
 
     @animateAttr()
+    public fromBefore: boolean
+
+    @animateAttr()
     public event?: IAnimateEvents
 
 
@@ -57,7 +60,7 @@ export class Animate implements IAnimate {
 
     protected nowIndex: number
     protected get nowItem(): IComputedKeyframe { return this.list[this.nowIndex] }
-    protected get nowTotalDuration(): number { return this.nowItem.totalDuration || this.nowItem.duration }
+    protected get nowTotalDuration(): number { return this.nowItem.totalDuration || this.nowItem.duration || 0 }
 
     protected easingFn: IFunction
 
@@ -127,8 +130,8 @@ export class Animate implements IAnimate {
 
 
     protected create(keyframes: IKeyframe[]): void {
-        const { target, list } = this, { length } = keyframes
-        let addedDuration = 0, autoDuration = 0, before: IObject = target, keyframe: IKeyframe, item: IComputedKeyframe, data: IObject
+        const { target, list } = this, { length } = keyframes, fromBefore = length > 1 ? this.fromBefore : true
+        let addedDuration = 0, autoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
 
         if (length > 1) this.from = {}, this.to = {}
 
@@ -136,20 +139,19 @@ export class Animate implements IAnimate {
 
             keyframe = keyframes[i]
 
-            data = keyframe.key || keyframe
-            item = { key: data, before: {} }
+            style = keyframe.style || keyframe
+            if (!before) before = fromBefore ? target : style
 
-            if (keyframe.key) { // with options
+            item = { style, before: {} }
+
+            if (keyframe.style) { // with options
 
                 const { duration, delay, endDelay, autoDelay, autoEndDelay, easing } = keyframe
 
                 if (duration) {
                     item.duration = duration, addedDuration += duration
                     if (delay || endDelay) item.totalDuration = duration + (delay || 0) + (endDelay || 0)
-                } else {
-                    if (keyframe.autoDuration) item.autoDuration = keyframe.autoDuration, autoDuration += keyframe.autoDuration
-                    else autoDuration++
-                }
+                } else if (keyframe.autoDuration) item.autoDuration = keyframe.autoDuration, autoDuration += keyframe.autoDuration
 
                 if (delay) item.delay = delay, addedDuration += delay
                 else if (autoDelay) item.autoDelay = autoDelay, autoDuration += autoDelay
@@ -159,21 +161,21 @@ export class Animate implements IAnimate {
 
                 if (easing) item.easingFn = AnimateEasing.get(easing)
 
-            } else {
+            }
 
-                if (length > 1) autoDuration++
+            if (item.duration === undefined) {
+                if (length > 1) (i > 0 || fromBefore) ? autoDuration++ : item.duration = 0 // 默认第一帧无时长
                 else item.duration = this.duration
-
             }
 
             if (length > 1) {
-                this.setBefore(item, data, before)
+                this.setBefore(item, style, before)
             } else {
-                for (let key in data) { item.before[key] = target[key] }
-                this.from = item.before, this.to = item.key
+                for (let key in style) { item.before[key] = target[key] }
+                this.from = item.before, this.to = item.style
             }
 
-            before = data
+            before = style
             list.push(item)
         }
 
@@ -197,15 +199,17 @@ export class Animate implements IAnimate {
 
     public allocateTime(partTime: number): void {
         this.list.forEach(item => {
-            if (!item.duration) {
+            if (item.duration === undefined) {
                 item.duration = item.autoDuration ? partTime * item.autoDuration : partTime
 
                 if (item.autoDelay) item.delay = item.autoDelay * partTime
                 if (item.autoEndDelay) item.endDelay = item.autoEndDelay * partTime
 
-                if (item.delay || item.endDelay) item.totalDuration = item.duration
-                if (item.delay) item.totalDuration += item.delay
-                if (item.endDelay) item.totalDuration += item.endDelay
+                if (item.delay || item.endDelay) {
+                    item.totalDuration = item.duration
+                    if (item.delay) item.totalDuration += item.delay
+                    if (item.endDelay) item.totalDuration += item.endDelay
+                }
             }
         })
     }
@@ -340,9 +344,9 @@ export class Animate implements IAnimate {
 
     protected transition(t: number): void {
         const { target } = this
-        const { key: style, before: beforeStyle } = this.nowItem
-        const fromStyle = this.isReverse ? style : beforeStyle
-        const toStyle = this.isReverse ? beforeStyle : style
+        const { style, before } = this.nowItem
+        const fromStyle = this.isReverse ? style : before
+        const toStyle = this.isReverse ? before : style
 
         if (t === 0) {
             this.setStyle(fromStyle)
