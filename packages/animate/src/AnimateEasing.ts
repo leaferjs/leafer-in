@@ -63,7 +63,7 @@ export const AnimateEasing = {
 
     get(easing: IAnimateEasing) {
         const { list } = AnimateEasing
-        if (typeof easing === 'string') return list[easing]
+        if (typeof easing === 'string') return list[easing || 'ease']
         else if (easing instanceof Array) return cubicBezier(easing[0], easing[1], easing[2], easing[3])
         else return list['ease']
     },
