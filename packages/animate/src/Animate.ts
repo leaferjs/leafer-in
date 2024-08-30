@@ -8,12 +8,14 @@ import { animateAttr } from './decorator'
 export class Animate implements IAnimate {
 
     public target: IObject
+
+    public keyframes: IKeyframe[]
     public config: IAnimateOptions
 
     public from: IObject
     public to: IObject
 
-    public began: boolean
+    public started: boolean
     public running: boolean
     public completed: boolean
     public destroyed: boolean
@@ -28,20 +30,23 @@ export class Animate implements IAnimate {
     @animateAttr('normal')
     public direction: IAnimateDirection
 
+
     @animateAttr(0)
     public delay: number
 
     @animateAttr(0.2)
     public duration: number
 
-    @animateAttr(0)
-    public endDelay: number
-
     @animateAttr('normal')
     public ending: IAnimateEnding
 
+
     @animateAttr(false)
     public loop: boolean | number
+
+    @animateAttr(0)
+    public loopDelay: number
+
 
     @animateAttr(1)
     public speed: number
@@ -52,14 +57,15 @@ export class Animate implements IAnimate {
     @animateAttr()
     public fromBefore: boolean
 
+
     @animateAttr()
     public event?: IAnimateEvents
 
 
-    protected list: IComputedKeyframe[]
+    protected frames: IComputedKeyframe[]
 
     protected nowIndex: number
-    protected get nowItem(): IComputedKeyframe { return this.list[this.nowIndex] }
+    protected get nowItem(): IComputedKeyframe { return this.frames[this.nowIndex] }
     protected get nowTotalDuration(): number { return this.nowItem.totalDuration || this.nowItem.duration || 0 }
 
     protected easingFn: IFunction
@@ -70,25 +76,30 @@ export class Animate implements IAnimate {
     protected isReverse: boolean
     protected timer: ITimer
 
-    protected get realDelay() { return this.isReverse ? this.endDelay : this.delay }
-    protected get realEndDelay() { return this.isReverse ? this.delay : this.endDelay }
     protected get alternate(): boolean { return this.direction.includes('alternate') }
 
 
     constructor(target: IObject, keyframes: IKeyframe | IKeyframe[], options?: IAnimateOptions | number) {
-        if (typeof options === 'number') options = { duration: options }
-
         this.target = target
-        this.config = options || {}
-        this.list = []
+        this.config = typeof options === 'number' ? { duration: options } : (options || {})
 
         if (!keyframes) return
+        this.keyframes = keyframes instanceof Array ? keyframes : [keyframes]
 
-        this.setFirstDirection()
+        this.init()
+    }
+
+    public init(): void {
+
         this.easingFn = AnimateEasing.get(this.easing)
-        this.create(keyframes instanceof Array ? keyframes : [keyframes])
 
-        if (this.autoplay) this.play()
+        this.frames = []
+        this.create()
+
+        if (this.autoplay) this.timer = setTimeout(() => {
+            this.timer = 0
+            this.play()
+        }, 0)
     }
 
 
@@ -96,7 +107,7 @@ export class Animate implements IAnimate {
         if (this.destroyed) return
 
         this.running = true
-        if (!this.began) this.begin()
+        if (!this.started) this.start()
         else if (!this.timer) this.requestAnimate()
         this.emit('play')
     }
@@ -121,7 +132,7 @@ export class Animate implements IAnimate {
         if (this.destroyed) return
 
         time /= this.speed
-        if (!this.began || time < this.now) this.begin(true)
+        if (!this.started || time < this.now) this.start(true)
         this.now = time
 
         this.animate(0, true)
@@ -129,42 +140,41 @@ export class Animate implements IAnimate {
     }
 
 
-    protected create(keyframes: IKeyframe[]): void {
-        const { target, list } = this, { length } = keyframes, fromBefore = length > 1 ? this.fromBefore : true
-        let addedDuration = 0, autoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
+    protected create(): void {
+        const { target, frames, keyframes } = this, { length } = keyframes, fromBefore = length > 1 ? this.fromBefore : true
+        let addedDuration = 0, totalAutoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
 
         if (length > 1) this.from = {}, this.to = {}
 
         for (let i = 0; i < length; i++) {
 
             keyframe = keyframes[i]
-
             style = keyframe.style || keyframe
+
             if (!before) before = fromBefore ? target : style
 
             item = { style, before: {} }
 
             if (keyframe.style) { // with options
 
-                const { duration, delay, endDelay, autoDelay, autoEndDelay, easing } = keyframe
+                const { duration, autoDuration, delay, autoDelay, easing } = keyframe
 
                 if (duration) {
                     item.duration = duration, addedDuration += duration
-                    if (delay || endDelay) item.totalDuration = duration + (delay || 0) + (endDelay || 0)
-                } else if (keyframe.autoDuration) item.autoDuration = keyframe.autoDuration, autoDuration += keyframe.autoDuration
+                    if (delay) item.totalDuration = duration + delay
+                } else {
+                    if (autoDuration) item.autoDuration = autoDuration, totalAutoDuration += autoDuration
+                }
 
                 if (delay) item.delay = delay, addedDuration += delay
-                else if (autoDelay) item.autoDelay = autoDelay, autoDuration += autoDelay
-
-                if (endDelay) item.endDelay = endDelay, addedDuration += endDelay
-                else if (autoEndDelay) item.autoEndDelay = autoEndDelay, autoDuration += autoEndDelay
+                else if (autoDelay) item.autoDelay = autoDelay, totalAutoDuration += autoDelay
 
                 if (easing) item.easingFn = AnimateEasing.get(easing)
 
             }
 
-            if (item.duration === undefined) {
-                if (length > 1) (i > 0 || fromBefore) ? autoDuration++ : item.duration = 0 // 默认第一帧无时长
+            if (!item.autoDuration && item.duration === undefined) {
+                if (length > 1) (i > 0 || fromBefore) ? totalAutoDuration++ : item.duration = 0 // fromBefore不为true时，第一帧无时长
                 else item.duration = this.duration
             }
 
@@ -176,14 +186,18 @@ export class Animate implements IAnimate {
             }
 
             before = style
-            list.push(item)
+            frames.push(item)
         }
 
-        if (autoDuration) {
-            this.allocateTime(Math.max(0, (this.duration - addedDuration) / autoDuration))
+
+        if (totalAutoDuration) {
+            if (this.duration < addedDuration) this.config.duration = addedDuration + 0.2 * totalAutoDuration
+            this.allocateTime((this.duration - addedDuration) / totalAutoDuration)
         } else {
             if (addedDuration) this.config.duration = addedDuration
         }
+
+        console.log(this.frames, this.duration)
 
         this.emit('create')
     }
@@ -198,20 +212,15 @@ export class Animate implements IAnimate {
     }
 
     public allocateTime(partTime: number): void {
-        this.list.forEach(item => {
-            if (item.duration === undefined) {
-                item.duration = item.autoDuration ? partTime * item.autoDuration : partTime
-
-                if (item.autoDelay) item.delay = item.autoDelay * partTime
-                if (item.autoEndDelay) item.endDelay = item.autoEndDelay * partTime
-
-                if (item.delay || item.endDelay) {
-                    item.totalDuration = item.duration
-                    if (item.delay) item.totalDuration += item.delay
-                    if (item.endDelay) item.totalDuration += item.endDelay
-                }
+        let { frames } = this, { length } = frames, frame: IComputedKeyframe
+        for (let i = 0; i < length; i++) {
+            frame = frames[i]
+            if (frame.duration === undefined) frame.duration = frame.autoDuration ? partTime * frame.autoDuration : partTime
+            if (!frame.totalDuration) {
+                if (frame.autoDelay) frame.delay = frame.autoDelay * partTime
+                if (frame.delay) frame.totalDuration = frame.duration, frame.totalDuration += frame.delay
             }
-        })
+        }
     }
 
 
@@ -226,9 +235,7 @@ export class Animate implements IAnimate {
             this.now += (Date.now() - this.requestAnimateTime) / 1000
         }
 
-        const { duration, loop } = this
-
-        const realNow = this.now * this.speed
+        const { duration } = this, realNow = this.now * this.speed
 
         if (realNow < duration) {
 
@@ -237,7 +244,7 @@ export class Animate implements IAnimate {
                 this.isReverse ? this.reverseNextItem() : this.nextItem()
             }
 
-            const itemDelay = (this.isReverse ? this.nowItem.endDelay : this.nowItem.delay) || 0
+            const itemDelay = this.isReverse ? 0 : (this.nowItem.delay || 0)
             const itemPlayedTime = realNow - this.playedDuration - itemDelay
 
             if (itemPlayedTime > this.nowItem.duration) {
@@ -259,45 +266,52 @@ export class Animate implements IAnimate {
             if (realNow < duration) {
                 this.requestAnimate()
             } else {
-                const { realEndDelay } = this
+                const { loop, loopDelay } = this
 
-                if (loop || this.alternate) {
+                if (loop !== false || this.alternate) {
 
                     this.looped++
 
                     if (!(typeof loop === 'number' && this.looped >= loop)) {
 
                         if (this.alternate) this.isReverse = !this.isReverse
-                        if (realEndDelay) this.timer = setTimeout(() => { this.timer = 0, this.begin() }, realEndDelay / this.speed * 1000)
+
+                        if (loopDelay) this.timer = setTimeout(() => { this.timer = 0, this.begin() }, loopDelay / this.speed * 1000)
                         else this.begin()
 
                         return
                     }
                 }
 
-                if (realEndDelay) this.timer = setTimeout(() => { this.timer = 0, this.complete() }, realEndDelay / this.speed * 1000)
-                else this.complete()
+                this.complete()
             }
         }
 
     }
 
-    protected begin(seek?: boolean): void {
-        this.began = true
+    protected start(seek?: boolean): void {
+        this.started = true
         this.completed = false
-        this.playedDuration = this.now = 0
 
+        this.looped = 0
+        this.isReverse = this.direction.includes('reverse')
+
+        if (seek) this.begin(true)
+        else {
+            const { delay } = this
+            if (delay) this.timer = setTimeout(() => {
+                this.timer = 0
+                this.begin()
+            }, delay / this.speed * 1000)
+            else this.begin()
+        }
+    }
+
+    protected begin(seek?: boolean): void {
+        this.playedDuration = this.now = 0
         this.isReverse ? this.setTo() : this.setFrom()
         this.transition(0)
-
-        if (!seek) {
-            const { realDelay } = this
-            if (realDelay) this.timer = setTimeout(() => {
-                this.timer = 0
-                this.requestAnimate()
-            }, realDelay / this.speed * 1000)
-            else this.requestAnimate()
-        }
+        if (!seek) this.requestAnimate()
     }
 
     protected end(): void {
@@ -306,7 +320,7 @@ export class Animate implements IAnimate {
     }
 
     protected complete(): void {
-        this.began = this.running = this.isReverse = false
+        this.started = this.running = this.isReverse = false
         this.completed = true
 
         const { ending } = this
@@ -324,13 +338,13 @@ export class Animate implements IAnimate {
     }
 
     protected setTo(): void {
-        this.nowIndex = this.list.length - 1
+        this.nowIndex = this.frames.length - 1
         this.setStyle(this.to)
     }
 
 
     protected nextItem(): void {
-        if (this.nowIndex + 1 >= this.list.length) return
+        if (this.nowIndex + 1 >= this.frames.length) return
         this.playedDuration += this.nowTotalDuration
         this.nowIndex++
     }
@@ -367,11 +381,6 @@ export class Animate implements IAnimate {
         Object.assign(this.target, style)
     }
 
-    protected setFirstDirection(): void {
-        this.looped = 0
-        this.isReverse = this.direction.includes('reverse')
-    }
-
     protected clearTimer(fn?: IFunction): void {
         if (this.timer) {
             clearTimeout(this.timer), this.timer = 0
@@ -388,7 +397,7 @@ export class Animate implements IAnimate {
         if (!this.destroyed) {
             if (complete && !this.completed) this.stop()
             else this.pause()
-            this.target = this.config = this.list = null
+            this.target = this.config = this.frames = null
             this.destroyed = true
         }
     }
