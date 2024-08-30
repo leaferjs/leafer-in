@@ -65,8 +65,8 @@ export class Animate implements IAnimate {
     protected frames: IComputedKeyframe[]
 
     protected nowIndex: number
-    protected get nowItem(): IComputedKeyframe { return this.frames[this.nowIndex] }
-    protected get nowTotalDuration(): number { return this.nowItem.totalDuration || this.nowItem.duration || 0 }
+    protected get nowFrame(): IComputedKeyframe { return this.frames[this.nowIndex] }
+    protected get nowTotalDuration(): number { return this.nowFrame.totalDuration || this.nowFrame.duration || 0 }
 
     protected easingFn: IFunction
 
@@ -197,8 +197,6 @@ export class Animate implements IAnimate {
             if (addedDuration) this.config.duration = addedDuration
         }
 
-        console.log(this.frames, this.duration)
-
         this.emit('create')
     }
 
@@ -241,17 +239,17 @@ export class Animate implements IAnimate {
 
             while (realNow - this.playedDuration > this.nowTotalDuration) {
                 this.transition(1)
-                this.isReverse ? this.reverseNextItem() : this.nextItem()
+                this.isReverse ? this.reverseNextFrame() : this.nextFrame()
             }
 
-            const itemDelay = this.isReverse ? 0 : (this.nowItem.delay || 0)
+            const itemDelay = this.isReverse ? 0 : (this.nowFrame.delay || 0)
             const itemPlayedTime = realNow - this.playedDuration - itemDelay
 
-            if (itemPlayedTime > this.nowItem.duration) {
+            if (itemPlayedTime > this.nowFrame.duration) {
                 this.transition(1)
             } else if (itemPlayedTime >= 0) {
-                const t = itemPlayedTime / this.nowItem.duration
-                this.transition(this.nowItem.easingFn ? this.nowItem.easingFn(t) : this.easingFn(t))
+                const t = itemPlayedTime / this.nowFrame.duration
+                this.transition(this.nowFrame.easingFn ? this.nowFrame.easingFn(t) : this.easingFn(t))
             }
 
         } else {
@@ -343,13 +341,13 @@ export class Animate implements IAnimate {
     }
 
 
-    protected nextItem(): void {
+    protected nextFrame(): void {
         if (this.nowIndex + 1 >= this.frames.length) return
         this.playedDuration += this.nowTotalDuration
         this.nowIndex++
     }
 
-    protected reverseNextItem(): void {
+    protected reverseNextFrame(): void {
         if (this.nowIndex - 1 < 0) return
         this.playedDuration += this.nowTotalDuration
         this.nowIndex--
@@ -358,7 +356,7 @@ export class Animate implements IAnimate {
 
     protected transition(t: number): void {
         const { target } = this
-        const { style, before } = this.nowItem
+        const { style, before } = this.nowFrame
         const fromStyle = this.isReverse ? style : before
         const toStyle = this.isReverse ? before : style
 
