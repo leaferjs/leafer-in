@@ -1,11 +1,14 @@
-import { ILeaf, IStateStyleType } from '@leafer/interface'
+import { IUI, IStateStyleType } from '@leafer-ui/interface'
 import { State } from '@leafer-ui/core'
 
 import { setStateStyle } from './set'
 import { hasFixedState, restoreStyle } from './helper'
 
 
-export function unsetStateStyle(leaf: ILeaf, _stateType: IStateStyleType, pointerState?: boolean): void {
+export function unsetStateStyle(leaf: IUI, stateType: IStateStyleType, pointerState?: boolean): void {
+
+    const data = leaf.__
+    if (!data[stateType]) return
 
     if (pointerState) {
 
@@ -14,9 +17,9 @@ export function unsetStateStyle(leaf: ILeaf, _stateType: IStateStyleType, pointe
             restoreStyle(leaf)
 
             // press > hover
-            if (State.isPress(leaf) && leaf.pressStyle) {
+            if (State.isPress(leaf) && data.pressStyle) {
                 setStateStyle(leaf, 'pressStyle', true)
-            } else if (State.isHover(leaf) && leaf.hoverStyle) {
+            } else if (State.isHover(leaf) && data.hoverStyle) {
                 setStateStyle(leaf, 'hoverStyle', true)
             }
 
@@ -27,11 +30,11 @@ export function unsetStateStyle(leaf: ILeaf, _stateType: IStateStyleType, pointe
         //  disabled > focus > selected
         restoreStyle(leaf)
 
-        if (leaf.disabledStyle && leaf.disabled) {
+        if (data.disabledStyle && data.disabled) {
             setStateStyle(leaf, 'disabledStyle')
-        } else if (leaf.focusStyle && State.isFocus(leaf)) {
+        } else if (data.focusStyle && State.isFocus(leaf)) {
             setStateStyle(leaf, 'focusStyle')
-        } else if (leaf.selectedStyle && leaf.selected) {
+        } else if (data.selectedStyle && data.selected) {
             setStateStyle(leaf, 'selectedStyle')
         }
 

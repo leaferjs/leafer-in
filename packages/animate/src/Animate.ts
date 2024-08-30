@@ -10,7 +10,7 @@ export class Animate implements IAnimate {
     public target: IObject
 
     public keyframes: IKeyframe[]
-    public config: IAnimateOptions
+    public config?: IAnimateOptions
 
     public from: IObject
     public to: IObject
@@ -81,13 +81,14 @@ export class Animate implements IAnimate {
 
     constructor(target: IObject, keyframes: IKeyframe | IKeyframe[], options?: IAnimateOptions | number) {
         this.target = target
-        this.config = typeof options === 'number' ? { duration: options } : (options || {})
+        this.config = typeof options === 'number' ? { duration: options } : (typeof options === 'object' ? options : undefined)
 
         if (!keyframes) return
         this.keyframes = keyframes instanceof Array ? keyframes : [keyframes]
 
         this.init()
     }
+
 
     public init(): void {
 
@@ -137,6 +138,10 @@ export class Animate implements IAnimate {
 
         this.animate(0, true)
         this.clearTimer(() => this.requestAnimate())
+    }
+
+    public kill(): void {
+        this.destroy(true)
     }
 
 
@@ -191,10 +196,10 @@ export class Animate implements IAnimate {
 
 
         if (totalAutoDuration) {
-            if (this.duration < addedDuration) this.config.duration = addedDuration + 0.2 * totalAutoDuration
+            if (this.duration < addedDuration) this.duration = addedDuration + 0.2 * totalAutoDuration
             this.allocateTime((this.duration - addedDuration) / totalAutoDuration)
         } else {
-            if (addedDuration) this.config.duration = addedDuration
+            if (addedDuration) this.duration = addedDuration
         }
 
         this.emit('create')

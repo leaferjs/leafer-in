@@ -1,13 +1,13 @@
-import { ILeaf, IObject, IStateStyleType } from '@leafer-ui/interface'
+import { IUI, IObject, IStateStyleType, IUIEaseInputData } from '@leafer-ui/interface'
 import { State } from '@leafer-ui/core'
 
 import { hasFixedState, restoreStyle } from './helper'
 
 
-export function setStateStyle(leaf: ILeaf, stateType: IStateStyleType, pointerState?: boolean): void {
+export function setStateStyle(leaf: IUI, stateType: IStateStyleType, pointerState?: boolean): void {
 
-    let style: IObject
-    const data = leaf.__ as IObject
+    let style: IUIEaseInputData
+    const data = leaf.__
 
     if (pointerState) {
 
@@ -22,19 +22,37 @@ export function setStateStyle(leaf: ILeaf, stateType: IStateStyleType, pointerSt
                 style = data[stateType]
                 break
             case 'focusStyle':
-                style = !leaf.disabled && data[stateType]
+                style = !data.disabled && data[stateType]
                 break
             case 'selectedStyle':
-                style = !leaf.disabled && !State.isFocus(leaf) && data[stateType]
+                style = !data.disabled && !State.isFocus(leaf) && data[stateType]
                 break
         }
 
     }
 
+
     if (style) {
         restoreStyle(leaf) // 先回到正常状态
+
+        let { ease, easeIn, easeOut } = style
+        if (ease) {
+            if (!easeIn) easeIn = true
+            if (!easeOut) easeOut = true
+        }
+
+        if (easeIn) {
+            const { from } = leaf.animate(style, easeIn as any)
+            style = from
+        }
+
         leaf.__.normalStyle = leaf.get(style) as IObject
-        leaf.set(style)
+        if (easeOut) leaf.__.normalStyle.easeOut = easeOut
+
+        if (!easeIn) {
+            leaf.killAnimate()
+            leaf.set(style)
+        }
     }
 
 }
