@@ -1,4 +1,4 @@
-import { IUI, IObject, IStateStyleType, IUIEaseInputData } from '@leafer-ui/interface'
+import { IUI, IObject, IStateStyleType, IStateStyle } from '@leafer-ui/interface'
 import { State } from '@leafer-ui/core'
 
 import { hasFixedState, restoreStyle } from './helper'
@@ -6,7 +6,7 @@ import { hasFixedState, restoreStyle } from './helper'
 
 export function setStateStyle(leaf: IUI, stateType: IStateStyleType, pointerState?: boolean): void {
 
-    let style: IUIEaseInputData
+    let style: IStateStyle
     const data = leaf.__
 
     if (pointerState) {

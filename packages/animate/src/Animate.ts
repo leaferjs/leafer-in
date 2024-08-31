@@ -15,9 +15,9 @@ export class Animate implements IAnimate {
     public from: IObject
     public to: IObject
 
-    public started: boolean
+    public get started(): boolean { return !!this.requestAnimateTime }
     public running: boolean
-    public completed: boolean
+    public get completed(): boolean { return this.time >= this.duration && !this.started }
     public destroyed: boolean
 
     public time: number
@@ -273,7 +273,7 @@ export class Animate implements IAnimate {
 
                 if (loop !== false || this.alternate) {
 
-                    this.looped++
+                    this.looped ? this.looped++ : this.looped = 1
 
                     if (!(typeof loop === 'number' && this.looped >= loop)) {
 
@@ -293,11 +293,11 @@ export class Animate implements IAnimate {
     }
 
     protected start(seek?: boolean): void {
-        this.started = true
-        this.completed = false
+        this.requestAnimateTime = 1 // started
 
-        this.looped = 0
-        this.isReverse = this.direction.includes('reverse')
+        const isReverse = this.direction.includes('reverse')
+        if (isReverse || this.isReverse) this.isReverse = isReverse
+        if (this.looped) this.looped = 0
 
         if (seek) this.begin(true)
         else {
@@ -323,8 +323,8 @@ export class Animate implements IAnimate {
     }
 
     protected complete(): void {
-        this.started = this.running = this.isReverse = false
-        this.completed = true
+        this.requestAnimateTime = 0
+        this.running = false
 
         const { ending } = this
         if (ending === 'from') this.setFrom(), this.transition(0)
