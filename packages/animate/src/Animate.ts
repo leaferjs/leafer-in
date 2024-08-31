@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents } from '@leafer-ui/interface'
 import { Platform } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -20,7 +20,7 @@ export class Animate implements IAnimate {
     public completed: boolean
     public destroyed: boolean
 
-    public now: number
+    public time: number
     public looped: number
 
 
@@ -79,12 +79,12 @@ export class Animate implements IAnimate {
     protected get alternate(): boolean { return this.direction.includes('alternate') }
 
 
-    constructor(target: IObject, keyframes: IKeyframe | IKeyframe[], options?: IAnimateOptions | number) {
+    constructor(target: IObject, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | number) {
         this.target = target
         this.config = typeof options === 'number' ? { duration: options } : (typeof options === 'object' ? options : undefined)
 
-        if (!keyframes) return
-        this.keyframes = keyframes instanceof Array ? keyframes : [keyframes]
+        if (!keyframe) return
+        this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
 
         this.init()
     }
@@ -133,8 +133,8 @@ export class Animate implements IAnimate {
         if (this.destroyed) return
 
         time /= this.speed
-        if (!this.started || time < this.now) this.start(true)
-        this.now = time
+        if (!this.started || time < this.time) this.start(true)
+        this.time = time
 
         this.animate(0, true)
         this.clearTimer(() => this.requestAnimate())
@@ -235,10 +235,10 @@ export class Animate implements IAnimate {
     protected animate(_runtime?: number, seek?: boolean): void {
         if (!seek) {
             if (!this.running) return
-            this.now += (Date.now() - this.requestAnimateTime) / 1000
+            this.time += (Date.now() - this.requestAnimateTime) / 1000
         }
 
-        const { duration } = this, realNow = this.now * this.speed
+        const { duration } = this, realNow = this.time * this.speed
 
         if (realNow < duration) {
 
@@ -311,7 +311,7 @@ export class Animate implements IAnimate {
     }
 
     protected begin(seek?: boolean): void {
-        this.playedDuration = this.now = 0
+        this.playedDuration = this.time = 0
         this.isReverse ? this.setTo() : this.setFrom()
         this.transition(0)
         if (!seek) this.requestAnimate()
