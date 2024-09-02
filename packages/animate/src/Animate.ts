@@ -108,7 +108,7 @@ export class Animate implements IAnimate {
         if (this.destroyed) return
 
         this.running = true
-        if (!this.started) this.start()
+        if (!this.started) this.clearTimer(), this.start()
         else if (!this.timer) this.requestAnimate()
         this.emit('play')
     }
@@ -249,11 +249,12 @@ export class Animate implements IAnimate {
 
             const itemDelay = this.isReverse ? 0 : (this.nowFrame.delay || 0)
             const itemPlayedTime = realNow - this.playedDuration - itemDelay
+            const nowDuration = this.nowFrame.duration
 
-            if (itemPlayedTime > this.nowFrame.duration) {
+            if (itemPlayedTime > nowDuration || !nowDuration) {
                 this.transition(1)
             } else if (itemPlayedTime >= 0) {
-                const t = itemPlayedTime / this.nowFrame.duration
+                const t = itemPlayedTime / nowDuration
                 this.transition(this.nowFrame.easingFn ? this.nowFrame.easingFn(t) : this.easingFn(t))
             }
 
@@ -370,10 +371,10 @@ export class Animate implements IAnimate {
         } else if (t === 1) {
             this.setStyle(toStyle)
         } else {
-            let from: number
+            let from: number, to: number
             for (let key in style) {
-                from = fromStyle[key]
-                target[key] = from + (toStyle[key] - from) * t
+                from = fromStyle[key], to = toStyle[key]
+                if (typeof from === 'number') target[key] = from + (to - from) * t
             }
         }
 

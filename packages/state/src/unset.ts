@@ -1,43 +1,77 @@
-import { IUI, IStateStyleType } from '@leafer-ui/interface'
+import { IUI, IStateStyleType, IStateStyle, IUIData } from '@leafer-ui/interface'
 import { State } from '@leafer-ui/core'
 
-import { setStateStyle } from './set'
-import { hasFixedState, restoreStyle } from './helper'
+import { findStyle, getStatesStyle, hasFixedState, restoreStyle } from './helper'
 
 
-export function unsetStateStyle(leaf: IUI, stateType: IStateStyleType, pointerState?: boolean): void {
+export function unsetPointerStateStyle(leaf: IUI, stateName: IStateStyleType): void {
+    const style = !hasFixedState(leaf) && leaf[stateName]
+    if (style) unsetStyle(leaf, stateName, style)
+    if (leaf.button) unsetChildrenPointerStateStyle(leaf.children, stateName)
+}
 
-    const data = leaf.__
-    if (!data[stateType]) return
 
-    if (pointerState) {
+export function unsetStateStyle(leaf: IUI, stateName: string, stateStyle: IStateStyle): void {
+    unsetStyle(leaf, stateName, stateStyle)
+}
 
-        if (!hasFixedState(leaf)) {
 
-            restoreStyle(leaf)
-
-            // press > hover
-            if (State.isPress(leaf) && data.pressStyle) {
-                setStateStyle(leaf, 'pressStyle', true)
-            } else if (State.isHover(leaf) && data.hoverStyle) {
-                setStateStyle(leaf, 'hoverStyle', true)
+function unsetChildrenPointerStateStyle(children: IUI[], stateType: IStateStyleType): void {
+    if (!children) return
+    let leaf: IUI
+    for (let i = 0, len = children.length; i < len; i++) {
+        leaf = children[i]
+        if (!leaf.button) {
+            switch (stateType) {
+                case 'hoverStyle':
+                    if (!State.isHover(leaf)) unsetPointerStateStyle(leaf, stateType)
+                    break
+                case 'pressStyle':
+                    if (!State.isPress(leaf)) unsetPointerStateStyle(leaf, stateType)
+                    break
+                case 'focusStyle':
+                    if (!State.isFocus(leaf)) unsetPointerStateStyle(leaf, stateType)
+                    break
             }
-
+            if (leaf.isBranch) unsetChildrenPointerStateStyle(leaf.children, stateType)
         }
-
-    } else {
-
-        //  disabled > focus > selected
-        restoreStyle(leaf)
-
-        if (data.disabledStyle && data.disabled) {
-            setStateStyle(leaf, 'disabledStyle')
-        } else if (data.focusStyle && State.isFocus(leaf)) {
-            setStateStyle(leaf, 'focusStyle')
-        } else if (data.selectedStyle && data.selected) {
-            setStateStyle(leaf, 'selectedStyle')
-        }
-
     }
+}
 
+function getEaseOut(style: IStateStyle, data: IUIData): any {
+    const ease = (!style || style.ease === undefined) ? data.ease : style.ease
+    let easeOut = (!style || style.easeOut === undefined) ? data.easeOut : style.easeOut
+    if (ease && easeOut === undefined) easeOut = ease
+    return easeOut
+}
+
+
+
+function unsetStyle(leaf: IUI, _stateName: string, style: IStateStyle): void {
+    if (typeof style !== 'object') style = undefined
+
+    const data = leaf.__, { normalStyle } = data
+
+    if (normalStyle) {
+        const statesStyle = getStatesStyle(leaf)
+        if (!style) style = normalStyle
+
+        const easeOut = getEaseOut(style, data)
+        const fromStyle = findStyle(style, data)
+
+        leaf.killAnimate()
+        restoreStyle(leaf) // 必须在得到 toStyle 之后执行
+
+        if (statesStyle) {
+            data.normalStyle = findStyle(statesStyle, data)
+            leaf.set(statesStyle)
+        } else {
+            data.normalStyle = undefined
+        }
+
+        if (easeOut) {
+            const toStyle = findStyle(style, data)
+            leaf.animate([fromStyle, toStyle], easeOut)
+        }
+    }
 }

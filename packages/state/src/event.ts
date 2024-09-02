@@ -1,23 +1,23 @@
 import { IUI } from '@leafer-ui/interface'
 import { PointerEvent } from '@leafer-ui/core'
 
-import { setStateStyle } from './set'
-import { unsetStateStyle } from './unset'
+import { setPointerStateStyle } from './set'
+import { unsetPointerStateStyle } from './unset'
 
 
 export function updateEventStyle(leaf: IUI, eventType: string): void {
     switch (eventType) {
         case PointerEvent.ENTER:
-            setStateStyle(leaf, 'hoverStyle', true)
+            setPointerStateStyle(leaf, 'hoverStyle')
             break
         case PointerEvent.LEAVE:
-            unsetStateStyle(leaf, 'hoverStyle', true)
+            unsetPointerStateStyle(leaf, 'hoverStyle')
             break
         case PointerEvent.DOWN:
-            setStateStyle(leaf, 'pressStyle', true)
+            setPointerStateStyle(leaf, 'pressStyle')
             break
         case PointerEvent.UP:
-            unsetStateStyle(leaf, 'pressStyle', true)
+            unsetPointerStateStyle(leaf, 'pressStyle')
             break
     }
 }
