@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI } from '@leafer-ui/interface'
 import { Platform } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -9,7 +9,7 @@ const frameDuration = 0.2
 
 export class Animate implements IAnimate {
 
-    public target: IObject
+    public target: IUI
 
     public keyframes: IKeyframe[]
     public config?: IAnimateOptions
@@ -63,6 +63,8 @@ export class Animate implements IAnimate {
     @animateAttr()
     public event?: IAnimateEvents
 
+    public isTemp: boolean
+
 
     protected frames: IComputedKeyframe[]
 
@@ -81,9 +83,10 @@ export class Animate implements IAnimate {
     protected get alternate(): boolean { return this.direction.includes('alternate') }
 
 
-    constructor(target: IObject, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | number) {
+    constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | number, isTemp?: boolean) {
         this.target = target
         this.config = typeof options === 'number' ? { duration: options } : (typeof options === 'object' ? options : undefined)
+        this.isTemp = isTemp
 
         if (!keyframe) return
         this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
@@ -188,7 +191,7 @@ export class Animate implements IAnimate {
             if (length > 1) {
                 this.setBefore(item, style, before)
             } else {
-                for (let key in style) { item.before[key] = target[key] }
+                for (let key in style) { item.before[key] = this.getTargetAttr(key) }
                 this.from = item.before, this.to = item.style
             }
 
@@ -213,9 +216,9 @@ export class Animate implements IAnimate {
     }
 
     public setBefore(item: IComputedKeyframe, data: IObject, before: IObject): void {
-        const { target, from, to } = this // 同时生成完整的 from / to
+        const { from, to } = this // 同时生成完整的 from / to
         for (let key in data) {
-            if (from[key] === undefined) from[key] = to[key] = target[key]
+            if (from[key] === undefined) from[key] = to[key] = this.getTargetAttr(key)
             item.before[key] = before[key] === undefined ? to[key] : before[key]
             to[key] = data[key]
         }
@@ -368,7 +371,6 @@ export class Animate implements IAnimate {
 
 
     protected transition(t: number): void {
-        const { target } = this
         const { style, before } = this.nowFrame
         const fromStyle = this.isReverse ? style : before
         const toStyle = this.isReverse ? before : style
@@ -378,18 +380,28 @@ export class Animate implements IAnimate {
         } else if (t === 1) {
             this.setStyle(toStyle)
         } else {
-            let from: number, to: number
+
+            let from: number, to: number, { between } = this.nowFrame
+            if (!between) between = this.nowFrame.between = {}
+
             for (let key in style) {
                 from = fromStyle[key], to = toStyle[key]
-                if (typeof from === 'number') target[key] = from + (to - from) * t
+                if (typeof from === 'number' && typeof to === 'number') between[key] = from + (to - from) * t
+                else between[key] = to
             }
+
+            this.setStyle(between)
         }
 
         this.emit('update')
     }
 
-    protected setStyle(style: IObject): void {
-        Object.assign(this.target, style)
+    public setStyle(style: IObject): void {
+        this.target.set(style, this.isTemp)
+    }
+
+    public getTargetAttr(name: string): any {
+        return (this.target.__ as IObject)[name]
     }
 
     protected clearTimer(fn?: IFunction): void {

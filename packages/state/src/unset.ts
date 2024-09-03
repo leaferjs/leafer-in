@@ -1,7 +1,7 @@
 import { IUI, IStateStyleType, IStateStyle, IUIData } from '@leafer-ui/interface'
 import { State } from '@leafer-ui/core'
 
-import { findStyle, getFromStyle, getStatesStyle, hasFixedState, restoreStyle } from './helper'
+import { assignScale, findStyle, getFromStyle, getStatesStyle, hasFixedState, restoreStyle } from './helper'
 
 
 export function unsetPointerStateStyle(leaf: IUI, stateName: IStateStyleType): void {
@@ -23,6 +23,8 @@ function unsetStyle(leaf: IUI, _stateName: string, style: IStateStyle): void {
         const statesStyle = getStatesStyle(leaf)
         if (!style) style = normalStyle
 
+        if (style.scale) assignScale(style)
+
         const easeOut = getEaseOut(style, data)
         const fromStyle = getFromStyle(leaf, style)
 
@@ -31,15 +33,15 @@ function unsetStyle(leaf: IUI, _stateName: string, style: IStateStyle): void {
 
         if (statesStyle) {
             data.normalStyle = findStyle(statesStyle, data)
-            leaf.set(statesStyle)
+            leaf.set(statesStyle, true)
         } else {
             data.normalStyle = undefined
         }
 
         if (easeOut && fromStyle) {
             const toStyle = findStyle(fromStyle, data)
-            leaf.set(fromStyle)
-            leaf.animate([fromStyle, toStyle], easeOut)
+            leaf.set(fromStyle, true)
+            leaf.animate([fromStyle, toStyle], easeOut, true)
         }
     }
 }

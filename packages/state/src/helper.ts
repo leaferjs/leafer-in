@@ -1,22 +1,26 @@
-import { IUI, IObject, IUIInputData } from '@leafer-ui/interface'
-import { State } from '@leafer-ui/core'
+import { IUI, IObject, IUIInputData, IStateStyle, IScaleData } from '@leafer-ui/interface'
+import { State, MathHelper } from '@leafer-ui/core'
 
 
 export function hasFixedState(leaf: IUI): boolean {
     return leaf.disabled
 }
 
+export function assignScale(style: IStateStyle): void {
+    MathHelper.assignScale(style as IScaleData, style.scale)
+    delete style.scale
+}
+
 export function restoreStyle(leaf: IUI) {
     const { normalStyle } = leaf.__
-    if (normalStyle) leaf.set(normalStyle)
+    if (normalStyle) leaf.set(normalStyle, true)
 }
 
 export function findStyle(find: IObject, data: IObject, findAdd?: IObject): IObject {
-    let value: any
     const to: IObject = findAdd ? find : {}
     const forStyle = findAdd || find
 
-    for (let key in forStyle) value = data[key], value !== undefined && (to[key] = data[key])
+    for (let key in forStyle) to[key] = data[key]
     return to
 }
 

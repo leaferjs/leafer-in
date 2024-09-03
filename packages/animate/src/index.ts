@@ -7,7 +7,7 @@ import { UI } from '@leafer-ui/draw'
 import { Animate } from './Animate'
 
 
-UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: IAnimateOptions | number): IAnimate {
+UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: IAnimateOptions | number, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate
 
     if (typeof keyframe === 'object') {
@@ -16,11 +16,11 @@ UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimat
     }
 
     this.killAnimate()
-    this.__animate = new Animate(this, keyframe as IUIInputData | IKeyframe[], options)
+    this.__animate = new Animate(this, keyframe as IUIInputData | IKeyframe[], options, isTemp)
 
     return this.__animate
 }
 
 UI.prototype.killAnimate = function (): void {
-    if (this.__animate) this.__animate.destroy(true)
+    if (this.__animate) this.__animate.kill()
 }
