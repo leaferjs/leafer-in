@@ -5,6 +5,8 @@ import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
 
 
+const frameDuration = 0.2
+
 export class Animate implements IAnimate {
 
     public target: IObject
@@ -34,7 +36,7 @@ export class Animate implements IAnimate {
     @animateAttr(0)
     public delay: number
 
-    @animateAttr(0.2)
+    @animateAttr(frameDuration)
     public duration: number
 
     @animateAttr('normal')
@@ -146,7 +148,7 @@ export class Animate implements IAnimate {
 
 
     protected create(): void {
-        const { target, frames, keyframes } = this, { length } = keyframes, fromBefore = length > 1 ? this.fromBefore : true
+        const { target, frames, keyframes, config } = this, { length } = keyframes, fromBefore = length > 1 ? this.fromBefore : true
         let addedDuration = 0, totalAutoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
 
         if (length > 1) this.from = {}, this.to = {}
@@ -196,13 +198,18 @@ export class Animate implements IAnimate {
 
 
         if (totalAutoDuration) {
-            if (this.duration < addedDuration) this.duration = addedDuration + 0.2 * totalAutoDuration
+            if (this.duration <= addedDuration || !(config && config.duration)) this.changeDuration(addedDuration + frameDuration * totalAutoDuration)
             this.allocateTime((this.duration - addedDuration) / totalAutoDuration)
         } else {
-            if (addedDuration) this.duration = addedDuration
+            if (addedDuration) this.changeDuration(addedDuration)
         }
 
         this.emit('create')
+    }
+
+    public changeDuration(duration: number): void {
+        const { config } = this
+        this.config = config ? { ...config, duration } : { duration }
     }
 
     public setBefore(item: IComputedKeyframe, data: IObject, before: IObject): void {
