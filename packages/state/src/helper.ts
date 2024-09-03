@@ -11,16 +11,25 @@ export function restoreStyle(leaf: IUI) {
     if (normalStyle) leaf.set(normalStyle)
 }
 
-export function findStyle(style: IObject, find: IObject): IObject {
-    if (!style) return find
-    const to: IObject = {}
-    for (let key in style) to[key] = find[key]
+export function findStyle(find: IObject, data: IObject, findAdd?: IObject): IObject {
+    let value: any
+    const to: IObject = findAdd ? find : {}
+    const forStyle = findAdd || find
+
+    for (let key in forStyle) value = data[key], value !== undefined && (to[key] = data[key])
     return to
+}
+
+export function getFromStyle(leaf: IUI, style: IObject): IObject {
+    const fromStyle = findStyle(style, leaf.__)
+    const animate = leaf.animate()
+    if (animate && !animate.started) findStyle(fromStyle, leaf.__, animate.from)
+    return fromStyle
 }
 
 export function getStatesStyle(leaf: IUI): IObject {
 
-    //  states < selected < focus < hover < press < disabled 从低到高依次覆盖
+    //  states < selected < focus < hover < press < disabled 从低到高的依次覆盖
 
     const data = leaf.__, { state } = data
     const style: IUIInputData = {}, stateStyle = state && data.states[state]

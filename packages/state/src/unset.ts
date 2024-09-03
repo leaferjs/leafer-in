@@ -1,7 +1,7 @@
 import { IUI, IStateStyleType, IStateStyle, IUIData } from '@leafer-ui/interface'
 import { State } from '@leafer-ui/core'
 
-import { findStyle, getStatesStyle, hasFixedState, restoreStyle } from './helper'
+import { findStyle, getFromStyle, getStatesStyle, hasFixedState, restoreStyle } from './helper'
 
 
 export function unsetPointerStateStyle(leaf: IUI, stateName: IStateStyleType): void {
@@ -10,11 +10,39 @@ export function unsetPointerStateStyle(leaf: IUI, stateName: IStateStyleType): v
     if (leaf.button) unsetChildrenPointerStateStyle(leaf.children, stateName)
 }
 
-
 export function unsetStateStyle(leaf: IUI, stateName: string, stateStyle: IStateStyle): void {
     unsetStyle(leaf, stateName, stateStyle)
 }
 
+function unsetStyle(leaf: IUI, _stateName: string, style: IStateStyle): void {
+    if (typeof style !== 'object') style = undefined
+
+    const data = leaf.__, { normalStyle } = data
+
+    if (normalStyle) {
+        const statesStyle = getStatesStyle(leaf)
+        if (!style) style = normalStyle
+
+        const easeOut = getEaseOut(style, data)
+        const fromStyle = getFromStyle(leaf, style)
+
+        leaf.killAnimate()
+        restoreStyle(leaf) // 必须在得到 toStyle 之后执行
+
+        if (statesStyle) {
+            data.normalStyle = findStyle(statesStyle, data)
+            leaf.set(statesStyle)
+        } else {
+            data.normalStyle = undefined
+        }
+
+        if (easeOut && fromStyle) {
+            const toStyle = findStyle(fromStyle, data)
+            leaf.set(fromStyle)
+            leaf.animate([fromStyle, toStyle], easeOut)
+        }
+    }
+}
 
 function unsetChildrenPointerStateStyle(children: IUI[], stateType: IStateStyleType): void {
     if (!children) return
@@ -43,35 +71,4 @@ function getEaseOut(style: IStateStyle, data: IUIData): any {
     let easeOut = (!style || style.easeOut === undefined) ? data.easeOut : style.easeOut
     if (ease && easeOut === undefined) easeOut = ease
     return easeOut
-}
-
-
-
-function unsetStyle(leaf: IUI, _stateName: string, style: IStateStyle): void {
-    if (typeof style !== 'object') style = undefined
-
-    const data = leaf.__, { normalStyle } = data
-
-    if (normalStyle) {
-        const statesStyle = getStatesStyle(leaf)
-        if (!style) style = normalStyle
-
-        const easeOut = getEaseOut(style, data)
-        const fromStyle = findStyle(style, data)
-
-        leaf.killAnimate()
-        restoreStyle(leaf) // 必须在得到 toStyle 之后执行
-
-        if (statesStyle) {
-            data.normalStyle = findStyle(statesStyle, data)
-            leaf.set(statesStyle)
-        } else {
-            data.normalStyle = undefined
-        }
-
-        if (easeOut) {
-            const toStyle = findStyle(style, data)
-            leaf.animate([fromStyle, toStyle], easeOut)
-        }
-    }
 }

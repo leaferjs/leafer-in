@@ -251,10 +251,10 @@ export class Animate implements IAnimate {
             const itemPlayedTime = realNow - this.playedDuration - itemDelay
             const nowDuration = this.nowFrame.duration
 
-            if (itemPlayedTime > nowDuration || !nowDuration) {
+            if (itemPlayedTime > nowDuration) {
                 this.transition(1)
             } else if (itemPlayedTime >= 0) {
-                const t = itemPlayedTime / nowDuration
+                const t = nowDuration ? itemPlayedTime / nowDuration : 1
                 this.transition(this.nowFrame.easingFn ? this.nowFrame.easingFn(t) : this.easingFn(t))
             }
 
