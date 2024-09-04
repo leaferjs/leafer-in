@@ -37,3 +37,7 @@ UI.prototype.focus = function (value: boolean = true): void {
         value ? setPointerState(this, 'focusStyle') : unsetPointerState(this, 'focusStyle')
     })
 }
+
+UI.prototype.updateState = function (): void {
+    State.updateStyle(this, undefined, 'easeIn')
+}

@@ -20,6 +20,7 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
 
 export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' | 'easeOut'): void {
     const statesStyle = getStyle(leaf), data = leaf.__
+
     if (!style) style = statesStyle || {}
 
     if (style.scale) {
@@ -45,6 +46,8 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' 
         leaf.set(fromStyle, true)
         leaf.animate([fromStyle, toStyle], ease === true ? undefined : ease, true)
     }
+
+    leaf.__layout.stateStyleChanged = false
 }
 
 export function getStyle(leaf: IUI): IStateStyle {
