@@ -1,17 +1,28 @@
-import { IUI, IStateStyleType } from '@leafer-ui/interface'
+import { IUI, IStateStyleType, IStateName } from '@leafer-ui/interface'
 import { State, UI } from '@leafer-ui/core'
 
-import { setPointerStateStyle, setStateStyle } from './set'
-import { unsetPointerStateStyle, unsetStateStyle } from './unset'
+import { setPointerState, setState } from './set'
+import { unsetPointerState, unsetState } from './unset'
 import { updateEventStyle } from './event'
+import { checkPointerState, checkFixedState, checkState } from './check'
+import { getStyle, updateStyle } from './style'
 
 
-State.isHover = function (leaf: IUI): boolean { return leaf.leafer && leaf.leafer.interaction.isHover(leaf) }
-State.isPress = function (leaf: IUI): boolean { return leaf.leafer && leaf.leafer.interaction.isPress(leaf) }
-State.isFocus = function (leaf: IUI): boolean { return leaf.leafer && leaf.leafer.interaction.isFocus(leaf) }
-State.isDrag = function (leaf: IUI): boolean { return leaf.leafer && leaf.leafer.interaction.isDrag(leaf) }
-State.setStyle = function (leaf: IUI, stateType: IStateStyleType, value: boolean): void { value ? setStateStyle(leaf, stateType, leaf[stateType]) : unsetStateStyle(leaf, stateType, leaf[stateType]) }
-State.setState = function (leaf: IUI, stateName: string): void { const style = leaf.states[stateName]; style ? setStateStyle(leaf, stateName, style) : unsetStateStyle(leaf, stateName, style) }
+State.isState = function (state: IStateName, leaf: IUI, button?: IUI | boolean): boolean { return checkState(state, leaf, button) }
+State.isSelected = function (leaf: IUI, button?: IUI | boolean): boolean { return checkFixedState('selected', leaf, button) }
+State.isDisabled = function (leaf: IUI, button?: IUI | boolean): boolean { return checkFixedState('disabled', leaf, button) }
+
+State.isFocus = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isFocus', leaf, button) }
+State.isHover = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isHover', leaf, button) }
+State.isPress = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isPress', leaf, button) }
+
+State.isDrag = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isDrag', leaf, button) }
+
+State.setStyleName = function (leaf: IUI, stateType: IStateStyleType, value: boolean): void { value ? setState(leaf, stateType, leaf[stateType]) : unsetState(leaf, stateType, leaf[stateType]) }
+State.set = function (leaf: IUI, stateName: string): void { const style = leaf.states[stateName]; style ? setState(leaf, stateName, style) : unsetState(leaf, stateName, style) }
+
+State.getStyle = getStyle
+State.updateStyle = updateStyle
 State.updateEventStyle = updateEventStyle
 
 
@@ -21,10 +32,8 @@ UI.prototype.focus = function (value: boolean = true): void {
         if (value) {
             if (focusData) focusData.focus(false)
             focusData = this
-        } else {
-            focusData = null
-        }
+        } else focusData = null
         this.app.interaction.focusData = focusData
-        value ? setPointerStateStyle(this, 'focusStyle') : unsetPointerStateStyle(this, 'focusStyle')
+        value ? setPointerState(this, 'focusStyle') : unsetPointerState(this, 'focusStyle')
     })
 }
