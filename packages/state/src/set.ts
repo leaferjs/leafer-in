@@ -12,7 +12,7 @@ export function setPointerState(leaf: IUI, stateName: IStateStyleType): void {
 
 export function setState(leaf: IUI, stateName: string, stateStyle?: IStateStyle): void {
     if (!stateStyle) stateStyle = leaf.states[stateName]
-    if (stateStyle) setStyle(leaf, stateStyle)
+    setStyle(leaf, stateStyle)
     if (leaf.button) setChildrenState(leaf.children, null, stateName)
 }
 

@@ -5,14 +5,13 @@ import { findParentButton } from './helper'
 
 
 export function setStyle(leaf: IUI, style: IStateStyle): void {
-    if (typeof style !== 'object') return
+    if (typeof style !== 'object') style = undefined
     updateStyle(leaf, style, 'easeIn')
 }
 
 export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
-    if (typeof style !== 'object') style = undefined
-
     const { normalStyle } = leaf.__
+    if (typeof style !== 'object') style = undefined
     if (normalStyle) {
         if (!style) style = normalStyle
         updateStyle(leaf, style, 'easeOut')
