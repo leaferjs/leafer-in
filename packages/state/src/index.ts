@@ -8,6 +8,25 @@ import { checkPointerState, checkFixedState, checkState } from './check'
 import { getStyle, updateStyle } from './style'
 
 
+State.animateExcludes = {
+    animation: 1,
+
+    states: 1,
+    state: 1,
+
+    normalStyle: 1,
+    hoverStyle: 1,
+    pressStyle: 1,
+    focusStyle: 1,
+    selectedStyle: 1,
+    disabledStyle: 1,
+
+    ease: 1,
+    easeIn: 1,
+    easeOut: 1
+}
+
+
 State.isState = function (state: IStateName, leaf: IUI, button?: IUI | boolean): boolean { return checkState(state, leaf, button) }
 State.isSelected = function (leaf: IUI, button?: IUI | boolean): boolean { return checkFixedState('selected', leaf, button) }
 State.isDisabled = function (leaf: IUI, button?: IUI | boolean): boolean { return checkFixedState('disabled', leaf, button) }

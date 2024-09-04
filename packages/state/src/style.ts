@@ -35,16 +35,16 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' 
     if (data.normalStyle) leaf.set(data.normalStyle, true)
 
     if (statesStyle) {
-        data.normalStyle = findStyle(statesStyle, data)
+        data.normalStyle = filterStyle(statesStyle, data)
         leaf.set(statesStyle, true)
     } else {
         data.normalStyle = undefined
     }
 
     if (ease) {
-        const toStyle = findStyle(fromStyle, data)
+        const toStyle = filterStyle(fromStyle, data)
         leaf.set(fromStyle, true)
-        leaf.animate([fromStyle, toStyle], ease === true ? undefined : ease, true)
+        leaf.animate([fromStyle, toStyle], ease, true)
     }
 
     leaf.__layout.stateStyleChanged = false
@@ -85,15 +85,23 @@ export function getStyle(leaf: IUI): IStateStyle {
 }
 
 
-function findStyle(find: IObject, data: IObject, findAdd?: IObject): IObject {
-    const to: IObject = findAdd ? find : {}, forStyle = findAdd || find
-    for (let key in forStyle) to[key] = data[key]
+function filterStyle(filter: IObject, data: IObject): IObject {
+    const to: IObject = {}
+    for (let key in filter) to[key] = data[key]
+    return to
+}
+
+function filterAnimateStyle(filter: IObject, data: IObject, add?: IObject): IObject {
+    const to: IObject = add ? filter : {}, forStyle = add || filter, { animateExcludes } = State
+    for (let key in forStyle) {
+        if (!animateExcludes[key]) to[key] = data[key]
+    }
     return to
 }
 
 function getFromStyle(leaf: IUI, style: IObject): IObject {
-    const fromStyle = findStyle(style, leaf.__), animate = leaf.animate()
-    if (animate && !animate.started) findStyle(fromStyle, leaf.__, animate.from)
+    const fromStyle = filterAnimateStyle(style, leaf.__), animate = leaf.animate()
+    if (animate && !animate.started) filterAnimateStyle(fromStyle, leaf.__, animate.from)
     return fromStyle
 }
 

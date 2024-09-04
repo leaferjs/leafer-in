@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IAnimateEasingName } from '@leafer-ui/interface'
 import { Platform } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -83,9 +83,13 @@ export class Animate implements IAnimate {
     protected get alternate(): boolean { return this.direction.includes('alternate') }
 
 
-    constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | number, isTemp?: boolean) {
+    constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | IAnimateEasingName | number | boolean, isTemp?: boolean) {
         this.target = target
-        this.config = typeof options === 'number' ? { duration: options } : (typeof options === 'object' ? options : undefined)
+        switch (typeof options) {
+            case 'number': this.config = { duration: options }; break
+            case 'string': this.config = { easing: options }; break
+            case 'object': this.config = options
+        }
         this.isTemp = isTemp
 
         if (!keyframe) return
