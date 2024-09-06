@@ -57,7 +57,7 @@ export class Animate implements IAnimate {
     public autoplay: boolean
 
     @animateAttr()
-    public fromBefore: boolean
+    public fromNow: boolean
 
 
     @animateAttr()
@@ -155,7 +155,7 @@ export class Animate implements IAnimate {
 
 
     protected create(): void {
-        const { target, frames, keyframes, config } = this, { length } = keyframes, fromBefore = length > 1 ? this.fromBefore : true
+        const { target, frames, keyframes, config } = this, { length } = keyframes, fromNow = length > 1 ? this.fromNow : true
         let addedDuration = 0, totalAutoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
 
         if (length > 1) this.from = {}, this.to = {}
@@ -165,7 +165,7 @@ export class Animate implements IAnimate {
             keyframe = keyframes[i]
             style = keyframe.style || keyframe
 
-            if (!before) before = fromBefore ? target : style
+            if (!before) before = fromNow ? target : style
 
             item = { style, before: {} }
 
@@ -188,7 +188,7 @@ export class Animate implements IAnimate {
             }
 
             if (!item.autoDuration && item.duration === undefined) {
-                if (length > 1) (i > 0 || fromBefore) ? totalAutoDuration++ : item.duration = 0 // fromBefore不为true时，第一帧无时长
+                if (length > 1) (i > 0 || fromNow) ? totalAutoDuration++ : item.duration = 0 // fromNow不为true时，第一帧无时长
                 else item.duration = this.duration
             }
 
