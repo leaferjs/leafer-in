@@ -1,4 +1,4 @@
-import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, IUIData, IStateEase } from '@leafer-ui/interface'
+import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, IUIData, IStateEase, IAnimate } from '@leafer-ui/interface'
 import { State, MathHelper } from '@leafer-ui/core'
 
 import { findParentButton } from './helper'
@@ -18,23 +18,42 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
     }
 }
 
-export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' | 'easeOut'): void {
-    const statesStyle = getStyle(leaf), data = leaf.__
+const emprtyStyle = {}
 
-    if (!style) style = statesStyle || {}
+export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' | 'easeOut'): void {
+    const data = leaf.__
+
+    if (!style) style = emprtyStyle
 
     if (style.scale) {
         MathHelper.assignScale(style as IScaleData, style.scale)
         delete style.scale
     }
 
-    const ease = easeType ? getEase(easeType, style, data) : undefined
+    if (style === emprtyStyle) easeType = null
+    let ease = easeType ? getEase(easeType, style, data) : undefined
     const fromStyle = ease ? getFromStyle(leaf, style) : undefined
 
+
+    // 回到正常状态
     leaf.killAnimate()
     if (data.normalStyle) leaf.set(data.normalStyle, true)
 
+
+    const statesStyle = getStyle(leaf) // 必须在回到正常状态之后获取
     if (statesStyle) {
+
+        if (statesStyle.animation) {
+            const animate = leaf.animate(statesStyle.animation, undefined, true)
+            Object.assign(statesStyle, animate.endingStyle) // 加上最终的动画样式
+
+            if (easeType !== 'easeIn' || style.animation !== statesStyle.animation) animate.kill()
+            else ease = null
+
+            delete statesStyle.animation
+        }
+
+
         data.normalStyle = filterStyle(statesStyle, data)
         leaf.set(statesStyle, true)
     } else {
@@ -85,23 +104,23 @@ export function getStyle(leaf: IUI): IStateStyle {
 }
 
 
-function filterStyle(filter: IObject, data: IObject): IObject {
-    const to: IObject = {}
-    for (let key in filter) to[key] = data[key]
-    return to
-}
-
-function filterAnimateStyle(filter: IObject, data: IObject, add?: IObject): IObject {
-    const to: IObject = add ? filter : {}, forStyle = add || filter, { animateExcludes } = State
+function filterStyle(style: IObject, data: IObject, addStyle?: IObject, useAnimateExcludes?: boolean): IObject {
+    const to: IObject = addStyle ? style : {}, forStyle = addStyle || style
     for (let key in forStyle) {
-        if (!animateExcludes[key]) to[key] = data[key]
+        if (useAnimateExcludes) {
+            if (!State.animateExcludes[key]) to[key] = data[key]
+        } else to[key] = data[key]
     }
     return to
 }
 
+function filterAnimateStyle(style: IObject, data: IObject, addStyle?: IObject): IObject {
+    return filterStyle(style, data, addStyle, true)
+}
+
 function getFromStyle(leaf: IUI, style: IObject): IObject {
     const fromStyle = filterAnimateStyle(style, leaf.__), animate = leaf.animate()
-    if (animate && !animate.started) filterAnimateStyle(fromStyle, leaf.__, animate.from)
+    if (animate) filterAnimateStyle(fromStyle, leaf.__, animate.fromStyle)
     return fromStyle
 }
 
