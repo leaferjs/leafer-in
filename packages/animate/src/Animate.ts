@@ -14,8 +14,9 @@ export class Animate implements IAnimate {
     public keyframes: IKeyframe[]
     public config?: IAnimateOptions
 
-    public from: IObject
-    public to: IObject
+    public fromStyle: IObject
+    public toStyle: IObject
+    public get endingStyle() { return this.realEnding === 'from' ? this.fromStyle : this.toStyle }
 
     public get started(): boolean { return !!this.requestAnimateTime }
     public running: boolean
@@ -66,7 +67,7 @@ export class Animate implements IAnimate {
     public isTemp: boolean
 
 
-    protected frames: IComputedKeyframe[]
+    public frames: IComputedKeyframe[]
 
     protected nowIndex: number
     protected get nowFrame(): IComputedKeyframe { return this.frames[this.nowIndex] }
@@ -80,21 +81,33 @@ export class Animate implements IAnimate {
     protected isReverse: boolean
     protected timer: ITimer
 
-    protected get alternate(): boolean { return this.direction.includes('alternate') }
+    public get alternate(): boolean { return this.direction.includes('alternate') }
+
+    public get realEnding(): IAnimateEnding {
+        let count: number
+        const { ending, direction, loop } = this
+        if (ending === 'from') count = 0
+        else if (ending === 'to') count = 1
+        else {
+            count = direction.includes('reverse') ? 0 : 1
+            if (loop && typeof loop === 'number') count += loop - 1
+        }
+        return count % 2 ? 'to' : 'from'
+    }
 
 
     constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | IAnimateEasingName | number | boolean, isTemp?: boolean) {
         this.target = target
+        this.isTemp = isTemp
         switch (typeof options) {
             case 'number': this.config = { duration: options }; break
             case 'string': this.config = { easing: options }; break
             case 'object': this.config = options
         }
-        this.isTemp = isTemp
+
 
         if (!keyframe) return
         this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
-
         this.init()
     }
 
@@ -158,7 +171,7 @@ export class Animate implements IAnimate {
         const { target, frames, keyframes, config } = this, { length } = keyframes, fromNow = length > 1 ? this.fromNow : true
         let addedDuration = 0, totalAutoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
 
-        if (length > 1) this.from = {}, this.to = {}
+        if (length > 1) this.fromStyle = {}, this.toStyle = {}
 
         for (let i = 0; i < length; i++) {
 
@@ -167,7 +180,7 @@ export class Animate implements IAnimate {
 
             if (!before) before = fromNow ? target : style
 
-            item = { style, before: {} }
+            item = { style, beforeStyle: {} }
 
             if (keyframe.style) { // with options
 
@@ -195,8 +208,8 @@ export class Animate implements IAnimate {
             if (length > 1) {
                 this.setBefore(item, style, before)
             } else {
-                for (let key in style) { item.before[key] = this.getTargetAttr(key) }
-                this.from = item.before, this.to = item.style
+                for (let key in style) { item.beforeStyle[key] = this.getTargetAttr(key) }
+                this.fromStyle = item.beforeStyle, this.toStyle = item.style
             }
 
             before = style
@@ -220,11 +233,11 @@ export class Animate implements IAnimate {
     }
 
     public setBefore(item: IComputedKeyframe, data: IObject, before: IObject): void {
-        const { from, to } = this // 同时生成完整的 from / to
+        const { fromStyle, toStyle } = this // 同时生成完整的 from / to
         for (let key in data) {
-            if (from[key] === undefined) from[key] = to[key] = this.getTargetAttr(key)
-            item.before[key] = before[key] === undefined ? to[key] : before[key]
-            to[key] = data[key]
+            if (fromStyle[key] === undefined) fromStyle[key] = toStyle[key] = this.getTargetAttr(key)
+            item.beforeStyle[key] = before[key] === undefined ? toStyle[key] : before[key]
+            toStyle[key] = data[key]
         }
     }
 
@@ -290,7 +303,7 @@ export class Animate implements IAnimate {
 
                     this.looped ? this.looped++ : this.looped = 1
 
-                    if (!(typeof loop === 'number' && this.looped >= loop)) {
+                    if (!(typeof loop === 'number' && (!loop || this.looped >= loop))) {
 
                         if (this.alternate) this.isReverse = !this.isReverse
 
@@ -328,22 +341,20 @@ export class Animate implements IAnimate {
     protected begin(seek?: boolean): void {
         this.playedDuration = this.time = 0
         this.isReverse ? this.setTo() : this.setFrom()
-        this.transition(0)
         if (!seek) this.requestAnimate()
     }
 
     protected end(): void {
         this.isReverse ? this.setFrom() : this.setTo()
-        this.transition(1)
     }
 
     protected complete(): void {
         this.requestAnimateTime = 0
         this.running = false
 
-        const { ending } = this
-        if (ending === 'from') this.setFrom(), this.transition(0)
-        else if (ending === 'to') this.setTo(), this.transition(1)
+        const { realEnding } = this
+        if (realEnding === 'from') this.setFrom()
+        else if (realEnding === 'to') this.setTo()
 
         this.clearTimer()
         this.emit('complete')
@@ -352,12 +363,12 @@ export class Animate implements IAnimate {
 
     protected setFrom(): void {
         this.nowIndex = 0
-        this.setStyle(this.from)
+        this.setStyle(this.fromStyle)
     }
 
     protected setTo(): void {
         this.nowIndex = this.frames.length - 1
-        this.setStyle(this.to)
+        this.setStyle(this.toStyle)
     }
 
 
@@ -375,9 +386,9 @@ export class Animate implements IAnimate {
 
 
     protected transition(t: number): void {
-        const { style, before } = this.nowFrame
-        const fromStyle = this.isReverse ? style : before
-        const toStyle = this.isReverse ? before : style
+        const { style, beforeStyle } = this.nowFrame
+        const fromStyle = this.isReverse ? style : beforeStyle
+        const toStyle = this.isReverse ? beforeStyle : style
 
         if (t === 0) {
             this.setStyle(fromStyle)
@@ -385,16 +396,16 @@ export class Animate implements IAnimate {
             this.setStyle(toStyle)
         } else {
 
-            let from: number, to: number, { between } = this.nowFrame
-            if (!between) between = this.nowFrame.between = {}
+            let from: number, to: number, { betweenStyle } = this.nowFrame
+            if (!betweenStyle) betweenStyle = this.nowFrame.betweenStyle = {}
 
             for (let key in style) {
                 from = fromStyle[key], to = toStyle[key]
-                if (typeof from === 'number' && typeof to === 'number') between[key] = from + (to - from) * t
-                else between[key] = to
+                if (typeof from === 'number' && typeof to === 'number') betweenStyle[key] = from + (to - from) * t
+                else betweenStyle[key] = to
             }
 
-            this.setStyle(between)
+            this.setStyle(betweenStyle)
         }
 
         this.emit('update')
