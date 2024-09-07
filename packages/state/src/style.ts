@@ -21,7 +21,7 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
 const emprtyStyle = {}
 
 export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' | 'easeOut'): void {
-    const data = leaf.__
+    const data = leaf.__, { normalStyle } = data
 
     if (!style) style = emprtyStyle
 
@@ -31,24 +31,24 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' 
     }
 
     if (style === emprtyStyle) easeType = null
-    let ease = easeType ? getEase(easeType, style, data) : undefined
+    let ease = easeType ? getEase(easeType, style, data) : false
     const fromStyle = ease ? getFromStyle(leaf, style) : undefined
-
 
     // 回到正常状态
     leaf.killAnimate()
-    if (data.normalStyle) leaf.set(data.normalStyle, true)
+    if (normalStyle) leaf.set(normalStyle, true)
 
 
     const statesStyle = getStyle(leaf) // 必须在回到正常状态之后获取
     if (statesStyle) {
 
-        if (statesStyle.animation) {
-            const animate = leaf.animate(statesStyle.animation, undefined, true)
+        const { animation } = statesStyle
+        if (animation) {
+            const animate = leaf.animate(animation, undefined, true)
             Object.assign(statesStyle, animate.endingStyle) // 加上最终的动画样式
 
-            if (easeType !== 'easeIn' || style.animation !== statesStyle.animation) animate.kill()
-            else ease = null
+            if (easeType !== 'easeIn' || style.animation !== animation) animate.kill()
+            else ease = false
 
             delete statesStyle.animation
         }

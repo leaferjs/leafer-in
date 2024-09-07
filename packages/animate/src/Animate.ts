@@ -178,7 +178,7 @@ export class Animate implements IAnimate {
             keyframe = keyframes[i]
             style = keyframe.style || keyframe
 
-            if (!before) before = fromNow ? target : style
+            if (!before) before = fromNow ? target.__ : style
 
             item = { style, beforeStyle: {} }
 
