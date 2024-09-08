@@ -15,4 +15,3 @@ export function animateAttr(defaultValue?: any) {
         } as ThisType<IAnimate>)
     }
 }
-

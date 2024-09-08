@@ -3,6 +3,8 @@ import { Platform } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
+import { AnimateTransition } from './AnimateTransition'
+import { transition } from './transition'
 
 
 const frameDuration = 0.2
@@ -104,7 +106,6 @@ export class Animate implements IAnimate {
             case 'string': this.config = { easing: options }; break
             case 'object': this.config = options
         }
-
 
         if (!keyframe) return
         this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
@@ -396,13 +397,15 @@ export class Animate implements IAnimate {
             this.setStyle(toStyle)
         } else {
 
-            let from: number, to: number, { betweenStyle } = this.nowFrame
+            let from: number, to: number, attrTransition: IFunction, { betweenStyle } = this.nowFrame
             if (!betweenStyle) betweenStyle = this.nowFrame.betweenStyle = {}
 
             for (let key in style) {
-                from = fromStyle[key], to = toStyle[key]
-                if (typeof from === 'number' && typeof to === 'number') betweenStyle[key] = from + (to - from) * t
+                from = fromStyle[key], to = toStyle[key], attrTransition = AnimateTransition[key] || transition
+
+                if (from !== to) betweenStyle[key] = attrTransition(from, to, t)
                 else betweenStyle[key] = to
+
             }
 
             this.setStyle(betweenStyle)
