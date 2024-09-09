@@ -1,4 +1,4 @@
-import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, IUIData, IStateEase, IAnimate } from '@leafer-ui/interface'
+import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, IUIData, ITransition } from '@leafer-ui/interface'
 import { State, MathHelper } from '@leafer-ui/core'
 
 import { findParentButton } from './helper'
@@ -6,7 +6,7 @@ import { findParentButton } from './helper'
 
 export function setStyle(leaf: IUI, style: IStateStyle): void {
     if (typeof style !== 'object') style = undefined
-    updateStyle(leaf, style, 'easeIn')
+    updateStyle(leaf, style, 'transitionIn')
 }
 
 export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
@@ -14,13 +14,13 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
     if (typeof style !== 'object') style = undefined
     if (normalStyle) {
         if (!style) style = normalStyle
-        updateStyle(leaf, style, 'easeOut')
+        updateStyle(leaf, style, 'transitionOut')
     }
 }
 
 const emprtyStyle = {}
 
-export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' | 'easeOut'): void {
+export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'transitionIn' | 'transitionOut'): void {
     const data = leaf.__, { normalStyle } = data
 
     if (!style) style = emprtyStyle
@@ -30,9 +30,9 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' 
         delete style.scale
     }
 
-    if (style === emprtyStyle) easeType = null
-    let ease = easeType ? getEase(easeType, style, data) : false
-    const fromStyle = ease ? getFromStyle(leaf, style) : undefined
+    if (style === emprtyStyle) transitionType = null
+    let transition = transitionType ? getTransition(transitionType, style, data) : false
+    const fromStyle = transition ? getFromStyle(leaf, style) : undefined
 
     // 回到正常状态
     leaf.killAnimate()
@@ -47,8 +47,8 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' 
             const animate = leaf.animate(animation, undefined, true)
             Object.assign(statesStyle, animate.endingStyle) // 加上最终的动画样式
 
-            if (easeType !== 'easeIn' || style.animation !== animation) animate.kill()
-            else ease = false
+            if (transitionType !== 'transitionIn' || style.animation !== animation) animate.kill()
+            else transition = false
 
             delete statesStyle.animation
         }
@@ -60,10 +60,10 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, easeType?: 'easeIn' 
         data.normalStyle = undefined
     }
 
-    if (ease) {
+    if (transition) {
         const toStyle = filterStyle(fromStyle, data)
         leaf.set(fromStyle, true)
-        leaf.animate([fromStyle, toStyle], ease, true)
+        leaf.animate([fromStyle, toStyle], transition, true)
     }
 
     leaf.__layout.stateStyleChanged = false
@@ -124,8 +124,8 @@ function getFromStyle(leaf: IUI, style: IObject): IObject {
     return fromStyle
 }
 
-function getEase(type: 'easeIn' | 'easeOut', style: IStateStyle, data: IUIData): IStateEase {
-    const ease = style.ease === undefined ? data.ease : style.ease
+function getTransition(type: 'transitionIn' | 'transitionOut', style: IStateStyle, data: IUIData): ITransition {
+    const ease = style.transition === undefined ? data.transition : style.transition
     let stateEase = style[type] === undefined ? data[type] : style[type]
     if (ease && stateEase === undefined) stateEase = ease
     return stateEase
