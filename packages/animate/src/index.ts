@@ -1,13 +1,13 @@
 export { Animate } from './Animate'
 export { AnimateEasing } from './AnimateEasing'
 
-import { IAnimate, IAnimateOptions, IKeyframe, IAnimation, IUIInputData, IKeyframesAnimation, IStyleAnimation, IAnimateEasingName } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IAnimation, IUIInputData, IKeyframesAnimation, IStyleAnimation, ITransition } from '@leafer-ui/interface'
 import { UI } from '@leafer-ui/draw'
 
 import { Animate } from './Animate'
 
 
-UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: IAnimateOptions | IAnimateEasingName | number | boolean, isTemp?: boolean): IAnimate {
+UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate
 
     if (typeof keyframe === 'object') {

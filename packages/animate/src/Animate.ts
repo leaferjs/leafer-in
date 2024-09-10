@@ -1,5 +1,5 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IAnimateEasingName } from '@leafer-ui/interface'
-import { Platform } from '@leafer-ui/draw'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IAnimateEasingName, IPercentData } from '@leafer-ui/interface'
+import { Platform, UnitConvert } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
@@ -16,8 +16,8 @@ export class Animate implements IAnimate {
     public keyframes: IKeyframe[]
     public config?: IAnimateOptions
 
-    public fromStyle: IObject
-    public toStyle: IObject
+    public fromStyle: IUIInputData
+    public toStyle: IUIInputData
     public get endingStyle() { return this.realEnding === 'from' ? this.fromStyle : this.toStyle }
 
     public get started(): boolean { return !!this.requestAnimateTime }
@@ -60,7 +60,7 @@ export class Animate implements IAnimate {
     public autoplay: boolean
 
     @animateAttr()
-    public fromNow: boolean
+    public join: boolean
 
 
     @animateAttr()
@@ -152,8 +152,9 @@ export class Animate implements IAnimate {
         this.emit('stop')
     }
 
-    public seek(time: number): void {
+    public seek(time: number | IPercentData): void {
         if (this.destroyed) return
+        if (typeof time === 'object') time = UnitConvert.number(time, this.duration)
 
         time /= this.speed
         if (!this.started || time < this.time) this.start(true)
@@ -169,7 +170,7 @@ export class Animate implements IAnimate {
 
 
     protected create(): void {
-        const { target, frames, keyframes, config } = this, { length } = keyframes, fromNow = length > 1 ? this.fromNow : true
+        const { target, frames, keyframes, config } = this, { length } = keyframes, joinBefore = length > 1 ? this.join : true
         let addedDuration = 0, totalAutoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
 
         if (length > 1) this.fromStyle = {}, this.toStyle = {}
@@ -179,7 +180,7 @@ export class Animate implements IAnimate {
             keyframe = keyframes[i]
             style = keyframe.style || keyframe
 
-            if (!before) before = fromNow ? target.__ : style
+            if (!before) before = joinBefore ? target.__ : style
 
             item = { style, beforeStyle: {} }
 
@@ -202,7 +203,7 @@ export class Animate implements IAnimate {
             }
 
             if (!item.autoDuration && item.duration === undefined) {
-                if (length > 1) (i > 0 || fromNow) ? totalAutoDuration++ : item.duration = 0 // fromNow不为true时，第一帧无时长
+                if (length > 1) (i > 0 || joinBefore) ? totalAutoDuration++ : item.duration = 0 // fromNow不为true时，第一帧无时长
                 else item.duration = this.duration
             }
 
