@@ -3,6 +3,7 @@ export { AnimateEasing } from './AnimateEasing'
 
 import { IAnimate, IAnimateOptions, IKeyframe, IAnimation, IUIInputData, IKeyframesAnimation, IStyleAnimation, ITransition } from '@leafer-ui/interface'
 import { UI } from '@leafer-ui/draw'
+import '@leafer-in/color'
 
 import { Animate } from './Animate'
 

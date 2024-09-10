@@ -58,5 +58,5 @@ UI.prototype.focus = function (value: boolean = true): void {
 }
 
 UI.prototype.updateState = function (): void {
-    State.updateStyle(this, undefined, 'easeIn')
+    State.updateStyle(this, undefined, 'transitionIn')
 }
