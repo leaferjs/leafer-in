@@ -22,5 +22,5 @@ UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimat
 }
 
 UI.prototype.killAnimate = function (): void {
-    if (this.__animate) this.__animate.kill()
+    if (this.__animate) this.__animate.kill(), this.__animate = null
 }
