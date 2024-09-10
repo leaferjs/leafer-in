@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IAnimateEasingName, IPercentData } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IPercentData, ITransition } from '@leafer-ui/interface'
 import { Platform, UnitConvert } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -98,7 +98,12 @@ export class Animate implements IAnimate {
     }
 
 
-    constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: IAnimateOptions | IAnimateEasingName | number | boolean, isTemp?: boolean) {
+    constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean) {
+        this.init(target, keyframe, options, isTemp)
+    }
+
+
+    public init(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean): void {
         this.target = target
         this.isTemp = isTemp
         switch (typeof options) {
@@ -109,11 +114,6 @@ export class Animate implements IAnimate {
 
         if (!keyframe) return
         this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
-        this.init()
-    }
-
-
-    public init(): void {
 
         this.easingFn = AnimateEasing.get(this.easing)
 

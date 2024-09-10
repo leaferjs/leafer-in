@@ -1,7 +1,7 @@
-import { IAnimateEasing, IAnimateEasingFunction, INumberMap, IObject } from '@leafer-ui/interface'
+import { IAnimateEasing, IAnimateEasingFunction, ICustomEasingFunction, INumberMap, IObject } from '@leafer-ui/interface'
 
 
-const { cos, sin, pow, sqrt, abs, PI } = Math
+const { cos, sin, pow, sqrt, abs, ceil, floor, round, PI } = Math
 
 const PIx5 = PI * 5
 
@@ -59,20 +59,23 @@ function bezier(t: number, v1: number, v2: number): number {
 }
 
 
+function steps(steps: number, intStep: 'floor' | 'round' | 'ceil' = 'floor'): IAnimateEasingFunction {
+    return (t: number) => (intStep === 'floor' ? floor(t * steps) : (intStep === 'ceil' ? ceil(t * steps) : round(t * steps))) / steps
+}
+
+
 export const AnimateEasing = {
 
     get(easing: IAnimateEasing) {
         const { list } = AnimateEasing
         if (typeof easing === 'string') return list[easing || 'ease']
-        else if (easing instanceof Array) return cubicBezier(easing[0], easing[1], easing[2], easing[3])
+        else if (typeof easing === 'object') return list[easing.name].apply(list, easing.value instanceof Array ? easing.value : [easing.value])
         else return list['ease']
     },
 
-    register(name: string, value: IAnimateEasingFunction): void {
-        (AnimateEasing.list as IObject)[name] = value
+    register(name: string, value: ICustomEasingFunction): void {
+        AnimateEasing.list[name] = value
     },
-
-    cubicBezier,
 
     list: {
 
@@ -133,7 +136,12 @@ export const AnimateEasing = {
         // 重力反弹
         'bounce-in': (t: number) => 1 - bounceOut(1 - t),
         'bounce-out': bounceOut,
-        'bounce-in-out': (t: number) => t < 0.5 ? (1 - bounceOut(1 - t * 2)) * 0.5 : (1 + bounceOut(t * 2 - 1)) * 0.5
-    }
+        'bounce-in-out': (t: number) => t < 0.5 ? (1 - bounceOut(1 - t * 2)) * 0.5 : (1 + bounceOut(t * 2 - 1)) * 0.5,
+
+        // 其他函数
+        'cubic-bezier': cubicBezier,
+        steps
+
+    } as IObject
 
 }
