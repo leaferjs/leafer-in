@@ -242,7 +242,7 @@ export class Animate implements IAnimate {
     public setBefore(item: IComputedKeyframe, data: IObject, before: IObject): void {
         const { fromStyle, toStyle } = this // 同时生成完整的 from / to
         for (let key in data) {
-            if (fromStyle[key] === undefined) fromStyle[key] = toStyle[key] = this.getTargetAttr(key)
+            if (fromStyle[key] === undefined) fromStyle[key] = toStyle[key] = (data === before) ? before[key] : this.getTargetAttr(key)
             item.beforeStyle[key] = before[key] === undefined ? toStyle[key] : before[key]
             toStyle[key] = data[key]
         }

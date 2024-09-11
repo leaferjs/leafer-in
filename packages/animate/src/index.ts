@@ -2,11 +2,13 @@ export { Animate } from './Animate'
 export { AnimateEasing } from './AnimateEasing'
 
 import { IAnimate, IAnimateOptions, IKeyframe, IAnimation, IUIInputData, IKeyframesAnimation, IStyleAnimation, ITransition } from '@leafer-ui/interface'
-import { UI } from '@leafer-ui/draw'
+import { UI, State } from '@leafer-ui/draw'
 import '@leafer-in/color'
 
 import { Animate } from './Animate'
 
+
+State.canAnimate = true
 
 UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate

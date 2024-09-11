@@ -30,7 +30,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
         delete style.scale
     }
 
-    if (style === emprtyStyle) transitionType = null
+    if (style === emprtyStyle || !State.canAnimate) transitionType = null
     let transition = transitionType ? getTransition(transitionType, style, data) : false
     const fromStyle = transition ? getFromStyle(leaf, style) : undefined
 
