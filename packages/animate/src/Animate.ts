@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IPercentData, ITransition } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IPercentData, ITransition, IBooleanMap } from '@leafer-ui/interface'
 import { Platform, UnitConvert } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -62,6 +62,8 @@ export class Animate implements IAnimate {
     @animateAttr()
     public join: boolean
 
+    @animateAttr()
+    public attrs: string[]
 
     @animateAttr()
     public event?: IAnimateEvents
@@ -82,6 +84,7 @@ export class Animate implements IAnimate {
 
     protected isReverse: boolean
     protected timer: ITimer
+    protected attrsMap: IBooleanMap
 
     public get alternate(): boolean { return this.direction.includes('alternate') }
 
@@ -105,7 +108,7 @@ export class Animate implements IAnimate {
 
     public init(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean): void {
         this.target = target
-        this.isTemp = isTemp
+        if (isTemp || this.isTemp) this.isTemp = isTemp // 需要支持二次初始化
         switch (typeof options) {
             case 'number': this.config = { duration: options }; break
             case 'string': this.config = { easing: options }; break
@@ -115,7 +118,9 @@ export class Animate implements IAnimate {
         if (!keyframe) return
         this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
 
-        this.easingFn = AnimateEasing.get(this.easing)
+        const { easing, attrs } = this
+        this.easingFn = AnimateEasing.get(easing)
+        if (attrs || this.attrsMap) this.attrsMap = attrs ? attrs.reduce((map, value) => { map[value] = true; return map }, {} as IBooleanMap) : undefined
 
         this.frames = []
         this.create()
@@ -398,15 +403,16 @@ export class Animate implements IAnimate {
             this.setStyle(toStyle)
         } else {
 
+            const { attrsMap } = this
             let from: number, to: number, attrTransition: IFunction, { betweenStyle } = this.nowFrame
+
             if (!betweenStyle) betweenStyle = this.nowFrame.betweenStyle = {}
 
             for (let key in style) {
+                if (attrsMap && !attrsMap[key]) continue
+
                 from = fromStyle[key], to = toStyle[key], attrTransition = AnimateTransition[key] || transition
-
                 if (from !== to) betweenStyle[key] = attrTransition(from, to, t)
-                else betweenStyle[key] = to
-
             }
 
             this.setStyle(betweenStyle)
