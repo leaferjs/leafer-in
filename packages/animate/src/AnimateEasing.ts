@@ -69,7 +69,7 @@ export const AnimateEasing = {
     get(easing: IAnimateEasing) {
         const { list } = AnimateEasing
         if (typeof easing === 'string') return list[easing || 'ease']
-        else if (typeof easing === 'object') return list[easing.name].apply(list, easing.value instanceof Array ? easing.value : [easing.value])
+        else if (typeof easing === 'object') return list[easing.name].apply(list, easing.params instanceof Array ? easing.params : [easing.params])
         else return list['ease']
     },
 
