@@ -34,28 +34,28 @@ function bounceOut(t: number): number {
 
 
 function cubicBezier(x1: number, y1: number, x2: number, y2: number): IAnimateEasingFunction {
-
     const cache: INumberMap = {}
 
     return (t: number) => {
         const key = ~~(t * 10000), c = cache[key] // 缓存精度可调
         if (c) return c
 
-        let y = t
+        let o: number, dx: number, x: number, v = t
         for (let i = 0; i < 8; i++) { // 循环次数可调
-            const x = bezier(y, x1, x2) - t
-            const dx = 3 * (1 - y) ** 2 * x1 + 6 * (1 - y) * y * (x2 - x1) + 3 * y ** 2 * (1 - x2)
+            o = 1 - v
+            x = bezier(v, x1, x2) - t
+            dx = 3 * o * o * x1 + 6 * o * v * (x2 - x1) + 3 * v * v * (1 - x2)
             if (abs(dx) < 1e-6) break // 精度可调
-            y -= x / dx
+            v -= x / dx
         }
 
-        return cache[key] = bezier(y, y1, y2)
+        return cache[key] = bezier(v, y1, y2)
     }
 }
 
 function bezier(t: number, v1: number, v2: number): number {
     const o = 1 - t
-    return (3 * o ** 2 * t) * v1 + (3 * o * t ** 2) * v2 + t ** 3
+    return 3 * o * o * t * v1 + 3 * o * t * t * v2 + t * t * t
 }
 
 
