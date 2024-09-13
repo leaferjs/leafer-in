@@ -17,9 +17,6 @@ export const PathScaler = {
             command = data[i]
             switch (command) {
                 case M:  //moveto(x, y)
-                    scalePoints(data, scaleX, scaleY, i, 1)
-                    i += 3
-                    break
                 case L:  //lineto(x, y)
                     scalePoints(data, scaleX, scaleY, i, 1)
                     i += 3
