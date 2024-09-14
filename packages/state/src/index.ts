@@ -66,7 +66,6 @@ stateStyleType()(ui, 'focusStyle')
 stateStyleType()(ui, 'selectedStyle')
 stateStyleType()(ui, 'disabledStyle')
 
-
 ui.focus = function (value: boolean = true): void {
     this.waitLeafer(() => {
         let { focusData } = this.app.interaction

@@ -2,7 +2,7 @@ export { Animate } from './Animate'
 export { AnimateEasing } from './AnimateEasing'
 
 import { IAnimate, IAnimateOptions, IKeyframe, IAnimation, IUIInputData, IKeyframesAnimation, IStyleAnimation, ITransition } from '@leafer-ui/interface'
-import { UI, State } from '@leafer-ui/draw'
+import { UI, State, dataType } from '@leafer-ui/draw'
 import '@leafer-in/color'
 
 import { Animate } from './Animate'
@@ -10,7 +10,19 @@ import { Animate } from './Animate'
 
 State.canAnimate = true
 
-UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, isTemp?: boolean): IAnimate {
+
+const ui = UI.prototype
+
+// addAttr
+dataType()(ui, 'animation')
+dataType()(ui, 'animationIn')
+dataType()(ui, 'animationOut')
+
+dataType(true)(ui, 'transition')
+dataType()(ui, 'transitionIn')
+dataType()(ui, 'transitionOut')
+
+ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate
 
     if (typeof keyframe === 'object') {
@@ -24,6 +36,6 @@ UI.prototype.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimat
     return this.__animate
 }
 
-UI.prototype.killAnimate = function (): void {
+ui.killAnimate = function (): void {
     if (this.__animate) this.__animate.kill(), this.__animate = null
 }
