@@ -1,15 +1,24 @@
+export { stateType, stateStyleType } from './decorator'
+
 import { IUI, IStateStyleType, IStateName } from '@leafer-ui/interface'
-import { State, UI } from '@leafer-ui/core'
+import { State, UI, dataType } from '@leafer-ui/core'
 
 import { setPointerState, setState } from './set'
 import { unsetPointerState, unsetState } from './unset'
 import { updateEventStyle } from './event'
 import { checkPointerState, checkFixedState, checkState } from './check'
 import { getStyle, updateStyle } from './style'
+import { stateType, stateStyleType } from './decorator'
 
 
 State.animateExcludes = {
     animation: 1,
+    animationIn: 1,
+    animationOut: 1,
+
+    transition: 1,
+    transitionIn: 1,
+    transitionOut: 1,
 
     states: 1,
     state: 1,
@@ -19,11 +28,7 @@ State.animateExcludes = {
     pressStyle: 1,
     focusStyle: 1,
     selectedStyle: 1,
-    disabledStyle: 1,
-
-    ease: 1,
-    easeIn: 1,
-    easeOut: 1
+    disabledStyle: 1
 }
 
 
@@ -45,7 +50,24 @@ State.updateStyle = updateStyle
 State.updateEventStyle = updateEventStyle
 
 
-UI.prototype.focus = function (value: boolean = true): void {
+const ui = UI.prototype
+
+// addAttr
+stateType(false, 'selectedStyle')(ui, 'selected')
+stateType(false, 'disabledStyle')(ui, 'disabled')
+
+stateStyleType({})(ui, 'states')
+stateType('')(ui, 'state')
+
+dataType()(ui, 'normalStyle')
+stateStyleType()(ui, 'hoverStyle')
+stateStyleType()(ui, 'pressStyle')
+stateStyleType()(ui, 'focusStyle')
+stateStyleType()(ui, 'selectedStyle')
+stateStyleType()(ui, 'disabledStyle')
+
+
+ui.focus = function (value: boolean = true): void {
     this.waitLeafer(() => {
         let { focusData } = this.app.interaction
         if (value) {
@@ -57,6 +79,6 @@ UI.prototype.focus = function (value: boolean = true): void {
     })
 }
 
-UI.prototype.updateState = function (): void {
+ui.updateState = function (): void {
     State.updateStyle(this, undefined, 'transitionIn')
 }
