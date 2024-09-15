@@ -35,7 +35,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
     const fromStyle = transition ? getFromStyle(leaf, style) : undefined
 
     // 回到正常状态
-    leaf.killAnimate()
+    leaf.killAnimate('transition')
     if (normalStyle) leaf.set(normalStyle, true)
 
 
@@ -44,7 +44,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
 
         const { animation } = statesStyle
         if (animation) {
-            const animate = leaf.animate(animation, undefined, true)
+            const animate = leaf.animate(animation, undefined, 'animation', true)
             Object.assign(statesStyle, animate.endingStyle) // 加上最终的动画样式
 
             if (transitionType !== 'transitionIn' || style.animation !== animation) animate.kill()
@@ -63,7 +63,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
     if (transition) {
         const toStyle = filterStyle(fromStyle, data)
         leaf.set(fromStyle, true)
-        leaf.animate([fromStyle, toStyle], transition, true)
+        leaf.animate([fromStyle, toStyle], transition, 'transition', true)
     }
 
     leaf.__layout.stateStyleChanged = false

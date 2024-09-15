@@ -1,5 +1,15 @@
-import { IAnimate, IAnimateOptions, IObject } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IObject, IValue, IUI } from '@leafer-ui/interface'
+import { decorateLeafAttr, attr } from '@leafer-ui/draw'
 
+
+export function animationType(defaultValue?: IValue) {
+    return decorateLeafAttr(defaultValue, (key: string) => attr({
+        set(value: any) {
+            this.__setAttr(key, value)
+            value ? this.waitLeafer(() => (this as IUI).animate(value, undefined, 'animation')) : (this as IUI).killAnimate('animation')
+        }
+    }))
+}
 
 export function animateAttr(defaultValue?: any) {
     return (target: IAnimate, key: string) => {
