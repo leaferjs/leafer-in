@@ -13,11 +13,9 @@ import { stateType, stateStyleType } from './decorator'
 
 State.animateExcludes = {
     animation: 1,
-    animationIn: 1,
     animationOut: 1,
 
     transition: 1,
-    transitionIn: 1,
     transitionOut: 1,
 
     states: 1,
@@ -66,6 +64,8 @@ stateStyleType()(ui, 'focusStyle')
 stateStyleType()(ui, 'selectedStyle')
 stateStyleType()(ui, 'disabledStyle')
 
+dataType(false)(ui, 'button')
+
 ui.focus = function (value: boolean = true): void {
     this.waitLeafer(() => {
         let { focusData } = this.app.interaction
@@ -79,5 +79,5 @@ ui.focus = function (value: boolean = true): void {
 }
 
 ui.updateState = function (): void {
-    State.updateStyle(this, undefined, 'transitionIn')
+    State.updateStyle(this, undefined, 'transition')
 }

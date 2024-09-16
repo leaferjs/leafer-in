@@ -1,15 +1,17 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IAnimateEvents, IUI, IPercentData, ITransition, IBooleanMap } from '@leafer-ui/interface'
-import { Platform, UnitConvert } from '@leafer-ui/draw'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap } from '@leafer-ui/interface'
+import { Platform, UnitConvert, useModule, LeafEventer, Eventer } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
 import { AnimateTransition } from './AnimateTransition'
+import { AnimateEvent } from './AnimateEvent'
 import { transition } from './transition'
 
 
 const frameDuration = 0.2
 
-export class Animate implements IAnimate {
+@useModule(LeafEventer)
+export class Animate extends Eventer implements IAnimate {
 
     public target: IUI
 
@@ -65,11 +67,8 @@ export class Animate implements IAnimate {
     @animateAttr()
     public attrs: string[]
 
-    @animateAttr()
-    public event?: IAnimateEvents
 
     public isTemp: boolean
-
 
     public frames: IComputedKeyframe[]
 
@@ -102,6 +101,7 @@ export class Animate implements IAnimate {
 
 
     constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean) {
+        super()
         this.init(target, keyframe, options, isTemp)
     }
 
@@ -138,7 +138,7 @@ export class Animate implements IAnimate {
         this.running = true
         if (!this.started) this.clearTimer(), this.start()
         else if (!this.timer) this.requestAnimate()
-        this.emit('play')
+        this.emit(AnimateEvent.PLAY, this)
     }
 
     public pause(): void {
@@ -146,7 +146,7 @@ export class Animate implements IAnimate {
 
         this.running = false
         this.clearTimer()
-        this.emit('pause')
+        this.emit(AnimateEvent.PAUSE, this)
     }
 
     public stop(): void {
@@ -154,7 +154,7 @@ export class Animate implements IAnimate {
 
         this.end()
         this.complete()
-        this.emit('stop')
+        this.emit(AnimateEvent.STOP, this)
     }
 
     public seek(time: number | IPercentData): void {
@@ -231,7 +231,7 @@ export class Animate implements IAnimate {
             if (addedDuration) this.changeDuration(addedDuration)
         }
 
-        this.emit('create')
+        this.emit(AnimateEvent.CREATED, this)
     }
 
     public changeDuration(duration: number): void {
@@ -364,7 +364,7 @@ export class Animate implements IAnimate {
         else if (realEnding === 'to') this.setTo()
 
         this.clearTimer()
-        this.emit('complete')
+        this.emit(AnimateEvent.COMPLETE, this)
     }
 
 
@@ -418,7 +418,7 @@ export class Animate implements IAnimate {
             this.setStyle(betweenStyle)
         }
 
-        this.emit('update')
+        this.emit(AnimateEvent.UPDATE, this)
     }
 
     public setStyle(style: IObject): void {
@@ -436,13 +436,10 @@ export class Animate implements IAnimate {
         }
     }
 
-    protected emit(name: 'play' | 'pause' | 'stop' | 'create' | 'update' | 'complete'): void {
-        const fn = this.event && this.event[name]
-        if (fn) fn(this)
-    }
-
     public destroy(complete?: boolean): void {
         if (!this.destroyed) {
+            super.destroy()
+
             if (complete && !this.completed) this.stop()
             else this.pause()
             this.target = this.config = this.frames = null

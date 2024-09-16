@@ -6,7 +6,7 @@ import { findParentButton } from './helper'
 
 export function setStyle(leaf: IUI, style: IStateStyle): void {
     if (typeof style !== 'object') style = undefined
-    updateStyle(leaf, style, 'transitionIn')
+    updateStyle(leaf, style, 'transition')
 }
 
 export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
@@ -20,7 +20,7 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
 
 const emprtyStyle = {}
 
-export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'transitionIn' | 'transitionOut'): void {
+export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'transition' | 'transitionOut'): void {
     const data = leaf.__, { normalStyle } = data
 
     if (!style) style = emprtyStyle
@@ -47,7 +47,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
             const animate = leaf.animate(animation, undefined, 'animation', true)
             Object.assign(statesStyle, animate.endingStyle) // 加上最终的动画样式
 
-            if (transitionType !== 'transitionIn' || style.animation !== animation) animate.kill()
+            if (transitionType !== 'transition' || style.animation !== animation) animate.kill()
             else transition = false
 
             delete statesStyle.animation
@@ -124,7 +124,7 @@ function getFromStyle(leaf: IUI, style: IObject): IObject {
     return fromStyle
 }
 
-function getTransition(type: 'transitionIn' | 'transitionOut', style: IStateStyle, data: IUIData): ITransition {
+function getTransition(type: 'transition' | 'transitionOut', style: IStateStyle, data: IUIData): ITransition {
     const ease = style.transition === undefined ? data.transition : style.transition
     let stateEase = style[type] === undefined ? data[type] : style[type]
     if (ease && stateEase === undefined) stateEase = ease
