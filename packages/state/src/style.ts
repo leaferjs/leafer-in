@@ -1,12 +1,12 @@
 import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, IUIData, ITransition } from '@leafer-ui/interface'
-import { State, MathHelper } from '@leafer-ui/core'
+import { State, MathHelper, isNull } from '@leafer-ui/core'
 
 import { findParentButton } from './helper'
 
 
 export function setStyle(leaf: IUI, style: IStateStyle): void {
     if (typeof style !== 'object') style = undefined
-    updateStyle(leaf, style, 'transition')
+    updateStyle(leaf, style, 'in')
 }
 
 export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
@@ -14,13 +14,13 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
     if (typeof style !== 'object') style = undefined
     if (normalStyle) {
         if (!style) style = normalStyle
-        updateStyle(leaf, style, 'transitionOut')
+        updateStyle(leaf, style, 'out')
     }
 }
 
 const emprtyStyle = {}
 
-export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'transition' | 'transitionOut'): void {
+export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out'): void {
     const data = leaf.__, { normalStyle } = data
 
     if (!style) style = emprtyStyle
@@ -30,8 +30,8 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
         delete style.scale
     }
 
-    if (style === emprtyStyle || !State.canAnimate) transitionType = null
-    let transition = transitionType ? getTransition(transitionType, style, data) : false
+    if (style === emprtyStyle || !State.canAnimate) type = null
+    let transition = type ? getTransition(type, style, data) : false
     const fromStyle = transition ? getFromStyle(leaf, style) : undefined
 
     // 回到正常状态
@@ -47,7 +47,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, transitionType?: 'tr
             const animate = leaf.animate(animation, undefined, 'animation', true)
             Object.assign(statesStyle, animate.endingStyle) // 加上最终的动画样式
 
-            if (transitionType !== 'transition' || style.animation !== animation) animate.kill()
+            if (type !== 'in' || style.animation !== animation) animate.kill()
             else transition = false
 
             delete statesStyle.animation
@@ -124,11 +124,10 @@ function getFromStyle(leaf: IUI, style: IObject): IObject {
     return fromStyle
 }
 
-function getTransition(type: 'transition' | 'transitionOut', style: IStateStyle, data: IUIData): ITransition {
-    const ease = style.transition === undefined ? data.transition : style.transition
-    let stateEase = style[type] === undefined ? data[type] : style[type]
-    if (ease && stateEase === undefined) stateEase = ease
-    return stateEase
+function getTransition(type: 'in' | 'out', style: IStateStyle, data: IUIData): ITransition {
+    let name: 'transition' | 'transitionOut' = type === 'in' ? 'transition' : 'transitionOut'
+    if (type === 'out' && isNull(data[name]) && isNull(style[name])) name = 'transition'
+    return isNull(style[name]) ? data[name] : style[name]
 }
 
 function assign(style: IStateStyle, stateStyle: IStateStyle): boolean {

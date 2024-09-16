@@ -79,5 +79,5 @@ ui.focus = function (value: boolean = true): void {
 }
 
 ui.updateState = function (): void {
-    State.updateStyle(this, undefined, 'transition')
+    State.updateStyle(this, undefined, 'in')
 }

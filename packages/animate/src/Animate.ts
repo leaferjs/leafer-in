@@ -44,7 +44,7 @@ export class Animate extends Eventer implements IAnimate {
     @animateAttr(frameDuration)
     public duration: number
 
-    @animateAttr('normal')
+    @animateAttr('auto')
     public ending: IAnimateEnding
 
 
