@@ -1,11 +1,9 @@
 import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap } from '@leafer-ui/interface'
-import { Platform, UnitConvert, useModule, LeafEventer, Eventer } from '@leafer-ui/draw'
+import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
-import { AnimateTransition } from './AnimateTransition'
 import { AnimateEvent } from './AnimateEvent'
-import { transition } from './transition'
 
 
 const frameDuration = 0.2
@@ -185,7 +183,7 @@ export class Animate extends Eventer implements IAnimate {
             keyframe = keyframes[i]
             style = keyframe.style || keyframe
 
-            if (!before) before = joinBefore ? target.__ : style
+            if (!before) before = joinBefore ? target : style
 
             item = { style, beforeStyle: {} }
 
@@ -215,7 +213,7 @@ export class Animate extends Eventer implements IAnimate {
             if (length > 1) {
                 this.setBefore(item, style, before)
             } else {
-                for (let key in style) { item.beforeStyle[key] = this.getTargetAttr(key) }
+                for (let key in style) { item.beforeStyle[key] = (target as IObject)[key] }
                 this.fromStyle = item.beforeStyle, this.toStyle = item.style
             }
 
@@ -240,9 +238,9 @@ export class Animate extends Eventer implements IAnimate {
     }
 
     public setBefore(item: IComputedKeyframe, data: IObject, before: IObject): void {
-        const { fromStyle, toStyle } = this // 同时生成完整的 from / to
+        const { fromStyle, toStyle, target } = this // 同时生成完整的 from / to
         for (let key in data) {
-            if (fromStyle[key] === undefined) fromStyle[key] = toStyle[key] = (data === before) ? before[key] : this.getTargetAttr(key)
+            if (fromStyle[key] === undefined) fromStyle[key] = toStyle[key] = (data === before) ? before[key] : (target as IObject)[key]
             item.beforeStyle[key] = before[key] === undefined ? toStyle[key] : before[key]
             toStyle[key] = data[key]
         }
@@ -403,16 +401,16 @@ export class Animate extends Eventer implements IAnimate {
             this.setStyle(toStyle)
         } else {
 
-            const { attrsMap } = this
-            let from: number, to: number, attrTransition: IFunction, { betweenStyle } = this.frame
+            const { attrsMap, target } = this
+            let from: number, to: number, transitionAttr: IFunction, { betweenStyle } = this.frame
 
             if (!betweenStyle) betweenStyle = this.frame.betweenStyle = {}
 
             for (let key in style) {
                 if (attrsMap && !attrsMap[key]) continue
 
-                from = fromStyle[key], to = toStyle[key], attrTransition = AnimateTransition[key] || transition
-                if (from !== to) betweenStyle[key] = attrTransition(from, to, t)
+                from = fromStyle[key], to = toStyle[key], transitionAttr = Transition.list[key] || Transition.value
+                if (from !== to) betweenStyle[key] = transitionAttr(from, to, t, target)
             }
 
             this.setStyle(betweenStyle)
@@ -423,10 +421,6 @@ export class Animate extends Eventer implements IAnimate {
 
     public setStyle(style: IObject): void {
         this.target.set(style, this.isTemp)
-    }
-
-    public getTargetAttr(name: string): any {
-        return (this.target.__ as IObject)[name]
     }
 
     protected clearTimer(fn?: IFunction): void {

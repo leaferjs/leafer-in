@@ -7,7 +7,7 @@ export function findParentButton(leaf: IUI, button?: IUI | boolean): IUI {
         let { parent } = leaf
         for (let i = 0; i < 2; i++) {
             if (parent) {
-                if (parent.__.button) return parent
+                if (parent.button) return parent
                 parent = parent.parent
             }
         }

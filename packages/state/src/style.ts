@@ -1,4 +1,4 @@
-import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, IUIData, ITransition } from '@leafer-ui/interface'
+import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, ITransition } from '@leafer-ui/interface'
 import { State, MathHelper, isNull } from '@leafer-ui/core'
 
 import { findParentButton } from './helper'
@@ -10,7 +10,7 @@ export function setStyle(leaf: IUI, style: IStateStyle): void {
 }
 
 export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
-    const { normalStyle } = leaf.__
+    const { normalStyle } = leaf
     if (typeof style !== 'object') style = undefined
     if (normalStyle) {
         if (!style) style = normalStyle
@@ -21,7 +21,7 @@ export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
 const emprtyStyle = {}
 
 export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out'): void {
-    const data = leaf.__, { normalStyle } = data
+    const { normalStyle } = leaf
 
     if (!style) style = emprtyStyle
 
@@ -31,7 +31,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out')
     }
 
     if (style === emprtyStyle || !State.canAnimate) type = null
-    let transition = type ? getTransition(type, style, data) : false
+    let transition = type ? getTransition(type, style, leaf) : false
     const fromStyle = transition ? getFromStyle(leaf, style) : undefined
 
     // 回到正常状态
@@ -54,14 +54,14 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out')
         }
 
 
-        data.normalStyle = filterStyle(statesStyle, data)
+        leaf.normalStyle = filterStyle(statesStyle, leaf)
         leaf.set(statesStyle, true)
     } else {
-        data.normalStyle = undefined
+        leaf.normalStyle = undefined
     }
 
     if (transition) {
-        const toStyle = filterStyle(fromStyle, data)
+        const toStyle = filterStyle(fromStyle, leaf)
         leaf.set(fromStyle, true)
         leaf.animate([fromStyle, toStyle], transition, 'transition', true)
     }
@@ -74,28 +74,28 @@ export function getStyle(leaf: IUI): IStateStyle {
     //   从低到高依次覆盖: states < selected < focus < hover < press < disabled
 
     let exist: boolean
-    const style: IUIInputData = {}, data = leaf.__, { state } = data, button = findParentButton(leaf)
+    const style: IUIInputData = {}, { state } = leaf, button = findParentButton(leaf)
 
-    const stateStyle = state && data.states[state]
+    const stateStyle = state && leaf.states[state]
     if (stateStyle && State.isState(state, leaf, button)) exist = assign(style, stateStyle)
 
-    const selectedStyle = style.selectedStyle || data.selectedStyle
+    const selectedStyle = style.selectedStyle || leaf.selectedStyle
     if (selectedStyle && State.isSelected(leaf, button)) exist = assign(style, selectedStyle)
 
     if (State.isDisabled(leaf, button)) {
 
-        const disabledStyle = style.disabledStyle || data.disabledStyle
+        const disabledStyle = style.disabledStyle || leaf.disabledStyle
         if (disabledStyle) exist = assign(style, disabledStyle)
 
     } else {
 
-        const focusStyle = style.focusStyle || data.focusStyle
+        const focusStyle = style.focusStyle || leaf.focusStyle
         if (focusStyle && State.isFocus(leaf, button)) exist = assign(style, focusStyle)
 
-        const hoverStyle = style.hoverStyle || data.hoverStyle
+        const hoverStyle = style.hoverStyle || leaf.hoverStyle
         if (hoverStyle && State.isHover(leaf, button)) exist = assign(style, hoverStyle)
 
-        const pressStyle = style.pressStyle || data.pressStyle
+        const pressStyle = style.pressStyle || leaf.pressStyle
         if (pressStyle && State.isPress(leaf, button)) exist = assign(style, pressStyle)
 
     }
@@ -119,12 +119,12 @@ function filterAnimateStyle(style: IObject, data: IObject, addStyle?: IObject): 
 }
 
 function getFromStyle(leaf: IUI, style: IObject): IObject {
-    const fromStyle = filterAnimateStyle(style, leaf.__), animate = leaf.animate()
-    if (animate) filterAnimateStyle(fromStyle, leaf.__, animate.fromStyle)
+    const fromStyle = filterAnimateStyle(style, leaf), animate = leaf.animate()
+    if (animate) filterAnimateStyle(fromStyle, leaf, animate.fromStyle)
     return fromStyle
 }
 
-function getTransition(type: 'in' | 'out', style: IStateStyle, data: IUIData): ITransition {
+function getTransition(type: 'in' | 'out', style: IStateStyle, data: IUI): ITransition {
     let name: 'transition' | 'transitionOut' = type === 'in' ? 'transition' : 'transitionOut'
     if (type === 'out' && isNull(data[name]) && isNull(style[name])) name = 'transition'
     return isNull(style[name]) ? data[name] : style[name]

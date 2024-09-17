@@ -3,15 +3,21 @@ export { AnimateEasing } from './AnimateEasing'
 export { AnimateEvent } from './AnimateEvent'
 
 import { IAnimate, IAnimateOptions, IKeyframe, IAnimation, IUIInputData, IKeyframesAnimation, IStyleAnimation, ITransition, IAnimateType, IFunction } from '@leafer-ui/interface'
-import { UI, State, dataType } from '@leafer-ui/draw'
+import { UI, State, dataType, Transition } from '@leafer-ui/draw'
 import '@leafer-in/color'
 
 import { Animate } from './Animate'
 import { animationType } from './decorator'
 import { AnimateEvent } from './AnimateEvent'
+import { TransitionList, TransitionModule } from './Transition'
 
 
 State.canAnimate = true
+
+
+// Transition
+Object.assign(Transition, TransitionModule)
+Object.assign(Transition.list, TransitionList)
 
 
 const ui = UI.prototype
