@@ -73,13 +73,13 @@ export class Animate extends Eventer implements IAnimate {
     public frames: IComputedKeyframe[]
 
     protected nowIndex: number
-    protected get nowFrame(): IComputedKeyframe { return this.frames[this.nowIndex] }
-    protected get nowTotalDuration(): number { return this.nowFrame.totalDuration || this.nowFrame.duration || 0 }
+    protected get frame(): IComputedKeyframe { return this.frames[this.nowIndex] }
+    protected get frameTotalTime(): number { return this.frame.totalTime || this.frame.duration || 0 }
 
     protected easingFn: IFunction
 
     protected requestAnimateTime: number
-    protected playedDuration: number
+    protected playedTotalTime: number
 
     protected isReverse: boolean
     protected timer: ITimer
@@ -195,7 +195,7 @@ export class Animate extends Eventer implements IAnimate {
 
                 if (duration) {
                     item.duration = duration, addedDuration += duration
-                    if (delay) item.totalDuration = duration + delay
+                    if (delay) item.totalTime = duration + delay
                 } else {
                     if (autoDuration) item.autoDuration = autoDuration, totalAutoDuration += autoDuration
                 }
@@ -253,9 +253,9 @@ export class Animate extends Eventer implements IAnimate {
         for (let i = 0; i < length; i++) {
             frame = frames[i]
             if (frame.duration === undefined) frame.duration = frame.autoDuration ? partTime * frame.autoDuration : partTime
-            if (!frame.totalDuration) {
+            if (!frame.totalTime) {
                 if (frame.autoDelay) frame.delay = frame.autoDelay * partTime
-                if (frame.delay) frame.totalDuration = frame.duration, frame.totalDuration += frame.delay
+                if (frame.delay) frame.totalTime = frame.duration, frame.totalTime += frame.delay
             }
         }
     }
@@ -272,24 +272,24 @@ export class Animate extends Eventer implements IAnimate {
             this.time += (Date.now() - this.requestAnimateTime) / 1000
         }
 
-        const { duration } = this, realNow = this.time * this.speed
+        const { duration } = this, realTime = this.time * this.speed
 
-        if (realNow < duration) {
+        if (realTime < duration) {
 
-            while (realNow - this.playedDuration > this.nowTotalDuration) {
+            while (realTime - this.playedTotalTime > this.frameTotalTime) {
                 this.transition(1)
                 this.isReverse ? this.reverseNextFrame() : this.nextFrame()
             }
 
-            const itemDelay = this.isReverse ? 0 : (this.nowFrame.delay || 0)
-            const itemPlayedTime = realNow - this.playedDuration - itemDelay
-            const nowDuration = this.nowFrame.duration
+            const itemDelay = this.isReverse ? 0 : (this.frame.delay || 0)
+            const itemPlayedTime = realTime - this.playedTotalTime - itemDelay
+            const frameDuration = this.frame.duration
 
-            if (itemPlayedTime > nowDuration) {
+            if (itemPlayedTime > frameDuration) {
                 this.transition(1)
             } else if (itemPlayedTime >= 0) {
-                const t = nowDuration ? itemPlayedTime / nowDuration : 1
-                this.transition(this.nowFrame.easingFn ? this.nowFrame.easingFn(t) : this.easingFn(t))
+                const t = frameDuration ? itemPlayedTime / frameDuration : 1
+                this.transition(this.frame.easingFn ? this.frame.easingFn(t) : this.easingFn(t))
             }
 
         } else {
@@ -301,7 +301,7 @@ export class Animate extends Eventer implements IAnimate {
         // next 
 
         if (!seek) {
-            if (realNow < duration) {
+            if (realTime < duration) {
                 this.requestAnimate()
             } else {
                 const { loop, loopDelay } = this
@@ -346,7 +346,7 @@ export class Animate extends Eventer implements IAnimate {
     }
 
     protected begin(seek?: boolean): void {
-        this.playedDuration = this.time = 0
+        this.playedTotalTime = this.time = 0
         this.isReverse ? this.setTo() : this.setFrom()
         if (!seek) this.requestAnimate()
     }
@@ -381,19 +381,19 @@ export class Animate extends Eventer implements IAnimate {
 
     protected nextFrame(): void {
         if (this.nowIndex + 1 >= this.frames.length) return
-        this.playedDuration += this.nowTotalDuration
+        this.playedTotalTime += this.frameTotalTime
         this.nowIndex++
     }
 
     protected reverseNextFrame(): void {
         if (this.nowIndex - 1 < 0) return
-        this.playedDuration += this.nowTotalDuration
+        this.playedTotalTime += this.frameTotalTime
         this.nowIndex--
     }
 
 
     protected transition(t: number): void {
-        const { style, beforeStyle } = this.nowFrame
+        const { style, beforeStyle } = this.frame
         const fromStyle = this.isReverse ? style : beforeStyle
         const toStyle = this.isReverse ? beforeStyle : style
 
@@ -404,9 +404,9 @@ export class Animate extends Eventer implements IAnimate {
         } else {
 
             const { attrsMap } = this
-            let from: number, to: number, attrTransition: IFunction, { betweenStyle } = this.nowFrame
+            let from: number, to: number, attrTransition: IFunction, { betweenStyle } = this.frame
 
-            if (!betweenStyle) betweenStyle = this.nowFrame.betweenStyle = {}
+            if (!betweenStyle) betweenStyle = this.frame.betweenStyle = {}
 
             for (let key in style) {
                 if (attrsMap && !attrsMap[key]) continue
