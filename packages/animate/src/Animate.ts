@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateDirection, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap } from '@leafer-ui/interface'
 import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -32,9 +32,6 @@ export class Animate extends Eventer implements IAnimate {
     @animateAttr('ease')
     public easing: IAnimateEasing
 
-    @animateAttr('normal')
-    public direction: IAnimateDirection
-
 
     @animateAttr(0)
     public delay: number
@@ -45,6 +42,12 @@ export class Animate extends Eventer implements IAnimate {
     @animateAttr('auto')
     public ending: IAnimateEnding
 
+
+    @animateAttr(false)
+    public reverse?: boolean
+
+    @animateAttr(false)
+    public swing?: boolean
 
     @animateAttr(false)
     public loop: boolean | number
@@ -79,19 +82,17 @@ export class Animate extends Eventer implements IAnimate {
     protected requestAnimateTime: number
     protected playedTotalTime: number
 
-    protected isReverse: boolean
+    protected nowReverse: boolean
     protected timer: ITimer
     protected attrsMap: IBooleanMap
 
-    public get alternate(): boolean { return this.direction.includes('alternate') }
-
     public get realEnding(): IAnimateEnding {
         let count: number
-        const { ending, direction, loop } = this
+        const { ending, reverse, loop } = this
         if (ending === 'from') count = 0
         else if (ending === 'to') count = 1
         else {
-            count = direction.includes('reverse') ? 0 : 1
+            count = reverse ? 0 : 1
             if (loop && typeof loop === 'number') count += loop - 1
         }
         return count % 2 ? 'to' : 'from'
@@ -276,10 +277,10 @@ export class Animate extends Eventer implements IAnimate {
 
             while (realTime - this.playedTotalTime > this.frameTotalTime) {
                 this.transition(1)
-                this.isReverse ? this.reverseNextFrame() : this.nextFrame()
+                this.nowReverse ? this.reverseNextFrame() : this.nextFrame()
             }
 
-            const itemDelay = this.isReverse ? 0 : (this.frame.delay || 0)
+            const itemDelay = this.nowReverse ? 0 : (this.frame.delay || 0)
             const itemPlayedTime = realTime - this.playedTotalTime - itemDelay
             const frameDuration = this.frame.duration
 
@@ -302,15 +303,15 @@ export class Animate extends Eventer implements IAnimate {
             if (realTime < duration) {
                 this.requestAnimate()
             } else {
-                const { loop, loopDelay } = this
+                const { loop, loopDelay, swing } = this
 
-                if (loop !== false || this.alternate) {
+                if (loop !== false || swing) {
 
                     this.looped ? this.looped++ : this.looped = 1
 
                     if (!(typeof loop === 'number' && (!loop || this.looped >= loop))) {
 
-                        if (this.alternate) this.isReverse = !this.isReverse
+                        if (swing) this.nowReverse = !this.nowReverse
 
                         if (loopDelay) this.timer = setTimeout(() => { this.timer = 0, this.begin() }, loopDelay / this.speed * 1000)
                         else this.begin()
@@ -328,8 +329,8 @@ export class Animate extends Eventer implements IAnimate {
     protected start(seek?: boolean): void {
         this.requestAnimateTime = 1 // started
 
-        const isReverse = this.direction.includes('reverse')
-        if (isReverse || this.isReverse) this.isReverse = isReverse
+        const { reverse } = this
+        if (reverse || this.nowReverse) this.nowReverse = reverse
         if (this.looped) this.looped = 0
 
         if (seek) this.begin(true)
@@ -345,12 +346,12 @@ export class Animate extends Eventer implements IAnimate {
 
     protected begin(seek?: boolean): void {
         this.playedTotalTime = this.time = 0
-        this.isReverse ? this.setTo() : this.setFrom()
+        this.nowReverse ? this.setTo() : this.setFrom()
         if (!seek) this.requestAnimate()
     }
 
     protected end(): void {
-        this.isReverse ? this.setFrom() : this.setTo()
+        this.nowReverse ? this.setFrom() : this.setTo()
     }
 
     protected complete(): void {
@@ -392,8 +393,8 @@ export class Animate extends Eventer implements IAnimate {
 
     protected transition(t: number): void {
         const { style, beforeStyle } = this.frame
-        const fromStyle = this.isReverse ? style : beforeStyle
-        const toStyle = this.isReverse ? beforeStyle : style
+        const fromStyle = this.nowReverse ? style : beforeStyle
+        const toStyle = this.nowReverse ? beforeStyle : style
 
         if (t === 0) {
             this.setStyle(fromStyle)
