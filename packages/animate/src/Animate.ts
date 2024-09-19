@@ -166,6 +166,7 @@ export class Animate extends Eventer implements IAnimate {
 
         this.animate(0, true)
         this.clearTimer(() => this.requestAnimate())
+        this.emit(AnimateEvent.SEEK, this)
     }
 
     public kill(): void {
@@ -363,7 +364,7 @@ export class Animate extends Eventer implements IAnimate {
         else if (realEnding === 'to') this.setTo()
 
         this.clearTimer()
-        this.emit(AnimateEvent.COMPLETE, this)
+        this.emit(AnimateEvent.COMPLETED, this)
     }
 
 

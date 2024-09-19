@@ -49,5 +49,5 @@ ui.killAnimate = function (_type?: IAnimateType): void {
 
 ui.__runAnimation = function (type: 'in' | 'out', complete?: IFunction): void {
     this.animate(type === 'in' ? this.animation : this.animationOut)
-    if (complete) this.__animate.on(AnimateEvent.COMPLETE, complete)
+    if (complete) this.__animate.on(AnimateEvent.COMPLETED, complete)
 }
