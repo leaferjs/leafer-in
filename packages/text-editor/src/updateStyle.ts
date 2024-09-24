@@ -1,4 +1,4 @@
-import { ColorConvert, inviteCode } from '@leafer-ui/core'
+import { ColorConvert } from '@leafer-ui/core'
 import { IFill, IText, IRGB } from '@leafer-ui/interface'
 
 
@@ -15,8 +15,6 @@ export const verticalAlignMap = {
     'middle': 'center',
     'bottom': 'flex-end'
 }
-
-export const codes = inviteCode
 
 export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: number): void {
     const { style } = textDom
