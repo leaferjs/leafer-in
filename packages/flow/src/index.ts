@@ -28,28 +28,34 @@ boundsType()(ui, 'widthRange')
 boundsType()(ui, 'heightRange')
 
 
+let created: boolean
 const { copyAndSpread } = BoundsHelper
-let doFlowX = flowX, doFlowY = flowY
 
 box.__updateFlowLayout = function (): void {
-    this.leafer.created = false
-    const { flow } = this.__
+    const { leafer } = this, { flow } = this.__
+
+    if (leafer) {
+        created = leafer.created
+        leafer.created = false
+    }
+
     switch (flow) {
         case 'x':
         case true:
-            doFlowX(this)
+            flowX(this)
             break
         case 'y':
-            doFlowY(this)
+            flowY(this)
             break
         case 'x-reverse':
-            doFlowX(this, true)
+            flowX(this, true)
             break
         case 'y-reverse':
-            doFlowY(this, true)
+            flowY(this, true)
             break
     }
-    this.leafer.created = true
+
+    if (leafer) leafer.created = created
 }
 
 box.__updateContentBounds = function (): void {
