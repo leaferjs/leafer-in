@@ -71,5 +71,45 @@ box.__updateContentBounds = function (): void {
     }
 }
 
+box.__updateBoxBounds = function (secondLayout?: boolean): void { // autoSide且自动布局时需要二次布局
+    const data = this.__
+
+    if (this.children.length) {
+
+        const { flow } = data
+
+        if (data.__autoSide) {
+
+            // this.leafer.layouter.addExtra(this)
+
+            flow && !secondLayout ? this.__updateRectBoxBounds() : this.__updateGroupBoxBounds()
+
+            const { boxBounds } = this.__layout
+
+            if (!data.__autoSize) {
+                if (data.__autoWidth) {
+                    if (!flow) boxBounds.width += boxBounds.x, boxBounds.x = 0
+                    boxBounds.height = data.height, boxBounds.y = 0
+                } else {
+                    if (!flow) boxBounds.height += boxBounds.y, boxBounds.y = 0
+                    boxBounds.width = data.width, boxBounds.x = 0
+                }
+            }
+
+            flow && secondLayout && data.padding && copyAndSpread(boxBounds, boxBounds, data.padding, false, data.__autoSize ? null : (data.__autoWidth ? 'width' : 'height'))
+
+            this.__updateNaturalSize()
+
+        } else {
+            this.__updateRectBoxBounds()
+        }
+
+        if (flow) this.__updateContentBounds()
+
+    } else {
+        this.__updateRectBoxBounds()
+    }
+}
+
 
 
