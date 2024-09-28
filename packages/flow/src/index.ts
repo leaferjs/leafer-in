@@ -2,14 +2,14 @@ export * from '@leafer-in/resize'
 
 export { Flow } from './Flow'
 
-import { BoundsHelper, Box, UI, autoLayoutType, boundsType } from '@leafer-ui/draw'
+import { BoundsHelper, Box, Group, UI, autoLayoutType, boundsType } from '@leafer-ui/draw'
 
 import { flowX } from './layout/flowX'
 import { flowY } from './layout/flowY'
 import { autoBoundsType } from './decorate'
 
 
-const ui = UI.prototype, box = Box.prototype
+const ui = UI.prototype, box = Box.prototype, { __updateBoxBounds } = Group.prototype
 
 // addAttr
 autoLayoutType(false)(ui, 'flow')
@@ -82,7 +82,7 @@ box.__updateBoxBounds = function (secondLayout?: boolean): void { // autoSide且
 
             // this.leafer.layouter.addExtra(this)
 
-            flow && !secondLayout ? this.__updateRectBoxBounds() : this.__updateGroupBoxBounds()
+            flow && !secondLayout ? this.__updateRectBoxBounds() : __updateBoxBounds.call(this)
 
             const { boxBounds } = this.__layout
 
