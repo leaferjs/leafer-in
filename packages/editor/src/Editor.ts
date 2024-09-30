@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, ILayoutBoundsData } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, ILayoutBoundsData, IMatrix } from '@leafer-ui/interface'
 import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
@@ -330,8 +330,10 @@ export class Editor extends Group implements IEditor {
         return this.element.getWorldPoint(LeafHelper.getInnerOrigin(this.element, origin))
     }
 
-    protected getChangedTransform(func: IFunction): Matrix {
+    protected getChangedTransform(func: IFunction): IMatrix {
         const { element } = this
+        if (this.multiple && !element.canChange) return element.changedTransform
+
         const oldMatrix = new Matrix(element.worldTransform)
         func()
         return new Matrix(element.worldTransform).divide(oldMatrix) // world change transform

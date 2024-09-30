@@ -1,5 +1,5 @@
-import { IObject, IFunction } from '@leafer-ui/interface'
-import { PropertyEvent, Rect } from '@leafer-ui/draw'
+import { IObject, IFunction, IMatrix } from '@leafer-ui/interface'
+import { LeafHelper, Matrix, PropertyEvent, Rect } from '@leafer-ui/draw'
 
 import { IEditor, ISimulateElement } from '@leafer-in/interface'
 
@@ -8,7 +8,14 @@ const checkMap: IObject = { x: 1, y: 1, scaleX: 1, scaleY: 1, rotation: 1, skewX
 
 export class SimulateElement extends Rect implements ISimulateElement {
 
-    public checkChange: boolean = true
+    public get __tag() { return 'SimulateElement' }
+
+    public checkChange = true
+
+    public canChange = true
+
+    public changedTransform: IMatrix
+
 
     constructor(editor: IEditor) {
         super()
@@ -16,16 +23,28 @@ export class SimulateElement extends Rect implements ISimulateElement {
         this.visible = false
 
         this.on(PropertyEvent.CHANGE, (event: PropertyEvent) => {
+
             if (this.checkChange && checkMap[event.attrName]) {
 
                 const { attrName, newValue, oldValue } = event
                 const addValue = attrName[0] === 's' ? (<number>newValue || 1) / (<number>oldValue || 1) : (<number>newValue || 0) - (<number>oldValue || 0)
 
-                const { leaferIsCreated, leafer } = this
+                this.canChange = false
 
-                if (leaferIsCreated) leafer.created = false;
-                (this as any)[attrName] = oldValue  // 恢复到之前，再使用editor操作修改
-                if (leaferIsCreated) leafer.created = true
+                const data: IObject = this.__
+
+                // old matrix
+                data[attrName] = oldValue
+                LeafHelper.updateMatrix(this)
+
+                const oldMatrix = new Matrix(this.__world)
+
+                // new matrix
+                data[attrName] = newValue
+                this.__layout.rotationChange()
+                LeafHelper.updateMatrix(this)
+
+                this.changedTransform = new Matrix(this.__world).divide(oldMatrix) // world change transform
 
                 switch (attrName) {
                     case 'x':
@@ -49,13 +68,18 @@ export class SimulateElement extends Rect implements ISimulateElement {
                     case 'skewY':
                         editor.skewOf(origin, 0, addValue)
                 }
+
+                this.canChange = true
+
             }
         })
     }
 
     public safeChange(changeFn: IFunction): void {
-        this.checkChange = false
-        changeFn()
-        this.checkChange = true
+        if (this.canChange) {
+            this.checkChange = false
+            changeFn()
+            this.checkChange = true
+        }
     }
 }
