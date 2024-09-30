@@ -6,6 +6,7 @@ export { IStroker } from './editor/IStroker'
 export { IEditBox } from './editor/IEditBox'
 export { ISelectArea } from './editor/ISelectArea'
 export { IEditSelect } from './editor/IEditSelect'
+export { ISimulateElement } from './editor/ISimulateTarget'
 
 // html
 

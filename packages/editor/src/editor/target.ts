@@ -12,6 +12,7 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
     if (target) {
         editor.leafList = target instanceof LeafList ? target : new LeafList(target instanceof Array ? target : target as IUI)
     } else {
+        editor.simulateTarget.remove()
         editor.leafList.reset()
         editor.closeInnerEditor()
     }

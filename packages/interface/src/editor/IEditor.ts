@@ -2,10 +2,11 @@ import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrix
 
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
+import { ISimulateElement } from './ISimulateTarget'
 
 
 export interface IEditor extends IEditorBase {
-    simulateTarget: IUI
+    simulateTarget: ISimulateElement
 
     selector: IEditSelect
     editBox: IEditBox

@@ -28,16 +28,12 @@ boundsType()(ui, 'widthRange')
 boundsType()(ui, 'heightRange')
 
 
-let created: boolean
 const { copyAndSpread } = BoundsHelper
 
 box.__updateFlowLayout = function (): void {
-    const { leafer } = this, { flow } = this.__
+    const { leaferIsCreated, flow } = this
 
-    if (leafer) {
-        created = leafer.created
-        leafer.created = false
-    }
+    if (leaferIsCreated) this.leafer.created = false
 
     switch (flow) {
         case 'x':
@@ -55,7 +51,7 @@ box.__updateFlowLayout = function (): void {
             break
     }
 
-    if (leafer) leafer.created = created
+    if (leaferIsCreated) this.leafer.created = true
 }
 
 box.__updateContentBounds = function (): void {
