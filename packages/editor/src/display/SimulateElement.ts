@@ -4,6 +4,7 @@ import { LeafHelper, Matrix, PropertyEvent, Rect } from '@leafer-ui/draw'
 import { IEditor, ISimulateElement } from '@leafer-in/interface'
 
 
+const { updateMatrix } = LeafHelper
 const checkMap: IObject = { x: 1, y: 1, scaleX: 1, scaleY: 1, rotation: 1, skewX: 1, skewY: 1 }, origin = 'top-left'
 
 export class SimulateElement extends Rect implements ISimulateElement {
@@ -35,14 +36,15 @@ export class SimulateElement extends Rect implements ISimulateElement {
 
                 // old matrix
                 data[attrName] = oldValue
-                LeafHelper.updateMatrix(this)
+                updateMatrix(this.parent)
+                updateMatrix(this)
 
                 const oldMatrix = new Matrix(this.__world)
 
                 // new matrix
                 data[attrName] = newValue
                 this.__layout.rotationChange()
-                LeafHelper.updateMatrix(this)
+                updateMatrix(this)
 
                 this.changedTransform = new Matrix(this.__world).divide(oldMatrix) // world change transform
 
