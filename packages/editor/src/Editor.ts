@@ -472,14 +472,15 @@ export class Editor extends Group implements IEditor {
 
     public listenTargetEvents(): void {
         if (!this.targetEventIds.length) {
-            const { leafer } = this.list[0]
+            const { app, leafer } = this
             this.targetEventIds = [
-                this.app.on_(MoveEvent.BEFORE_MOVE, this.onMove, this, true),
-                this.app.on_(ZoomEvent.BEFORE_ZOOM, this.onScale, this, true),
-                this.app.on_(RotateEvent.BEFORE_ROTATE, this.onRotate, this, true),
                 leafer.on_(RenderEvent.START, this.update, this),
-                leafer.on_([KeyEvent.HOLD, KeyEvent.UP], (e: KeyEvent) => { updateCursor(this, e) }),
-                leafer.on_(KeyEvent.DOWN, this.editBox.onArrow, this.editBox)
+                app.on_(RenderEvent.CHILD_START, this.forceRender, this),
+                app.on_(MoveEvent.BEFORE_MOVE, this.onMove, this, true),
+                app.on_(ZoomEvent.BEFORE_ZOOM, this.onScale, this, true),
+                app.on_(RotateEvent.BEFORE_ROTATE, this.onRotate, this, true),
+                app.on_([KeyEvent.HOLD, KeyEvent.UP], (e: KeyEvent) => { updateCursor(this, e) }),
+                app.on_(KeyEvent.DOWN, this.editBox.onArrow, this.editBox)
             ]
         }
     }

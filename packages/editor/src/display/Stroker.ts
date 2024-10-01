@@ -30,42 +30,40 @@ export class Stroker extends UI implements IStroker {
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {
         const { list } = this
+
         if (list.length) {
 
             let leaf: IUI
-            const { stroke, strokeWidth, fill } = this.__
-            const { bounds } = options
+            const data = this.__, { stroke, strokeWidth, fill } = data, { bounds } = options
 
             for (let i = 0; i < list.length; i++) {
                 leaf = list[i]
-                if (bounds && bounds.hit(leaf.__world, options.matrix)) {
+                const { worldTransform, worldRenderBounds } = leaf
+                if (bounds && bounds.hit(worldRenderBounds, options.matrix)) {
 
-                    const aScaleX = abs(leaf.__world.scaleX), aScaleY = abs(leaf.__world.scaleY)
+                    const aScaleX = abs(worldTransform.scaleX), aScaleY = abs(worldTransform.scaleY)
 
                     if (aScaleX !== aScaleY) { // need no scale stroke, use rect path
 
-                        copy(matrix, leaf.__world)
+                        copy(matrix, worldTransform)
                         scale(matrix, 1 / aScaleX, 1 / aScaleY)
 
                         canvas.setWorld(matrix, options.matrix)
                         canvas.beginPath()
-                        this.__.strokeWidth = strokeWidth
+                        data.strokeWidth = strokeWidth
 
                         const { x, y, width, height } = leaf.__layout.boxBounds
                         canvas.rect(x * aScaleX, y * aScaleY, width * aScaleX, height * aScaleY)
 
                     } else {
 
-                        canvas.setWorld(leaf.__world, options.matrix)
+                        canvas.setWorld(worldTransform, options.matrix)
                         canvas.beginPath()
 
-                        if (leaf.__.__useArrow) {
-                            leaf.__drawPath(canvas)
-                        } else {
-                            leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
-                        }
+                        if (leaf.__.__useArrow) leaf.__drawPath(canvas)
+                        else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
 
-                        this.__.strokeWidth = strokeWidth / abs(leaf.__world.scaleX)
+                        data.strokeWidth = strokeWidth / abs(worldTransform.scaleX)
 
                     }
 
@@ -74,7 +72,7 @@ export class Stroker extends UI implements IStroker {
                 }
             }
 
-            this.__.strokeWidth = strokeWidth
+            data.strokeWidth = strokeWidth
         }
     }
 

@@ -98,9 +98,10 @@ export class EditBox extends Group implements IEditBox {
         rect.hittable = !single && !!moveable
 
         // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
-        element.syncEventer = (single && moveable) ? rect : null
-        this.app.interaction.bottomList = (single && moveable) ? [{ target: rect, proxy: element }] : null
-
+        if (single && moveable) {
+            element.syncEventer = rect
+            this.app.interaction.bottomList = [{ target: rect, proxy: element }]
+        }
     }
 
     public update(bounds: IBoundsData): void {

@@ -21,7 +21,7 @@ export class SimulateElement extends Rect implements ISimulateElement {
     constructor(editor: IEditor) {
         super()
 
-        this.visible = false
+        this.visible = this.hittable = false
 
         this.on(PropertyEvent.CHANGE, (event: PropertyEvent) => {
 
