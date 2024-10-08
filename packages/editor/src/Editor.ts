@@ -59,6 +59,7 @@ export class Editor extends Group implements IEditor {
     public get single(): boolean { return this.list.length === 1 }
 
     public get dragging(): boolean { return this.editBox.dragging }
+    public get moving(): boolean { return this.editBox.moving }
 
     // 组件
 
