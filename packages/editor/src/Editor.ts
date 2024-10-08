@@ -44,8 +44,9 @@ export class Editor extends Group implements IEditor {
 
     // 列表
 
-    public get list(): IUI[] { return this.leafList.list as IUI[] }
     public leafList: ILeafList = new LeafList() // from target
+    public get list(): IUI[] { return this.leafList.list as IUI[] }
+    public get dragHoverExclude(): IUI[] { return [this.editBox.rect] }
     public openedGroupList: ILeafList = new LeafList()
 
     // 状态
