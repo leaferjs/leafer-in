@@ -43,7 +43,6 @@ export class EditBox extends Group implements IEditBox {
         this.editor = editor
         this.visible = false
         this.create()
-        this.rect.syncEventer = editor // rect的事件不会冒泡，需要手动传递给editor
         this.__listenEvents()
     }
 
@@ -96,6 +95,7 @@ export class EditBox extends Group implements IEditBox {
         // rect
         rect.set({ stroke, strokeWidth, ...(mergeConfig.rect || {}) })
         rect.hittable = !single && !!moveable
+        rect.syncEventer = single && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
 
         // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
         if (single && moveable) {
