@@ -11,8 +11,8 @@
     "type": "git",
     "url": "https://github.com/leaferjs/leafer-in.git"
   },
-  "homepage": "https://github.com/leaferjs/in/tree/main/packages/interface",
-  "bugs": "https://github.com/leaferjs/in/issues",
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/interface",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
   "keywords": [
     "leafer-in interface",
     "leafer-in",
