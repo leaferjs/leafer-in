@@ -403,10 +403,10 @@ export class Editor extends Group implements IEditor {
 
     // inner
 
-    public openInnerEditor(target?: IUI): void {
-        if (target) this.target = target
+    public openInnerEditor(target?: IUI, select?: boolean): void {
+        if (target && select) this.target = target
         if (this.single) {
-            const editTarget = this.element
+            const editTarget = target || this.element
             const tag = editTarget.editInner
             if (tag && EditToolCreator.list[tag]) {
                 this.editTool.unload()

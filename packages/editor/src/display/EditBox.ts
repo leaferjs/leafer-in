@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig } from '@leafer-ui/interface'
-import { Group, Box, AroundHelper, Direction9 } from '@leafer-ui/draw'
+import { Group, Box, Text, AroundHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -301,6 +301,11 @@ export class EditBox extends Group implements IEditBox {
         if (editor.single) {
             const { element } = editor
             if (element.isBranch) {
+                if ((element as IBox).textBox) {
+                    const find = element.children.find(item => item.editable && item instanceof Text)
+                    if (find) return editor.openInnerEditor(find) // 文本Box直接进入编辑状态，如便利贴文本
+                }
+
                 editor.openGroup(element as IGroup)
                 editor.target = editor.selector.findDeepOne(e)
             } else {
