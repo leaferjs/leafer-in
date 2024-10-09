@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/editor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "@leafer-in/editor",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -17,7 +17,7 @@
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/leaferjs/in.git"
+    "url": "https://github.com/leaferjs/leafer-in.git"
   },
   "homepage": "https://github.com/leaferjs/in/tree/main/packages/editor",
   "bugs": "https://github.com/leaferjs/in/issues",
@@ -30,9 +30,9 @@
     "leaferjs"
   ],
   "dependencies": {
-    "@leafer-ui/core": "^1.0.4",
-    "@leafer-ui/interface": "^1.0.4",
-    "@leafer-in/resize": "^1.0.4",
-    "@leafer-in/interface": "^1.0.4"
+    "@leafer-ui/core": "^1.0.5",
+    "@leafer-ui/interface": "^1.0.5",
+    "@leafer-in/resize": "^1.0.5",
+    "@leafer-in/interface": "^1.0.5"
   }
 }

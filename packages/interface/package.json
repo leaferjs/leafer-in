@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/interface",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "@leafer-in/interface",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/leaferjs/in.git"
+    "url": "https://github.com/leaferjs/leafer-in.git"
   },
   "homepage": "https://github.com/leaferjs/in/tree/main/packages/interface",
   "bugs": "https://github.com/leaferjs/in/issues",
@@ -21,7 +21,7 @@
     "leaferjs"
   ],
   "dependencies": {
-    "@leafer-ui/interface": "^1.0.4",
-    "@leafer/interface": "^1.0.4"
+    "@leafer-ui/interface": "^1.0.5",
+    "@leafer/interface": "^1.0.5"
   }
 }
