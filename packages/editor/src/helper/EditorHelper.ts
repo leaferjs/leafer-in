@@ -40,7 +40,7 @@ export const EditorHelper = {
 
         app.lockLayout()
         list.forEach(leaf => {
-            if (leaf.isBranch) {
+            if (leaf.isBranch && !leaf.isBranchLeaf) {
                 const { parent, children } = leaf
                 while (children.length) {
                     ungroupList.push(children[0])
