@@ -41,22 +41,7 @@ export class TextEditor extends InnerEditor {
         style.transformOrigin = 'left top'
         style.boxSizing = 'border-box'
 
-        if (this.isHTMLText) {
-
-            div.innerHTML = text.text
-            this.textScale = 1
-
-        } else {
-
-            div.innerText = text.text
-
-            const { scaleX, scaleY } = text.worldTransform
-            this.textScale = Math.max(Math.abs(scaleX), Math.abs(scaleY))
-
-            const fontSize = text.fontSize * this.textScale
-            if (fontSize < 12) this.textScale *= 12 / fontSize
-
-        }
+        this.isHTMLText ? div.innerHTML = text.text : div.innerText = text.text
 
         const { view } = editor.app;
         (this.inBody = view instanceof HTMLCanvasElement) ? document.body.appendChild(div) : (view as HTMLDivElement).appendChild(div)
@@ -117,17 +102,54 @@ export class TextEditor extends InnerEditor {
     }
 
     public onUpdate() {
-        const { editTarget: text, textScale } = this
-        const { style } = this.editDom
-        const { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
-        const { a, b, c, d, e, f } = new Matrix(text.worldTransform).scale(1 / textScale)
+        const { editTarget: text } = this
 
+        // get text scale
+        let textScale = 1
+
+        if (!this.isHTMLText) {
+            const { scaleX, scaleY } = text.worldTransform
+            textScale = Math.max(Math.abs(scaleX), Math.abs(scaleY))
+
+            const fontSize = text.fontSize * textScale
+            if (fontSize < 12) textScale *= 12 / text.fontSize
+        }
+
+        this.textScale = textScale
+
+        // layout
+        const { a, b, c, d, e, f } = new Matrix(text.worldTransform).scale(1 / textScale)
+        let { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
+        let { width, height } = text
+
+        x -= window.scrollX, y -= window.scrollY, width *= textScale, height *= textScale
+
+        const data = text.__
+
+        if (data.__autoWidth && data.autoSizeAlign) {
+            width += 20 // 加大一点防止换行
+            switch (data.textAlign) {
+                case 'center': x -= width / 2; break
+                case 'right': x -= width
+            }
+        }
+
+        if (data.__autoHeight && data.autoSizeAlign) {
+            height += 20
+            switch (data.verticalAlign) {
+                case 'middle': y -= height / 2; break
+                case 'bottom': y -= height
+            }
+        }
+
+        const { style } = this.editDom
         style.transform = `matrix(${a},${b},${c},${d},${e},${f})`
-        style.left = x - window.scrollX + 'px'
-        style.top = y - window.scrollY + 'px'
-        style.width = text.width * textScale + (text.__.__autoWidth ? 20 : 0) + 'px'
-        style.height = text.height * textScale + (text.__.__autoHeight ? 20 : 0) + 'px'
-        this.isHTMLText || updateStyle(this.editDom, text, this.textScale)
+        style.left = x + 'px'
+        style.top = y + 'px'
+        style.width = width + 'px'
+        style.height = height + 'px'
+
+        this.isHTMLText || updateStyle(this.editDom, text, textScale)
     }
 
     public onUnload(): void {
