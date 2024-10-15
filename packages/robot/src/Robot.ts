@@ -43,7 +43,6 @@ export class Robot extends UI implements IRobot {
 
     constructor(data?: IRobotInputData) {
         super(data)
-        this.__.__drawAfterFill = true
     }
 
 
@@ -146,19 +145,10 @@ export class Robot extends UI implements IRobot {
         }
     }
 
-    public __drawAfterFill(canvas: ILeaferCanvas, _options: IRenderOptions): void {
-        const { nowFrame } = this
-        if (nowFrame) {
-            const { width, height, cornerRadius } = this.__
-            if (cornerRadius || this.pathInputed) {
-                canvas.save()
-                canvas.clip()
-                canvas.drawImage(nowFrame.view, nowFrame.x, nowFrame.y, nowFrame.width, nowFrame.height, 0, 0, width, height)
-                canvas.restore()
-            } else {
-                canvas.drawImage(nowFrame.view, nowFrame.x, nowFrame.y, nowFrame.width, nowFrame.height, 0, 0, width, height)
-            }
-        }
+    // in __drawAfterFill()
+    public __drawContent(canvas: ILeaferCanvas, _options: IRenderOptions): void {
+        const { nowFrame } = this, { width, height } = this.__
+        if (nowFrame) canvas.drawImage(nowFrame.view, nowFrame.x, nowFrame.y, nowFrame.width, nowFrame.height, 0, 0, width, height)
     }
 
     public destroy(): void {

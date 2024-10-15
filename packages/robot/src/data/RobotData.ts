@@ -4,6 +4,8 @@ import { UIData } from '@leafer-ui/draw'
 
 export class RobotData extends UIData {
 
+    public get __drawAfterFill(): boolean { return true }
+
     protected _robot: IRobotKeyframe | IRobotKeyframe[]
     protected _action: IRobotActionName
 
