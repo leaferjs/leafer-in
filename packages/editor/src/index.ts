@@ -33,6 +33,10 @@ import { Editor } from './Editor'
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
 
+defineKey(UI.prototype, 'editOuter', {
+    get(): string { return this.__.__isLinePath ? 'LineEditTool' : 'EditTool' }
+})
+
 UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): void {
     defineKey(this.prototype, 'editConfig', {
         get(): IEditorConfig { return typeof config === 'function' ? config(this) : config }
