@@ -27,15 +27,26 @@ export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
 import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
-import { Creator, UI, defineKey } from '@leafer-ui/draw'
+import { Creator, UI, Text, defineKey } from '@leafer-ui/draw'
 
 import { Editor } from './Editor'
 
+
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
+
 
 defineKey(UI.prototype, 'editOuter', {
     get(): string { return this.__.__isLinePath ? 'LineEditTool' : 'EditTool' }
 })
+
+defineKey(UI.prototype, 'editInner', {
+    get(): string { return 'PathEditor' }
+})
+
+defineKey(Text.prototype, 'editInner', {
+    get(): string { return 'TextEditor' }
+})
+
 
 UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): void {
     defineKey(this.prototype, 'editConfig', {
