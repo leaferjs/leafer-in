@@ -7,7 +7,7 @@ import { registerEditTool } from './EditToolCreator'
 
 
 const { left, right } = Direction9
-const { move, copy } = PointHelper
+const { move, copy, toNumberPoints } = PointHelper
 
 @registerEditTool()
 export class LineEditTool extends EditTool {
@@ -65,13 +65,7 @@ export class LineEditTool extends EditTool {
 
     getInnerMove(ui: IUI, event: IDragEvent, lockRatio: boolean | 'corner'): IPointData {
         const movePoint = event.getInnerMove(ui)
-        if (lockRatio) {
-            if (Math.abs(movePoint.x) > Math.abs(movePoint.y)) {
-                movePoint.y = 0
-            } else {
-                movePoint.x = 0
-            }
-        }
+        if (lockRatio) Math.abs(movePoint.x) > Math.abs(movePoint.y) ? movePoint.y = 0 : movePoint.x = 0
         return movePoint
     }
 
@@ -82,7 +76,8 @@ export class LineEditTool extends EditTool {
         }
     }
 
-    getFromToByPoints(points: number[]): IFromToData {
+    getFromToByPoints(originPoints: number[] | IPointData[]): IFromToData {
+        const points = toNumberPoints(originPoints)
         return {
             from: { x: points[0], y: points[1] },
             to: { x: points[2], y: points[3] }
