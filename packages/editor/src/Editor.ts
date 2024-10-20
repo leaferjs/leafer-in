@@ -500,7 +500,8 @@ export class Editor extends Group implements IEditor {
             this.simulateTarget.destroy()
             Object.values(this.editToolList).forEach(item => item.destroy())
             this.editToolList = {}
-            this.target = this.hoverTarget = this.simulateTarget = this.editTool = this.innerEditor = null
+            this.target = this.hoverTarget = null // 必须在 simulateTarget = null之前执行
+            this.simulateTarget = this.editTool = this.innerEditor = null
             super.destroy()
         }
     }
