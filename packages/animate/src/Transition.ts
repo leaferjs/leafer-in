@@ -1,4 +1,4 @@
-import { IFourNumber, IColor, ITransitionMap } from '@leafer-ui/interface'
+import { IFourNumber, IColor, ITransitionMap, IShadowEffect } from '@leafer-ui/interface'
 import { MathHelper, ColorConvert } from '@leafer-ui/draw'
 
 
@@ -13,7 +13,10 @@ export const TransitionList: ITransitionMap = {
         if (typeof from === 'number' && typeof to === 'number') return number(from, to, t)
         from = fourNumber(from), to = fourNumber(to)
         return from.map((f, i) => number(f, to[i], t))
-    }
+    },
+
+    shadow,
+    innerShadow: shadow
 }
 
 export const TransitionModule = {
@@ -27,6 +30,7 @@ function value(from: any, to: any, t: number): any {
 }
 
 function number(from: number, to: number, t: number, roundValue?: number): number {
+    from || (from = 0), to || (to = 0)
     const value = from + (to - from) * t
     return roundValue ? round(value) : value
 }
@@ -40,4 +44,20 @@ function color(from: IColor, to: IColor, t: number): string {
 
 function paint(from: string, to: string, t: number): any {
     return (typeof from === 'string' && typeof to === 'string') ? color(from, to, t) : to
+}
+
+
+function shadow(from: IShadowEffect, to: IShadowEffect, t: number): IShadowEffect {
+    if (from instanceof Array || to instanceof Array) return to
+    from = from || {} as IShadowEffect, to = to || {} as IShadowEffect
+    return {
+        x: number(from.x, to.x, t),
+        y: number(from.y, to.y, t),
+        blur: number(from.blur, to.blur, t),
+        spread: number(from.spread, to.spread, t),
+        color: color(from.color || '#FFFFFF00', to.color || '#FFFFFF00', t),
+        visible: to.visible,
+        blendMode: to.blendMode,
+        box: to.box || from.box
+    } as IShadowEffect
 }
