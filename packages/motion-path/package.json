@@ -1,31 +1,31 @@
 {
   "name": "@leafer-in/motion-path",
-  "version": "1.0.6",
+  "version": "1.0.6-rc1",
   "description": "@leafer-in/motion-path",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/path.esm.js",
+  "main": "dist/motion-path.esm.js",
   "exports": {
-    "import": "./dist/path.esm.js",
-    "require": "./dist/path.cjs",
+    "import": "./dist/motion-path.esm.js",
+    "require": "./dist/motion-path.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/path.js",
-  "jsdelivr": "dist/path.js",
+  "unpkg": "dist/motion-path.js",
+  "jsdelivr": "dist/motion-path.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/leaferjs/leafer-in.git"
   },
-  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/path",
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/motion-path",
   "bugs": "https://github.com/leaferjs/leafer-in/issues",
   "keywords": [
-    "leafer path",
-    "leafer-path",
+    "leafer motion path",
+    "leafer-motion-path",
     "leafer-in",
-    "path",
+    "motion-path",
     "leafer-ui",
     "leaferjs"
   ],
