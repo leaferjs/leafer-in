@@ -42,8 +42,11 @@ export class InnerEditor implements IInnerEditor {
 
     public onLoad(): void { }
     public load(): void {
-        this.editor.selector.hittable = this.editor.app.tree.hitChildren = false
-        this.onLoad()
+        const { editor } = this
+        if (editor) {
+            if (editor.app) editor.selector.hittable = editor.app.tree.hitChildren = false
+            this.onLoad()
+        }
     }
 
     public onUpdate(): void { }
@@ -51,8 +54,11 @@ export class InnerEditor implements IInnerEditor {
 
     public onUnload(): void { }
     public unload(): void {
-        this.editor.selector.hittable = this.editor.app.tree.hitChildren = true
-        this.onUnload()
+        const { editor } = this
+        if (editor) {
+            if (editor.app) editor.selector.hittable = editor.app.tree.hitChildren = true
+            this.onUnload()
+        }
     }
 
     public onDestroy(): void { }

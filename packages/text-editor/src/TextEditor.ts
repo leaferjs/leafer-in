@@ -158,7 +158,7 @@ export class TextEditor extends InnerEditor {
             this.onInput()
             text.visible = true
 
-            editor.app.config.keyEvent = this._keyEvent
+            if (editor.app) editor.app.config.keyEvent = this._keyEvent
             editor.off_(this.eventIds)
 
             dom.removeEventListener("focus", this.onFocus)
