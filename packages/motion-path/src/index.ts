@@ -28,24 +28,20 @@ motionPathType(true)(ui, 'motionRotation')
 
 
 ui.getMotionPathData = function (): IMotionPathData {
-    const { parent } = this
-
-    if (!this.motionPath && parent) {
-        const { children } = parent
-        for (let i = 0; i < children.length; i++) {
-            if (children[i].motionPath) return children[i].getMotionPathData()
-        }
-    }
-
-    const data = this.__
-    if (data.__pathForMotion) return data.__pathForMotion
-    return data.__pathForMotion = HighCurveHelper.getMotionPathData(this.getPath(true, true))
+    return getMotionPathData(getMotionPath(this))
 }
 
 ui.getMotionPoint = function (motionDistance: number | IUnitData): IRotationPointData {
-    const data = this.getMotionPathData()
+    const path = getMotionPath(this)
+    const data = getMotionPathData(path)
+    if (!data.total) return {} as IRotationPointData
+
     const point = HighCurveHelper.getDistancePoint(data, motionDistance)
-    MatrixHelper.toOuterPoint(this.localTransform, point)
+    MatrixHelper.toOuterPoint(path.localTransform, point)
+
+    const { motionRotation } = this
+    if (motionRotation === false) delete point.rotation
+    else if (typeof motionRotation === 'number') point.rotation += motionRotation
     return point
 }
 
@@ -64,18 +60,17 @@ ui.__updateMotionPath = function (): void {
             child = children[i]
             if (!isNull(child.motion)) updateMotion(child)
         }
-    } else {
-        updateMotion(this)
-    }
+    } updateMotion(this)
 }
 
+
 function updateMotion(leaf: IUI): void {
-    const { motion, motionRotation } = leaf
+    const { motion } = leaf
     if (isNull(motion)) return
 
     if (leaf.motionPath) {
 
-        const data = leaf.getMotionPathData()
+        const data = getMotionPathData(leaf)
         if (data.total) leaf.__.__pathForRender = HighCurveHelper.getDistancePath(data, motion) // 生长路径
 
     } else {
@@ -85,19 +80,27 @@ function updateMotion(leaf: IUI): void {
         for (let i = 0; i < children.length; i++) {
             child = children[i]
             if (child.motionPath) {
-                const data = child.getMotionPathData()
-                if (!data.total) return
-                const point = child.getMotionPoint(motion)
-                if (motionRotation === false) delete point.rotation
-                else {
-                    point.rotation += child.rotation
-                    if (typeof motionRotation === 'number') point.rotation += motionRotation
-                }
-
-                leaf.set(point) // 动画路径
+                leaf.set(child.getMotionPoint(motion)) // 动画路径
                 break
             }
         }
 
     }
+}
+
+function getMotionPath(leaf: IUI): IUI {
+    const { parent } = leaf
+    if (!leaf.motionPath && parent) {
+        const { children } = parent
+        for (let i = 0; i < children.length; i++) {
+            if (children[i].motionPath) return children[i]
+        }
+    }
+    return leaf
+}
+
+function getMotionPathData(leaf: IUI): IMotionPathData {
+    const data = leaf.__
+    if (data.__pathForMotion) return data.__pathForMotion
+    return data.__pathForMotion = HighCurveHelper.getMotionPathData(leaf.getPath(true, true))
 }
