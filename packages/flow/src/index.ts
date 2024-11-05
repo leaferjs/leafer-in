@@ -33,7 +33,7 @@ const { copyAndSpread } = BoundsHelper
 box.__updateFlowLayout = function (): void {
     const { leaferIsCreated, flow } = this
 
-    if (leaferIsCreated) this.leafer.created = false
+    if (leaferIsCreated) this.leafer.created = false // 拦截布局更新通知，进行手动更新布局
 
     switch (flow) {
         case 'x':

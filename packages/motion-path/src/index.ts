@@ -3,7 +3,7 @@ export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
 import { IMotionPathData, IUI, IUnitData, IRotationPointData } from '@leafer-ui/interface'
-import { isNull, MatrixHelper, Transition, UI, UnitConvert } from '@leafer-ui/draw'
+import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
 import { motionPathType } from './decorator'
@@ -17,8 +17,14 @@ Transition.register('motion', function (from: any, to: any, t: number, target: I
     return Transition.number(from, to, t)
 })
 
+Transition.register('motionRotation', function (from: any, to: any, t: number): number {
+    return Transition.number(from, to, t)
+})
+
 
 const ui = UI.prototype
+const { updateMatrix, updateAllMatrix } = LeafHelper
+const { updateBounds } = BranchHelper
 
 
 // addAttr
@@ -55,18 +61,23 @@ ui.__updateMotionPath = function (): void {
 
     if (this.motionPath) {
         let child: IUI
-        const { children } = this.parent
+        const { children } = this.parent, { leaferIsReady } = this
         for (let i = 0; i < children.length; i++) {
             child = children[i]
-            if (!isNull(child.motion)) updateMotion(child)
+            if (!isNull(child.motion) && !child.__layout.matrixChanged) {
+                if (leaferIsReady && child !== this) this.leafer.layouter.addExtra(child) // add part 
+                updateMotion(child)
+            }
         }
-    } updateMotion(this)
+    } else updateMotion(this)
 }
 
 
 function updateMotion(leaf: IUI): void {
-    const { motion } = leaf
+    const { motion, leaferIsCreated } = leaf
     if (isNull(motion)) return
+
+    if (leaferIsCreated) leaf.leafer.created = false // 拦截布局更新通知，进行手动更新布局
 
     if (leaf.motionPath) {
 
@@ -75,17 +86,16 @@ function updateMotion(leaf: IUI): void {
 
     } else {
 
-        let child: IUI
-        const { children } = leaf.parent
-        for (let i = 0; i < children.length; i++) {
-            child = children[i]
-            if (child.motionPath) {
-                leaf.set(child.getMotionPoint(motion)) // 动画路径
-                break
-            }
+        leaf.set(leaf.getMotionPoint(motion)) // 动画路径
+
+        if (!leaf.__hasAutoLayout) { // 手动更新布局
+            if (leaf.isBranch) updateAllMatrix(leaf), updateBounds(leaf, leaf)
+            else updateMatrix(leaf)
         }
 
     }
+
+    if (leaferIsCreated) leaf.leafer.created = true
 }
 
 function getMotionPath(leaf: IUI): IUI {
