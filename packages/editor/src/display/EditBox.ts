@@ -76,7 +76,7 @@ export class EditBox extends Group implements IEditBox {
     public load(): void {
         const { mergeConfig, element, single } = this.editor
         const { rect, circle, resizePoints } = this
-        const { stroke, strokeWidth, moveable } = mergeConfig
+        const { stroke, strokeWidth } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
@@ -94,11 +94,11 @@ export class EditBox extends Group implements IEditBox {
 
         // rect
         rect.set({ stroke, strokeWidth, ...(mergeConfig.rect || {}) })
-        rect.hittable = !single && !!moveable
+        rect.hittable = !single
         rect.syncEventer = single && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
 
         // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
-        if (single && moveable) {
+        if (single) {
             element.syncEventer = rect
             this.app.interaction.bottomList = [{ target: rect, proxy: element }]
         }

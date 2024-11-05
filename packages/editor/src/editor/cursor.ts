@@ -40,7 +40,8 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
 }
 
 export function updateMoveCursor(editor: IEditor): void {
-    editor.editBox.rect.cursor = editor.mergeConfig.moveCursor
+    const { moveCursor, moveable } = editor.mergeConfig
+    editor.editBox.rect.cursor = moveable ? moveCursor : undefined
 }
 
 
