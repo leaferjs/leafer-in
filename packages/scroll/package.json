@@ -29,7 +29,7 @@
     "leafer-ui",
     "leaferjs"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "@leafer-ui/draw": "^1.0.8",
     "@leafer-ui/core": "^1.0.8",
     "@leafer-ui/interface": "^1.0.8",

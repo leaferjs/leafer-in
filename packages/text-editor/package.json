@@ -29,9 +29,9 @@
     "leafer-ui",
     "leaferjs"
   ],
-  "dependencies": {
-    "@leafer-ui/core": "^1.0.8",
+  "peerDependencies": {
     "@leafer-in/editor": "^1.0.8",
+    "@leafer-ui/core": "^1.0.8",
     "@leafer-ui/interface": "^1.0.8",
     "@leafer-in/interface": "^1.0.8"
   }
