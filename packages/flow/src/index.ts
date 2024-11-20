@@ -23,8 +23,6 @@ boundsType(true)(ui, 'inFlow')
 autoBoundsType()(ui, 'autoWidth')
 autoBoundsType()(ui, 'autoHeight')
 boundsType()(ui, 'autoBox')
-boundsType()(ui, 'widthRange')
-boundsType()(ui, 'heightRange')
 
 
 const { copyAndSpread } = BoundsHelper
