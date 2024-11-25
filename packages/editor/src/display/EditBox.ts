@@ -211,7 +211,7 @@ export class EditBox extends Group implements IEditBox {
 
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.mergeConfig
-        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius } as IBoxInputData
+        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0 } as IBoxInputData
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
