@@ -19,7 +19,7 @@ export class TextEditor extends InnerEditor {
 
     public eventIds: IEventListenerId[] = []
 
-    protected inBody: boolean
+    protected inBody: boolean // App 的 view 为 canvas 类型时，文本编辑框只能添加到 body 下了
     protected isHTMLText: boolean
     protected _keyEvent: boolean
 
@@ -119,10 +119,12 @@ export class TextEditor extends InnerEditor {
 
         // layout
         const { a, b, c, d, e, f } = new Matrix(text.worldTransform).scale(1 / textScale)
-        let { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
-        let { width, height } = text
 
-        x -= window.scrollX, y -= window.scrollY, width *= textScale, height *= textScale
+        let { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
+        if (!this.inBody) x -= window.scrollX, y -= window.scrollY
+
+        let { width, height } = text
+        width *= textScale, height *= textScale
 
         const data = text.__
 
