@@ -302,7 +302,8 @@ export class EditBox extends Group implements IEditBox {
             const { element } = editor
             if (element.isBranch) {
                 if ((element as IBox).textBox) {
-                    const find = element.children.find(item => item.editable && item instanceof Text)
+                    const { children } = element
+                    const find = children.find(item => item.editable && item instanceof Text) || children.find(item => item instanceof Text)
                     if (find) return editor.openInnerEditor(find) // 文本Box直接进入编辑状态，如便利贴文本
                 }
 
