@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/animate",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "@leafer-in/animate",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -29,12 +29,10 @@
     "leafer-ui",
     "leaferjs"
   ],
-  "dependencies": {
-    "@leafer-in/color": "^1.0.9"
-  },
   "peerDependencies": {
-    "@leafer-ui/draw": "^1.0.9",
-    "@leafer-ui/interface": "^1.0.9",
-    "@leafer-in/interface": "^1.0.9"
+    "@leafer-ui/draw": "^1.0.10",
+    "@leafer-in/color": "^1.0.10",
+    "@leafer-ui/interface": "^1.0.10",
+    "@leafer-in/interface": "^1.0.10"
   }
 }

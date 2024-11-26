@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/motion-path",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "@leafer-in/motion-path",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -30,8 +30,8 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-ui/draw": "^1.0.9",
-    "@leafer-ui/interface": "^1.0.9",
-    "@leafer-in/interface": "^1.0.9"
+    "@leafer-ui/draw": "^1.0.10",
+    "@leafer-ui/interface": "^1.0.10",
+    "@leafer-in/interface": "^1.0.10"
   }
 }
