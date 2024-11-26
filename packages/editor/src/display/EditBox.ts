@@ -300,7 +300,7 @@ export class EditBox extends Group implements IEditBox {
         const { editor } = this
         if (editor.single) {
             const { element } = editor
-            if (element.isBranch) {
+            if (element.isBranch && !element.editInner) {
                 if ((element as IBox).textBox) {
                     const { children } = element
                     const find = children.find(item => item.editable && item instanceof Text) || children.find(item => item instanceof Text)

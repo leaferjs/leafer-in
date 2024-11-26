@@ -27,7 +27,7 @@ export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
 import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
-import { Creator, UI, Text, Box, dataType, defineKey } from '@leafer-ui/draw'
+import { Creator, UI, Group, Text, Box, dataType, defineKey } from '@leafer-ui/draw'
 
 import { Editor } from './Editor'
 
@@ -44,6 +44,10 @@ defineKey(UI.prototype, 'editOuter', {
 
 defineKey(UI.prototype, 'editInner', {
     get(): string { return 'PathEditor' }
+})
+
+defineKey(Group.prototype, 'editInner', { // 必须设为空
+    get(): string { return '' }
 })
 
 defineKey(Text.prototype, 'editInner', {
