@@ -160,7 +160,7 @@ export class Animate extends Eventer implements IAnimate {
         if (this.destroyed) return
         if (typeof time === 'object') time = UnitConvert.number(time, this.duration)
 
-        time /= this.speed
+        if (time) time /= this.speed
         if (!this.started || time < this.time) this.start(true)
         this.time = time
 

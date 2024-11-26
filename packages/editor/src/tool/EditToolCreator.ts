@@ -20,7 +20,8 @@ export const EditToolCreator = {
 
     register(EditTool: IObject): void {
         const { tag } = EditTool.prototype as IEditTool
-        list[tag] ? debug.repeat(tag) : (list[tag] = EditTool)
+        list[tag] && debug.repeat(tag)
+        list[tag] = EditTool
     },
 
     get(tag: string, editor: IEditor): IEditTool {
