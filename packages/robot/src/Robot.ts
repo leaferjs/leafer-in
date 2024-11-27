@@ -123,8 +123,10 @@ export class Robot extends UI implements IRobot {
     protected __runAction(start: number, end: number): void {
         this.__timer = setTimeout(() => {
             if (this.running) {
-                if (this.now === end) this.now = start
-                else this.now++
+                if (this.now === end) {
+                    if (!this.loop) return this.stop()
+                    this.now = start
+                } else this.now++
                 this.__updateRobotBounds()
             }
 
