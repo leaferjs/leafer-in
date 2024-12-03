@@ -82,12 +82,13 @@ export const HighCurveHelper = {
     },
 
 
-    getDistancePoint(distanceData: IMotionPathData, motionDistance: number | IUnitData): IRotationPointData {
+    getDistancePoint(distanceData: IMotionPathData, motionDistance: number | IUnitData, motionPrecision?: number): IRotationPointData {
         const { segments, data } = distanceData
         motionDistance = UnitConvert.number(motionDistance, distanceData.total)
 
         let total = 0, distance: number, to = {} as IRotationPointData
         let i = 0, index = 0, x: number = 0, y: number = 0, toX: number, toY: number, command: number
+        let x1: number, y1: number, x2: number, y2: number, t: number
 
         const len = data.length
         while (i < len) {
@@ -120,11 +121,10 @@ export const HighCurveHelper = {
                     distance = segments[index]
 
                     if (total + distance > motionDistance) {
-                        const x1 = data[i + 1], y1 = data[i + 2], x2 = data[i + 3], y2 = data[i + 4]
-                        motionDistance -= total
-                        BezierHelper.getPointAndSet(motionDistance / distance, x, y, x1, y1, x2, y2, toX, toY, to)
-                        BezierHelper.getPointAndSet(Math.max(0, motionDistance - 0.1) / distance, x, y, x1, y1, x2, y2, toX, toY, tempFrom)
-                        to.rotation = PointHelper.getAngle(tempFrom, to)
+                        x1 = data[i + 1], y1 = data[i + 2], x2 = data[i + 3], y2 = data[i + 4]
+                        t = HighBezierHelper.getT(motionDistance - total, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
+                        BezierHelper.getPointAndSet(t, x, y, x1, y1, x2, y2, toX, toY, to)
+                        to.rotation = HighBezierHelper.getRotation(t, x, y, x1, y1, x2, y2, toX, toY)
                         return to
                     }
 
@@ -145,12 +145,13 @@ export const HighCurveHelper = {
         return to
     },
 
-    getDistancePath(distanceData: IMotionPathData, motionDistance: number | IUnitData): IPathCommandData {
+    getDistancePath(distanceData: IMotionPathData, motionDistance: number | IUnitData, motionPrecision?: number): IPathCommandData {
         const { segments, data } = distanceData, path: IPathCommandData = []
         motionDistance = UnitConvert.number(motionDistance, distanceData.total)
 
         let total = 0, distance: number, to = {} as IRotationPointData
         let i = 0, index = 0, x: number = 0, y: number = 0, toX: number, toY: number, command: number
+        let x1: number, y1: number, x2: number, y2: number, t: number
 
         const len = data.length
         while (i < len) {
@@ -179,13 +180,14 @@ export const HighCurveHelper = {
                     path.push(command, x, y)
                     break
                 case C: //bezierCurveTo(x1, y1, x2, y2, x,y)
-                    const x1 = data[i + 1], y1 = data[i + 2], x2 = data[i + 3], y2 = data[i + 4]
+                    x1 = data[i + 1], y1 = data[i + 2], x2 = data[i + 3], y2 = data[i + 4]
                     toX = data[i + 5]
                     toY = data[i + 6]
                     distance = segments[index]
 
                     if (total + distance > motionDistance) {
-                        HighBezierHelper.cut(path, (motionDistance - total) / distance, x, y, x1, y1, x2, y2, toX, toY)
+                        t = HighBezierHelper.getT(motionDistance - total, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
+                        HighBezierHelper.cut(path, t, x, y, x1, y1, x2, y2, toX, toY)
                         return path
                     }
 

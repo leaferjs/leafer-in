@@ -29,6 +29,8 @@ const { updateBounds } = BranchHelper
 
 // addAttr
 motionPathType()(ui, 'motionPath')
+motionPathType(1)(ui, 'motionPrecision')
+
 motionPathType()(ui, 'motion')
 motionPathType(true)(ui, 'motionRotation')
 
@@ -42,7 +44,7 @@ ui.getMotionPoint = function (motionDistance: number | IUnitData): IRotationPoin
     const data = getMotionPathData(path)
     if (!data.total) return {} as IRotationPointData
 
-    const point = HighCurveHelper.getDistancePoint(data, motionDistance)
+    const point = HighCurveHelper.getDistancePoint(data, motionDistance, path.motionPrecision)
     MatrixHelper.toOuterPoint(path.localTransform, point)
 
     const { motionRotation } = this
@@ -82,7 +84,7 @@ function updateMotion(leaf: IUI): void {
     if (leaf.motionPath) {
 
         const data = getMotionPathData(leaf)
-        if (data.total) leaf.__.__pathForRender = HighCurveHelper.getDistancePath(data, motion) // 生长路径
+        if (data.total) leaf.__.__pathForRender = HighCurveHelper.getDistancePath(data, motion, leaf.motionPrecision) // 生长路径
 
     } else {
 
