@@ -1,4 +1,4 @@
-import { ILeaferCanvas, IRenderOptions, ILeaferImage, IRobot, IRobotData, IRobotInputData, IRobotKeyframe, IRobotActions, IRobotActionName, IRobotComputedKeyframe } from '@leafer-ui/interface'
+import { ILeaferCanvas, IRenderOptions, ILeaferImage, IRobot, IRobotData, IRobotInputData, IRobotKeyframe, IRobotActions, IRobotActionName, IRobotComputedKeyframe, IRobotAnimation } from '@leafer-ui/interface'
 import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType } from '@leafer-ui/draw'
 
 import { RobotData } from './data/RobotData'
@@ -35,9 +35,10 @@ export class Robot extends UI implements IRobot {
     public FPS?: number
 
     @dataType(true)
-    public loop?: boolean
+    public loop?: boolean | number
 
 
+    protected __action?: IRobotAnimation
     protected __timer: any
 
 
@@ -81,14 +82,18 @@ export class Robot extends UI implements IRobot {
 
             this.now = action
 
-        } else if (action instanceof Array) {
+        } else if (typeof action === 'object') {
 
-            const { length } = action
+            const isArray = action instanceof Array
+            const keyframes = isArray ? action : action.keyframes
+            this.__action = isArray ? undefined : action
+
+            const { length } = keyframes
             if (length > 1) {
-                const start = this.now = action[0], end = action[action.length - 1]
+                const start = this.now = keyframes[0], end = keyframes[keyframes.length - 1]
                 this.play()
                 this.__runAction(start, end)
-            } else if (length) this.now = action[0]
+            } else if (length) this.now = keyframes[0]
 
         }
     }
@@ -121,17 +126,24 @@ export class Robot extends UI implements IRobot {
 
 
     protected __runAction(start: number, end: number): void {
+        let { FPS, loop, __action: a } = this
+        if (a) {
+            if (a.FPS) FPS = a.FPS
+            if (a.loop !== undefined) loop = a.loop
+        }
+
         this.__timer = setTimeout(() => {
+
             if (this.running) {
                 if (this.now === end) {
-                    if (!this.loop) return this.stop()
+                    if (!loop) return this.stop()
                     this.now = start
                 } else this.now++
                 this.__updateRobotBounds()
             }
 
             this.__runAction(start, end)
-        }, 1000 / this.FPS)
+        }, 1000 / FPS)
     }
 
     protected __updateRobotBounds(): void {
