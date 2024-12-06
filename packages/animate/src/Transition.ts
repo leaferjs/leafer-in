@@ -16,7 +16,7 @@ export const TransitionList: ITransitionMap = {
     },
 
     text(from: any, to: any, t: number): any {
-        return (typeof from === 'number' || typeof to === 'number') ? Math.round(number(from, to, t)) : to // count 效果
+        return (typeof from === 'number' || typeof to === 'number') ? MathHelper.float(number(from, to, t), Math.max(getDecimalLen(from), getDecimalLen(to))) : to
     },
 
     shadow,
@@ -27,6 +27,12 @@ export const TransitionModule = {
     value,
     number,
     color
+}
+
+
+function getDecimalLen(num: number | string) { // 小数位长度
+    const decimal = String(num).split('.')[1]
+    return decimal ? decimal.length : 0
 }
 
 function value(from: any, to: any, t: number): any {
