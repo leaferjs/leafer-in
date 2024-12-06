@@ -16,7 +16,7 @@ export const PathArrowModule: IPathArrowModule = {
     list: arrows,
 
     addArrows(ui: IUI, changeRenderPath?: boolean): void {
-        const { startArrow, endArrow, strokeWidth, __pathForRender: data } = ui.__
+        const { startArrow, endArrow, strokeWidth, dashPattern, __pathForRender: data } = ui.__
 
         let command: number, i = 0, len = data.length, count = 0, useStartArrow = startArrow && startArrow !== 'none'
 
@@ -79,20 +79,23 @@ export const PathArrowModule: IPathArrowModule = {
             if (count === 2 && useStartArrow) copy(second, command === L ? now : last)
 
             if (i === len) {
-                const p = ui.__.__pathForRender = changeRenderPath ? [...data] : data
+                const path = ui.__.__pathForRender = changeRenderPath ? [...data] : data
+                const pathForArrow: IPathCommandData = ui.__.__pathForArrow = []
 
                 if (useStartArrow) {
-                    p.push(...getArrowPath(ui, startArrow, second, first, strokeWidth, connectPoint))
+                    const startArrowPath = getArrowPath(ui, startArrow, second, first, strokeWidth, connectPoint, !!dashPattern)
+                    dashPattern ? pathForArrow.push(...startArrowPath) : path.push(...startArrowPath)
 
                     if (connectPoint.x) {
                         getDistancePoint(first, second, -connectPoint.x, true)
-                        p[1] = second.x
-                        p[2] = second.y
+                        path[1] = second.x
+                        path[2] = second.y
                     }
                 }
 
                 if (endArrow && endArrow !== 'none') {
-                    p.push(...getArrowPath(ui, endArrow, last, now, strokeWidth, connectPoint))
+                    const endArrowPath = getArrowPath(ui, endArrow, last, now, strokeWidth, connectPoint, !!dashPattern)
+                    dashPattern ? pathForArrow.push(...endArrowPath) : path.push(...endArrowPath)
 
                     if (connectPoint.x) {
                         getDistancePoint(now, last, -connectPoint.x, true)
@@ -111,7 +114,7 @@ export const PathArrowModule: IPathArrowModule = {
                                 index = i - 6 + 3
                                 break
                         }
-                        if (index) setPoint(p, last, index)
+                        if (index) setPoint(path, last, index)
                     }
                 }
 

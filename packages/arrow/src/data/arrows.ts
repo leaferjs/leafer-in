@@ -13,16 +13,16 @@ const angle: IPathDataArrow = { connect: half, offset: { x: -0.71, bevelJoin: 0.
 const angleSide: IPathDataArrow = { connect: half, offset: { x: -1.207, bevelJoin: 0.854, roundJoin: 0.707 }, path: [1, -3, -3, 2, 0, 0, 2, -1, 0] } // moveTo(-3, -3).lineTo(0, 0).lineTo(-1, 0)
 
 const triangleLinePath = [1, -3, 0, 2, -3, -2, 2, 0, 0, 2, -3, 2, 2, -3, 0]  // moveTo(-3, 0).lineTo(-3, -2).lineTo(0, 0).lineTo(-3, 2).lineTo(-3, 0)
-const triangle: IPathDataArrow = { connect: half, offset: { x: -0.9, bevelJoin: 0.624, roundJoin: 0.4 }, path: [...triangleLinePath, 1, -2.05, 1.1, 2, -2.05, -1.1] } // fill: moveTo(-2.05, 1.1).lineTo(-2.05, -1.1)
+const triangle: IPathDataArrow = { connect: half, offset: { x: -0.9, bevelJoin: 0.624, roundJoin: 0.4 }, path: [...triangleLinePath, 1, -2.05, 1.1, 2, -2.05, -1.1], dashPath: [1, -2, 0, 2, -0.5, 0] } // fill: moveTo(-2.05, 1.1).lineTo(-2.05, -1.1)
 
 const arrowLinePath = [1, -3, 0, 2, -3.5, -1.8, 2, 0, 0, 2, -3.5, 1.8, 2, -3, 0]  // moveTo(-3, 0).lineTo(-3.5, -1.8).lineTo(0, 0).lineTo(-3.5, 1.8).lineTo(-3, 0)
-const arrow: IPathDataArrow = { connect: half, offset: { x: -1.1, bevelJoin: 0.872, roundJoin: 0.6 }, path: [...arrowLinePath, 1, -2.25, 0.95, 2, -2.25, -0.95] } // fill: moveTo(-2.25, 0.95).lineTo(-2.25, -0.95)
+const arrow: IPathDataArrow = { connect: half, offset: { x: -1.1, bevelJoin: 0.872, roundJoin: 0.6 }, path: [...arrowLinePath, 1, -2.25, 0.95, 2, -2.25, -0.95], dashPath: [1, -3, 0, 2, -0.5, 0] } // fill: moveTo(-2.25, 0.95).lineTo(-2.25, -0.95) 
 
-const triangleFlip: IPathDataArrow = { offset: half, path: [...triangle.path], } // triangle rotate 180
+const triangleFlip: IPathDataArrow = { offset: half, path: [...triangle.path], dashPath: [1, -2.5, 0, 2, -1, 0] } // triangle rotate 180
 rotate(triangleFlip.path, 180, { x: -1.5, y: 0 })
 
 const circleLine: IPathDataArrow = { connect: { x: -1.3 }, path: [1, 1.8, -0.1, 2, 1.8, 0, 26, 0, 0, 1.8, 0, 359, 0], }  //drawArc(0, 0, 2, 0, 360)
-const circle: IPathDataArrow = { connect: { x: 0.5 }, path: [...circleLine.path, 1, 0, 0, 26, 0, 0, 1, 0, 360, 0] } // fill: moveTo(0,0).arc(0, 0, 1, 0, 360)
+const circle: IPathDataArrow = { connect: { x: 0.5 }, path: [...circleLine.path, 1, 0, 0, 26, 0, 0, 1, 0, 360, 0], dashPath: [1, -0.5, 0, 2, 0.5, 0] } // fill: moveTo(0,0).arc(0, 0, 1, 0, 360)
 
 const squareLine: IPathDataArrow = { connect: { x: -1.3 }, path: [1, -1.4, 0, 2, -1.4, -1.4, 2, 1.4, -1.4, 2, 1.4, 1.4, 2, -1.4, 1.4, 2, -1.4, 0] } // moveTo(-1.4, 0).lineTo(-1.4, -1.4).lineTo(1.4, -1.4).lineTo(1.4, 1.4).lineTo(-1.4, 1.4).lineTo(-1.4, 0)
 const square: IPathDataArrow = { path: [...squareLine.path, 2, -1.4, -0.49, 2, 1, -0.49, 1, -1.4, 0.49, 2, 1, 0.49] } // fill: moveTo(-1.4, -0.49).lineTo(1, -0.49).moveTo(-1.4, 0.49).lineTo(1, 0.49)
@@ -55,14 +55,15 @@ export const arrows: IPathDataArrowMap = {
 
 }
 
-export function getArrowPath(ui: IUI, arrow: IArrowType, from: IPointData, to: IPointData, scale: number, connectOffset: IPointData): IPathCommandData {
+export function getArrowPath(ui: IUI, arrow: IArrowType, from: IPointData, to: IPointData, scale: number, connectOffset: IPointData, hasDashPattern?: boolean): IPathCommandData {
     const { strokeCap, strokeJoin } = ui.__
-    const { offset, connect, path } = (typeof arrow === 'object' ? arrow : arrows[arrow])
+    const { offset, connect, path, dashPath } = (typeof arrow === 'object' ? arrow : arrows[arrow])
 
     let connectX = connect ? connect.x : 0
     let offsetX = offset ? offset.x : 0
 
     const data = [...path]
+    if (hasDashPattern && dashPath) data.push(...dashPath)
 
     if (strokeCap !== 'none') connectX -= 0.5
     if (offset) {
