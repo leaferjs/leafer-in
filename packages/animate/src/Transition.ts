@@ -15,6 +15,10 @@ export const TransitionList: ITransitionMap = {
         return from.map((f, i) => number(f, to[i], t))
     },
 
+    text(from: any, to: any, t: number): any {
+        return (typeof from === 'number' || typeof to === 'number') ? Math.round(number(from, to, t)) : to // count 效果
+    },
+
     shadow,
     innerShadow: shadow
 }
