@@ -41,7 +41,7 @@ export class TextEditor extends InnerEditor {
         style.transformOrigin = 'left top'
         style.boxSizing = 'border-box'
 
-        this.isHTMLText ? div.innerHTML = text.text : div.innerText = text.text
+        this.isHTMLText ? div.innerHTML = String(text.text) : div.innerText = String(text.text)
 
         const { view } = editor.app;
         (this.inBody = view instanceof HTMLCanvasElement) ? document.body.appendChild(div) : (view as HTMLDivElement).appendChild(div)
