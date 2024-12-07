@@ -422,7 +422,7 @@ export class Animate extends Eventer implements IAnimate {
     }
 
     public setStyle(style: IObject): void {
-        this.target.set(style, this.isTemp)
+        this.target.set(style, this.isTemp ? 'temp' : false)
     }
 
     protected clearTimer(fn?: IFunction): void {

@@ -36,7 +36,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out')
 
     // 回到正常状态
     leaf.killAnimate('transition')
-    if (normalStyle) leaf.set(normalStyle, true)
+    if (normalStyle) leaf.set(normalStyle, 'temp')
 
 
     const statesStyle = getStyle(leaf) // 必须在回到正常状态之后获取
@@ -55,14 +55,14 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out')
 
 
         leaf.normalStyle = filterStyle(statesStyle, leaf)
-        leaf.set(statesStyle, true)
+        leaf.set(statesStyle, 'temp')
     } else {
         leaf.normalStyle = undefined
     }
 
     if (transition) {
         const toStyle = filterStyle(fromStyle, leaf)
-        leaf.set(fromStyle, true)
+        leaf.set(fromStyle, 'temp')
         leaf.animate([fromStyle, toStyle], transition, 'transition', true)
     }
 
