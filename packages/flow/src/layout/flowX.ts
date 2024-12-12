@@ -70,7 +70,7 @@ export function flowX(box: IBox, reverse?: boolean): void {
 
     }
 
-    if (complex) {
+    if (complex && data) {
 
         const { isAutoYGap, isFitYGap, contentAlign, rowXAlign, rowYAlign } = pData
 

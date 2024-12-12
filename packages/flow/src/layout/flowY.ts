@@ -68,7 +68,7 @@ export function flowY(box: IBox, reverse?: boolean): void {
 
     }
 
-    if (complex) {
+    if (complex && data) {
 
         const { isAutoXGap, isFitXGap, contentAlign, rowXAlign, rowYAlign } = pData
 
