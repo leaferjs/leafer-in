@@ -24,7 +24,7 @@ export class ScrollBar extends Group implements IScrollBar {
 
     public get isOutside() { return true }
 
-    protected __dragOut: boolean
+    protected __dragOut: boolean | number
     protected __eventIds: IEventListenerId[]
 
     constructor(target: IGroup, userConfig?: IScrollBarConfig) {

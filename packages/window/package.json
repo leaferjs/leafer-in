@@ -1,0 +1,25 @@
+{
+  "name": "@leafer-in/window",
+  "version": "1.1.0",
+  "description": "@leafer-in/window",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "types": "types/index.d.ts",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/window",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer window",
+    "leafer-in",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/core": "^1.1.0",
+    "@leafer-ui/interface": "^1.1.0"
+  }
+}
