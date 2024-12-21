@@ -38,6 +38,7 @@
     "@leafer-in/view": "1.1.0",
     "@leafer-in/flow": "1.1.0",
     "@leafer-in/text-editor": "1.1.0",
-    "@leafer-in/color": "1.1.0"
+    "@leafer-in/color": "1.1.0",
+    "@leafer-in/window": "1.1.0"
   }
 }

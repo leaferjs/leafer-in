@@ -1,4 +1,5 @@
 export * from '@leafer-in/resize'
+export * from '@leafer-in/window'
 
 export { Editor } from './Editor'
 

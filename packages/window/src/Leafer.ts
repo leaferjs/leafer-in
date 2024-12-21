@@ -1,7 +1,6 @@
-
 import { ILeaferType, IPointData } from '@leafer-ui/interface'
 
-import { Leafer, Bounds } from '@leafer-ui/core'
+import { Leafer, Bounds, MathHelper } from '@leafer-ui/core'
 
 import { LeaferTypeCreator } from './LeaferTypeCreator'
 
@@ -35,7 +34,7 @@ leafer.getValidMove = function (moveX: number, moveY: number): IPointData {
 
 leafer.getValidScale = function (changeScale: number): number {
     const { scaleX } = this.zoomLayer.__, { min, max, disabled } = this.app.config.zoom, absScale = Math.abs(scaleX * changeScale)
-    if (absScale < min) changeScale = min / scaleX
-    else if (absScale > max) changeScale = max / scaleX
-    return disabled ? 1 : changeScale
+    if (min && absScale < min) changeScale = min / scaleX
+    else if (max && absScale > max) changeScale = max / scaleX
+    return disabled ? 1 : MathHelper.float(changeScale)
 }
