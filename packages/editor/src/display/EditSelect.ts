@@ -62,7 +62,8 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     public update(): void {
-        if (this.targetStroker.target) this.targetStroker.forceUpdate()
+        this.hoverStroker.update()
+        this.targetStroker.update()
     }
 
     // move / down

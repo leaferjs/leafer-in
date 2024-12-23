@@ -1,14 +1,17 @@
 import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
-import { Paint, UI, MatrixHelper } from '@leafer-ui/draw'
+import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
 
 import { targetAttr } from '../decorator/data'
 
 
-const matrix = MatrixHelper.get()
 const { abs } = Math
 const { copy, scale } = MatrixHelper
+const { setListWithFn } = BoundsHelper
+const { worldBounds } = LeafBoundsHelper
+const matrix = getMatrixData()
+const bounds = getBoundsData()
 
 export class Stroker extends UI implements IStroker {
 
@@ -26,6 +29,17 @@ export class Stroker extends UI implements IStroker {
     public setTarget(target: IUI | IUI[], style: IRectInputData): void {
         this.set(style)
         this.target = target
+        this.update()
+    }
+
+    public update(): void {
+        const { list } = this
+        if (list.length) {
+            setListWithFn(bounds, list, worldBounds)
+            this.set(bounds)
+        } else {
+            this.width = this.height = 1
+        }
     }
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {
@@ -39,7 +53,8 @@ export class Stroker extends UI implements IStroker {
             for (let i = 0; i < list.length; i++) {
                 leaf = list[i]
                 const { worldTransform, worldRenderBounds } = leaf
-                if (bounds && bounds.hit(worldRenderBounds, options.matrix)) {
+
+                if (!bounds || bounds.hit(worldRenderBounds, options.matrix)) {
 
                     const aScaleX = abs(worldTransform.scaleX), aScaleY = abs(worldTransform.scaleY)
 
@@ -86,5 +101,4 @@ export class Stroker extends UI implements IStroker {
 function onTarget(stroker: Stroker): void {
     const value = stroker.target
     stroker.list = value ? (value instanceof Array ? value : [value]) : []
-    stroker.forceUpdate()
 }
