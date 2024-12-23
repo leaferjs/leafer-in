@@ -7,7 +7,7 @@ import { getFixBounds, getZoomScale } from './helper'
 Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean): IBoundsData {
 
     const { zoomLayer } = this
-    const limitBounds = this.canvas.bounds.clone().shrink(padding ? padding : 30), bounds = new Bounds()
+    const limitBounds = this.canvas.bounds.clone().shrink(padding !== undefined ? padding : 30), bounds = new Bounds()
     const center: IPointData = { x: limitBounds.x + limitBounds.width / 2, y: limitBounds.y + limitBounds.height / 2 }
 
     let changeScale: number
