@@ -6,6 +6,7 @@ import { LeaferTypeCreator } from './LeaferTypeCreator'
 
 
 const leafer = Leafer.prototype
+const bounds = new Bounds()
 
 leafer.initType = function (type: ILeaferType) {
     LeaferTypeCreator.run(type, this)
@@ -13,11 +14,16 @@ leafer.initType = function (type: ILeaferType) {
 
 leafer.getValidMove = function (moveX: number, moveY: number): IPointData {
     const { scroll, disabled } = this.app.config.move
-    if (scroll) {
-        Math.abs(moveX) > Math.abs(moveY) ? moveY = 0 : moveX = 0
 
-        if (scroll === 'limit') {
-            const { x, y, width, height } = new Bounds(this.__world).addPoint(this.zoomLayer as IPointData)
+    if (scroll) {
+        const type = scroll === true ? '' : scroll
+
+        if (type.includes('x')) moveX = moveX || moveY, moveY = 0
+        else if (type.includes('y')) moveY = moveY || moveX, moveX = 0
+        else Math.abs(moveX) > Math.abs(moveY) ? moveY = 0 : moveX = 0
+
+        if (type.includes('limit')) {
+            const { x, y, width, height } = bounds.set(this.__world).addPoint(this.zoomLayer as IPointData)
             const right = x + width - this.width, bottom = y + height - this.height
 
             if (x >= 0 && right <= 0) moveX = 0 // includeX
