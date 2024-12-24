@@ -3,6 +3,7 @@ import { ILeaferBase, ILeaferTypeList, ILeaferTypeFunction } from '@leafer-ui/in
 import { Debug } from '@leafer-ui/core'
 
 import { addViewport } from './viewport'
+import { custom } from './custom'
 import { design } from './design'
 import { document } from './document'
 
@@ -28,5 +29,6 @@ export const LeaferTypeCreator = {
 const { list, register } = LeaferTypeCreator
 
 register('viewport', addViewport)
+register('custom', custom)
 register('design', design)
 register('document', document)

@@ -3,9 +3,9 @@ import { ILeaferBase, IPointData, ILeaferConfig } from '@leafer-ui/interface'
 import { MoveEvent, ZoomEvent, PointHelper, DataHelper } from '@leafer-ui/core'
 
 
-export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig): void {
+export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, custom?: boolean): void {
     addViewportConfig(leafer.parentApp ? leafer.parentApp : leafer, mergeConfig)
-    if (leafer.isApp) return
+    if (leafer.isApp || custom) return
 
     leafer.__eventIds.push(
         leafer.on_(MoveEvent.BEFORE_MOVE, (e: MoveEvent) => {
