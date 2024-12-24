@@ -3,8 +3,8 @@ import { ILeaferBase, IPointData, ILeaferConfig } from '@leafer-ui/interface'
 import { MoveEvent, ZoomEvent, PointHelper, DataHelper } from '@leafer-ui/core'
 
 
-export function addInteractionWindow(leafer: ILeaferBase, mergeConfig?: ILeaferConfig): void {
-    addInteractionWindowConfig(leafer.parentApp ? leafer.parentApp : leafer, mergeConfig)
+export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig): void {
+    addViewportConfig(leafer.parentApp ? leafer.parentApp : leafer, mergeConfig)
     if (leafer.isApp) return
 
     leafer.__eventIds.push(
@@ -22,7 +22,7 @@ export function addInteractionWindow(leafer: ILeaferBase, mergeConfig?: ILeaferC
     )
 }
 
-export function addInteractionWindowConfig(leafer: ILeaferBase, mergeConfig?: ILeaferConfig): void {
+export function addViewportConfig(leafer: ILeaferBase, mergeConfig?: ILeaferConfig): void {
     if (mergeConfig) DataHelper.assign(leafer.config, mergeConfig)
     DataHelper.assign(leafer.config, {
         wheel: { preventDefault: true },

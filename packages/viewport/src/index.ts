@@ -1,4 +1,4 @@
 export { LeaferTypeCreator } from './LeaferTypeCreator'
-export { addInteractionWindow, addInteractionWindowConfig } from './window'
+export { addViewport, addViewportConfig } from './viewport'
 
 export * from './Leafer'

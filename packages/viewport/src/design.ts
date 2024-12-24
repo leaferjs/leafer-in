@@ -1,10 +1,10 @@
 import { ILeaferBase } from '@leafer-ui/interface'
 
-import { addInteractionWindow } from './window'
+import { addViewport } from './viewport'
 
 
 export function design(leafer: ILeaferBase): void {
-    addInteractionWindow(leafer, {
+    addViewport(leafer, {
         zoom: {
             min: 0.01,
             max: 256
