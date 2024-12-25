@@ -2,10 +2,10 @@ import { ILeaferBase, ILeaferTypeList, ILeaferTypeFunction } from '@leafer-ui/in
 
 import { Debug } from '@leafer-ui/core'
 
-import { addViewport } from './viewport'
-import { custom } from './custom'
-import { design } from './design'
-import { document } from './document'
+import { addViewport } from './type/viewport'
+import { custom } from './type/custom'
+import { design } from './type/design'
+import { document } from './type/document'
 
 
 const debug = Debug.get('LeaferTypeCreator')

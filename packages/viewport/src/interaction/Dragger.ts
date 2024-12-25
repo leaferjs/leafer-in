@@ -3,7 +3,9 @@ import { IPointerEvent, IFunction } from '@leafer-ui/interface'
 import { Dragger, BoundsHelper, PointHelper } from '@leafer-ui/core'
 
 
-Dragger.prototype.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean {
+const dragger = Dragger.prototype
+
+dragger.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean {
     const { moveX, moveY } = this.dragData
     if (this.interaction.m.dragAnimate && this.canAnimate && this.moving && (Math.abs(moveX) > 1 || Math.abs(moveY) > 1)) {
         data = { ...data }
@@ -17,19 +19,19 @@ Dragger.prototype.checkDragEndAnimate = function (data: IPointerEvent, speed?: n
     return false
 }
 
-Dragger.prototype.animate = function (func?: IFunction, off?: 'off'): void { // dragEnd animation
+dragger.animate = function (func?: IFunction, off?: 'off'): void { // dragEnd animation
     const animateWait = func || this.animateWait
     if (animateWait) this.interaction.target.nextRender(animateWait, null, off)
     this.animateWait = func
 }
 
-Dragger.prototype.checkDragOut = function (data: IPointerEvent): void {
+dragger.checkDragOut = function (data: IPointerEvent): void {
     const { interaction } = this
     this.autoMoveCancel()
     if (this.dragging && !interaction.shrinkCanvasBounds.hitPoint(data)) this.autoMoveOnDragOut(data)
 }
 
-Dragger.prototype.autoMoveOnDragOut = function (data: IPointerEvent): void {
+dragger.autoMoveOnDragOut = function (data: IPointerEvent): void {
     const { interaction, downData, canDragOut } = this
     const { autoDistance, dragOut } = interaction.m
     if (!dragOut || !canDragOut || !autoDistance) return
@@ -55,7 +57,7 @@ Dragger.prototype.autoMoveOnDragOut = function (data: IPointerEvent): void {
     }, 10)
 }
 
-Dragger.prototype.autoMoveCancel = function (): void {
+dragger.autoMoveCancel = function (): void {
     if (this.autoMoveTimer) {
         clearInterval(this.autoMoveTimer)
         this.autoMoveTimer = 0
