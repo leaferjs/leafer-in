@@ -5,7 +5,7 @@ import { Dragger, BoundsHelper, PointHelper } from '@leafer-ui/core'
 
 Dragger.prototype.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean {
     const { moveX, moveY } = this.dragData
-    if (this.interaction.config.move.dragAnimate && this.canAnimate && this.moving && (Math.abs(moveX) > 1 || Math.abs(moveY) > 1)) {
+    if (this.interaction.m.dragAnimate && this.canAnimate && this.moving && (Math.abs(moveX) > 1 || Math.abs(moveY) > 1)) {
         data = { ...data }
         speed = (speed || (data.pointerType === 'touch' ? 2 : 1)) * 0.9
         PointHelper.move(data, moveX * speed, moveY * speed)
@@ -31,7 +31,7 @@ Dragger.prototype.checkDragOut = function (data: IPointerEvent): void {
 
 Dragger.prototype.autoMoveOnDragOut = function (data: IPointerEvent): void {
     const { interaction, downData, canDragOut } = this
-    const { autoDistance, dragOut } = interaction.config.move
+    const { autoDistance, dragOut } = interaction.m
     if (!dragOut || !canDragOut || !autoDistance) return
 
     const bounds = interaction.shrinkCanvasBounds
