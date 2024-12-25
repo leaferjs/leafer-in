@@ -4,19 +4,27 @@ import { Dragger, BoundsHelper, PointHelper } from '@leafer-ui/core'
 
 
 const dragger = Dragger.prototype
+const { abs } = Math
 
 dragger.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean {
     const { moveX, moveY } = this.dragData
-    if (this.interaction.m.dragAnimate && this.canAnimate && this.moving && (Math.abs(moveX) > 1 || Math.abs(moveY) > 1)) {
+    const absMoveX = abs(moveX), absMoveY = abs(moveY)
+    const dragAnimate = this.interaction.m.dragAnimate && this.canAnimate && this.moving && (absMoveX > 0.1 || absMoveY > 0.1)
+
+    if (dragAnimate) {
+        const inertia = data.pointerType === 'touch' ? 3 : 1, maxMove = 70
+        speed = speed ? 0.95 : inertia
+        if (absMoveX * speed > maxMove) speed = maxMove / absMoveX
+        else if (absMoveY * speed > maxMove) speed = maxMove / absMoveY
+
         data = { ...data }
-        speed = (speed || (data.pointerType === 'touch' ? 2 : 1)) * 0.9
         PointHelper.move(data, moveX * speed, moveY * speed)
 
         this.drag(data)
         this.animate(() => { this.dragEnd(data, 1) })
-        return true
     }
-    return false
+
+    return dragAnimate
 }
 
 dragger.animate = function (func?: IFunction, off?: 'off'): void { // dragEnd animation
