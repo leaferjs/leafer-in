@@ -1,7 +1,10 @@
 import { ILeaf, IBoundsData, IZoomType, IFourNumber, IPointData } from '@leafer-ui/interface'
-import { Leafer, Bounds, LeafBoundsHelper } from '@leafer-ui/draw'
+import { Leafer, Bounds, LeafBoundsHelper, Plugin } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
+
+
+Plugin.add('view')
 
 
 Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean): IBoundsData {

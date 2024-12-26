@@ -1,12 +1,17 @@
-export * from '@leafer-in/resize'
-
 export { Flow } from './Flow'
 
-import { BoundsHelper, Box, Group, UI, autoLayoutType, boundsType } from '@leafer-ui/draw'
+
+import { BoundsHelper, Box, Group, UI, autoLayoutType, boundsType, Plugin } from '@leafer-ui/draw'
+
+import '@leafer-in/resize'
 
 import { flowX } from './layout/flowX'
 import { flowY } from './layout/flowY'
 import { autoBoundsType } from './decorate'
+
+
+Plugin.add('flow')
+setTimeout(() => Plugin.check('resize', true))
 
 
 const ui = UI.prototype, box = Box.prototype, { __updateBoxBounds } = Group.prototype

@@ -1,7 +1,7 @@
 export { stateType, stateStyleType } from './decorator'
 
 import { IUI, IStateStyleType, IStateName } from '@leafer-ui/interface'
-import { State, UI, dataType } from '@leafer-ui/core'
+import { State, UI, dataType, Plugin } from '@leafer-ui/core'
 
 import { setPointerState, setState } from './set'
 import { unsetPointerState, unsetState } from './unset'
@@ -9,6 +9,9 @@ import { updateEventStyle } from './event'
 import { checkPointerState, checkFixedState, checkState } from './check'
 import { getStyle, updateStyle } from './style'
 import { stateType, stateStyleType } from './decorator'
+
+
+Plugin.add('state')
 
 
 State.animateExcludes = {

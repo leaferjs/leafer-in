@@ -1,6 +1,6 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, ILayoutBoundsData, IMatrix } from '@leafer-ui/interface'
 import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9 } from '@leafer-ui/draw'
-import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
+import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent, Plugin } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
 
@@ -29,7 +29,7 @@ import { SimulateElement } from './display/SimulateElement'
 
 export class Editor extends Group implements IEditor {
 
-    public config = DataHelper.clone(config)
+    public config = DataHelper.clone(config) as IEditorConfig
 
     public get mergeConfig(): IEditorConfig {
         const { element, config } = this
@@ -88,6 +88,7 @@ export class Editor extends Group implements IEditor {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
         this.addMany(this.editMask, this.selector, this.editBox)
+        if (!Plugin.check('resize', true)) this.config.editSize = 'scale'
     }
 
     // select 

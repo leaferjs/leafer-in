@@ -8,8 +8,8 @@ const { abs } = Math
 
 dragger.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean {
     const { moveX, moveY } = this.dragData
-    const absMoveX = abs(moveX), absMoveY = abs(moveY)
-    const dragAnimate = this.interaction.m.dragAnimate && this.canAnimate && this.moving && (absMoveX > 0.1 || absMoveY > 0.1)
+    const absMoveX = abs(moveX), absMoveY = abs(moveY), minMove = speed ? 1 : 0.1
+    const dragAnimate = this.interaction.m.dragAnimate && this.canAnimate && this.moving && (absMoveX > minMove || absMoveY > minMove)
 
     if (dragAnimate) {
         const inertia = data.pointerType === 'touch' ? 3 : 1, maxMove = 70

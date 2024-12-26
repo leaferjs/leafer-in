@@ -3,10 +3,13 @@ export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
 import { IMotionPathData, IUI, IUnitData, IRotationPointData } from '@leafer-ui/interface'
-import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert } from '@leafer-ui/draw'
+import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
 import { motionPathType } from './decorator'
+
+
+Plugin.add('motion-path')
 
 
 Transition.register('motion', function (from: any, to: any, t: number, target: IUI): number {

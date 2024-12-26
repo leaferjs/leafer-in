@@ -1,5 +1,3 @@
-export * from '@leafer-in/resize'
-
 export { Editor } from './Editor'
 
 export { EditBox } from './display/EditBox'
@@ -26,10 +24,16 @@ export { EditorHelper } from './helper/EditorHelper'
 export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
+
 import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
-import { Creator, UI, Group, Text, Box, dataType, defineKey } from '@leafer-ui/draw'
+import { Creator, UI, Group, Text, Box, dataType, defineKey, Plugin } from '@leafer-ui/draw'
+
+import '@leafer-in/resize'
 
 import { Editor } from './Editor'
+
+
+Plugin.add('editor')
 
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
