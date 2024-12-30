@@ -23,10 +23,11 @@ export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, cu
 }
 
 export function addViewportConfig(leafer: ILeaferBase, mergeConfig?: ILeaferConfig): void {
-    if (mergeConfig) DataHelper.assign(leafer.config, mergeConfig)
-    DataHelper.assign(leafer.config, {
+    const viewportConfig: ILeaferConfig = {
         wheel: { preventDefault: true },
         touch: { preventDefault: true },
         pointer: { preventDefaultMenu: true }
-    } as ILeaferConfig, leafer.userConfig)
+    }
+    if (mergeConfig) DataHelper.assign(viewportConfig, mergeConfig)
+    DataHelper.assign(leafer.config, viewportConfig, leafer.userConfig)
 }
