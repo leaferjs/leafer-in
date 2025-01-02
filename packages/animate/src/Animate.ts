@@ -16,6 +16,7 @@ export class Animate extends Eventer implements IAnimate {
     public keyframes: IKeyframe[]
     public config?: IAnimateOptions
 
+    public style: IUIInputData
     public fromStyle: IUIInputData
     public toStyle: IUIInputData
     public get endingStyle() { return this.realEnding === 'from' ? this.fromStyle : this.toStyle }
@@ -422,7 +423,7 @@ export class Animate extends Eventer implements IAnimate {
     }
 
     public setStyle(style: IObject): void {
-        this.target.set(style, this.isTemp ? 'temp' : false)
+        this.target.set(this.style = style, this.isTemp ? 'temp' : false)
     }
 
     protected clearTimer(fn?: IFunction): void {
