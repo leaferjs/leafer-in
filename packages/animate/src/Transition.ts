@@ -16,6 +16,11 @@ export const TransitionList: ITransitionMap = {
     },
 
     text(from: any, to: any, t: number): any {
+        if (typeof from === 'string' && typeof to === 'string') {
+            const fl = from.length, tl = to.length, len = number(fl, tl, t, 1)
+            if (fl < tl) return to.substring(0, len) // 打字机效果
+            if (fl > tl) return from.substring(0, len) // 删除文字效果
+        }
         return (typeof from === 'number' || typeof to === 'number') ? MathHelper.float(number(from, to, t), Math.max(getDecimalLen(from), getDecimalLen(to))) : to
     },
 
