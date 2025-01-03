@@ -11,7 +11,7 @@ const frameDuration = 0.2
 @useModule(LeafEventer)
 export class Animate extends Eventer implements IAnimate {
 
-    public target: IUI
+    public target: IUI | IObject
 
     public keyframes: IKeyframe[]
     public config?: IAnimateOptions
@@ -100,13 +100,13 @@ export class Animate extends Eventer implements IAnimate {
     }
 
 
-    constructor(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean) {
+    constructor(target: IUI | IObject, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean) {
         super()
         this.init(target, keyframe, options, isTemp)
     }
 
 
-    public init(target: IUI, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean): void {
+    public init(target: IUI | IObject, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean): void {
         this.target = target
         if (isTemp || this.isTemp) this.isTemp = isTemp // 需要支持二次初始化
         switch (typeof options) {
@@ -159,6 +159,7 @@ export class Animate extends Eventer implements IAnimate {
 
     public seek(time: number | IPercentData): void {
         if (this.destroyed) return
+
         if (typeof time === 'object') time = UnitConvert.number(time, this.duration)
 
         if (time) time /= this.speed
@@ -423,7 +424,11 @@ export class Animate extends Eventer implements IAnimate {
     }
 
     public setStyle(style: IObject): void {
-        this.target.set(this.style = style, this.isTemp ? 'temp' : false)
+        const { target } = this
+        if (target && style) {
+            this.style = style
+            target.__ ? target.set(style, this.isTemp ? 'temp' : false) : Object.assign(target, style)
+        }
     }
 
     protected clearTimer(fn?: IFunction): void {
