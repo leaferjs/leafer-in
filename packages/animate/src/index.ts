@@ -43,13 +43,15 @@ ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation | IAni
         else if ((keyframe as IStyleAnimation).style) options = keyframe as IAnimateOptions, keyframe = (keyframe as IStyleAnimation).style
     }
 
-    this.killAnimate(kill)
-    return this.__animate = new Animate(this, keyframe as IUIInputData | IKeyframe[], options, isTemp)
+    const animate = new Animate(this, keyframe as IUIInputData | IKeyframe[], options, isTemp)
+    this.killAnimate(kill, animate.toStyle)
+
+    return this.__animate = animate
 }
 
-ui.killAnimate = function (_type?: IAnimateType): void {
+ui.killAnimate = function (_type?: IAnimateType, killStyle?: IUIInputData): void {
     const animate = this.__animate
-    if (animate) animate.kill(), this.__animate = null
+    if (animate) animate.kill(true, killStyle), this.__animate = null
 }
 
 ui.__runAnimation = function (type: 'in' | 'out', complete?: IFunction): void {

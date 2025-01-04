@@ -69,6 +69,7 @@ export class Animate extends Eventer implements IAnimate {
     @animateAttr()
     public attrs: string[]
 
+    protected killStyle: IUIInputData
 
     public isTemp: boolean
 
@@ -152,7 +153,6 @@ export class Animate extends Eventer implements IAnimate {
     public stop(): void {
         if (this.destroyed) return
 
-        this.end()
         this.complete()
         this.emit(AnimateEvent.STOP, this)
     }
@@ -171,8 +171,9 @@ export class Animate extends Eventer implements IAnimate {
         this.emit(AnimateEvent.SEEK, this)
     }
 
-    public kill(): void {
-        this.destroy(true)
+    public kill(complete = true, killStyle?: IUIInputData): void {
+        this.killStyle = killStyle
+        this.destroy(complete)
     }
 
 
@@ -361,9 +362,10 @@ export class Animate extends Eventer implements IAnimate {
         this.requestAnimateTime = 0
         this.running = false
 
-        const { realEnding } = this
-        if (realEnding === 'from') this.setFrom()
-        else if (realEnding === 'to') this.setTo()
+        const { endingStyle, killStyle } = this
+        const style = killStyle ? {} : endingStyle
+        if (killStyle) for (let key in endingStyle) key in killStyle || (style[key] = endingStyle[key]) // 排除已存在 killStyle 中的属性
+        this.setStyle(style)
 
         this.clearTimer()
         this.emit(AnimateEvent.COMPLETED, this)
@@ -444,7 +446,7 @@ export class Animate extends Eventer implements IAnimate {
 
             if (complete && !this.completed) this.stop()
             else this.pause()
-            this.target = this.config = this.frames = null
+            this.target = this.config = this.frames = this.fromStyle = this.toStyle = this.style = this.killStyle = null
             this.destroyed = true
         }
     }
