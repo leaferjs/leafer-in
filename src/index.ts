@@ -13,6 +13,9 @@ export * from '@leafer-in/motion-path'
 export * from '@leafer-in/state'
 export * from '@leafer-in/robot'
 
+export * from '@leafer-in/find'
+export * from '@leafer-in/export'
+
 export * from '@leafer-in/color'
 export * from '@leafer-in/resize'
 

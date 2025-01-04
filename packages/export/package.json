@@ -1,0 +1,37 @@
+{
+  "name": "@leafer-in/export",
+  "version": "1.2.2",
+  "description": "@leafer-in/export",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/export.esm.js",
+  "exports": {
+    "import": "./dist/export.esm.js",
+    "require": "./dist/export.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/export.js",
+  "jsdelivr": "dist/export.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/export",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer export",
+    "leafer-export",
+    "leafer-in",
+    "export",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/draw": "^1.2.2",
+    "@leafer-ui/interface": "^1.2.2",
+    "@leafer-in/interface": "^1.2.2"
+  }
+}
