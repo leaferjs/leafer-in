@@ -1,0 +1,37 @@
+{
+  "name": "@leafer-in/find",
+  "version": "1.2.2",
+  "description": "@leafer-in/find",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/find.esm.js",
+  "exports": {
+    "import": "./dist/find.esm.js",
+    "require": "./dist/find.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/find.js",
+  "jsdelivr": "dist/find.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/find",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer find",
+    "leafer-find",
+    "leafer-in",
+    "find",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/draw": "^1.2.2",
+    "@leafer-ui/interface": "^1.2.2",
+    "@leafer-in/interface": "^1.2.2"
+  }
+}
