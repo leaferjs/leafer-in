@@ -10,8 +10,7 @@ import { flowY } from './layout/flowY'
 import { autoBoundsType } from './decorate'
 
 
-Plugin.add('flow')
-setTimeout(() => Plugin.check('resize', true))
+Plugin.add('flow', 'resize')
 
 
 const ui = UI.prototype, box = Box.prototype, { __updateBoxBounds } = Group.prototype

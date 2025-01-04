@@ -88,7 +88,7 @@ export class Editor extends Group implements IEditor {
         super(data)
         if (userConfig) this.config = DataHelper.default(userConfig, this.config)
         this.addMany(this.editMask, this.selector, this.editBox)
-        if (!Plugin.check('resize', true)) this.config.editSize = 'scale'
+        if (!Plugin.has('resize')) this.config.editSize = 'scale'
     }
 
     // select 

@@ -33,7 +33,7 @@ import '@leafer-in/resize'
 import { Editor } from './Editor'
 
 
-Plugin.add('editor')
+Plugin.add('editor', 'resize')
 
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }

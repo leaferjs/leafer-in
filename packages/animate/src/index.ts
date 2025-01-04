@@ -14,8 +14,7 @@ import { AnimateEvent } from './AnimateEvent'
 import { TransitionList, TransitionModule } from './Transition'
 
 
-Plugin.add('animate')
-setTimeout(() => Plugin.check('color', true))
+Plugin.add('animate', 'color')
 
 
 State.canAnimate = true
@@ -36,7 +35,7 @@ dataType()(ui, 'animationOut')
 dataType(true)(ui, 'transition')
 dataType()(ui, 'transitionOut')
 
-ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, kill?: IAnimateType, isTemp?: boolean): IAnimate {
+ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation | IAnimation[], options?: ITransition, kill?: IAnimateType, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate
 
     if (typeof keyframe === 'object') {
