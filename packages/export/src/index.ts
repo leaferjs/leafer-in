@@ -1,8 +1,11 @@
 import { IExportFileType, IExportOptions, IExportResult } from '@leafer-ui/interface'
-import { Export, UI } from '@leafer-ui/draw'
+import { Export, UI, Plugin } from '@leafer-ui/draw'
 
 import { ExportModule } from './export'
 import './canvas'
+
+
+Plugin.add('export')
 
 
 Object.assign(Export, ExportModule)

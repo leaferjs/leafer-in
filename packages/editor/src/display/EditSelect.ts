@@ -1,5 +1,5 @@
 import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId, IPointerEvent, IFunction } from '@leafer-ui/interface'
-import { Bounds, LeafList, Group } from '@leafer-ui/draw'
+import { Bounds, LeafList, Group, Plugin } from '@leafer-ui/draw'
 import { PointerEvent, DragEvent, MoveEvent, ZoomEvent } from '@leafer-ui/core'
 
 import { IEditSelect, IEditor, ISelectArea, IStroker } from '@leafer-in/interface'
@@ -207,7 +207,7 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected allowDrag(e: DragEvent) {
-        if (this.running && this.editor.mergeConfig.boxSelect && !e.target.draggable) {
+        if (this.running && (this.editor.mergeConfig.boxSelect && Plugin.has('find')) && !e.target.draggable) {
             return (!this.editor.editing && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
         } else {
             return false
