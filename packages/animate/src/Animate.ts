@@ -78,13 +78,16 @@ export class Animate extends Eventer implements IAnimate {
     protected nowIndex: number
     protected get frame(): IComputedKeyframe { return this.frames[this.nowIndex] }
     protected get frameTotalTime(): number { return this.frame.totalTime || this.frame.duration || 0 }
+    protected frameLooped: number
+    protected frameReverse: boolean
 
     protected easingFn: IFunction
 
     protected requestAnimateTime: number
-    protected playedTotalTime: number
+    protected playedTotalTime: number // 已播放完的帧总时长
 
-    protected nowReverse: boolean
+    public get nowReverse(): boolean { return (this.mainReverse ? 1 : 0) + (this.frameReverse ? 1 : 0) === 1 }
+    protected mainReverse: boolean
     protected timer: ITimer
     protected attrsMap: IBooleanMap
 
@@ -179,7 +182,7 @@ export class Animate extends Eventer implements IAnimate {
 
     protected create(): void {
         const { target, frames, keyframes, config } = this, { length } = keyframes, joinBefore = length > 1 ? this.join : true
-        let addedDuration = 0, totalAutoDuration = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject
+        let addedTime = 0, addedAutoTime = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject, times: number
 
         if (length > 1) this.fromStyle = {}, this.toStyle = {}
 
@@ -191,27 +194,31 @@ export class Animate extends Eventer implements IAnimate {
             if (!before) before = joinBefore ? target : style
 
             item = { style, beforeStyle: {} }
+            times = 1 // 帧循环的次数
 
             if (keyframe.style) { // with options
 
-                const { duration, autoDuration, delay, autoDelay, easing } = keyframe
+                const { duration, autoDuration, delay, autoDelay, easing, swing, loop } = keyframe
+
+                if (swing) item.swing = swing, times = swing * 2 - 1
+                if (loop) item.loop = times = loop as number
 
                 if (duration) {
-                    item.duration = duration, addedDuration += duration
+                    item.duration = duration, addedTime += duration * times
                     if (delay) item.totalTime = duration + delay
                 } else {
-                    if (autoDuration) item.autoDuration = autoDuration, totalAutoDuration += autoDuration
+                    if (autoDuration) item.autoDuration = autoDuration, addedAutoTime += autoDuration * times
                 }
 
-                if (delay) item.delay = delay, addedDuration += delay
-                else if (autoDelay) item.autoDelay = autoDelay, totalAutoDuration += autoDelay
+                if (delay) item.delay = delay, addedTime += delay * times
+                else if (autoDelay) item.autoDelay = autoDelay, addedAutoTime += autoDelay * times
 
                 if (easing) item.easingFn = AnimateEasing.get(easing)
 
             }
 
             if (!item.autoDuration && item.duration === undefined) {
-                if (length > 1) (i > 0 || joinBefore) ? totalAutoDuration++ : item.duration = 0 // fromNow不为true时，第一帧无时长
+                if (length > 1) (i > 0 || joinBefore) ? addedAutoTime += times : item.duration = 0 // fromNow不为true时，第一帧无时长
                 else item.duration = this.duration
             }
 
@@ -227,11 +234,11 @@ export class Animate extends Eventer implements IAnimate {
         }
 
 
-        if (totalAutoDuration) {
-            if (this.duration <= addedDuration || !(config && config.duration)) this.changeDuration(addedDuration + frameDuration * totalAutoDuration)
-            this.allocateTime((this.duration - addedDuration) / totalAutoDuration)
+        if (addedAutoTime) {
+            if (this.duration <= addedTime || !(config && config.duration)) this.changeDuration(addedTime + frameDuration * addedAutoTime)
+            this.allocateTime((this.duration - addedTime) / addedAutoTime)
         } else {
-            if (addedDuration) this.changeDuration(addedDuration)
+            if (addedTime) this.changeDuration(addedTime)
         }
 
         this.emit(AnimateEvent.CREATED, this)
@@ -258,7 +265,7 @@ export class Animate extends Eventer implements IAnimate {
             if (frame.duration === undefined) frame.duration = frame.autoDuration ? partTime * frame.autoDuration : partTime
             if (!frame.totalTime) {
                 if (frame.autoDelay) frame.delay = frame.autoDelay * partTime
-                if (frame.delay) frame.totalTime = frame.duration, frame.totalTime += frame.delay
+                if (frame.delay) frame.totalTime = frame.duration + frame.delay
             }
         }
     }
@@ -281,7 +288,7 @@ export class Animate extends Eventer implements IAnimate {
 
             while (realTime - this.playedTotalTime > this.frameTotalTime) {
                 this.transition(1)
-                this.nowReverse ? this.reverseNextFrame() : this.nextFrame()
+                this.mainReverse ? this.reverseNextFrame() : this.nextFrame()
             }
 
             const itemDelay = this.nowReverse ? 0 : (this.frame.delay || 0)
@@ -313,9 +320,9 @@ export class Animate extends Eventer implements IAnimate {
 
                     this.looped ? this.looped++ : this.looped = 1
 
-                    if (!(this.checkTimes(swing, true) || this.checkTimes(loop))) {
+                    if (this.needLoop(this.looped, loop, swing)) {
 
-                        if (swing) this.nowReverse = !this.nowReverse
+                        if (swing) this.mainReverse = !this.mainReverse
 
                         if (loopDelay) this.timer = setTimeout(() => { this.timer = 0, this.begin() }, loopDelay / this.speed * 1000)
                         else this.begin()
@@ -330,16 +337,19 @@ export class Animate extends Eventer implements IAnimate {
 
     }
 
+    protected needLoop(looped: number, loop: boolean | number, swing: boolean | number): boolean {
+        return !(this.needStopLoop(looped, loop) || this.needStopLoop(looped, swing, true))
+    }
 
-    protected checkTimes(times: boolean | number, swing?: boolean): boolean {
-        return typeof times === 'number' && (!times || this.looped >= (swing ? times * 2 - 1 : times))
+    protected needStopLoop(looped: number, times: boolean | number, swing?: boolean,): boolean {
+        return typeof times === 'number' && (!times || looped >= (swing ? times * 2 - 1 : times))
     }
 
     protected start(seek?: boolean): void {
         this.requestAnimateTime = 1 // started
 
         const { reverse } = this
-        if (reverse || this.nowReverse) this.nowReverse = reverse
+        if (reverse || this.mainReverse) this.mainReverse = reverse
         if (this.looped) this.looped = 0
 
         if (seek) this.begin(true)
@@ -355,12 +365,12 @@ export class Animate extends Eventer implements IAnimate {
 
     protected begin(seek?: boolean): void {
         this.playedTotalTime = this.time = 0
-        this.nowReverse ? this.setTo() : this.setFrom()
+        this.mainReverse ? this.setTo() : this.setFrom()
         if (!seek) this.requestAnimate()
     }
 
     protected end(): void {
-        this.nowReverse ? this.setFrom() : this.setTo()
+        this.mainReverse ? this.setFrom() : this.setTo()
     }
 
     protected complete(): void {
@@ -389,15 +399,32 @@ export class Animate extends Eventer implements IAnimate {
 
 
     protected nextFrame(): void {
+        if (this.needLoopFrame()) return this.increaseTime()
         if (this.nowIndex + 1 >= this.frames.length) return
         this.playedTotalTime += this.frameTotalTime
         this.nowIndex++
     }
 
     protected reverseNextFrame(): void {
+        if (this.needLoopFrame()) return this.increaseTime()
         if (this.nowIndex - 1 < 0) return
-        this.playedTotalTime += this.frameTotalTime
+        this.increaseTime()
         this.nowIndex--
+    }
+
+    protected increaseTime() {
+        this.playedTotalTime += this.frameTotalTime
+    }
+
+    protected needLoopFrame(): boolean {
+        const { loop, swing } = this.frame
+        if (loop || swing) {
+            this.frameLooped ? this.frameLooped++ : this.frameLooped = 1
+            if (swing) this.frameReverse = !this.frameReverse
+            if (this.needLoop(this.frameLooped, loop, swing)) return true
+            this.frameLooped = this.frameReverse = undefined
+        }
+        return false
     }
 
 
