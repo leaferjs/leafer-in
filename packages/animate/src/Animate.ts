@@ -313,7 +313,7 @@ export class Animate extends Eventer implements IAnimate {
 
                     this.looped ? this.looped++ : this.looped = 1
 
-                    if (!(typeof loop === 'number' && (!loop || this.looped >= loop))) {
+                    if (!(this.checkTimes(swing, true) || this.checkTimes(loop))) {
 
                         if (swing) this.nowReverse = !this.nowReverse
 
@@ -328,6 +328,11 @@ export class Animate extends Eventer implements IAnimate {
             }
         }
 
+    }
+
+
+    protected checkTimes(times: boolean | number, swing?: boolean): boolean {
+        return typeof times === 'number' && (!times || this.looped >= (swing ? times * 2 - 1 : times))
     }
 
     protected start(seek?: boolean): void {
