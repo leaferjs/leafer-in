@@ -300,6 +300,7 @@ export class EditBox extends Group implements IEditBox {
         const { editor } = this
         if (editor.single) {
             const { element } = editor
+            if (element.locked) return
             if (element.isBranch && !element.editInner) {
                 if ((element as IBox).textBox) {
                     const { children } = element
