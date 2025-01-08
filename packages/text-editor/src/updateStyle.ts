@@ -29,7 +29,7 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
     style.textDecoration = textDecoration === 'delete' ? 'line-through' : textDecoration
     style.textTransform = textCaseMap[text.textCase]
 
-    style.textAlign = text.textAlign
+    style.textAlign = text.textAlign === 'both' ? 'justify' : text.textAlign
     style.display = 'flex'
     style.flexDirection = 'column'
     style.justifyContent = verticalAlignMap[text.verticalAlign]
