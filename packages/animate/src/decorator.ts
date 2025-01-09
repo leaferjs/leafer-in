@@ -6,7 +6,10 @@ export function animationType(defaultValue?: IValue) {
     return decorateLeafAttr(defaultValue, (key: string) => attr({
         set(value: any) {
             this.__setAttr(key, value)
-            if (this.leafer) value ? (this as IUI).animate(value, undefined, 'animation') : (this as IUI).killAnimate('animation')
+            if (this.leafer) {
+                (this as IUI).killAnimate('animation')
+                if (value) (this as IUI).animate(value, undefined, 'animation')
+            }
         }
     }))
 }
