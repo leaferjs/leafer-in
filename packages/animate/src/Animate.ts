@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventMap } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventMap } from '@leafer-ui/interface'
 import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -104,11 +104,13 @@ export class Animate extends Eventer implements IAnimate {
     }
 
 
-    constructor(target: IUI | IObject, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean) {
+    constructor(target: IUI | IObject, keyframe: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, isTemp?: boolean) {
         super()
-        this.init(target, keyframe, options, isTemp)
+        if (!target) return // AnimateList 模式
+        if ((keyframe as IKeyframesAnimation).keyframes) options = keyframe as IAnimateOptions, keyframe = (keyframe as IKeyframesAnimation).keyframes
+        else if ((keyframe as IStyleAnimation).style) options = keyframe as IAnimateOptions, keyframe = (keyframe as IStyleAnimation).style
+        this.init(target, keyframe as IUIInputData | IKeyframe[], options, isTemp)
     }
-
 
     public init(target: IUI | IObject, keyframe: IUIInputData | IKeyframe[], options?: ITransition, isTemp?: boolean): void {
         this.target = target
@@ -446,8 +448,8 @@ export class Animate extends Eventer implements IAnimate {
         this.playedTotalTime += this.frameTotalTime
     }
 
-    protected needLoop(looped: number, loop: boolean | number, swing?: boolean | number): boolean {
-        return !(this.needStopLoop(looped, loop) || (swing && this.needStopLoop(looped, swing, true)))
+    protected needLoop(looped: number, loop: boolean | number, swing: boolean | number): boolean {
+        return !(this.needStopLoop(looped, loop) || this.needStopLoop(looped, swing, true))
     }
 
     protected needStopLoop(looped: number, times: boolean | number, swing?: boolean,): boolean {
