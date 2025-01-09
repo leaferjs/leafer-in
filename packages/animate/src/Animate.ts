@@ -182,7 +182,7 @@ export class Animate extends Eventer implements IAnimate {
 
     protected create(): void {
         const { target, frames, keyframes, config } = this, { length } = keyframes, joinBefore = length > 1 ? this.join : true
-        let addedTime = 0, addedAutoTime = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject, times: number
+        let totalTime = 0, totalAutoTime = 0, before: IObject, keyframe: IKeyframe, item: IComputedKeyframe, style: IObject, times: number
 
         if (length > 1) this.fromStyle = {}, this.toStyle = {}
 
@@ -200,25 +200,25 @@ export class Animate extends Eventer implements IAnimate {
 
                 const { duration, autoDuration, delay, autoDelay, easing, swing, loop } = keyframe
 
-                if (swing) item.swing = swing, times = swing * 2 - 1
-                if (loop) item.loop = times = loop as number
+                if (swing) item.swing = typeof swing === 'number' ? swing : 2, times = item.swing * 2 - 1
+                if (loop) item.loop = times = typeof loop === 'number' ? loop : 2
 
                 if (duration) {
-                    item.duration = duration, addedTime += duration * times
+                    item.duration = duration, totalTime += duration * times
                     if (delay) item.totalTime = duration + delay
                 } else {
-                    if (autoDuration) item.autoDuration = autoDuration, addedAutoTime += autoDuration * times
+                    if (autoDuration) item.autoDuration = autoDuration, totalAutoTime += autoDuration * times
                 }
 
-                if (delay) item.delay = delay, addedTime += delay * times
-                else if (autoDelay) item.autoDelay = autoDelay, addedAutoTime += autoDelay * times
+                if (delay) item.delay = delay, totalTime += delay * times
+                else if (autoDelay) item.autoDelay = autoDelay, totalAutoTime += autoDelay * times
 
                 if (easing) item.easingFn = AnimateEasing.get(easing)
 
             }
 
             if (!item.autoDuration && item.duration === undefined) {
-                if (length > 1) (i > 0 || joinBefore) ? addedAutoTime += times : item.duration = 0 // fromNow不为true时，第一帧无时长
+                if (length > 1) (i > 0 || joinBefore) ? totalAutoTime += times : item.duration = 0 // fromNow不为true时，第一帧无时长
                 else item.duration = this.duration
             }
 
@@ -234,11 +234,11 @@ export class Animate extends Eventer implements IAnimate {
         }
 
 
-        if (addedAutoTime) {
-            if (this.duration <= addedTime || !(config && config.duration)) this.changeDuration(addedTime + frameDuration * addedAutoTime)
-            this.allocateTime((this.duration - addedTime) / addedAutoTime)
+        if (totalAutoTime) {
+            if (this.duration <= totalTime || !(config && config.duration)) this.changeDuration(totalTime + frameDuration * totalAutoTime)
+            this.allocateTime((this.duration - totalTime) / totalAutoTime)
         } else {
-            if (addedTime) this.changeDuration(addedTime)
+            if (totalTime) this.changeDuration(totalTime)
         }
 
         this.emit(AnimateEvent.CREATED, this)
@@ -292,7 +292,7 @@ export class Animate extends Eventer implements IAnimate {
             }
 
             const itemDelay = this.nowReverse ? 0 : (this.frame.delay || 0)
-            const itemPlayedTime = realTime - this.playedTotalTime - itemDelay
+            const itemPlayedTime = realTime - this.playedTotalTime - itemDelay // 必须实时计算
             const frameDuration = this.frame.duration
 
             if (itemPlayedTime > frameDuration) {
@@ -335,14 +335,6 @@ export class Animate extends Eventer implements IAnimate {
             }
         }
 
-    }
-
-    protected needLoop(looped: number, loop: boolean | number, swing: boolean | number): boolean {
-        return !(this.needStopLoop(looped, loop) || this.needStopLoop(looped, swing, true))
-    }
-
-    protected needStopLoop(looped: number, times: boolean | number, swing?: boolean,): boolean {
-        return typeof times === 'number' && (!times || looped >= (swing ? times * 2 - 1 : times))
     }
 
     protected start(seek?: boolean): void {
@@ -401,7 +393,7 @@ export class Animate extends Eventer implements IAnimate {
     protected nextFrame(): void {
         if (this.needLoopFrame()) return this.increaseTime()
         if (this.nowIndex + 1 >= this.frames.length) return
-        this.playedTotalTime += this.frameTotalTime
+        this.increaseTime()
         this.nowIndex++
     }
 
@@ -411,22 +403,6 @@ export class Animate extends Eventer implements IAnimate {
         this.increaseTime()
         this.nowIndex--
     }
-
-    protected increaseTime() {
-        this.playedTotalTime += this.frameTotalTime
-    }
-
-    protected needLoopFrame(): boolean {
-        const { loop, swing } = this.frame
-        if (loop || swing) {
-            this.frameLooped ? this.frameLooped++ : this.frameLooped = 1
-            if (swing) this.frameReverse = !this.frameReverse
-            if (this.needLoop(this.frameLooped, loop, swing)) return true
-            this.frameLooped = this.frameReverse = undefined
-        }
-        return false
-    }
-
 
     protected transition(t: number): void {
         const { style, beforeStyle } = this.frame
@@ -465,12 +441,38 @@ export class Animate extends Eventer implements IAnimate {
         }
     }
 
+
+    protected increaseTime() {
+        this.playedTotalTime += this.frameTotalTime
+    }
+
+    protected needLoop(looped: number, loop: boolean | number, swing?: boolean | number): boolean {
+        return !(this.needStopLoop(looped, loop) || (swing && this.needStopLoop(looped, swing, true)))
+    }
+
+    protected needStopLoop(looped: number, times: boolean | number, swing?: boolean,): boolean {
+        return typeof times === 'number' && (!times || looped >= (swing ? times * 2 - 1 : times))
+    }
+
+    protected needLoopFrame(): boolean {
+        const { loop, swing } = this.frame
+        if (loop || swing) {
+            this.frameLooped ? this.frameLooped++ : this.frameLooped = 1
+            if (swing) this.frameReverse = !this.frameReverse
+            if (this.needLoop(this.frameLooped, loop, swing)) return true
+            this.frameLooped = this.frameReverse = undefined
+        }
+        return false
+    }
+
+
     protected clearTimer(fn?: IFunction): void {
         if (this.timer) {
             clearTimeout(this.timer), this.timer = 0
             if (fn) fn()
         }
     }
+
 
     public destroy(complete?: boolean): void {
         if (!this.destroyed) {
