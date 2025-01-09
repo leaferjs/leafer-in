@@ -1,4 +1,4 @@
-import { IAnimate, IUIInputData, IObject, IUI, IPercentData, IAnimation } from '@leafer-ui/interface'
+import { IUIInputData, IObject, IUI, IPercentData, IAnimation, IAnimate, IFunction } from '@leafer-ui/interface'
 import { useModule, LeafEventer } from '@leafer-ui/draw'
 
 import { Animate } from './Animate'
@@ -7,47 +7,69 @@ import { Animate } from './Animate'
 @useModule(LeafEventer)
 export class AnimateList extends Animate {
 
-    public target: IUI | IObject
+    public list: IAnimate[] = []
 
-    public list: IAnimate[]
+    public get completed(): boolean { return this.list.every(item => item.completed) }
 
-    constructor(target: IUI | IObject, animation?: IAnimation[], isTemp?: boolean) {
-        super(null, null)
+    public get endingStyle() { return this._endingStyle }
+    protected _endingStyle: IUIInputData
+
+
+    constructor(target: IUI | IObject, animation?: IAnimation[] | IAnimate[], isTemp?: boolean) {
+        super(target, null)
+        this.updateList(animation, isTemp)
+    }
+
+
+    public updateList(animation?: IAnimation[] | IAnimate[], isTemp?: boolean) {
         this.fromStyle = {}
         this.toStyle = {}
+        this._endingStyle = {}
+
+        if (!animation) animation = this.list.filter(item => {
+            const { completed } = item
+            if (completed) item.destroy()
+            return !completed
+        })
+
         this.list = animation.map(item => {
-            const animate = new Animate(target, item, isTemp)
+            const animate = (item as IAnimate).target ? item as IAnimate : new Animate(this.target, item, isTemp)
             Object.assign(this.fromStyle, animate.fromStyle)
             Object.assign(this.toStyle, animate.toStyle)
+            Object.assign(this._endingStyle, animate.endingStyle)
             return animate
         })
     }
 
     public override play(): void {
-        this.list.forEach(item => item.play())
+        this.each(item => item.play())
     }
 
     public override pause(): void {
-        this.list.forEach(item => item.pause())
+        this.each(item => item.pause())
     }
 
     public override stop(): void {
-        this.list.forEach(item => item.stop())
+        this.each(item => item.stop())
     }
 
     public override seek(time: number | IPercentData): void {
-        this.list.forEach(item => item.seek(time))
+        this.each(item => item.seek(time))
     }
 
     public override kill(complete?: boolean, killStyle?: IUIInputData): void {
-        this.list.forEach(item => item.kill(complete, killStyle))
+        this.each(item => item.kill(complete, killStyle))
         this.destroy()
+    }
+
+    protected each(func: IFunction): void {
+        this.list.forEach(func)
     }
 
     public override destroy(complete?: boolean): void {
         const { list } = this
         if (list.length) {
-            list.forEach(item => item.destroy(complete))
+            this.each(item => item.destroy(complete))
             list.length = 0
         }
     }

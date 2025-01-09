@@ -106,9 +106,10 @@ export class Animate extends Eventer implements IAnimate {
 
     constructor(target: IUI | IObject, keyframe: IUIInputData | IKeyframe[] | IAnimation, options?: ITransition, isTemp?: boolean) {
         super()
-        if (!target) return // AnimateList 模式
-        if ((keyframe as IKeyframesAnimation).keyframes) options = keyframe as IAnimateOptions, keyframe = (keyframe as IKeyframesAnimation).keyframes
-        else if ((keyframe as IStyleAnimation).style) options = keyframe as IAnimateOptions, keyframe = (keyframe as IStyleAnimation).style
+        if (keyframe) {
+            if ((keyframe as IKeyframesAnimation).keyframes) options = keyframe as IAnimateOptions, keyframe = (keyframe as IKeyframesAnimation).keyframes
+            else if ((keyframe as IStyleAnimation).style) options = keyframe as IAnimateOptions, keyframe = (keyframe as IStyleAnimation).style
+        }
         this.init(target, keyframe as IUIInputData | IKeyframe[], options, isTemp)
     }
 
@@ -121,8 +122,7 @@ export class Animate extends Eventer implements IAnimate {
             case 'object': this.config = options, options.event && (this.event = options.event as IEventMap)
         }
 
-        if (!keyframe) return
-        this.keyframes = keyframe instanceof Array ? keyframe : [keyframe]
+        this.keyframes = keyframe instanceof Array ? keyframe : (keyframe ? [keyframe] : [])
 
         const { easing, attrs } = this
         this.easingFn = AnimateEasing.get(easing)
@@ -131,12 +131,11 @@ export class Animate extends Eventer implements IAnimate {
         this.frames = []
         this.create()
 
-        if (this.autoplay) this.timer = setTimeout(() => {
+        if (this.autoplay && this.frames.length) this.timer = setTimeout(() => {
             this.timer = 0
             this.play()
         }, 0)
     }
-
 
     public play(): void {
         if (this.destroyed) return

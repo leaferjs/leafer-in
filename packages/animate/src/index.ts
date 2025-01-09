@@ -39,16 +39,32 @@ dataType()(ui, 'transitionOut')
 
 ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation | IAnimation[], options?: ITransition, kill?: IAnimateType, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate
-    const isAnimationList = keyframe instanceof Array && !options && kill
-    const animate = isAnimationList ? new AnimateList(this, keyframe as IAnimation[], isTemp) : new Animate(this, keyframe as IUIInputData | IKeyframe[] | IAnimation, options, isTemp)
-    this.killAnimate(kill, animate.toStyle)
 
-    return this.__animate = animate
+    const isAnimationList = keyframe instanceof Array && !options && kill
+    let nextAnimate = isAnimationList ? new AnimateList(this, keyframe as IAnimation[], isTemp) : new Animate(this, keyframe as IUIInputData | IKeyframe[] | IAnimation, options, isTemp)
+
+    this.killAnimate(kill, nextAnimate.toStyle)
+
+    const animate = this.__animate
+    if (animate) {
+        if (nextAnimate instanceof AnimateList) nextAnimate.list.unshift(animate)
+        else nextAnimate = new AnimateList(this, [animate, nextAnimate])
+    }
+
+    return this.__animate = nextAnimate
 }
 
-ui.killAnimate = function (_type?: IAnimateType, killStyle?: IUIInputData): void {
+ui.killAnimate = function (_type?: IAnimateType, nextStyle?: IUIInputData): void {
     const animate = this.__animate
-    if (animate) animate.kill(true, killStyle), this.__animate = null
+    if (animate) {
+        let kill = false
+        if (nextStyle && !animate.completed) {
+            if (animate instanceof AnimateList) animate.updateList()
+            const { toStyle } = animate
+            for (let key in nextStyle) if (key in toStyle) { kill = true; break }
+        } else kill = true
+        if (kill) animate.kill(true, nextStyle), this.__animate = null
+    }
 }
 
 ui.__runAnimation = function (type: 'in' | 'out', complete?: IFunction): void {

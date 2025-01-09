@@ -35,7 +35,8 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out')
     const fromStyle = transition ? getFromStyle(leaf, style) : undefined
 
     // 回到正常状态
-    leaf.killAnimate('transition')
+    const nextStyle = State.canAnimate && getStyle(leaf)
+    if (nextStyle) leaf.killAnimate('transition')
     if (normalStyle) leaf.set(normalStyle, 'temp')
 
 
