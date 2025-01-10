@@ -93,12 +93,12 @@ export class Animate extends Eventer implements IAnimate {
 
     public get realEnding(): IAnimateEnding {
         let count: number
-        const { ending, reverse, loop } = this
+        const { ending, reverse, swing, loop } = this
         if (ending === 'from') count = 0
         else if (ending === 'to') count = 1
         else {
             count = reverse ? 0 : 1
-            if (loop && typeof loop === 'number') count += loop - 1
+            if (swing && loop && typeof loop === 'number') count += loop - 1
         }
         return count % 2 ? 'to' : 'from'
     }
