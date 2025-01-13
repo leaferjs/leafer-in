@@ -11,6 +11,7 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
     const { target } = editor
     if (target) {
         editor.leafList = target instanceof LeafList ? target : new LeafList(target instanceof Array ? target : target as IUI)
+        if (editor.multiple) simulate(editor) // 更新模拟元素
     } else {
         editor.simulateTarget.remove()
         editor.leafList.reset()
@@ -22,7 +23,6 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
 
     if (editor.editing) {
         editor.waitLeafer(() => {
-            if (editor.multiple) simulate(editor)
             updateMoveCursor(editor)
             editor.updateEditTool()
             editor.update()
