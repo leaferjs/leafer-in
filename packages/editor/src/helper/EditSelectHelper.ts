@@ -1,7 +1,5 @@
-import { IBounds, ILeafList, IUI } from '@leafer-ui/interface'
-import { Answer } from '@leafer-ui/draw'
+import { IBounds, ILeafList, IUI, IUIData } from '@leafer-ui/interface'
 
-const { No, Yes, NoAndSkip, YesAndSkip } = Answer
 
 export const EditSelectHelper = {
 
@@ -9,26 +7,35 @@ export const EditSelectHelper = {
         return path.list.find((leaf) => leaf.editable) as IUI
     },
 
-    findBounds(leaf: IUI, bounds: IBounds): Answer {
-        if (leaf.__.hittable && leaf.__.visible && !leaf.__.locked && bounds.hit(leaf.__world)) {
+    findByBounds(branch: IUI, bounds: IBounds): IUI[] {
+        const list: IUI[] = []
+        eachFind([branch], list, bounds)
+        return list
+    }
 
-            if (leaf.__.editable) {
-                if (leaf.isBranch && !leaf.__.hitChildren) {
-                    return leaf.__.hitSelf ? YesAndSkip : NoAndSkip
-                } else if (leaf.isFrame) {
-                    return bounds.includes(leaf.__layout.boxBounds, leaf.__world) ? YesAndSkip : No
-                } else {
-                    if (bounds.hit(leaf.__layout.boxBounds, leaf.__world) && leaf.__.hitSelf) return Yes
-                }
+}
+
+
+function eachFind(children: IUI[], list: IUI[], bounds: IBounds): void {
+    let child: IUI, data: IUIData
+    for (let i = 0, len = children.length; i < len; i++) {
+        child = children[i], data = child.__
+        if (data.hittable && data.visible && !data.locked && bounds.hit(child.__world)) {
+
+            if (data.editable) {
+                if (child.isBranch && !data.hitChildren) {
+                    if (data.hitSelf) list.push(child)
+                    continue
+                } else if (child.isFrame) {
+                    if (bounds.includes(child.__layout.boxBounds, child.__world)) {
+                        list.push(child)
+                        continue
+                    }
+                } else if (bounds.hit(child.__layout.boxBounds, child.__world) && data.hitSelf) list.push(child)
             }
 
-            return No
-
-        } else {
-
-            return leaf.isBranch ? NoAndSkip : No
+            if (child.isBranch) eachFind(child.children, list, bounds)
 
         }
     }
-
 }

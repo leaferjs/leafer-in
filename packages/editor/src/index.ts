@@ -29,12 +29,11 @@ import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from
 import { Creator, UI, Group, Text, Box, dataType, defineKey, Plugin } from '@leafer-ui/draw'
 
 import '@leafer-in/resize'
-import '@leafer-in/find'
 
 import { Editor } from './Editor'
 
 
-Plugin.add('editor', 'resize', 'find')
+Plugin.add('editor', 'resize')
 
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }

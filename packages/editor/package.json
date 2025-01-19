@@ -32,7 +32,6 @@
   "peerDependencies": {
     "@leafer-ui/core": "^1.3.2",
     "@leafer-in/resize": "^1.3.2",
-    "@leafer-in/find": "^1.3.2",
     "@leafer-ui/interface": "^1.3.2",
     "@leafer-in/interface": "^1.3.2"
   }
