@@ -40,7 +40,8 @@ function getDecimalLen(num: number | string) { // 小数位长度
 }
 
 function value(from: any, to: any, t: number): any {
-    return (typeof from === 'number' && typeof to === 'number') ? from + (to - from) * t : to
+    const fromIsNumber = typeof from === 'number', toIsNumber = typeof to === 'number'
+    return (fromIsNumber && toIsNumber) ? from + (to - from) * t : ((toIsNumber || fromIsNumber) ? number(from, to, t) : from)
 }
 
 function number(from: number, to: number, t: number, roundValue?: number): number {
