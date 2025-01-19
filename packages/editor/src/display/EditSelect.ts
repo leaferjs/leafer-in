@@ -10,7 +10,7 @@ import { EditSelectHelper } from '../helper/EditSelectHelper'
 import { EditorEvent } from '../event/EditorEvent'
 
 
-const { findOne } = EditSelectHelper
+const { findOne, findByBounds } = EditSelectHelper
 
 export class EditSelect extends Group implements IEditSelect {
 
@@ -160,7 +160,7 @@ export class EditSelect extends Group implements IEditSelect {
             const total = e.getInnerTotal(this)
 
             const dragBounds = this.bounds.clone().unsign()
-            const list = new LeafList(EditSelectHelper.findByBounds(editor.app, dragBounds))
+            const list = new LeafList(findByBounds(editor.app, dragBounds))
 
             this.bounds.width = total.x
             this.bounds.height = total.y
