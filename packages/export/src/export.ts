@@ -48,7 +48,7 @@ export const ExportModule: IExportModule = {
 
                         let renderBounds: IBoundsData, trimBounds: IBounds, scaleX = 1, scaleY = 1
                         const { worldTransform, isLeafer, isFrame } = leaf
-                        const { slice, trim, onCanvas } = options
+                        const { slice, trim, padding, onCanvas } = options
                         const smooth = options.smooth === undefined ? leafer.config.smooth : options.smooth
                         const contextSettings = options.contextSettings || leafer.config.contextSettings
 
@@ -141,6 +141,14 @@ export const ExportModule: IExportModule = {
 
                             canvas = Creator.canvas(config)
                             canvas.copyWorld(old, trimBounds, config)
+                        }
+
+                        if (padding) {
+                            const [top, right, bottom, left] = MathHelper.fourNumber(padding)
+                            const old = canvas, { width, height } = old
+
+                            canvas = Creator.canvas({ width: width + left + right, height: height + top + bottom, pixelRatio })
+                            canvas.copyWorld(old, old.bounds, { x: left, y: top, width, height })
                         }
 
                         if (needFill) canvas.fillWorld(canvas.bounds, fill || '#FFFFFF', 'destination-over')
