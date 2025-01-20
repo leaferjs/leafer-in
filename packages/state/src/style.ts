@@ -75,7 +75,8 @@ export function getStyle(leaf: IUI): IStateStyle {
     //   从低到高依次覆盖: states < selected < focus < hover < press < disabled
 
     let exist: boolean
-    const style: IUIInputData = {}, { state } = leaf, button = findParentButton(leaf)
+    const style: IUIInputData = {}, button = findParentButton(leaf)
+    const state = button ? (leaf.state || button.state) : leaf.state
 
     const stateStyle = state && leaf.states[state]
     if (stateStyle && State.isState(state, leaf, button)) exist = assign(style, stateStyle)

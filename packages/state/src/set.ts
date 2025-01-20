@@ -17,7 +17,7 @@ export function setState(leaf: IUI, stateName: string, stateStyle?: IStateStyle)
 }
 
 
-function setChildrenState(children: IUI[], stateType: IStateStyleType, state?: IStateName): void {
+function setChildrenState(children: IUI[], stateType: IStateStyleType, stateName?: IStateName): void {
     if (!children) return
 
     let leaf: IUI, update: boolean
@@ -38,8 +38,8 @@ function setChildrenState(children: IUI[], stateType: IStateStyleType, state?: I
             }
             if (update) setPointerState(leaf, stateType)
 
-        } else if (state) setState(leaf, state)
+        } else if (stateName !== undefined) setState(leaf, stateName)
 
-        if (leaf.isBranch) setChildrenState(leaf.children, stateType, state)
+        if (leaf.isBranch) setChildrenState(leaf.children, stateType, stateName)
     }
 }

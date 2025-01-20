@@ -15,15 +15,15 @@ export function unsetState(leaf: IUI, stateName: string, stateStyle?: IStateStyl
 }
 
 
-function unsetChildrenState(children: IUI[], stateType: IStateStyleType, state?: IStateName): void {
+function unsetChildrenState(children: IUI[], stateType: IStateStyleType, stateName?: IStateName): void {
     if (!children) return
 
     let leaf: IUI
     for (let i = 0, len = children.length; i < len; i++) {
         leaf = children[i]
         if (stateType) unsetPointerState(leaf, stateType)
-        else if (state) unsetState(leaf, state)
+        else if (stateName !== undefined) unsetState(leaf, stateName)
 
-        if (leaf.isBranch) unsetChildrenState(leaf.children, stateType, state)
+        if (leaf.isBranch) unsetChildrenState(leaf.children, stateType, stateName)
     }
 }
