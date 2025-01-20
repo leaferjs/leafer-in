@@ -77,7 +77,7 @@ box.__updateBoxBounds = function (secondLayout?: boolean): void { // autoSide且
 
         if (data.__autoSide) {
 
-            // this.leafer.layouter.addExtra(this)
+            if (data.__hasSurface) this.__extraUpdate() // Box自身存在样式，需要额外更新
 
             flow && !secondLayout ? this.__updateRectBoxBounds() : __updateBoxBounds.call(this)
 

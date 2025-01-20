@@ -66,11 +66,11 @@ ui.__updateMotionPath = function (): void {
 
     if (this.motionPath) {
         let child: IUI
-        const { children } = this.parent, { leaferIsReady } = this
+        const { children } = this.parent
         for (let i = 0; i < children.length; i++) {
             child = children[i]
             if (!isNull(child.motion) && !child.__layout.matrixChanged) {
-                if (leaferIsReady && child !== this) this.leafer.layouter.addExtra(child) // add part 
+                if (child !== this) child.__extraUpdate()
                 updateMotion(child)
             }
         }
