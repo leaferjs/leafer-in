@@ -5,15 +5,15 @@
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/motion-path.esm.js",
+  "main": "dist/motion-path.esm.min.js",
   "exports": {
-    "import": "./dist/motion-path.esm.js",
-    "require": "./dist/motion-path.cjs",
+    "import": "./dist/motion-path.esm.min.js",
+    "require": "./dist/motion-path.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/motion-path.js",
-  "jsdelivr": "dist/motion-path.js",
+  "unpkg": "dist/motion-path.min.js",
+  "jsdelivr": "dist/motion-path.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

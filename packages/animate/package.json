@@ -5,15 +5,15 @@
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/animate.esm.js",
+  "main": "dist/animate.esm.min.js",
   "exports": {
-    "import": "./dist/animate.esm.js",
-    "require": "./dist/animate.cjs",
+    "import": "./dist/animate.esm.min.js",
+    "require": "./dist/animate.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/animate.js",
-  "jsdelivr": "dist/animate.js",
+  "unpkg": "dist/animate.min.js",
+  "jsdelivr": "dist/animate.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

@@ -5,15 +5,15 @@
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/robot.esm.js",
+  "main": "dist/robot.esm.min.js",
   "exports": {
-    "import": "./dist/robot.esm.js",
-    "require": "./dist/robot.cjs",
+    "import": "./dist/robot.esm.min.js",
+    "require": "./dist/robot.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/robot.js",
-  "jsdelivr": "dist/robot.js",
+  "unpkg": "dist/robot.min.js",
+  "jsdelivr": "dist/robot.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

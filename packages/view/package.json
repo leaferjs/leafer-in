@@ -7,13 +7,13 @@
   "type": "module",
   "main": "dist/view.esm.js",
   "exports": {
-    "import": "./dist/view.esm.js",
-    "require": "./dist/view.cjs",
+    "import": "./dist/view.esm.min.js",
+    "require": "./dist/view.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/view.js",
-  "jsdelivr": "dist/view.js",
+  "unpkg": "dist/view.min.js",
+  "jsdelivr": "dist/view.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

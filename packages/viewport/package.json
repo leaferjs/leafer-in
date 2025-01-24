@@ -5,15 +5,15 @@
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/viewport.esm.js",
+  "main": "dist/viewport.esm.min.js",
   "exports": {
-    "import": "./dist/viewport.esm.js",
-    "require": "./dist/viewport.cjs",
+    "import": "./dist/viewport.esm.min.js",
+    "require": "./dist/viewport.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/viewport.js",
-  "jsdelivr": "dist/viewport.js",
+  "unpkg": "dist/viewport.min.js",
+  "jsdelivr": "dist/viewport.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

@@ -5,15 +5,15 @@
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/resize.esm.js",
+  "main": "dist/resize.esm.min.js",
   "exports": {
-    "import": "./dist/resize.esm.js",
-    "require": "./dist/resize.cjs",
+    "import": "./dist/resize.esm.min.js",
+    "require": "./dist/resize.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/resize.js",
-  "jsdelivr": "dist/resize.js",
+  "unpkg": "dist/resize.min.js",
+  "jsdelivr": "dist/resize.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

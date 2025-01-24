@@ -5,15 +5,15 @@
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/color.esm.js",
+  "main": "dist/color.esm.min.js",
   "exports": {
-    "import": "./dist/color.esm.js",
-    "require": "./dist/color.cjs",
+    "import": "./dist/color.esm.min.js",
+    "require": "./dist/color.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/color.js",
-  "jsdelivr": "dist/color.js",
+  "unpkg": "dist/color.min.js",
+  "jsdelivr": "dist/color.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
