@@ -1,5 +1,5 @@
-import { ILeaf, IBoundsData, IZoomType, IFourNumber, IPointData } from '@leafer-ui/interface'
-import { Leafer, Bounds, LeafBoundsHelper, Plugin } from '@leafer-ui/draw'
+import { ILeaf, IBoundsData, IZoomType, IFourNumber, IPointData, ITransition } from '@leafer-ui/interface'
+import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
 
@@ -7,7 +7,9 @@ import { getFixBounds, getZoomScale } from './helper'
 Plugin.add('view')
 
 
-Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean): IBoundsData {
+Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean, transition?: ITransition): IBoundsData {
+
+    this.killAnimate()
 
     const { zoomLayer } = this
     const limitBounds = this.canvas.bounds.clone().shrink(padding !== undefined ? padding : 30), bounds = new Bounds()
@@ -45,9 +47,13 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
 
     if (changeScale) {
 
-        if (changeScale !== 1) zoomLayer.scaleOfWorld(center, this.getValidScale(changeScale))
+        changeScale = this.getValidScale(changeScale)
+        zoomLayer.scaleOfWorld(center, changeScale, changeScale, false, transition)
 
     } else if (typeof zoomType === 'object') {
+
+        const { x, y, scaleX, scaleY } = zoomLayer
+        const data = { x, y, scaleX, scaleY }
 
         const isArray = zoomType instanceof Array
 
@@ -59,8 +65,8 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
             bounds.set(zoomLayer.getWorldBounds(innerBounds))
         }
 
-        const { x, y, width, height } = bounds
-        let moveX = limitBounds.x - x, moveY = limitBounds.y - y
+        const { width, height } = bounds
+        let moveX = limitBounds.x - bounds.x, moveY = limitBounds.y - bounds.y
 
         if (fixed) {
 
@@ -69,17 +75,23 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
 
         } else {
 
-            const fitScale = this.getValidScale(Math.min(limitBounds.width / width, limitBounds.height / height))
-            moveX += (limitBounds.width - width * fitScale) / 2
-            moveY += (limitBounds.height - height * fitScale) / 2
+            changeScale = this.getValidScale(Math.min(limitBounds.width / width, limitBounds.height / height))
+            moveX += (limitBounds.width - width * changeScale) / 2
+            moveY += (limitBounds.height - height * changeScale) / 2
 
-            zoomLayer.scaleOfWorld(bounds, fitScale)
-            bounds.scaleOf(bounds, fitScale)
+            PointHelper.scaleOf(data, bounds, changeScale)
+            bounds.scaleOf(bounds, changeScale)
 
+            data.scaleX *= changeScale
+            data.scaleY *= changeScale
         }
 
-        zoomLayer.move(moveX, moveY)
-        return bounds.move(moveX, moveY)
+        PointHelper.move(data, moveX, moveY)
+        bounds.move(moveX, moveY)
+
+        zoomLayer.set(data, transition)
+
+        return bounds
 
     }
 
