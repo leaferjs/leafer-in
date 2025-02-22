@@ -1,4 +1,4 @@
-import { IFourNumber, IColor, ITransitionMap, IShadowEffect } from '@leafer-ui/interface'
+import { IFourNumber, IColor, ITransitionMap, IShadowEffect, ITransitionModule } from '@leafer-ui/interface'
 import { MathHelper, ColorConvert } from '@leafer-ui/draw'
 
 
@@ -28,10 +28,11 @@ export const TransitionList: ITransitionMap = {
 }
 
 export const TransitionModule = {
+    list: TransitionList,
     value,
     number,
     color
-}
+} as ITransitionModule
 
 
 function getDecimalLen(num: number | string) { // 小数位长度
