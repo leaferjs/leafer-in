@@ -1,5 +1,5 @@
 import { IBoundsData, IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
-import { AroundHelper, MathHelper, PointHelper, Direction9 } from '@leafer-ui/draw'
+import { AroundHelper, MathHelper, PointHelper, BoundsHelper, Bounds, Direction9 } from '@leafer-ui/draw'
 
 import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
@@ -13,7 +13,7 @@ export const EditDataHelper = {
     getScaleData(element: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
 
-        const { boxBounds, widthRange, heightRange } = element
+        const { boxBounds, widthRange, heightRange, dragBounds } = element
         const { width, height } = startBounds
 
         if (around) {
@@ -116,6 +116,21 @@ export const EditDataHelper = {
             if (scaleY < 0) scaleY = 1 / boxBounds.height / worldTransform.scaleY
         }
 
+        // 检查限制
+
+        toPoint(around || align, boxBounds, origin, true)
+
+        if (dragBounds) {
+            const allowBounds = dragBounds === 'parent' ? element.parent.boxBounds : dragBounds
+            const localBounds = new Bounds(element.__localBoxBounds)
+            localBounds.scaleOf(element.getLocalPointByInner(origin), scaleX, scaleY)
+
+            if (!BoundsHelper.includes(allowBounds, localBounds)) {
+                const realBounds = localBounds.getIntersect(allowBounds)
+                scaleX *= realBounds.width / localBounds.width
+                scaleY *= realBounds.height / localBounds.height // 后续需优化带旋转的场景
+            }
+        }
 
         if (widthRange) {
             const nowWidth = boxBounds.width * element.scaleX
@@ -126,9 +141,6 @@ export const EditDataHelper = {
             const nowHeight = boxBounds.height * element.scaleY
             scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
-
-
-        toPoint(around || align, boxBounds, origin, true)
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
