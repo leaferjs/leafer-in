@@ -258,9 +258,10 @@ export class Editor extends Group implements IEditor {
     // transform
 
     public move(x: number | IPointData, y = 0): void {
-        if (!this.checkTransform('moveable')) return
-
         const { element } = this
+        if (!this.checkTransform('moveable') || element.draggable === false) return
+
+
         const world = element.getWorldPointByLocal(typeof x === 'object' ? { ...x } : { x, y }, null, true)
         if (this.multiple) element.safeChange(() => element.move(x, y))
         const event = new EditorMoveEvent(EditorMoveEvent.MOVE, { target: element, editor: this, moveX: world.x, moveY: world.y })
