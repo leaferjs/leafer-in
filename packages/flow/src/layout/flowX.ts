@@ -97,14 +97,3 @@ export function flowX(box: IBox, reverse?: boolean): void {
 
     }
 }
-
-
-// if (typeof autoWidth === 'object') {
-
-//     const realWidth = width * autoWidth.value / 100 // 百分比
-//     data.width += data.count ? realWidth + xGapTempNum : realWidth
-//     const scaleX = realWidth / local.width
-//     child.scaleResize(scaleX, 1, true)
-//     local.width = realWidth
-
-// } else 

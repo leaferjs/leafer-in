@@ -259,7 +259,7 @@ export class Editor extends Group implements IEditor {
 
     public move(x: number | IPointData, y = 0): void {
         const { element } = this
-        if (!this.checkTransform('moveable') || element.draggable === false) return
+        if (!this.checkTransform('moveable')) return
 
 
         const world = element.getWorldPointByLocal(typeof x === 'object' ? { ...x } : { x, y }, null, true)

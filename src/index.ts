@@ -16,6 +16,8 @@ export * from '@leafer-in/robot'
 export * from '@leafer-in/find'
 export * from '@leafer-in/export'
 
+export * from '@leafer-in/filter'
+
 export * from '@leafer-in/color'
 export * from '@leafer-in/resize'
 
