@@ -42,6 +42,9 @@ Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor
 dataType(false)(Box.prototype, 'textBox')
 
 
+dataType()(UI.prototype, 'editConfig')
+
+
 defineKey(UI.prototype, 'editOuter', {
     get(): string { return this.__.__isLinePath ? 'LineEditTool' : 'EditTool' }
 })
@@ -61,7 +64,8 @@ defineKey(Text.prototype, 'editInner', {
 
 UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): void {
     defineKey(this.prototype, 'editConfig', {
-        get(): IEditorConfig { return typeof config === 'function' ? config(this) : config }
+        set(value: IEditorConfig) { this.__setAttr('editConfig', value) },
+        get(): IEditorConfig { return this.__getAttr('editConfig') as IEditorConfig || (typeof config === 'function' ? config(this) : config) }
     })
 }
 
