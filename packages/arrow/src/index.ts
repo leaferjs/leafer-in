@@ -12,10 +12,9 @@ import { arrowType } from './decorator'
 Plugin.add('arrow')
 
 
-const ui = UI.prototype
-
 // addAttr
-arrowType('none')(ui, 'startArrow')
-arrowType('none')(ui, 'endArrow')
+UI.addAttr('startArrow', 'none', arrowType)
+UI.addAttr('endArrow', 'none', arrowType)
+
 
 Object.assign(PathArrow, PathArrowModule)
