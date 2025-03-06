@@ -31,11 +31,11 @@ const { updateBounds } = BranchHelper
 
 
 // addAttr
-motionPathType()(ui, 'motionPath')
-motionPathType(1)(ui, 'motionPrecision')
+UI.addAttr('motionPath', undefined, motionPathType)
+UI.addAttr('motionPrecision', 1, motionPathType)
 
-motionPathType()(ui, 'motion')
-motionPathType(true)(ui, 'motionRotation')
+UI.addAttr('motion', undefined, motionPathType)
+UI.addAttr('motionRotation', true, motionPathType)
 
 
 ui.getMotionPathData = function (): IMotionPathData {
