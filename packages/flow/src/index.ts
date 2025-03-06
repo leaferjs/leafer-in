@@ -13,20 +13,20 @@ import { autoBoundsType } from './decorate'
 Plugin.add('flow', 'resize')
 
 
-const ui = UI.prototype, box = Box.prototype, { __updateBoxBounds } = Group.prototype
+const box = Box.prototype, { __updateBoxBounds } = Group.prototype
 
 // addAttr
-autoLayoutType(false)(ui, 'flow')
-boundsType(0)(ui, 'gap')
-boundsType('top-left')(ui, 'flowAlign')
-boundsType(false)(ui, 'flowWrap')
+UI.addAttr('flow', false, autoLayoutType)
+UI.addAttr('gap', 0, boundsType)
+UI.addAttr('flowAlign', 'top-left', boundsType)
+UI.addAttr('flowWrap', false, boundsType)
 
-boundsType('box')(ui, 'itemBox')
-boundsType(true)(ui, 'inFlow')
+UI.addAttr('itemBox', 'box', boundsType)
+UI.addAttr('inFlow', true, boundsType)
 
-autoBoundsType()(ui, 'autoWidth')
-autoBoundsType()(ui, 'autoHeight')
-boundsType()(ui, 'autoBox')
+UI.addAttr('autoWidth', undefined, autoBoundsType)
+UI.addAttr('autoHeight', undefined, autoBoundsType)
+UI.addAttr('autoBox', undefined, boundsType)
 
 
 const { copyAndSpread } = BoundsHelper
@@ -107,6 +107,3 @@ box.__updateBoxBounds = function (secondLayout?: boolean): void { // autoSide且
         this.__updateRectBoxBounds()
     }
 }
-
-
-
