@@ -26,7 +26,7 @@ export { EditSelectHelper } from './helper/EditSelectHelper'
 
 
 import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
-import { Creator, UI, Group, Text, Box, dataType, defineKey, Plugin } from '@leafer-ui/draw'
+import { Creator, UI, Group, Text, Box, dataType, Plugin } from '@leafer-ui/draw'
 
 import '@leafer-in/resize'
 
@@ -38,45 +38,15 @@ Plugin.add('editor', 'resize')
 
 Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
 
+Box.addAttr('textBox', false, dataType)
 
-dataType(false)(Box.prototype, 'textBox')
+UI.addAttr('editConfig', undefined, dataType)
+UI.addAttr('editOuter', (ui: UI) => ui.__.__isLinePath ? 'LineEditTool' : 'EditTool', dataType)
 
+UI.addAttr('editInner', 'PathEditor', dataType)
+Group.addAttr('editInner', '', dataType)  // 必须设为空
+Text.addAttr('editInner', 'TextEditor', dataType)
 
-dataType()(UI.prototype, 'editConfig')
-
-
-defineKey(UI.prototype, 'editOuter', {
-    get(): string { return this.__.__isLinePath ? 'LineEditTool' : 'EditTool' }
-})
-
-defineKey(UI.prototype, 'editInner', {
-    get(): string { return 'PathEditor' }
-})
-
-defineKey(Group.prototype, 'editInner', { // 必须设为空
-    get(): string { return '' }
-})
-
-defineKey(Text.prototype, 'editInner', {
-    get(): string { return 'TextEditor' }
-})
-
-
-UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): void {
-    defineKey(this.prototype, 'editConfig', {
-        set(value: IEditorConfig) { this.__setAttr('editConfig', value) },
-        get(): IEditorConfig { return this.__getAttr('editConfig') as IEditorConfig || (typeof config === 'function' ? config(this) : config) }
-    })
-}
-
-UI.setEditOuter = function (toolName: string | IEditToolFunction): void {
-    defineKey(this.prototype, 'editOuter', {
-        get(): string { return typeof toolName === 'string' ? toolName : toolName(this) }
-    })
-}
-
-UI.setEditInner = function (editorName: string | IEditToolFunction): void {
-    defineKey(this.prototype, 'editInner', {
-        get(): string { return typeof editorName === 'string' ? editorName : editorName(this) }
-    })
-}
+UI.setEditConfig = function (config: IEditorConfig | IEditorConfigFunction): void { this.changeAttr('editConfig', config) }
+UI.setEditOuter = function (toolName: string | IEditToolFunction): void { this.changeAttr('editOuter', toolName) }
+UI.setEditInner = function (editorName: string | IEditToolFunction): void { this.changeAttr('editInner', editorName) }
