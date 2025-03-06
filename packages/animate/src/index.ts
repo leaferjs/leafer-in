@@ -34,11 +34,11 @@ const ui = UI.prototype
 
 
 // addAttr
-animationType()(ui, 'animation')
-dataType()(ui, 'animationOut')
+UI.addAttr('animation', undefined, animationType)
+UI.addAttr('animationOut', undefined, dataType)
 
-dataType(true)(ui, 'transition')
-dataType()(ui, 'transitionOut')
+UI.addAttr('transition', true, dataType)
+UI.addAttr('transitionOut', undefined, dataType)
 
 ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation | IAnimation[], options?: ITransition, kill?: IAnimateType, isTemp?: boolean): IAnimate {
     if (keyframe === undefined) return this.__animate
