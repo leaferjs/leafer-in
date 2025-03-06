@@ -54,20 +54,20 @@ State.updateEventStyle = updateEventStyle
 const ui = UI.prototype
 
 // addAttr
-stateType(false, 'selectedStyle')(ui, 'selected')
-stateType(false, 'disabledStyle')(ui, 'disabled')
+UI.addAttr('selected', false, stateType, 'selectedStyle')
+UI.addAttr('disabled', false, stateType, 'disabledStyle')
 
-stateStyleType({})(ui, 'states')
-stateType('')(ui, 'state')
+UI.addAttr('states', {}, stateStyleType)
+UI.addAttr('state', '', stateType)
 
-dataType()(ui, 'normalStyle')
-stateStyleType()(ui, 'hoverStyle')
-stateStyleType()(ui, 'pressStyle')
-stateStyleType()(ui, 'focusStyle')
-stateStyleType()(ui, 'selectedStyle')
-stateStyleType()(ui, 'disabledStyle')
+UI.addAttr('normalStyle', undefined, dataType)
+UI.addAttr('hoverStyle', undefined, stateStyleType)
+UI.addAttr('pressStyle', undefined, stateStyleType)
+UI.addAttr('focusStyle', undefined, stateStyleType)
+UI.addAttr('selectedStyle', undefined, stateStyleType)
+UI.addAttr('disabledStyle', undefined, stateStyleType)
 
-dataType(false)(ui, 'button')
+UI.addAttr('button', false, dataType)
 
 ui.focus = function (value: boolean = true): void {
     this.waitLeafer(() => {
