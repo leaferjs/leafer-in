@@ -1,6 +1,6 @@
-import { ILeaferBase, IPointData, ILeaferConfig } from '@leafer-ui/interface'
+import { ILeaferBase, ILeaferConfig } from '@leafer-ui/interface'
 
-import { MoveEvent, ZoomEvent, PointHelper, DataHelper } from '@leafer-ui/core'
+import { MoveEvent, ZoomEvent, DataHelper } from '@leafer-ui/core'
 
 
 export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, custom?: boolean): void {
@@ -14,10 +14,7 @@ export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, cu
         leafer.on_(ZoomEvent.BEFORE_ZOOM, (e: ZoomEvent) => {
             const { zoomLayer } = leafer
             const changeScale = leafer.getValidScale(e.scale)
-            if (changeScale !== 1) {
-                PointHelper.scaleOf(zoomLayer as IPointData, e, changeScale)
-                zoomLayer.scale = zoomLayer.__.scaleX * changeScale
-            }
+            if (changeScale !== 1) zoomLayer.scaleOfWorld(e, changeScale)
         })
     )
 }
