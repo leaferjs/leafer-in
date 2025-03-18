@@ -1,5 +1,5 @@
 import { IString, IImage } from '@leafer-ui/interface'
-import { Image, boundsType, registerUI, dataProcessor } from '@leafer-ui/draw'
+import { Image, boundsType, registerUI, dataProcessor, dataType } from '@leafer-ui/draw'
 
 import { IHTMLTextData, IHTMLTextInputData } from '@leafer-in/interface'
 
@@ -17,7 +17,8 @@ export class HTMLText extends Image implements IImage {
     @boundsType('')
     public text?: IString
 
-    public get editInner(): string { return 'TextEditor' }
+    @dataType('TextEditor')
+    public editInner: string
 
     constructor(data?: IHTMLTextInputData) {
         super(data)
