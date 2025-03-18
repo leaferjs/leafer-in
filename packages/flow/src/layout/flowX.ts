@@ -83,7 +83,7 @@ export function flowX(box: IBox, reverse?: boolean): void {
         if (wrap) {
 
             if (isAutoYGap) autoGap(wrapData, 'height', height, isFitYGap)
-            else wrapData.gap = yGap as number
+            else wrapData.height += (wrapData.gap = yGap as number) * (wrapData.list.length - 1)
 
             align(box, wrapData, contentAlign, rowXAlign)
             layout(box, wrapData, rowYAlign, reverse)

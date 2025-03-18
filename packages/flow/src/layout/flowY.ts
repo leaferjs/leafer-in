@@ -80,8 +80,8 @@ export function flowY(box: IBox, reverse?: boolean): void {
 
         if (wrap) {
 
-            if (!isAutoXGap) wrapData.gap = xGap as number
-            else autoGap(wrapData, 'width', width, isFitXGap)
+            if (isAutoXGap) autoGap(wrapData, 'width', width, isFitXGap)
+            else wrapData.width += (wrapData.gap = xGap as number) * (wrapData.list.length - 1)
 
             align(box, wrapData, contentAlign, rowYAlign)
             layout(box, wrapData, rowXAlign, reverse)
