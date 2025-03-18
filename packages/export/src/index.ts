@@ -13,3 +13,7 @@ Object.assign(Export, ExportModule)
 UI.prototype.export = function (filename: IExportFileType | string, options?: IExportOptions | number | boolean): Promise<IExportResult> {
     return Export.export(this, filename, options)
 }
+
+UI.prototype.syncExport = function (filename: string, options?: IExportOptions | number | boolean): IExportResult {
+    return Export.syncExport(this, filename, options)
+}
