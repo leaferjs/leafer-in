@@ -163,7 +163,7 @@ export const HighCurveHelper = {
                     toY = data[i + 2]
                     distance = segments[index]
 
-                    if (total + distance > motionDistance || !distanceData.total) {
+                    if (total + distance >= motionDistance || !distanceData.total) {
                         if (!i) x = toX, y = toY // first M
                         tempFrom.x = x
                         tempFrom.y = y
@@ -185,7 +185,7 @@ export const HighCurveHelper = {
                     toY = data[i + 6]
                     distance = segments[index]
 
-                    if (total + distance > motionDistance) {
+                    if (total + distance >= motionDistance) {
                         t = HighBezierHelper.getT(motionDistance - total, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
                         HighBezierHelper.cut(path, t, x, y, x1, y1, x2, y2, toX, toY)
                         return path
