@@ -17,13 +17,10 @@ export function scaleResize(leaf: ILeaf, scaleX: number, scaleY: number): void {
     }
 }
 
-export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number): void {
-    const { app } = leaf
-    const editor = app && app.editor
-
+export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number, direction?: Direction9): void {
     let fontScale = scaleX
 
-    if (editor.editing) {
+    if (direction !== undefined) {
 
         const layout = leaf.__layout
 
@@ -31,7 +28,7 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number)
         width *= scaleY - scaleX
         height *= scaleX - scaleY
 
-        switch (editor.resizeDirection) {
+        switch (direction) { // 编辑器控制点的位置
             case top:
             case bottom:
                 fontScale = scaleY
