@@ -1,4 +1,4 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig } from '@leafer-ui/interface'
+import { IRect, IEventListenerId, IBoundsData, IPointData, ILayoutBoundsData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig } from '@leafer-ui/interface'
 import { Group, Box, Text, AroundHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
@@ -10,7 +10,7 @@ import { EditPoint } from './EditPoint'
 import { EditDataHelper } from '../helper/EditDataHelper'
 
 
-const fourDirection = ['top', 'right', 'bottom', 'left']
+const fourDirection = ['top', 'right', 'bottom', 'left'], editConfig: IEditorConfig = undefined
 
 export class EditBox extends Group implements IEditBox {
 
@@ -28,13 +28,17 @@ export class EditBox extends Group implements IEditBox {
     public rotatePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public resizeLines: IEditPoint[] = [] // top, right, bottom, left
 
+    public enterPoint: IEditPoint
+    public dragPoint: IEditPoint // 正在拖拽的控制点
+
+    public dragStartPoint: IPointData
+    public dragStartBounds: ILayoutBoundsData
+
     // fliped
     public get flipped(): boolean { return this.flippedX || this.flippedY }
     public get flippedX(): boolean { return this.scaleX < 0 }
     public get flippedY(): boolean { return this.scaleY < 0 }
     public get flippedOne(): boolean { return this.scaleX * this.scaleY < 0 }
-
-    public enterPoint: IEditPoint
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -93,7 +97,7 @@ export class EditBox extends Group implements IEditBox {
         circle.set(this.getPointStyle(mergeConfig.circle || mergeConfig.rotatePoint || pointsStyle[0]))
 
         // rect
-        rect.set({ stroke, strokeWidth, ...(mergeConfig.rect || {}) })
+        rect.set({ stroke, strokeWidth, editConfig, ...(mergeConfig.rect || {}) })
         rect.hittable = !single
         rect.syncEventer = single && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
 
@@ -211,7 +215,7 @@ export class EditBox extends Group implements IEditBox {
 
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.mergeConfig
-        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0 } as IBoxInputData
+        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0, editConfig } as IBoxInputData
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
@@ -236,23 +240,22 @@ export class EditBox extends Group implements IEditBox {
 
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
+        const point = this.dragPoint = e.current as IEditPoint
         const { editor } = this
-        if (e.current.name === 'rect') {
+        if (point.name === 'rect') {
             this.moving = true
-            editor.dragStartPoint = { x: editor.element.x, y: editor.element.y }
+            this.dragStartPoint = { x: editor.element.x, y: editor.element.y }
             editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
-        } else if ((e.current as IEditPoint).pointType === 'resize') {
-            editor.dragStartBounds = { ...editor.element.getLayoutBounds('box', 'local') }
-            editor.resizeDirection = (e.current as IEditPoint).direction
+        } else if (point.pointType === 'resize') {
+            this.dragStartBounds = { ...editor.element.getLayoutBounds('box', 'local') }
         }
     }
 
     protected onDragEnd(e: DragEvent): void {
         this.dragging = false
+        this.dragPoint = null
         this.moving = false
         if (e.current.name === 'rect') this.editor.opacity = 1 // move
-        this.editor.resizeDirection = undefined
-
     }
 
     protected onDrag(e: DragEvent): void {

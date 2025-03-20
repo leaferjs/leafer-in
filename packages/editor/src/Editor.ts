@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, ILayoutBoundsData, IMatrix } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
 import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent, Plugin } from '@leafer-ui/core'
 
@@ -32,8 +32,10 @@ export class Editor extends Group implements IEditor {
     public config = DataHelper.clone(config) as IEditorConfig
 
     public get mergeConfig(): IEditorConfig {
-        const { element, config } = this
-        return this.single && element.editConfig ? { ...config, ...element.editConfig } : config // 实时合并，后期可优化
+        const { config, element, dragPoint } = this, mergeConfig = { ...config } // 实时合并，后期可优化
+        if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig)
+        if (dragPoint && dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
+        return mergeConfig
     }
 
     @targetAttr(onHover)
@@ -61,6 +63,7 @@ export class Editor extends Group implements IEditor {
 
     public get dragging(): boolean { return this.editBox.dragging }
     public get moving(): boolean { return this.editBox.moving }
+    public get dragPoint(): IEditPoint { return this.editBox.dragPoint }
 
     // 组件
 
@@ -77,9 +80,6 @@ export class Editor extends Group implements IEditor {
 
     public selector: EditSelect = new EditSelect(this)
     public editMask: EditMask = new EditMask(this)
-
-    public dragStartPoint: IPointData
-    public dragStartBounds: ILayoutBoundsData
 
     public targetEventIds: IEventListenerId[] = []
 
@@ -180,7 +180,7 @@ export class Editor extends Group implements IEditor {
                 else total.x = 0
             }
 
-            this.move(DragEvent.getValidMove(this.element, this.dragStartPoint, total))
+            this.move(DragEvent.getValidMove(this.element, this.editBox.dragStartPoint, total))
 
         }
 
@@ -200,7 +200,7 @@ export class Editor extends Group implements IEditor {
 
             if (e.shiftKey || element.lockRatio) lockRatio = true
 
-            const data = EditDataHelper.getScaleData(element, this.dragStartBounds, direction, e.getInnerTotal(element), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, this.multiple || editSize === 'scale')
+            const data = EditDataHelper.getScaleData(element, this.editBox.dragStartBounds, direction, e.getInnerTotal(element), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, this.multiple || editSize === 'scale')
 
             if (this.editTool.onScaleWithDrag) {
                 data.drag = e
