@@ -28,7 +28,6 @@ export const TransitionList: ITransitionMap = {
 }
 
 export const TransitionModule = {
-    list: TransitionList,
     value,
     number,
     color

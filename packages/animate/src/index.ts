@@ -4,7 +4,7 @@ export { AnimateEasing } from './AnimateEasing'
 export { AnimateEvent } from './AnimateEvent'
 
 
-import { IAnimate, IKeyframe, IAnimation, IUIInputData, ITransition, IAnimateType, IFunction, ITransitionModule, ITransitionFunction } from '@leafer-ui/interface'
+import { IAnimate, IKeyframe, IAnimation, IUIInputData, ITransition, IAnimateType, IFunction } from '@leafer-ui/interface'
 import { UI, State, dataType, Transition, Plugin } from '@leafer-ui/draw'
 
 import '@leafer-in/color'
@@ -12,7 +12,7 @@ import '@leafer-in/color'
 import { Animate } from './Animate'
 import { animationType } from './decorator'
 import { AnimateEvent } from './AnimateEvent'
-import { TransitionModule } from './Transition'
+import { TransitionModule, TransitionList } from './Transition'
 import { AnimateList } from './AnimateList'
 
 
@@ -23,11 +23,8 @@ State.canAnimate = true
 
 
 // Transition
-Object.assign(Transition, {
-    ...TransitionModule,
-    register(attrName: string, fn: ITransitionFunction): void { Transition.list[attrName] = fn },
-    get(attrName: string): ITransitionFunction { return Transition.list[attrName] }
-} as ITransitionModule)
+Object.assign(Transition.list, TransitionList)
+Object.assign(Transition, TransitionModule)
 
 
 const ui = UI.prototype
