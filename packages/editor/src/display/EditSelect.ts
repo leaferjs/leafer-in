@@ -54,9 +54,9 @@ export class EditSelect extends Group implements IEditSelect {
 
     protected onSelect(): void {
         if (this.running) {
-            const { mergeConfig: config, list } = this.editor
-            const { stroke, strokeWidth } = config
-            this.targetStroker.setTarget(list, { stroke, strokeWidth: Math.max(1, strokeWidth / 2) })
+            const { mergeConfig, list } = this.editor
+            const { stroke, strokeWidth, selectedStyle } = mergeConfig
+            this.targetStroker.setTarget(list, { stroke, strokeWidth: Math.max(1, strokeWidth / 2), ...(selectedStyle || {}) })
             this.hoverStroker.target = null
         }
     }
