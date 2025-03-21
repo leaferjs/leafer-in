@@ -109,16 +109,16 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public update(bounds: IBoundsData): void {
-        const { mergeConfig, element } = this.editor
+        const { mergeConfig, element, multiple } = this.editor
         const { middlePoint, resizeable, rotateable, hideOnSmall, editBox } = mergeConfig
-        this.visible = editBox && !element.locked
+        this.visible = !element.locked
 
         if (this.view.worldOpacity) {
             const { width, height } = bounds
             const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
 
             const smallSize = typeof hideOnSmall === 'number' ? hideOnSmall : 10
-            const showPoints = !(hideOnSmall && width < smallSize && height < smallSize)
+            const showPoints = editBox && !(hideOnSmall && width < smallSize && height < smallSize)
 
             let point = {} as IPointData, rotateP: IRect, resizeP: IRect, resizeL: IRect
 
@@ -158,7 +158,7 @@ export class EditBox extends Group implements IEditBox {
 
             // rect
             if (rect.path) rect.path = null // line可能会变成path优先模式
-            rect.set({ ...bounds, visible: true })
+            rect.set({ ...bounds, visible: multiple ? true : editBox })
 
             // buttons
             buttons.visible = showPoints && buttons.children.length > 0
