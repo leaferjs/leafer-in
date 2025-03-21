@@ -1,4 +1,4 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, ILayoutBoundsData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig } from '@leafer-ui/interface'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData } from '@leafer-ui/interface'
 import { Group, Box, Text, AroundHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
@@ -31,8 +31,7 @@ export class EditBox extends Group implements IEditBox {
     public enterPoint: IEditPoint
     public dragPoint: IEditPoint // 正在拖拽的控制点
 
-    public dragStartPoint: IPointData
-    public dragStartBounds: ILayoutBoundsData
+    public dragStartData = {} as IEditorDragStartData
 
     // fliped
     public get flipped(): boolean { return this.flippedX || this.flippedY }
@@ -241,14 +240,16 @@ export class EditBox extends Group implements IEditBox {
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint
-        const { editor } = this
+        const { editor, dragStartData } = this, { element } = editor
         if (point.name === 'rect') {
             this.moving = true
-            this.dragStartPoint = { x: editor.element.x, y: editor.element.y }
             editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
-        } else if (point.pointType.includes('resize')) {
-            this.dragStartBounds = { ...editor.element.getLayoutBounds('box', 'local') }
         }
+        dragStartData.x = e.x
+        dragStartData.y = e.y
+        dragStartData.point = { x: element.x, y: element.y } // 用于移动
+        dragStartData.bounds = { ...element.getLayoutBounds('box', 'local') } // 用于resize
+        dragStartData.rotation = element.rotation // 用于旋转
     }
 
     protected onDragEnd(e: DragEvent): void {

@@ -187,7 +187,7 @@ export class Editor extends Group implements IEditor {
                 else total.x = 0
             }
 
-            this.move(DragEvent.getValidMove(this.element, this.editBox.dragStartPoint, total))
+            this.move(DragEvent.getValidMove(this.element, this.editBox.dragStartData.point, total))
 
         }
 
@@ -207,7 +207,7 @@ export class Editor extends Group implements IEditor {
 
             if (e.shiftKey || element.lockRatio) lockRatio = true
 
-            const data = EditDataHelper.getScaleData(element, this.editBox.dragStartBounds, direction, e.getInnerTotal(element), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, this.multiple || editSize === 'scale')
+            const data = EditDataHelper.getScaleData(element, this.editBox.dragStartData.bounds, direction, e.getInnerTotal(element), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, this.multiple || editSize === 'scale')
 
             if (this.editTool.onScaleWithDrag) {
                 data.drag = e
@@ -225,7 +225,7 @@ export class Editor extends Group implements IEditor {
         const { direction, name } = e.current as IEditPoint
         if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
 
-        const { element } = this
+        const { element } = this, { dragStartData } = this.editBox
         let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
@@ -233,21 +233,23 @@ export class Editor extends Group implements IEditor {
             if (rotateable === 'rotate') e.stop(), rotation = e.rotation, origin = element.getBoxPoint(e)
             else return
 
+            if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
+
         } else {
 
-            const last = { x: e.x - e.moveX, y: e.y - e.moveY }
-            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getBoxPoint(element), element.getBoxPoint(last), e.shiftKey ? null : (element.around || element.origin || around || 'center'))
+            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getBoxPoint(element), element.getBoxPoint(dragStartData), e.shiftKey ? null : (element.around || element.origin || around || 'center'))
             rotation = data.rotation
             origin = data.origin
 
         }
 
-        rotation = MathHelper.getGapRotation(rotation, rotateGap, element.rotation)
+        if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
+        if (e instanceof DragEvent) rotation = dragStartData.rotation + rotation - element.rotation
+
+        rotation = MathHelper.float(MathHelper.getGapRotation(rotation, rotateGap, element.rotation), 2)
         if (!rotation) return
 
-        if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
-
-        this.rotateOf(origin, MathHelper.float(rotation, 2))
+        this.rotateOf(origin, rotation)
     }
 
 
