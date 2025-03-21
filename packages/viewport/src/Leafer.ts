@@ -1,6 +1,6 @@
 import { ILeaferType, IPointData } from '@leafer-ui/interface'
 
-import { Leafer, Bounds, MathHelper } from '@leafer-ui/core'
+import { Leafer, Bounds } from '@leafer-ui/core'
 
 import { LeaferTypeCreator } from './LeaferTypeCreator'
 
