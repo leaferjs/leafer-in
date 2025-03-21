@@ -10,6 +10,7 @@ Plugin.add('view')
 Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean, transition?: ITransition): IBoundsData {
 
     this.killAnimate()
+    this.updateLayout()
 
     const { zoomLayer } = this
     const limitBounds = this.canvas.bounds.clone().shrink(padding !== undefined ? padding : 30), bounds = new Bounds()
