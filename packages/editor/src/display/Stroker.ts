@@ -54,7 +54,7 @@ export class Stroker extends UI implements IStroker {
                 leaf = list[i]
                 const { worldTransform, worldRenderBounds } = leaf
 
-                if (!bounds || bounds.hit(worldRenderBounds, options.matrix)) {
+                if (worldRenderBounds.width && worldRenderBounds.height && (!bounds || bounds.hit(worldRenderBounds, options.matrix))) {
 
                     const aScaleX = abs(worldTransform.scaleX), aScaleY = abs(worldTransform.scaleY)
 
