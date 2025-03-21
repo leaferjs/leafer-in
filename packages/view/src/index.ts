@@ -10,14 +10,13 @@ Plugin.add('view')
 Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean, transition?: ITransition): IBoundsData {
 
     this.killAnimate()
-    this.updateLayout()
 
     const { zoomLayer } = this
     const limitBounds = this.canvas.bounds.clone().shrink(padding !== undefined ? padding : 30), bounds = new Bounds()
     const center: IPointData = { x: limitBounds.x + limitBounds.width / 2, y: limitBounds.y + limitBounds.height / 2 }
 
     let changeScale: number
-    const { scaleX } = this.__
+    const { x, y, scaleX, scaleY } = zoomLayer.__
 
     if (typeof zoomType === 'string') {
 
@@ -53,9 +52,7 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
 
     } else if (typeof zoomType === 'object') {
 
-        const { x, y, scaleX, scaleY } = zoomLayer
         const data = { x, y, scaleX, scaleY }
-
         const isArray = zoomType instanceof Array
 
         if (isArray || (zoomType as ILeaf).tag) {

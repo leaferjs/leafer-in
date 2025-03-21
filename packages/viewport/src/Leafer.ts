@@ -42,5 +42,5 @@ leafer.getValidScale = function (changeScale: number): number {
     const { scaleX } = this.zoomLayer.__, { min, max, disabled } = this.app.config.zoom, absScale = Math.abs(scaleX * changeScale)
     if (min && absScale < min) changeScale = min / scaleX
     else if (max && absScale > max) changeScale = max / scaleX
-    return disabled ? 1 : MathHelper.float(changeScale)
+    return disabled ? 1 : changeScale // fix 不能过滤小数位
 }
