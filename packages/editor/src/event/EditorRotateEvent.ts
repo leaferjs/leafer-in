@@ -5,6 +5,7 @@ import { EditorEvent } from './EditorEvent'
 
 export class EditorRotateEvent extends EditorEvent implements IEditorRotateEvent {
 
+    static BEFORE_ROTATE = 'editor.before_rotate'
     static ROTATE = 'editor.rotate'
 
     // rotateOf(origin, rotation)

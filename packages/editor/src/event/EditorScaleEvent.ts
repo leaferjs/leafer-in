@@ -8,6 +8,7 @@ import { EditorEvent } from './EditorEvent'
 
 export class EditorScaleEvent extends EditorEvent implements IEditorScaleEvent {
 
+    static BEFORE_SCALE = 'editor.before_scale'
     static SCALE = 'editor.scale'
 
     // scaleOf(origin, scaleX, scaleY, resize)

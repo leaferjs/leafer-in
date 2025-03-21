@@ -2,7 +2,7 @@ import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSiz
 import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9, isNull } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent, Plugin } from '@leafer-ui/core'
 
-import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
+import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
 
 import { EditorMoveEvent } from './event/EditorMoveEvent'
 import { EditorScaleEvent } from './event/EditorScaleEvent'
@@ -268,11 +268,12 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         if (!this.checkTransform('moveable')) return
 
-
         const world = element.getWorldPointByLocal(typeof x === 'object' ? { ...x } : { x, y }, null, true)
         if (this.multiple) element.safeChange(() => element.move(x, y))
-        const event = new EditorMoveEvent(EditorMoveEvent.MOVE, { target: element, editor: this, moveX: world.x, moveY: world.y })
+        const data: IEditorMoveEvent = { target: element, editor: this, moveX: world.x, moveY: world.y }
 
+        this.emitEvent(new EditorMoveEvent(EditorMoveEvent.BEFORE_MOVE, data))
+        const event = new EditorMoveEvent(EditorMoveEvent.MOVE, data)
         this.editTool.onMove(event)
         this.emitEvent(event)
     }
@@ -281,8 +282,10 @@ export class Editor extends Group implements IEditor {
         if (!this.checkTransform('resizeable')) return
 
         const { element } = this
-        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, { ...data, target: element, editor: this, worldOrigin: element.getWorldPoint(data.origin) })
+        data = { ...data, target: element, editor: this, worldOrigin: element.getWorldPoint(data.origin) }
 
+        this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
+        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
         this.editTool.onScaleWithDrag(event)
         this.emitEvent(event)
     }
@@ -294,8 +297,10 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const worldOrigin = this.getWorldOrigin(origin)
         const transform = this.multiple && this.getChangedTransform(() => element.safeChange(() => element.scaleOf(origin, scaleX, scaleY)))
-        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, { target: element, editor: this, worldOrigin, scaleX, scaleY, transform })
+        const data: IEditorScaleEvent = { target: element, editor: this, worldOrigin, scaleX, scaleY, transform }
 
+        this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
+        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
         this.editTool.onScale(event)
         this.emitEvent(event)
     }
@@ -306,8 +311,10 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const worldOrigin = this.getWorldOrigin('center')
         const transform = this.multiple ? this.getChangedTransform(() => element.safeChange(() => element.flip(axis))) : new Matrix(LeafHelper.getFlipTransform(element, axis))
-        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, { target: element, editor: this, worldOrigin, scaleX: axis === 'x' ? -1 : 1, scaleY: axis === 'y' ? -1 : 1, transform })
+        const data: IEditorScaleEvent = { target: element, editor: this, worldOrigin, scaleX: axis === 'x' ? -1 : 1, scaleY: axis === 'y' ? -1 : 1, transform }
 
+        this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
+        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
         this.editTool.onScale(event)
         this.emitEvent(event)
     }
@@ -318,8 +325,10 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const worldOrigin = this.getWorldOrigin(origin)
         const transform = this.multiple && this.getChangedTransform(() => element.safeChange(() => element.rotateOf(origin, rotation)))
-        const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, { target: element, editor: this, worldOrigin, rotation, transform })
+        const data: IEditorRotateEvent = { target: element, editor: this, worldOrigin, rotation, transform }
 
+        this.emitEvent(new EditorRotateEvent(EditorRotateEvent.BEFORE_ROTATE, data))
+        const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, data)
         this.editTool.onRotate(event)
         this.emitEvent(event)
     }
@@ -330,8 +339,10 @@ export class Editor extends Group implements IEditor {
         const { element } = this
         const worldOrigin = this.getWorldOrigin(origin)
         const transform = this.multiple && this.getChangedTransform(() => element.safeChange(() => element.skewOf(origin, skewX, skewY)))
-        const event = new EditorSkewEvent(EditorSkewEvent.SKEW, { target: element, editor: this, worldOrigin, skewX, skewY, transform })
+        const data: IEditorSkewEvent = { target: element, editor: this, worldOrigin, skewX, skewY, transform }
 
+        this.emitEvent(new EditorSkewEvent(EditorSkewEvent.BEFORE_SKEW, data))
+        const event = new EditorSkewEvent(EditorSkewEvent.SKEW, data)
         this.editTool.onSkew(event)
         this.emitEvent(event)
     }
@@ -356,6 +367,7 @@ export class Editor extends Group implements IEditor {
 
     public group(userGroup?: IGroup | IGroupInputData): IGroup {
         if (this.multiple) {
+            this.emitGroupEvent(EditorGroupEvent.BEFORE_GROUP)
             this.target = EditorHelper.group(this.list, this.element, userGroup)
             this.emitGroupEvent(EditorGroupEvent.GROUP, this.target as IGroup)
         }
@@ -373,12 +385,14 @@ export class Editor extends Group implements IEditor {
     }
 
     public openGroup(group: IGroup): void {
+        this.emitGroupEvent(EditorGroupEvent.BEFORE_OPEN, group)
         this.openedGroupList.add(group)
         group.hitChildren = true
         this.emitGroupEvent(EditorGroupEvent.OPEN, group)
     }
 
     public closeGroup(group: IGroup): void {
+        this.emitGroupEvent(EditorGroupEvent.BEFORE_CLOSE, group)
         this.openedGroupList.remove(group)
         group.hitChildren = false
         this.emitGroupEvent(EditorGroupEvent.CLOSE, group)
@@ -405,10 +419,10 @@ export class Editor extends Group implements IEditor {
         }
     }
 
-    public emitGroupEvent(type: string, group: IGroup): void {
+    public emitGroupEvent(type: string, group?: IGroup): void {
         const event = new EditorGroupEvent(type, { editTarget: group })
         this.emitEvent(event)
-        group.emitEvent(event)
+        if (group) group.emitEvent(event)
     }
 
     // inner

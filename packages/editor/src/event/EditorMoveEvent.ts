@@ -5,6 +5,7 @@ import { EditorEvent } from './EditorEvent'
 
 export class EditorMoveEvent extends EditorEvent implements IEditorMoveEvent {
 
+    static BEFORE_MOVE = 'editor.before_move'
     static MOVE = 'editor.move'
 
     readonly moveX: number

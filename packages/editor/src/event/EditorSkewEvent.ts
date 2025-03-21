@@ -5,6 +5,7 @@ import { EditorEvent } from './EditorEvent'
 
 export class EditorSkewEvent extends EditorEvent implements IEditorSkewEvent {
 
+    static BEFORE_SKEW = 'editor.before_skew'
     static SKEW = 'editor.skew'
 
     // skewOf(origin, skewX, skewY)
