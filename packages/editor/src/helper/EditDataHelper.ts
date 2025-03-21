@@ -13,7 +13,7 @@ export const EditDataHelper = {
     getScaleData(element: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
 
-        const { boxBounds, widthRange, heightRange, dragBounds } = element
+        const { boxBounds, widthRange, heightRange, dragBounds, worldBoxBounds } = element
         const { width, height } = startBounds
 
         if (around) {
@@ -33,12 +33,6 @@ export const EditDataHelper = {
 
         totalMove.x *= scaleMode ? originChangedScaleX : signX
         totalMove.y *= scaleMode ? originChangedScaleY : signY
-
-
-        // 防止变为0
-        if (Math.abs(totalMove.x) === width) totalMove.x += 0.1
-        if (Math.abs(totalMove.y) === height) totalMove.y += 0.1
-
 
         const topScale = (-totalMove.y + height) / height
         const rightScale = (totalMove.x + width) / width
@@ -141,6 +135,10 @@ export const EditDataHelper = {
             const nowHeight = boxBounds.height * element.scaleY
             scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
+
+        // 防止小于1px
+        if (Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = (scaleX < 0 ? -1 : 1) / worldBoxBounds.width
+        if (Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = (scaleY < 0 ? -1 : 1) / worldBoxBounds.height
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
