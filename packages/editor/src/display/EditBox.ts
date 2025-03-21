@@ -142,11 +142,11 @@ export class EditBox extends Group implements IEditBox {
 
                     if (((i + 1) / 2) % 2) { // top, bottom
                         resizeL.width = width
-                        if (resizeP.width > width - 30) resizeP.visible = false
+                        if (hideOnSmall && resizeP.width * 2 > width) resizeP.visible = false
                     } else {
                         resizeL.height = height
                         resizeP.rotation = 90
-                        if (resizeP.width > height - 30) resizeP.visible = false
+                        if (hideOnSmall && resizeP.width * 2 > height) resizeP.visible = false
                     }
                 }
 

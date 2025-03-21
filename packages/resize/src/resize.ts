@@ -41,8 +41,8 @@ leaf.resizeHeight = function (height: number): void {
 // UI
 
 Text.prototype.__scaleResize = function (scaleX: number, scaleY: number): void {
-    const { app } = this, editor = app && app.editor, dragPoint = editor && editor.dragPoint
-    if (this.__.resizeFontSize || (dragPoint && editor.mergeConfig.editSize === 'font-size')) {
+    const { app, editConfig } = this, editor = app && app.editor, dragPoint = editor && editor.dragPoint
+    if (this.__.resizeFontSize || (editConfig && editConfig.editSize === 'font-size') || (dragPoint && editor.mergeConfig.editSize === 'font-size')) {
         scaleResizeFontSize(this, scaleX, scaleY, dragPoint && dragPoint.direction)
     } else {
         scaleResize(this, scaleX, scaleY)
