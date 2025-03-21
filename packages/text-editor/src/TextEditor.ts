@@ -62,11 +62,11 @@ export class TextEditor extends InnerEditor {
         this.onFocus = this.onFocus.bind(this)
         this.onInput = this.onInput.bind(this)
         this.onUpdate = this.onUpdate.bind(this)
-        this.onEscape = this.onEscape.bind(this)
+        this.onKeydown = this.onKeydown.bind(this)
 
         div.addEventListener("focus", this.onFocus)
         div.addEventListener("input", this.onInput)
-        window.addEventListener('keydown', this.onEscape)
+        window.addEventListener('keydown', this.onKeydown)
         window.addEventListener('scroll', this.onUpdate)
 
         // select
@@ -90,15 +90,30 @@ export class TextEditor extends InnerEditor {
 
     protected onInput(): void {
         const { editDom } = this
-        this.editTarget.text = this.isHTMLText ? editDom.innerHTML : editDom.innerText.replace(/\n\n/, '\n')
+        this.editTarget.text = this.isHTMLText ? editDom.innerHTML : editDom.innerText
     }
 
     protected onFocus(): void {
         this.editDom.style.outline = 'none'
     }
 
-    protected onEscape(e: KeyboardEvent): void {
+    protected onKeydown(e: KeyboardEvent): void {
         if (e.code === 'Escape') this.editor.closeInnerEditor()
+        if (e.key === 'Enter') { // fix 换行产生 <div><br/></div> 
+            e.preventDefault()
+
+            // 手动插入 <br/>
+            const br = document.createElement('br')
+            const selection = window.getSelection()
+            const range = selection.getRangeAt(0)
+            range.deleteContents()
+            range.insertNode(br)
+
+            range.setStartAfter(br)
+            range.setEndAfter(br)
+
+            this.onInput()
+        }
     }
 
     public onUpdate() {
@@ -165,7 +180,7 @@ export class TextEditor extends InnerEditor {
 
             dom.removeEventListener("focus", this.onFocus)
             dom.removeEventListener("input", this.onInput)
-            window.removeEventListener('keydown', this.onEscape)
+            window.removeEventListener('keydown', this.onKeydown)
             window.removeEventListener('scroll', this.onUpdate)
 
             dom.remove()
