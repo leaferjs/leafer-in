@@ -91,7 +91,7 @@ export const ExportModule: IExportModule = {
             // 导出元素
             const { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
             const renderOptions: IRenderOptions = { matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
-            let canvas = Creator.canvas({ width: Math.round(width), height: Math.round(height), pixelRatio, smooth, contextSettings })
+            let canvas = Creator.canvas({ width: Math.floor(width), height: Math.floor(height), pixelRatio, smooth, contextSettings })
 
             let sliceLeaf: IUI
             if (slice) {
