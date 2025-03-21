@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
-import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9 } from '@leafer-ui/draw'
+import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9, isNull } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent, Plugin } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
@@ -34,7 +34,14 @@ export class Editor extends Group implements IEditor {
     public get mergeConfig(): IEditorConfig {
         const { config, element, dragPoint } = this, mergeConfig = { ...config } // 实时合并，后期可优化
         if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig)
-        if (dragPoint && dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
+        if (dragPoint) {
+            if (dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
+            if (mergeConfig.editSize === 'font-size') mergeConfig.lockRatio = true // 强制锁定比例
+            if (dragPoint.pointType === 'resize-rotate') {
+                mergeConfig.around || (mergeConfig.around = 'center')
+                isNull(mergeConfig.lockRatio) && (mergeConfig.lockRatio = true)
+            }
+        }
         return mergeConfig
     }
 

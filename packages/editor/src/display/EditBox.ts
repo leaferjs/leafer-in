@@ -246,7 +246,7 @@ export class EditBox extends Group implements IEditBox {
             this.moving = true
             this.dragStartPoint = { x: editor.element.x, y: editor.element.y }
             editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
-        } else if (point.pointType === 'resize') {
+        } else if (point.pointType.includes('resize')) {
             this.dragStartBounds = { ...editor.element.getLayoutBounds('box', 'local') }
         }
     }
@@ -260,12 +260,9 @@ export class EditBox extends Group implements IEditBox {
 
     protected onDrag(e: DragEvent): void {
         const { editor } = this
-        const point = this.enterPoint = e.current as IEditPoint
-        if (point.pointType === 'rotate' || e.metaKey || e.ctrlKey || !editor.mergeConfig.resizeable) {
-            if (editor.mergeConfig.rotateable) editor.onRotate(e)
-        } else if (point.pointType === 'resize') {
-            editor.onScale(e)
-        }
+        const { pointType } = this.enterPoint = e.current as IEditPoint
+        if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !editor.mergeConfig.resizeable) editor.onRotate(e)
+        if (pointType.includes('resize')) editor.onScale(e)
         updateCursor(editor, e)
     }
 

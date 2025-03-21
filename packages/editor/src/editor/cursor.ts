@@ -21,7 +21,7 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
     const { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editor.mergeConfig
     const { pointType } = point, { flippedX, flippedY } = editBox
 
-    let showResize = pointType === 'resize'
+    let showResize = pointType.includes('resize')
     if (showResize && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResize = false
     const showSkew = skewable && !showResize && point.name === 'resize-line'
 
