@@ -18,7 +18,7 @@ export class HTMLText extends Image implements IImage {
     public text?: IString
 
     @dataType('TextEditor')
-    public editInner: string
+    declare public editInner: string
 
     constructor(data?: IHTMLTextInputData) {
         super(data)
