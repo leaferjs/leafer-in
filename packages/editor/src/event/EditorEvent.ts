@@ -10,7 +10,10 @@ function toList(value: IUI | IUI[]): IUI[] {
 
 export class EditorEvent extends Event implements IEditorEvent {
 
+    static BEFORE_SELECT = 'editor.before_select'
     static SELECT = 'editor.select'
+
+    static BEFORE_HOVER = 'editor.before_hover'
     static HOVER = 'editor.hover'
 
     declare readonly target: IUI
