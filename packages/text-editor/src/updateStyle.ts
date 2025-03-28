@@ -1,5 +1,5 @@
 import { ColorConvert } from '@leafer-ui/core'
-import { IFill, IText, IRGB } from '@leafer-ui/interface'
+import { IFill, IText, IRGB, ITextDecorationType } from '@leafer-ui/interface'
 
 
 export const textCaseMap = {
@@ -26,7 +26,28 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
 
     style.fontStyle = text.italic ? 'italic' : 'normal'
     style.fontWeight = text.fontWeight as string
-    style.textDecoration = textDecoration === 'delete' ? 'line-through' : textDecoration
+
+    let decorationType: string
+    if (typeof textDecoration === 'object') {
+        decorationType = textDecoration.type
+        if (textDecoration.color) style.textDecorationColor = ColorConvert.string(textDecoration.color)
+    } else {
+        decorationType = textDecoration
+    }
+
+    switch (decorationType) {
+        case 'under':
+            decorationType = 'underline'
+            break
+        case 'delete':
+            decorationType = 'line-through'
+            break
+        case 'under-delete':
+            decorationType = 'underline line-through'
+    }
+
+    style.textDecoration = decorationType
+
     style.textTransform = textCaseMap[text.textCase]
 
     style.textAlign = text.textAlign === 'both' ? 'justify' : text.textAlign
