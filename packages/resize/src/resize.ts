@@ -85,10 +85,7 @@ Group.prototype.__scaleResize = function (scaleX: number, scaleY: number): void 
 
 
 Box.prototype.__scaleResize = function (scaleX: number, scaleY: number): void {
-    if (this.__.__autoSize && this.children.length) {
-        scaleResizeGroup(this, scaleX, scaleY)
-    } else {
-        scaleResize(this, scaleX, scaleY)
-        if (this.__.resizeChildren) scaleResizeGroup(this, scaleX, scaleY)
-    }
+    const { resizeChildren, __autoSize } = this.__
+    if (!(__autoSize && resizeChildren)) scaleResize(this, scaleX, scaleY)
+    if (resizeChildren) scaleResizeGroup(this, scaleX, scaleY)
 }
