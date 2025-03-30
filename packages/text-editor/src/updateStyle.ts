@@ -16,6 +16,13 @@ export const verticalAlignMap = {
     'bottom': 'flex-end'
 }
 
+export const textDecorationMap = {
+    'none': 'none',
+    'under': 'underline',
+    'delete': 'line-through',
+    'under-delete': 'underline line-through'
+}
+
 export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: number): void {
     const { style } = textDom
     const { fill, padding, textWrap, textOverflow, textDecoration } = text
@@ -27,26 +34,14 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
     style.fontStyle = text.italic ? 'italic' : 'normal'
     style.fontWeight = text.fontWeight as string
 
-    let decorationType: string
+    let decorationType: ITextDecorationType
     if (typeof textDecoration === 'object') {
         decorationType = textDecoration.type
         if (textDecoration.color) style.textDecorationColor = ColorConvert.string(textDecoration.color)
     } else {
         decorationType = textDecoration
     }
-
-    switch (decorationType) {
-        case 'under':
-            decorationType = 'underline'
-            break
-        case 'delete':
-            decorationType = 'line-through'
-            break
-        case 'under-delete':
-            decorationType = 'underline line-through'
-    }
-
-    style.textDecoration = decorationType
+    style.textDecoration = textDecorationMap[decorationType]
 
     style.textTransform = textCaseMap[text.textCase]
 
