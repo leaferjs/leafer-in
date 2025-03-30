@@ -23,7 +23,7 @@ export function updateCursor(editor: IEditor, e: IUIEvent): void {
 
     let showResize = pointType.includes('resize')
     if (showResize && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResize = false
-    const showSkew = skewable && !showResize && point.name === 'resize-line'
+    const showSkew = skewable && !showResize && (point.name === 'resize-line' || pointType === 'skew')
 
     const cursor = showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor)
     rotation += (EditDataHelper.getFlipDirection(point.direction, flippedX, flippedY) + 1) * 45

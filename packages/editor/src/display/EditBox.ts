@@ -264,6 +264,7 @@ export class EditBox extends Group implements IEditBox {
         const { pointType } = this.enterPoint = e.current as IEditPoint
         if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !editor.mergeConfig.resizeable) editor.onRotate(e)
         if (pointType.includes('resize')) editor.onScale(e)
+        if (pointType === 'skew') editor.onSkew(e)
         updateCursor(editor, e)
     }
 

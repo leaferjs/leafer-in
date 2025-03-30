@@ -174,21 +174,25 @@ export const EditDataHelper = {
 
         switch (direction) {
             case top:
+            case topLeft:
                 last = { x: 0.5, y: 0 }
                 align = 'bottom'
                 skewX = 1
                 break
             case bottom:
+            case bottomRight:
                 last = { x: 0.5, y: 1 }
                 align = 'top'
                 skewX = 1
                 break
             case left:
+            case bottomLeft:
                 last = { x: 0, y: 0.5 }
                 align = 'right'
                 skewY = 1
                 break
             case right:
+            case topRight:
                 last = { x: 1, y: 0.5 }
                 align = 'left'
                 skewY = 1
