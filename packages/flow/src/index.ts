@@ -71,7 +71,7 @@ box.__updateContentBounds = function (): void {
 box.__updateBoxBounds = function (secondLayout?: boolean): void { // autoSide且自动布局时需要二次布局
     const data = this.__
 
-    if (this.children.length) {
+    if (this.children.length && !this.pathInputed) {
 
         const { flow } = data
 
