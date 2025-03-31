@@ -207,7 +207,8 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     protected allowDrag(e: DragEvent) {
-        if (this.running && (this.editor.mergeConfig.boxSelect) && !e.target.draggable) {
+        const { boxSelect, multipleSelect } = this.editor.mergeConfig
+        if (this.running && (multipleSelect && boxSelect) && !e.target.draggable) {
             return (!this.editor.editing && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
         } else {
             return false
@@ -228,7 +229,8 @@ export class EditSelect extends Group implements IEditSelect {
     }
 
     public isMultipleSelect(e: IPointerEvent): boolean {
-        return e.shiftKey || this.editor.mergeConfig.continuousSelect
+        const { multipleSelect, continuousSelect } = this.editor.mergeConfig
+        return multipleSelect && (e.shiftKey || continuousSelect)
     }
 
     protected __listenEvents(): void {
