@@ -168,7 +168,6 @@ export class Editor extends Group implements IEditor {
     // operate
 
     public onMove(e: DragEvent | MoveEvent): void {
-
         if (e instanceof MoveEvent) {
 
             if (e.moveType !== 'drag') {
@@ -190,7 +189,6 @@ export class Editor extends Group implements IEditor {
             this.move(DragEvent.getValidMove(this.element, this.editBox.dragStartData.point, total))
 
         }
-
     }
 
     public onScale(e: DragEvent | ZoomEvent): void {
@@ -217,7 +215,6 @@ export class Editor extends Group implements IEditor {
             }
 
         }
-
     }
 
     public onRotate(e: DragEvent | RotateEvent): void {
@@ -267,12 +264,19 @@ export class Editor extends Group implements IEditor {
     // transform
 
     public move(x: number | IPointData, y = 0): void {
-        const { element } = this
         if (!this.checkTransform('moveable')) return
+        if (typeof x === 'object') y = x.y, x = x.x
 
-        const world = element.getWorldPointByLocal(typeof x === 'object' ? { ...x } : { x, y }, null, true)
-        if (this.multiple) element.safeChange(() => element.move(x, y))
-        const data: IEditorMoveEvent = { target: element, editor: this, moveX: world.x, moveY: world.y }
+        const { element: target } = this, { beforeMove } = this.mergeConfig
+        if (beforeMove) {
+            const check = beforeMove({ target, x, y })
+            if (typeof check === 'object') x = check.x, y = check.y
+            else if (check === false) return
+        }
+
+        const world = target.getWorldPointByLocal({ x, y }, null, true)
+        if (this.multiple) target.safeChange(() => target.move(x, y))
+        const data: IEditorMoveEvent = { target, editor: this, moveX: world.x, moveY: world.y }
 
         this.emitEvent(new EditorMoveEvent(EditorMoveEvent.BEFORE_MOVE, data))
         const event = new EditorMoveEvent(EditorMoveEvent.MOVE, data)
@@ -283,8 +287,14 @@ export class Editor extends Group implements IEditor {
     public scaleWithDrag(data: IEditorScaleEvent): void {
         if (!this.checkTransform('resizeable')) return
 
-        const { element } = this
-        data = { ...data, target: element, editor: this, worldOrigin: element.getWorldPoint(data.origin) }
+        const { element: target } = this, { beforeScale } = this.mergeConfig
+        if (beforeScale) {
+            const { origin, scaleX, scaleY, drag } = data
+            const check = beforeScale({ target, drag, origin, scaleX, scaleY })
+            if (check === false) return
+        }
+
+        data = { ...data, target, editor: this, worldOrigin: target.getWorldPoint(data.origin) }
 
         this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
@@ -296,10 +306,16 @@ export class Editor extends Group implements IEditor {
     override scaleOf(origin: IPointData | IAlign, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
         if (!this.checkTransform('resizeable')) return
 
-        const { element } = this
+        const { element: target } = this, { beforeScale } = this.mergeConfig
+        if (beforeScale) {
+            const check = beforeScale({ target, origin, scaleX, scaleY })
+            if (typeof check === 'object') scaleX = check.scaleX, scaleY = check.scaleY
+            else if (check === false) return
+        }
+
         const worldOrigin = this.getWorldOrigin(origin)
-        const transform = this.multiple && this.getChangedTransform(() => element.safeChange(() => element.scaleOf(origin, scaleX, scaleY)))
-        const data: IEditorScaleEvent = { target: element, editor: this, worldOrigin, scaleX, scaleY, transform }
+        const transform = this.multiple && this.getChangedTransform(() => target.safeChange(() => target.scaleOf(origin, scaleX, scaleY)))
+        const data: IEditorScaleEvent = { target, editor: this, worldOrigin, scaleX, scaleY, transform }
 
         this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
@@ -324,10 +340,16 @@ export class Editor extends Group implements IEditor {
     override rotateOf(origin: IPointData | IAlign, rotation: number): void {
         if (!this.checkTransform('rotateable')) return
 
-        const { element } = this
+        const { element: target } = this, { beforeRotate } = this.mergeConfig
+        if (beforeRotate) {
+            const check = beforeRotate({ target, origin, rotation })
+            if (typeof check === 'number') rotation = check
+            else if (check === false) return
+        }
+
         const worldOrigin = this.getWorldOrigin(origin)
-        const transform = this.multiple && this.getChangedTransform(() => element.safeChange(() => element.rotateOf(origin, rotation)))
-        const data: IEditorRotateEvent = { target: element, editor: this, worldOrigin, rotation, transform }
+        const transform = this.multiple && this.getChangedTransform(() => target.safeChange(() => target.rotateOf(origin, rotation)))
+        const data: IEditorRotateEvent = { target, editor: this, worldOrigin, rotation, transform }
 
         this.emitEvent(new EditorRotateEvent(EditorRotateEvent.BEFORE_ROTATE, data))
         const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, data)
@@ -338,10 +360,16 @@ export class Editor extends Group implements IEditor {
     override skewOf(origin: IPointData | IAlign, skewX: number, skewY = 0, _resize?: boolean): void {
         if (!this.checkTransform('skewable')) return
 
-        const { element } = this
+        const { element: target } = this, { beforeSkew } = this.mergeConfig
+        if (beforeSkew) {
+            const check = beforeSkew({ target, origin, skewX, skewY })
+            if (typeof check === 'object') skewX = check.skewX, skewY = check.skewY
+            else if (check === false) return
+        }
+
         const worldOrigin = this.getWorldOrigin(origin)
-        const transform = this.multiple && this.getChangedTransform(() => element.safeChange(() => element.skewOf(origin, skewX, skewY)))
-        const data: IEditorSkewEvent = { target: element, editor: this, worldOrigin, skewX, skewY, transform }
+        const transform = this.multiple && this.getChangedTransform(() => target.safeChange(() => target.skewOf(origin, skewX, skewY)))
+        const data: IEditorSkewEvent = { target, editor: this, worldOrigin, skewX, skewY, transform }
 
         this.emitEvent(new EditorSkewEvent(EditorSkewEvent.BEFORE_SKEW, data))
         const event = new EditorSkewEvent(EditorSkewEvent.SKEW, data)
