@@ -99,10 +99,10 @@ export const EditDataHelper = {
             }
         }
 
+        const useScaleX = scaleX !== 1, useScaleY = scaleY !== 1
 
-        scaleX /= changedScaleX
-        scaleY /= changedScaleY
-
+        if (useScaleX) scaleX /= changedScaleX
+        if (useScaleY) scaleY /= changedScaleY
 
         if (!flipable) {
             const { worldTransform } = element
@@ -121,24 +121,27 @@ export const EditDataHelper = {
 
             if (!BoundsHelper.includes(allowBounds, localBounds)) {
                 const realBounds = localBounds.getIntersect(allowBounds)
-                scaleX *= realBounds.width / localBounds.width
-                scaleY *= realBounds.height / localBounds.height // 后续需优化带旋转的场景
+                const fitScaleX = realBounds.width / localBounds.width, fitScaleY = realBounds.height / localBounds.height
+                if (useScaleX) scaleX *= fitScaleX
+                if (useScaleY) scaleY *= fitScaleY // 后续需优化带旋转的场景
             }
         }
 
-        if (widthRange) {
+        if (useScaleX && widthRange) {
             const nowWidth = boxBounds.width * element.scaleX
             scaleX = within(nowWidth * scaleX, widthRange) / nowWidth
         }
 
-        if (heightRange) {
+        if (useScaleY && heightRange) {
             const nowHeight = boxBounds.height * element.scaleY
             scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
 
         // 防止小于1px
-        if (Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = (scaleX < 0 ? -1 : 1) / worldBoxBounds.width
-        if (Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = (scaleY < 0 ? -1 : 1) / worldBoxBounds.height
+        if (useScaleX && Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = (scaleX < 0 ? -1 : 1) / worldBoxBounds.width
+        if (useScaleY && Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = (scaleY < 0 ? -1 : 1) / worldBoxBounds.height
+
+        if (lockRatio && scaleX !== scaleY) scaleY = scaleX = Math.min(scaleX, scaleY)
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
