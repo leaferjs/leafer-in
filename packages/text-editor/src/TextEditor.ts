@@ -28,7 +28,7 @@ export class TextEditor extends InnerEditor {
         const { config } = editor.app
 
         const text = this.editTarget
-        text.visible = false
+        text.textEditing = true
 
         this.isHTMLText = !(text instanceof Text) // HTMLText
         this._keyEvent = config.keyEvent
@@ -173,7 +173,7 @@ export class TextEditor extends InnerEditor {
         const { editTarget: text, editor, editDom: dom } = this
         if (text) {
             this.onInput()
-            text.visible = true
+            text.textEditing = undefined
 
             if (editor.app) editor.app.config.keyEvent = this._keyEvent
             editor.off_(this.eventIds)
