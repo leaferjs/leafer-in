@@ -417,16 +417,11 @@ export class Animate extends Eventer implements IAnimate {
         } else {
 
             const { attrsMap, target } = this
-            let from: number, to: number, transitionAttr: IFunction, { betweenStyle } = this.frame
+            let { betweenStyle } = this.frame
 
             if (!betweenStyle) betweenStyle = this.frame.betweenStyle = {}
 
-            for (let key in style) {
-                if (attrsMap && !attrsMap[key]) continue
-
-                from = fromStyle[key], to = toStyle[key], transitionAttr = Transition.list[key] || Transition.value
-                if (from !== to) betweenStyle[key] = transitionAttr(from, to, t, target)
-            }
+            Transition.setBetweenStyle(betweenStyle, fromStyle, toStyle, style, t, target, attrsMap)
 
             this.setStyle(betweenStyle)
         }

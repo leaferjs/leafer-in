@@ -1,5 +1,5 @@
-import { IFourNumber, IColor, ITransitionMap, IShadowEffect, ITransitionModule } from '@leafer-ui/interface'
-import { MathHelper, ColorConvert } from '@leafer-ui/draw'
+import { IFourNumber, IColor, ITransitionMap, IShadowEffect, ITransitionModule, IFunction, IObject } from '@leafer-ui/interface'
+import { MathHelper, ColorConvert, Transition } from '@leafer-ui/draw'
 
 
 const { round } = Math
@@ -23,16 +23,35 @@ export const TransitionList: ITransitionMap = {
         return (typeof from === 'number' || typeof to === 'number') ? MathHelper.float(number(from, to, t), Math.max(getDecimalLen(from), getDecimalLen(to))) : to  // count 数字文字效果
     },
 
+    boxStyle(from: any, to: any, t: number, target: any): any {
+        from || (from = {}), to || (to = {})
+        const betweenStyle = { ...from, ...to }
+        Transition.setBetweenStyle(betweenStyle, from, to, betweenStyle, t, target)
+        return betweenStyle
+    },
+
     shadow,
     innerShadow: shadow
 }
 
+
 export const TransitionModule = {
     value,
     number,
-    color
+    color,
+    setBetweenStyle: setBetweenStyle
 } as ITransitionModule
 
+function setBetweenStyle(betweenStyle: IObject, fromStyle: IObject, toStyle: IObject, bothStyle: IObject, t: number, target: any, attrs?: IObject): void {
+    let from: number, to: number, transitionAttr: IFunction
+    const { list, value } = Transition
+
+    for (let key in bothStyle) {
+        if (attrs && !attrs[key]) continue
+        from = fromStyle[key], to = toStyle[key], transitionAttr = list[key] || value
+        if (from !== to) betweenStyle[key] = transitionAttr(from, to, t, target)
+    }
+}
 
 function getDecimalLen(num: number | string) { // 小数位长度
     const decimal = String(num).split('.')[1]
