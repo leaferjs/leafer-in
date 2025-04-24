@@ -21,9 +21,7 @@ export class EditTool extends InnerEditor implements IEditTool {
         const { moveX, moveY, editor } = e
         const { app, list } = editor
         app.lockLayout()
-        list.forEach(target => {
-            target.moveWorld(moveX, moveY)
-        })
+        list.forEach(target => { target.moveWorld(moveX, moveY) })
         app.unlockLayout()
     }
 
@@ -33,11 +31,8 @@ export class EditTool extends InnerEditor implements IEditTool {
         app.lockLayout()
         list.forEach(target => {
             const resize = editor.getEditSize(target) !== 'scale'
-            if (transform) {
-                target.transformWorld(transform, resize)
-            } else {
-                target.scaleOfWorld(worldOrigin, scaleX, scaleY, resize)
-            }
+            if (transform) target.transformWorld(transform, resize)
+            else target.scaleOfWorld(worldOrigin, scaleX, scaleY, resize)
         })
         app.unlockLayout()
     }
@@ -48,11 +43,8 @@ export class EditTool extends InnerEditor implements IEditTool {
         app.lockLayout()
         list.forEach(target => {
             const resize = editor.getEditSize(target) !== 'scale'
-            if (transform) {
-                target.transformWorld(transform, resize)
-            } else {
-                target.rotateOfWorld(worldOrigin, rotation)
-            }
+            if (transform) target.transformWorld(transform, resize)
+            else target.rotateOfWorld(worldOrigin, rotation)
         })
         app.unlockLayout()
     }
@@ -63,11 +55,8 @@ export class EditTool extends InnerEditor implements IEditTool {
         app.lockLayout()
         list.forEach(target => {
             const resize = editor.getEditSize(target) !== 'scale'
-            if (transform) {
-                target.transformWorld(transform, resize)
-            } else {
-                target.skewOfWorld(worldOrigin, skewX, skewY, resize)
-            }
+            if (transform) target.transformWorld(transform, resize)
+            else target.skewOfWorld(worldOrigin, skewX, skewY, resize)
         })
         app.unlockLayout()
     }

@@ -1,4 +1,4 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
 import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9, isNull } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent, Plugin } from '@leafer-ui/core'
 
@@ -524,19 +524,27 @@ export class Editor extends Group implements IEditor {
         }
     }
 
+    protected onRenderStart(target: IApp): void {
+        if (target.children.find(leafer => leafer !== this.leafer && leafer.renderer.changed)) this.forceRender()
+    }
+
+    protected onKey(e: KeyEvent): void {
+        updateCursor(this, e)
+    }
+
     // event 
 
     public listenTargetEvents(): void {
         if (!this.targetEventIds.length) {
-            const { app, leafer } = this
+            const { app, leafer, editBox } = this
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.update, this),
-                app.on_(RenderEvent.CHILD_START, this.forceRender, this),
+                app.on_(RenderEvent.CHILD_START, this.onRenderStart, this),
                 app.on_(MoveEvent.BEFORE_MOVE, this.onMove, this, true),
                 app.on_(ZoomEvent.BEFORE_ZOOM, this.onScale, this, true),
                 app.on_(RotateEvent.BEFORE_ROTATE, this.onRotate, this, true),
-                app.on_([KeyEvent.HOLD, KeyEvent.UP], (e: KeyEvent) => { updateCursor(this, e) }),
-                app.on_(KeyEvent.DOWN, this.editBox.onArrow, this.editBox)
+                app.on_([KeyEvent.HOLD, KeyEvent.UP], this.onKey, this),
+                app.on_(KeyEvent.DOWN, editBox.onArrow, editBox)
             ]
         }
     }
