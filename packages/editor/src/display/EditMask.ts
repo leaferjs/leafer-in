@@ -3,6 +3,7 @@ import { UI } from '@leafer-ui/draw'
 
 import { IEditor } from '@leafer-in/interface'
 
+const bigBounds = { x: 0, y: 0, width: 100000, height: 100000 }
 
 export class EditMask extends UI {
 
@@ -13,7 +14,10 @@ export class EditMask extends UI {
         this.editor = editor
         this.hittable = false
         this.visible = 0
-        this.noBounds = true
+    }
+
+    override __updateWorldBounds(): void {
+        Object.assign(this.__world, bigBounds) // 强制修改渲染包围盒
     }
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {
