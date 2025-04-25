@@ -528,7 +528,7 @@ export class Editor extends Group implements IEditor {
 
     public listenTargetEvents(): void {
         if (!this.targetEventIds.length) {
-            const { app, leafer, editBox } = this
+            const { app, leafer, editBox, editMask } = this
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.update, this),
                 app.on_(RenderEvent.CHILD_START, this.onRenderStart, this),
@@ -538,14 +538,16 @@ export class Editor extends Group implements IEditor {
                 app.on_([KeyEvent.HOLD, KeyEvent.UP], this.onKey, this),
                 app.on_(KeyEvent.DOWN, editBox.onArrow, editBox)
             ]
+            if (editMask.visible) editMask.forceRender()
         }
     }
 
     public removeTargetEvents(): void {
-        const { targetEventIds } = this
+        const { targetEventIds, editMask } = this
         if (targetEventIds.length) {
             this.off_(targetEventIds)
             targetEventIds.length = 0
+            if (editMask.visible) editMask.forceRender()
         }
     }
 
