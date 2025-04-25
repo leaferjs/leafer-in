@@ -110,12 +110,12 @@ export class EditBox extends Group implements IEditBox {
     public update(bounds: IBoundsData): void {
         const { mergeConfig, element, multiple } = this.editor
         const { middlePoint, resizeable, rotateable, hideOnSmall, editBox } = mergeConfig
+        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
+
         this.visible = !element.locked
 
         if (this.view.worldOpacity) {
             const { width, height } = bounds
-            const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
-
             const smallSize = typeof hideOnSmall === 'number' ? hideOnSmall : 10
             const showPoints = editBox && !(hideOnSmall && width < smallSize && height < smallSize)
 
@@ -162,7 +162,7 @@ export class EditBox extends Group implements IEditBox {
             // buttons
             buttons.visible = showPoints && buttons.children.length > 0
             if (buttons.visible) this.layoutButtons(mergeConfig)
-        }
+        } else rect.set(bounds) // 需要更新大小
     }
 
     protected layoutCircle(config: IEditorConfig): void {

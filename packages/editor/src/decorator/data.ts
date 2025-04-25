@@ -1,6 +1,6 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
 import { IEditor } from '@leafer-in/interface'
-import { defineKey } from '@leafer-ui/draw'
+import { defineKey, isNull } from '@leafer-ui/draw'
 
 import { EditorEvent } from '../event/EditorEvent'
 
@@ -38,3 +38,26 @@ export function targetAttr(fn: IFunction) {
         } as ThisType<ILeaf>)
     }
 }
+
+
+export function mergeConfigAttr() {
+    return (target: IEditor, key: string) => {
+        defineKey(target, key, {
+            get() {
+                const { config, element, dragPoint } = this, mergeConfig = { ...config } // 实时合并，后期可优化
+                if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig)
+                if (dragPoint) {
+                    if (dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
+                    if (mergeConfig.editSize === 'font-size') mergeConfig.lockRatio = true // 强制锁定比例
+                    if (dragPoint.pointType === 'resize-rotate') {
+                        mergeConfig.around || (mergeConfig.around = 'center')
+                        isNull(mergeConfig.lockRatio) && (mergeConfig.lockRatio = true)
+                    }
+                }
+                return (this as IObject).mergedConfig = mergeConfig
+            }
+        } as ThisType<IEditor>)
+    }
+}
+
+

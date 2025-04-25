@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
-import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9, isNull } from '@leafer-ui/draw'
+import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9 } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent, Plugin } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -16,7 +16,7 @@ import { EditMask } from './display/EditMask'
 import { config } from './config'
 
 import { onTarget, onHover } from './editor/target'
-import { targetAttr } from './decorator/data'
+import { targetAttr, mergeConfigAttr } from './decorator/data'
 import { EditorHelper } from './helper/EditorHelper'
 import { EditDataHelper } from './helper/EditDataHelper'
 import { simulate } from './editor/simulate'
@@ -29,21 +29,11 @@ import { SimulateElement } from './display/SimulateElement'
 
 export class Editor extends Group implements IEditor {
 
-    public config = DataHelper.clone(config) as IEditorConfig
+    public config: IEditorConfig
 
-    public get mergeConfig(): IEditorConfig {
-        const { config, element, dragPoint } = this, mergeConfig = { ...config } // 实时合并，后期可优化
-        if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig)
-        if (dragPoint) {
-            if (dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
-            if (mergeConfig.editSize === 'font-size') mergeConfig.lockRatio = true // 强制锁定比例
-            if (dragPoint.pointType === 'resize-rotate') {
-                mergeConfig.around || (mergeConfig.around = 'center')
-                isNull(mergeConfig.lockRatio) && (mergeConfig.lockRatio = true)
-            }
-        }
-        return mergeConfig
-    }
+    @mergeConfigAttr()
+    readonly mergeConfig: IEditorConfig
+    readonly mergedConfig: IEditorConfig
 
     @targetAttr(onHover)
     public hoverTarget?: IUI
@@ -93,7 +83,10 @@ export class Editor extends Group implements IEditor {
 
     constructor(userConfig?: IEditorConfig, data?: IGroupInputData) {
         super(data)
-        if (userConfig) this.config = DataHelper.default(userConfig, this.config)
+        let mergedConfig: IEditorConfig = DataHelper.clone(config)
+        if (userConfig) mergedConfig = DataHelper.default(userConfig, mergedConfig)
+        this.mergedConfig = this.config = mergedConfig
+
         this.addMany(this.editMask, this.selector, this.editBox)
         if (!Plugin.has('resize')) this.config.editSize = 'scale'
     }
@@ -489,8 +482,7 @@ export class Editor extends Group implements IEditor {
     }
 
     public emitInnerEvent(type: string): void {
-        const { innerEditor } = this
-        const { editTarget } = innerEditor
+        const { innerEditor } = this, { editTarget } = innerEditor
         const event = new InnerEditorEvent(type, { editTarget, innerEditor })
         this.emitEvent(event)
         editTarget.emitEvent(event)
@@ -525,7 +517,7 @@ export class Editor extends Group implements IEditor {
     }
 
     protected onRenderStart(target: IApp): void {
-        if (target.children.find(leafer => leafer !== this.leafer && leafer.renderer.changed)) this.forceRender()
+        if (target.children.find(leafer => leafer !== this.leafer && leafer.renderer.changed)) this.editBox.forceRender()
     }
 
     protected onKey(e: KeyEvent): void {

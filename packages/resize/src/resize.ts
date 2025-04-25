@@ -47,7 +47,7 @@ Text.prototype.__scaleResize = function (scaleX: number, scaleY: number): void {
     if (__autoWidth && textAlign !== 'left' && scaleX !== 1) this.x += boxBounds.x
     if (__autoHeight && verticalAlign !== 'top' && scaleY !== 1) this.y += boxBounds.y
 
-    if (this.__.resizeFontSize || (editConfig && editConfig.editSize === 'font-size') || (dragPoint && editor.mergeConfig.editSize === 'font-size')) {
+    if (this.__.resizeFontSize || (editConfig && editConfig.editSize === 'font-size') || (dragPoint && editor.mergedConfig.editSize === 'font-size')) {
         scaleResizeFontSize(this, scaleX, scaleY, dragPoint && dragPoint.direction)
     } else {
         scaleResize(this, scaleX, scaleY)

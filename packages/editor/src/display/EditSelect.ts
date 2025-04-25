@@ -189,7 +189,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected onDragEnd(e: DragEvent): void {
         if (e.multiTouch) return
 
-        if (this.dragging) this.originList = null, this.selectArea.visible = false
+        if (this.dragging) this.originList = null, this.selectArea.visible = 0
     }
 
     protected onAutoMove(e: MoveEvent): void {

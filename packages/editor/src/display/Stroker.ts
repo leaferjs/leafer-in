@@ -37,9 +37,8 @@ export class Stroker extends UI implements IStroker {
         if (list.length) {
             setListWithFn(bounds, list, worldBounds)
             this.set(bounds)
-        } else {
-            this.width = this.height = 1
-        }
+            this.visible = true
+        } else this.visible = 0
     }
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {

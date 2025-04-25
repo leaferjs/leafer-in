@@ -11,7 +11,8 @@ export class SelectArea extends Group implements ISelectArea {
 
     constructor(data?: IGroupInputData) {
         super(data)
-        this.visible = this.hittable = false
+        this.visible = 0
+        this.hittable = false
         this.addMany(this.fillArea, this.strokeArea)
     }
 
