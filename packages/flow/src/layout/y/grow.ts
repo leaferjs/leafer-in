@@ -8,9 +8,10 @@ const { within } = MathHelper
 
 export function growY(box: IBox, row: IFlowDrawData, height: number, reverse: boolean): void {
     let child: IUI, grow: IAutoSize, remainSpace: number, remainTotalSpace = 0, list: IUI[] = row.hasRangeSize && [], { grow: totalGrow, start } = row
-    const growSize = row.height < height ? (height - row.height) / totalGrow : 0, { children } = box
+    const growSize = (height - row.height) / totalGrow, { children } = box
+    if (growSize <= 0) return
 
-    if (growSize) row.height = height
+    row.height = height
 
     for (let j = 0, end = row.count; j < end; j++) {
         child = children[reverse ? start - j : start + j]
