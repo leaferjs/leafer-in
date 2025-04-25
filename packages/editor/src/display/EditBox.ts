@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData } from '@leafer-ui/interface'
-import { Group, Box, Text, AroundHelper, Direction9 } from '@leafer-ui/draw'
+import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -240,7 +240,7 @@ export class EditBox extends Group implements IEditBox {
 
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
-        const point = this.dragPoint = e.current as IEditPoint
+        const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
         const { editor, dragStartData } = this, { element } = editor
         if (point.name === 'rect') {
             this.moving = true
@@ -251,13 +251,16 @@ export class EditBox extends Group implements IEditBox {
         dragStartData.point = { x: element.x, y: element.y } // 用于移动
         dragStartData.bounds = { ...element.getLayoutBounds('box', 'local') } // 用于resize
         dragStartData.rotation = element.rotation // 用于旋转
+        if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = editor.leafList.keys // 记录正在resize中的元素列表
     }
 
     protected onDragEnd(e: DragEvent): void {
         this.dragging = false
         this.dragPoint = null
         this.moving = false
-        if (e.current.name === 'rect') this.editor.opacity = 1 // move
+        const { name, pointType } = e.current as IEditPoint
+        if (name === 'rect') this.editor.opacity = 1 // move
+        if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = null
     }
 
     protected onDrag(e: DragEvent): void {
