@@ -27,13 +27,13 @@ leaf.__scaleResize = function (scaleX: number, scaleY: number): void {
 
 
 leaf.resizeWidth = function (width: number): void {
-    const scale = width / this.getBounds('box', 'local').width
+    const scale = width / this.getBounds('box', 'local').width || 1 // 不允许为0
     this.scaleOf(this.__layout.boxBounds, scale, this.__.lockRatio ? scale : 1, true)
 }
 
 
 leaf.resizeHeight = function (height: number): void {
-    const scale = height / this.getBounds('box', 'local').height
+    const scale = height / this.getBounds('box', 'local').height || 1 // 不允许为0
     this.scaleOf(this.__layout.boxBounds, this.__.lockRatio ? scale : 1, scale, true)
 }
 
