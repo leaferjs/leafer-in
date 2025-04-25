@@ -22,7 +22,7 @@ export class EditMask extends UI {
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {
         const { editor } = this, { mask } = editor.mergedConfig
-        if (mask) {
+        if (mask && editor.editing) {
             const { rect } = editor.editBox, { width, height } = rect.__
             canvas.resetTransform()
             canvas.fillWorld(canvas.bounds, mask === true ? 'rgba(0,0,0,0.8)' : mask)
