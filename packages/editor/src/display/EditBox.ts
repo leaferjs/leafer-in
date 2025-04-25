@@ -22,7 +22,7 @@ export class EditBox extends Group implements IEditBox {
 
     public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
     public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'center', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
-    public buttons: IGroup = new Group({ around: 'center', hitSelf: false })
+    public buttons: IGroup = new Group({ around: 'center', hitSelf: false, visible: 0 })
 
     public resizePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public rotatePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
@@ -160,7 +160,7 @@ export class EditBox extends Group implements IEditBox {
             rect.set({ ...bounds, visible: multiple ? true : editBox })
 
             // buttons
-            buttons.visible = showPoints && buttons.children.length > 0
+            buttons.visible = showPoints && buttons.children.length > 0 || 0
             if (buttons.visible) this.layoutButtons(mergeConfig)
         } else rect.set(bounds) // 需要更新大小
     }
