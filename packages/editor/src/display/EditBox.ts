@@ -108,11 +108,12 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public update(bounds: IBoundsData): void {
-        const { mergeConfig, element, multiple } = this.editor
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox } = mergeConfig
-        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
+        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines, editor } = this
+        const { mergeConfig, element, multiple, editMask } = editor
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask } = mergeConfig
 
         this.visible = !element.locked
+        editMask.visible = mask ? true : 0
 
         if (this.view.worldOpacity) {
             const { width, height } = bounds
@@ -271,23 +272,24 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        if (this.editor.editing && this.editor.mergeConfig.keyEvent) {
-            const move = { x: 0, y: 0 }
+        const { editor } = this
+        if (editor.editing && editor.mergeConfig.keyEvent) {
+            let x = 0, y = 0
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
                 case 'ArrowDown':
-                    move.y = distance
+                    y = distance
                     break
                 case 'ArrowUp':
-                    move.y = -distance
+                    y = -distance
                     break
                 case 'ArrowLeft':
-                    move.x = -distance
+                    x = -distance
                     break
                 case 'ArrowRight':
-                    move.x = distance
+                    x = distance
             }
-            this.editor.move(move)
+            if (x || y) editor.move(x, y)
         }
     }
 
