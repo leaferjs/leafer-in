@@ -1,6 +1,6 @@
 import { IMoveEvent, IZoomEvent, IRotateEvent, IWheelEvent, IUIEvent, IKeepTouchData, IPointData, IEvent } from '@leafer-ui/interface'
 
-import { InteractionBase } from '@leafer-ui/core'
+import { InteractionBase, PointHelper } from '@leafer-ui/core'
 
 import { WheelEventHelper } from './WheelEventHelper'
 import { Transformer } from './Transformer'
@@ -44,11 +44,16 @@ interaction.transformEnd = function (): void {
 
 
 interaction.wheel = function (data: IWheelEvent): void {
-    const { wheel } = this.config
+    const { wheel, pointRound } = this.config
     if (wheel.disabled) return
 
     const scale = wheel.getScale ? wheel.getScale(data, wheel) : WheelEventHelper.getScale(data, wheel)
-    scale !== 1 ? this.zoom(getZoomEventData(scale, data)) : this.move(getMoveEventData(wheel.getMove ? wheel.getMove(data, wheel) : WheelEventHelper.getMove(data, wheel), data))
+    if (scale !== 1) this.zoom(getZoomEventData(scale, data))
+    else {
+        const move = wheel.getMove ? wheel.getMove(data, wheel) : WheelEventHelper.getMove(data, wheel)
+        if (pointRound) PointHelper.round(move)
+        this.move(getMoveEventData(move, data))
+    }
 }
 
 
