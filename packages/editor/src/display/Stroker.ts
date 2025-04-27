@@ -22,6 +22,7 @@ export class Stroker extends UI implements IStroker {
 
     constructor() {
         super()
+        this.visible = 0
         this.hittable = false
         this.strokeAlign = 'center'
     }
