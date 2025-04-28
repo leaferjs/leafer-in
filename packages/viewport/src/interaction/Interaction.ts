@@ -44,14 +44,14 @@ interaction.transformEnd = function (): void {
 
 
 interaction.wheel = function (data: IWheelEvent): void {
-    const { wheel, pointRound } = this.config
+    const { wheel, pointer } = this.config
     if (wheel.disabled) return
 
     const scale = wheel.getScale ? wheel.getScale(data, wheel) : WheelEventHelper.getScale(data, wheel)
     if (scale !== 1) this.zoom(getZoomEventData(scale, data))
     else {
         const move = wheel.getMove ? wheel.getMove(data, wheel) : WheelEventHelper.getMove(data, wheel)
-        if (pointRound) PointHelper.round(move)
+        if (pointer.snap) PointHelper.round(move)
         this.move(getMoveEventData(move, data))
     }
 }
