@@ -44,14 +44,14 @@ interaction.transformEnd = function (): void {
 
 
 interaction.wheel = function (data: IWheelEvent): void {
-    const { wheel, pointer } = this.config, { positiveDeltaSpeed, negativeDeltaSpeed } = wheel
+    const { wheel, pointer } = this.config, { posDeltaSpeed, negDeltaSpeed } = wheel
     if (wheel.disabled) return
 
-    if (data.deltaX > 0) positiveDeltaSpeed && (data.deltaX *= positiveDeltaSpeed)
-    else negativeDeltaSpeed && (data.deltaX *= negativeDeltaSpeed)
+    if (data.deltaX > 0) posDeltaSpeed && (data.deltaX *= posDeltaSpeed)
+    else negDeltaSpeed && (data.deltaX *= negDeltaSpeed)
 
-    if (data.deltaY > 0) positiveDeltaSpeed && (data.deltaY *= positiveDeltaSpeed)
-    else negativeDeltaSpeed && (data.deltaY *= negativeDeltaSpeed)
+    if (data.deltaY > 0) posDeltaSpeed && (data.deltaY *= posDeltaSpeed)
+    else negDeltaSpeed && (data.deltaY *= negDeltaSpeed)
 
     const scale = wheel.getScale ? wheel.getScale(data, wheel) : WheelEventHelper.getScale(data, wheel)
     if (scale !== 1) this.zoom(getZoomEventData(scale, data))
