@@ -1,4 +1,4 @@
-import { ILeaferCanvas, IRenderOptions } from '@leafer-ui/interface'
+import { IBox, ILeaferCanvas, IRenderOptions } from '@leafer-ui/interface'
 import { UI } from '@leafer-ui/draw'
 
 import { IEditor } from '@leafer-in/interface'
@@ -17,8 +17,7 @@ export class EditMask extends UI {
     }
 
     override __updateWorldBounds(): void {
-        // 强制修改渲染包围盒
-        Object.assign(this.__local, bigBounds)
+        Object.assign(this.__local, bigBounds) // 强制修改渲染包围盒
         Object.assign(this.__world, bigBounds)
     }
 
@@ -30,7 +29,11 @@ export class EditMask extends UI {
             if (options.bounds && !options.bounds.hit(editor.editBox.rect.__world, options.matrix)) return
 
             canvas.saveBlendMode('destination-out')
-            editor.list.forEach(item => item.__renderShape(canvas, options))
+            editor.list.forEach(item => {
+                item.__renderShape(canvas, options)
+                const { __box, parent } = item
+                if ((item = __box) || ((item = parent) && (parent as IBox).textBox)) item.__renderShape(canvas, options) // 文本框
+            })
             canvas.restoreBlendMode()
         }
     }
