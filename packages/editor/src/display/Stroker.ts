@@ -1,4 +1,4 @@
-import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData } from '@leafer-ui/interface'
+import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
 import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
@@ -10,7 +10,7 @@ const { abs } = Math
 const { copy, scale } = MatrixHelper
 const { setListWithFn } = BoundsHelper
 const { worldBounds } = LeafBoundsHelper
-const matrix = getMatrixData()
+const matrix = getMatrixData() as IMatrixWithOptionHalfData
 const bounds = getBoundsData()
 
 export class Stroker extends UI implements IStroker {
@@ -58,11 +58,12 @@ export class Stroker extends UI implements IStroker {
 
                     const aScaleX = abs(worldTransform.scaleX), aScaleY = abs(worldTransform.scaleY)
 
+                    copy(matrix, worldTransform)
+                    matrix.half = strokeWidth % 2
+
                     if (aScaleX !== aScaleY) { // need no scale stroke, use rect path
 
-                        copy(matrix, worldTransform)
                         scale(matrix, 1 / aScaleX, 1 / aScaleY)
-
                         canvas.setWorld(matrix, options.matrix)
                         canvas.beginPath()
                         data.strokeWidth = strokeWidth
@@ -72,7 +73,7 @@ export class Stroker extends UI implements IStroker {
 
                     } else {
 
-                        canvas.setWorld(worldTransform, options.matrix)
+                        canvas.setWorld(matrix, options.matrix)
                         canvas.beginPath()
 
                         if (leaf.__.__useArrow) leaf.__drawPath(canvas)
