@@ -78,6 +78,7 @@ export class Editor extends Group implements IEditor {
     public selector: EditSelect = new EditSelect(this)
     public editMask: EditMask = new EditMask(this)
 
+    public targetChanged: boolean
     public targetEventIds: IEventListenerId[] = []
 
 
@@ -516,8 +517,12 @@ export class Editor extends Group implements IEditor {
         }
     }
 
-    protected onRenderStart(target: IApp): void {
-        if (target.children.find(leafer => leafer !== this.leafer && leafer.renderer.changed)) this.editBox.forceRender()
+    protected onAppRenderStart(app: IApp): void {
+        if (this.targetChanged = app.children.some(leafer => leafer !== this.leafer && leafer.renderer.changed)) this.editBox.forceRender()
+    }
+
+    protected onRenderStart(): void {
+        if (this.targetChanged) this.update()
     }
 
     protected onKey(e: KeyEvent): void {
@@ -530,8 +535,8 @@ export class Editor extends Group implements IEditor {
         if (!this.targetEventIds.length) {
             const { app, leafer, editBox, editMask } = this
             this.targetEventIds = [
-                leafer.on_(RenderEvent.START, this.update, this),
-                app.on_(RenderEvent.CHILD_START, this.onRenderStart, this),
+                leafer.on_(RenderEvent.START, this.onRenderStart, this),
+                app.on_(RenderEvent.CHILD_START, this.onAppRenderStart, this),
                 app.on_(MoveEvent.BEFORE_MOVE, this.onMove, this, true),
                 app.on_(ZoomEvent.BEFORE_ZOOM, this.onScale, this, true),
                 app.on_(RotateEvent.BEFORE_ROTATE, this.onRotate, this, true),

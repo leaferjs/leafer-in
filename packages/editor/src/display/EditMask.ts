@@ -17,17 +17,21 @@ export class EditMask extends UI {
     }
 
     override __updateWorldBounds(): void {
-        Object.assign(this.__world, bigBounds) // 强制修改渲染包围盒
+        // 强制修改渲染包围盒
+        Object.assign(this.__local, bigBounds)
+        Object.assign(this.__world, bigBounds)
     }
 
     public __draw(canvas: ILeaferCanvas, options: IRenderOptions): void {
+
         const { editor } = this, { mask } = editor.mergedConfig
         if (mask && editor.editing) {
-            const { rect } = editor.editBox, { width, height } = rect.__
-            canvas.resetTransform()
             canvas.fillWorld(canvas.bounds, mask === true ? 'rgba(0,0,0,0.8)' : mask)
-            canvas.setWorld(rect.__world, options.matrix)
-            canvas.clearRect(0, 0, width, height)
+            if (options.bounds && !options.bounds.hit(editor.editBox.rect.__world, options.matrix)) return
+
+            canvas.saveBlendMode('destination-out')
+            editor.list.forEach(item => item.__renderShape(canvas, options))
+            canvas.restoreBlendMode()
         }
     }
 
