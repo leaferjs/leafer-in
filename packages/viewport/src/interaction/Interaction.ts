@@ -68,6 +68,8 @@ interaction.multiTouch = function (data: IUIEvent, list: IKeepTouchData[]): void
     const { move, rotation, scale, center } = MultiTouchHelper.getData(list)
     Object.assign(data, center)
 
+    this.pointerWaitCancel()
+
     this.rotate(getRotateEventData(rotation, data))
     this.zoom(getZoomEventData(scale, data))
     this.move(getMoveEventData(move, data))
