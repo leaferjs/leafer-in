@@ -1,5 +1,5 @@
 import { IPathCommandData } from '@leafer-ui/interface'
-import { OneRadian, PathCommandMap } from '@leafer-ui/draw'
+import { BezierHelper, OneRadian, PathCommandMap } from '@leafer-ui/draw'
 
 
 // 高斯-勒让德积分节点和权重
@@ -7,6 +7,7 @@ const gaussNodes = [0.1488743389, 0.4333953941, 0.6794095682, 0.8650633666, 0.97
 const gaussWeights = [0.2955242247, 0.2692667193, 0.2190863625, 0.1494513491, 0.0666713443]
 
 const { sqrt } = Math
+const { getDerivative } = BezierHelper
 
 export const HighBezierHelper = {
 
@@ -25,11 +26,6 @@ export const HighBezierHelper = {
             distance += gaussWeights[i] * (sqrt(d1X * d1X + d1Y * d1Y) + sqrt(d2X * d2X + d2Y * d2Y))
         }
         return distance * half
-    },
-
-    getDerivative(t: number, fromV: number, v1: number, v2: number, toV: number): number { // 导数
-        const o = 1 - t
-        return 3 * o * o * (v1 - fromV) + 6 * o * t * (v2 - v1) + 3 * t * t * (toV - v2)
     },
 
     getRotation(t: number, fromX: number, fromY: number, x1: number, y1: number, x2: number, y2: number, toX: number, toY: number): number { // 切线角度
@@ -67,4 +63,4 @@ export const HighBezierHelper = {
 
 }
 
-const { getDerivative, getDistance } = HighBezierHelper
+const { getDistance } = HighBezierHelper
