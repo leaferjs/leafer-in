@@ -78,8 +78,9 @@ export const EditDataHelper = {
         }
 
         if (lockRatio) {
-            const unlockSide = lockRatio === 'corner' && direction % 2
-            if (!unlockSide) {
+            if (lockRatio === 'corner' && direction % 2) {
+                lockRatio = false
+            } else {
                 let scale: number
                 switch (direction) {
                     case top:
@@ -92,7 +93,6 @@ export const EditDataHelper = {
                         break
                     default:
                         scale = Math.sqrt(Math.abs(scaleX * scaleY))
-
                 }
                 scaleX = scaleX < 0 ? -scale : scale
                 scaleY = scaleY < 0 ? -scale : scale
