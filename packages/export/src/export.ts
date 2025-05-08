@@ -33,7 +33,7 @@ export const ExportModule: IExportModule = {
 
             let renderBounds: IBoundsData, trimBounds: IBounds, scaleX = 1, scaleY = 1
             const { worldTransform, isLeafer, leafer, isFrame } = leaf
-            const { slice, trim, padding, onCanvas } = options
+            const { slice, clip, trim, padding, onCanvas } = options
             const smooth = options.smooth === undefined ? (leafer ? leafer.config.smooth : true) : options.smooth
             const contextSettings = options.contextSettings || (leafer ? leafer.config.contextSettings : undefined)
 
@@ -89,7 +89,9 @@ export const ExportModule: IExportModule = {
 
 
             // 导出元素
-            const { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
+            let { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
+            if (clip) x += clip.x, y += clip.y, width = clip.width, height = clip.height
+
             const renderOptions: IRenderOptions = { matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
             let canvas = Creator.canvas({ width: Math.floor(width), height: Math.floor(height), pixelRatio, smooth, contextSettings })
 
