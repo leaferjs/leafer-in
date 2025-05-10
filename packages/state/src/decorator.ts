@@ -5,7 +5,8 @@ export function stateType(defaultValue?: IValue, styleName?: string) {
     return decorateLeafAttr(defaultValue, (key: string) => attr({
         set(value: any) {
             this.__setAttr(key, value)
-            this.waitLeafer(() => styleName ? State.setStyleName(this, styleName, value) : State.set(this, value))
+            if (this.leaferIsReady) styleName ? State.setStyleName(this, styleName, value) : State.set(this, value)
+            else this.__layout.stateStyleChanged = true
         }
     }))
 }

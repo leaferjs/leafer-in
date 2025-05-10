@@ -72,7 +72,7 @@ export function updateStyle(leaf: IUI, style?: IStateStyle, type?: 'in' | 'out')
 
 export function getStyle(leaf: IUI): IStateStyle {
 
-    //   从低到高依次覆盖: states < selected < focus < hover < press < disabled
+    //   从低到高依次覆盖:  states < selected < placeholder < focus < hover < press < disabled
 
     let exist: boolean
     const style: IUIInputData = {}, button = findParentButton(leaf)
@@ -83,6 +83,9 @@ export function getStyle(leaf: IUI): IStateStyle {
 
     const selectedStyle = style.selectedStyle || leaf.selectedStyle
     if (selectedStyle && State.isSelected(leaf, button)) exist = assign(style, selectedStyle)
+
+    const placeholderStyle = style.placeholderStyle || leaf.placeholderStyle
+    if (placeholderStyle && State.isPlaceholder(leaf, button)) exist = assign(style, placeholderStyle)
 
     if (State.isDisabled(leaf, button)) {
 

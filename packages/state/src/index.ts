@@ -1,6 +1,6 @@
 export { stateType, stateStyleType } from './decorator'
 
-import { IUI, IStateStyleType, IStateName } from '@leafer-ui/interface'
+import { IUI, IStateStyleType, IStateName, IText } from '@leafer-ui/interface'
 import { State, UI, dataType, Plugin } from '@leafer-ui/core'
 
 import { setPointerState, setState } from './set'
@@ -24,12 +24,15 @@ State.animateExcludes = {
     states: 1,
     state: 1,
 
+    placeholder: 1,
+
     normalStyle: 1,
     hoverStyle: 1,
     pressStyle: 1,
     focusStyle: 1,
     selectedStyle: 1,
-    disabledStyle: 1
+    disabledStyle: 1,
+    placeholderStyle: 1
 }
 
 
@@ -40,6 +43,7 @@ State.isDisabled = function (leaf: IUI, button?: IUI | boolean): boolean { retur
 State.isFocus = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isFocus', leaf, button) }
 State.isHover = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isHover', leaf, button) }
 State.isPress = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isPress', leaf, button) }
+State.isPlaceholder = function (leaf: IUI, _button?: IUI | boolean): boolean { return (leaf as IText).placeholder && (leaf as IText).text == '' }
 
 State.isDrag = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isDrag', leaf, button) }
 
@@ -66,6 +70,7 @@ UI.addAttr('pressStyle', undefined, stateStyleType)
 UI.addAttr('focusStyle', undefined, stateStyleType)
 UI.addAttr('selectedStyle', undefined, stateStyleType)
 UI.addAttr('disabledStyle', undefined, stateStyleType)
+UI.addAttr('placeholderStyle', undefined, stateStyleType)
 
 UI.addAttr('button', false, dataType)
 
