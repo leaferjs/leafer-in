@@ -1,7 +1,7 @@
 export { stateType, stateStyleType } from './decorator'
 
 import { IUI, IStateStyleType, IStateName, IText } from '@leafer-ui/interface'
-import { State, UI, dataType, Plugin } from '@leafer-ui/core'
+import { State, UI, Text, dataType, Plugin, getDescriptor, doBoundsType, defineKey } from '@leafer-ui/core'
 
 import { setPointerState, setState } from './set'
 import { unsetPointerState, unsetState } from './unset'
@@ -43,7 +43,7 @@ State.isDisabled = function (leaf: IUI, button?: IUI | boolean): boolean { retur
 State.isFocus = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isFocus', leaf, button) }
 State.isHover = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isHover', leaf, button) }
 State.isPress = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isPress', leaf, button) }
-State.isPlaceholder = function (leaf: IUI, _button?: IUI | boolean): boolean { return (leaf as IText).placeholder && (leaf as IText).text == '' }
+State.isPlacehold = function (leaf: IUI, _button?: IUI | boolean): boolean { return (leaf as IText).placeholder && (leaf as IText).text == '' }
 
 State.isDrag = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isDrag', leaf, button) }
 
@@ -89,3 +89,17 @@ ui.focus = function (value: boolean = true): void {
 ui.updateState = function (): void {
     State.updateStyle(this, undefined, 'in')
 }
+
+
+const text = Text.prototype, textKey = 'text'
+
+defineKey(text, textKey, {
+    ...getDescriptor(text, textKey),
+    set(value: string) {
+        const t = this as Text, oldValue = t.text
+        if (t.__setAttr(textKey, value)) {
+            doBoundsType(t)
+            if (t.placeholderStyle && t.placeholder && (oldValue === '' || value === '')) t.__layout.stateStyleChanged = true
+        }
+    }
+})

@@ -85,7 +85,7 @@ export function getStyle(leaf: IUI): IStateStyle {
     if (selectedStyle && State.isSelected(leaf, button)) exist = assign(style, selectedStyle)
 
     const placeholderStyle = style.placeholderStyle || leaf.placeholderStyle
-    if (placeholderStyle && State.isPlaceholder(leaf, button)) exist = assign(style, placeholderStyle)
+    if (placeholderStyle && State.isPlacehold(leaf, button)) exist = assign(style, placeholderStyle)
 
     if (State.isDisabled(leaf, button)) {
 
