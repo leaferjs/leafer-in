@@ -173,6 +173,7 @@ export class TextEditor extends InnerEditor {
         const { editTarget: text, editor, editDom: dom } = this
         if (text) {
             this.onInput()
+            if (text.text === '\n') text.text = ''
             text.textEditing = undefined
 
             if (editor.app) editor.app.config.keyEvent = this._keyEvent
