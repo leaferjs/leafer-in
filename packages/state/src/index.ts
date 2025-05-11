@@ -43,7 +43,7 @@ State.isDisabled = function (leaf: IUI, button?: IUI | boolean): boolean { retur
 State.isFocus = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isFocus', leaf, button) }
 State.isHover = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isHover', leaf, button) }
 State.isPress = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isPress', leaf, button) }
-State.isPlacehold = function (leaf: IUI, _button?: IUI | boolean): boolean { return (leaf as IText).placeholder && (leaf as IText).text == '' }
+State.isPlacehold = function (leaf: IUI, _button?: IUI | boolean): boolean { return (leaf as IText).__.__isPlacehold }
 
 State.isDrag = function (leaf: IUI, button?: IUI | boolean): boolean { return checkPointerState('isDrag', leaf, button) }
 
