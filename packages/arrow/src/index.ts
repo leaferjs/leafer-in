@@ -4,7 +4,8 @@ export { PathArrowModule } from './PathArrowModule'
 export { PathMatrixHelper } from './PathMatrixHelper'
 export { arrowType } from './decorator'
 
-import { PathArrow, UI, Plugin } from '@leafer-ui/draw'
+import { IUI, ILeaferCanvas } from '@leafer-ui/interface'
+import { PathArrow, UI, Plugin, Paint } from '@leafer-ui/draw'
 import { PathArrowModule } from './PathArrowModule'
 import { arrowType } from './decorator'
 
@@ -18,3 +19,13 @@ UI.addAttr('endArrow', 'none', arrowType)
 
 
 Object.assign(PathArrow, PathArrowModule)
+Object.assign(Paint, {
+    strokeArrow(_stroke: string, ui: IUI, canvas: ILeaferCanvas): void {
+        if (ui.__.dashPattern) {  // fix: dashPattern Arrow
+            canvas.beginPath()
+            ui.__drawPathByData(canvas, ui.__.__pathForArrow)
+            canvas.dashPattern = null
+            canvas.stroke()
+        }
+    }
+})
