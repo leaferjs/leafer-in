@@ -25,7 +25,7 @@ export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
 
-import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction } from '@leafer-in/interface'
+import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction, IApp } from '@leafer-in/interface'
 import { Creator, UI, Group, Text, Box, dataType, Plugin } from '@leafer-ui/draw'
 
 import '@leafer-in/resize'
@@ -36,7 +36,11 @@ import { Editor } from './Editor'
 Plugin.add('editor', 'resize')
 
 
-Creator.editor = function (options?: IEditorConfig): IEditor { return new Editor(options) }
+Creator.editor = function (options?: IEditorConfig, app?: IApp): IEditor {
+    const editor = new Editor(options)
+    if (app) app.sky.add(app.editor = editor)
+    return editor
+}
 
 Box.addAttr('textBox', false, dataType)
 
