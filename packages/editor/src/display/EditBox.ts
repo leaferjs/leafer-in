@@ -1,4 +1,4 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData } from '@leafer-ui/interface'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams } from '@leafer-ui/interface'
 import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent } from '@leafer-ui/core'
 
@@ -330,31 +330,36 @@ export class EditBox extends Group implements IEditBox {
         const { editor } = this
         point.direction = direction
         point.pointType = type
-        point.on_(DragEvent.START, this.onDragStart, this)
-        point.on_(DragEvent.DRAG, this.onDrag, this)
-        point.on_(DragEvent.END, this.onDragEnd, this)
-        point.on_(PointerEvent.LEAVE, () => this.enterPoint = null)
-        if (point.name !== 'circle') point.on_(PointerEvent.ENTER, (e) => { this.enterPoint = point, updateCursor(editor, e) })
+
+        const events: IEventParams[] = [
+            [DragEvent.START, this.onDragStart, this],
+            [DragEvent.DRAG, this.onDrag, this],
+            [DragEvent.END, this.onDragEnd, this],
+            [PointerEvent.LEAVE, () => { this.enterPoint = null }],
+        ]
+        if (point.name !== 'circle') events.push([PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, updateCursor(editor, e) }])
+        this.__eventIds.push(point.on_(events))
     }
 
     protected __listenEvents(): void {
         const { rect, editor } = this
-        this.__eventIds = [
+        this.__eventIds.push(
             editor.on_(EditorEvent.SELECT, this.onSelect, this),
 
-            rect.on_(DragEvent.START, this.onDragStart, this),
-            rect.on_(DragEvent.DRAG, editor.onMove, editor),
-            rect.on_(DragEvent.END, this.onDragEnd, this),
+            rect.on_([
+                [DragEvent.START, this.onDragStart, this],
+                [DragEvent.DRAG, editor.onMove, editor],
+                [DragEvent.END, this.onDragEnd, this],
 
-            rect.on_(PointerEvent.ENTER, () => updateMoveCursor(editor)),
-            rect.on_(PointerEvent.DOUBLE_TAP, this.onDoubleTap, this),
-            rect.on_(PointerEvent.LONG_PRESS, this.onLongPress, this)
-        ]
+                [PointerEvent.ENTER, () => updateMoveCursor(editor)],
+                [PointerEvent.DOUBLE_TAP, this.onDoubleTap, this],
+                [PointerEvent.LONG_PRESS, this.onLongPress, this]
+            ])
+        )
     }
 
     protected __removeListenEvents(): void {
         this.off_(this.__eventIds)
-        this.__eventIds.length = 0
     }
 
     public destroy(): void {

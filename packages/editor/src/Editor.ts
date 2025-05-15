@@ -536,12 +536,17 @@ export class Editor extends Group implements IEditor {
             const { app, leafer, editBox, editMask } = this
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.onRenderStart, this),
-                app.on_(RenderEvent.CHILD_START, this.onAppRenderStart, this),
-                app.on_(MoveEvent.BEFORE_MOVE, this.onMove, this, true),
-                app.on_(ZoomEvent.BEFORE_ZOOM, this.onScale, this, true),
-                app.on_(RotateEvent.BEFORE_ROTATE, this.onRotate, this, true),
-                app.on_([KeyEvent.HOLD, KeyEvent.UP], this.onKey, this),
-                app.on_(KeyEvent.DOWN, editBox.onArrow, editBox)
+
+                app.on_([
+                    [RenderEvent.CHILD_START, this.onAppRenderStart, this],
+
+                    [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
+                    [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
+                    [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
+
+                    [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
+                    [KeyEvent.DOWN, editBox.onArrow, editBox]
+                ])
             ]
             if (editMask.visible) editMask.forceRender()
         }
@@ -551,7 +556,6 @@ export class Editor extends Group implements IEditor {
         const { targetEventIds, editMask } = this
         if (targetEventIds.length) {
             this.off_(targetEventIds)
-            targetEventIds.length = 0
             if (editMask.visible) editMask.forceRender()
         }
     }

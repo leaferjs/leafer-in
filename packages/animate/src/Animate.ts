@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventMap } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventParamsMap } from '@leafer-ui/interface'
 import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -119,7 +119,7 @@ export class Animate extends Eventer implements IAnimate {
         switch (typeof options) {
             case 'number': this.config = { duration: options }; break
             case 'string': this.config = { easing: options }; break
-            case 'object': this.config = options, options.event && (this.event = options.event as IEventMap)
+            case 'object': this.config = options, options.event && (this.event = options.event as IEventParamsMap)
         }
 
         this.keyframes = keyframe instanceof Array ? keyframe : (keyframe ? [keyframe] : [])

@@ -241,29 +241,30 @@ export class EditSelect extends Group implements IEditSelect {
             app.selector.proxy = editor
 
             this.__eventIds = [
-                editor.on_(EditorEvent.HOVER, this.onHover, this),
-                editor.on_(EditorEvent.SELECT, this.onSelect, this),
+                editor.on_([
+                    [EditorEvent.HOVER, this.onHover, this],
+                    [EditorEvent.SELECT, this.onSelect, this]
+                ]),
 
-                app.on_(PointerEvent.MOVE, this.onPointerMove, this),
-                app.on_(PointerEvent.BEFORE_DOWN, this.onBeforeDown, this),
-                app.on_(PointerEvent.TAP, this.onTap, this),
+                app.on_([
+                    [PointerEvent.MOVE, this.onPointerMove, this],
+                    [PointerEvent.BEFORE_DOWN, this.onBeforeDown, this],
+                    [PointerEvent.TAP, this.onTap, this],
 
-                app.on_(DragEvent.START, this.onDragStart, this, true), // 采用捕获事件，需要比EditBox中的dragStart早触发
-                app.on_(DragEvent.DRAG, this.onDrag, this),
-                app.on_(DragEvent.END, this.onDragEnd, this),
+                    [DragEvent.START, this.onDragStart, this, true], // 采用捕获事件，需要比EditBox中的dragStart早触发
+                    [DragEvent.DRAG, this.onDrag, this],
+                    [DragEvent.END, this.onDragEnd, this],
 
-                app.on_(MoveEvent.MOVE, this.onAutoMove, this),
-                app.on_([ZoomEvent.ZOOM, MoveEvent.MOVE], () => { this.editor.hoverTarget = null }),
+                    [MoveEvent.MOVE, this.onAutoMove, this],
+                    [[ZoomEvent.ZOOM, MoveEvent.MOVE], () => { this.editor.hoverTarget = null }],
+                ])
             ]
 
         })
     }
 
     protected __removeListenEvents(): void {
-        if (this.__eventIds) {
-            this.off_(this.__eventIds)
-            this.__eventIds.length = 0
-        }
+        this.off_(this.__eventIds)
     }
 
     public destroy(): void {
