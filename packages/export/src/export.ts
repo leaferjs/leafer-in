@@ -33,11 +33,10 @@ export const ExportModule: IExportModule = {
 
             let renderBounds: IBoundsData, trimBounds: IBounds, scaleX = 1, scaleY = 1
             const { worldTransform, isLeafer, leafer, isFrame } = leaf
-            const { slice, clip, trim, padding, onCanvas } = options
+            const { slice, clip, trim, screenshot, padding, onCanvas } = options
             const smooth = options.smooth === undefined ? (leafer ? leafer.config.smooth : true) : options.smooth
             const contextSettings = options.contextSettings || (leafer ? leafer.config.contextSettings : undefined)
 
-            const screenshot = options.screenshot || leaf.isApp
             const fill = (isLeafer && screenshot) ? (options.fill === undefined ? leaf.fill : options.fill) : options.fill // leafer use 
             const needFill = FileHelper.isOpaqueImage(filename) || fill, matrix = new Matrix()
 
@@ -81,11 +80,6 @@ export const ExportModule: IExportModule = {
             MathHelper.getScaleData(options.scale, options.size, renderBounds, scaleData)
 
             let pixelRatio = options.pixelRatio || 1
-            if (leaf.isApp) {
-                scaleData.scaleX *= pixelRatio // app 只能以自身的pixelRatio导出，需转移到scale上
-                scaleData.scaleY *= pixelRatio
-                pixelRatio = leaf.app.pixelRatio
-            }
 
 
             // 导出元素
