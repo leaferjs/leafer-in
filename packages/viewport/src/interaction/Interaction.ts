@@ -1,4 +1,4 @@
-import { IMoveEvent, IZoomEvent, IRotateEvent, IWheelEvent, IUIEvent, IKeepTouchData, IPointData, IEvent } from '@leafer-ui/interface'
+import { IMoveEvent, IZoomEvent, IRotateEvent, IWheelEvent, IKeepTouchData, IPointData, IEvent, IPointerEvent } from '@leafer-ui/interface'
 
 import { InteractionBase, PointHelper } from '@leafer-ui/core'
 
@@ -63,10 +63,12 @@ interaction.wheel = function (data: IWheelEvent): void {
 }
 
 
-interaction.multiTouch = function (data: IUIEvent, list: IKeepTouchData[]): void {
+interaction.multiTouch = function (data: IPointerEvent, list: IKeepTouchData[]): void {
     if (this.config.multiTouch.disabled) return
     const { move, rotation, scale, center } = MultiTouchHelper.getData(list)
+
     Object.assign(data, center)
+    data.multiTouch = true
 
     this.pointerWaitCancel()
 
