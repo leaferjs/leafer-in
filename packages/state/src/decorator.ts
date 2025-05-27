@@ -1,5 +1,5 @@
 import { IValue } from '@leafer-ui/interface'
-import { decorateLeafAttr, attr, State } from '@leafer-ui/draw'
+import { decorateLeafAttr, attr, State } from '@leafer-ui/core'
 
 export function stateType(defaultValue?: IValue, styleName?: string) {
     return decorateLeafAttr(defaultValue, (key: string) => attr({
