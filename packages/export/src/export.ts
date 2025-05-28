@@ -86,7 +86,7 @@ export const ExportModule: IExportModule = {
             let { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
             if (clip) x += clip.x, y += clip.y, width = clip.width, height = clip.height
 
-            const renderOptions: IRenderOptions = { matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
+            const renderOptions: IRenderOptions = { exporting: true, matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
             let canvas = Creator.canvas({ width: Math.floor(width), height: Math.floor(height), pixelRatio, smooth, contextSettings })
 
             let sliceLeaf: IUI
