@@ -52,11 +52,9 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
 
     style.lineHeight = (text.__.__lineHeight || 0) * textScale + 'px'
     style.letterSpacing = (text.__.__letterSpacing || 0) * textScale + 'px'
-    if (textWrap === 'none') {
-        style.whiteSpace = 'nowrap'
-    } else if (textWrap === 'break') {
-        style.wordBreak = 'break-all'
-    }
+
+    style.whiteSpace = (textWrap === 'none' || text.__.__autoWidth) ? 'nowrap' : 'normal'
+    style.wordBreak = textWrap === 'break' ? 'break-all' : 'normal'
 
     style.textIndent = (text.paraIndent || 0) * textScale + 'px'
     style.padding = padding instanceof Array ? padding.map(item => item * textScale + 'px').join(' ') : (padding || 0) * textScale + 'px'

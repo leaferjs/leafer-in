@@ -133,30 +133,32 @@ export class TextEditor extends InnerEditor {
         this.textScale = textScale
 
         // layout
-        let { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
-        if (!this.inBody) x -= window.scrollX, y -= window.scrollY
-
         let { width, height } = text, offsetX = 0, offsetY = 0
         width *= textScale, height *= textScale
 
         const data = text.__
 
-        if (data.__autoWidth && data.autoSizeAlign) {
+        if (data.__autoWidth) {
             width += 20 // 加大一点防止换行
-            switch (data.textAlign) {
-                case 'center': offsetX = -width / 2; break
-                case 'right': offsetX = -width
+            if (data.autoSizeAlign) {
+                switch (data.textAlign) {
+                    case 'center': offsetX = -width / 2; break
+                    case 'right': offsetX = -width
+                }
             }
         }
 
-        if (data.__autoHeight && data.autoSizeAlign) {
+        if (data.__autoHeight) {
             height += 20
-            switch (data.verticalAlign) {
-                case 'middle': offsetY = -height / 2; break
-                case 'bottom': offsetY = -height
+            if (data.autoSizeAlign) {
+                switch (data.verticalAlign) {
+                    case 'middle': offsetY = -height / 2; break
+                    case 'bottom': offsetY = -height
+                }
             }
         }
 
+        const { x, y } = this.inBody ? text.app.clientBounds : text.app.tree.clientBounds
         const { a, b, c, d, e, f } = new Matrix(text.worldTransform).scale(1 / textScale).translateInner(offsetX, offsetY)
 
         const { style } = this.editDom
