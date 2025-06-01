@@ -1,4 +1,4 @@
-import { ILeaf, IBoundsData, IZoomType, IFourNumber, IPointData, ITransition } from '@leafer-ui/interface'
+import { ILeaf, IBoundsData, IZoomType, IZoomOptions, IFourNumber, IPointData, ITransition } from '@leafer-ui/interface'
 import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
@@ -7,9 +7,17 @@ import { getFixBounds, getZoomScale } from './helper'
 Plugin.add('view')
 
 
-Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fixed?: boolean, transition?: ITransition): IBoundsData {
+Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomOptions | IFourNumber, scroll?: 'x' | 'y' | boolean, transition?: ITransition): IBoundsData {
 
     this.killAnimate()
+
+    let padding: IFourNumber
+
+    if (typeof optionsOrPadding === 'object' && !(optionsOrPadding instanceof Array)) {
+        padding = optionsOrPadding.padding
+        scroll = optionsOrPadding.scroll
+        transition = optionsOrPadding.transition
+    } else padding = optionsOrPadding
 
     const { zoomLayer } = this
     const limitBounds = this.canvas.bounds.clone().shrink(padding !== undefined ? padding : 30), bounds = new Bounds()
@@ -66,7 +74,7 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
         const { width, height } = bounds
         let moveX = limitBounds.x - bounds.x, moveY = limitBounds.y - bounds.y
 
-        if (fixed) {
+        if (scroll) {
 
             moveX += Math.max((limitBounds.width - width) / 2, 0)
             moveY += Math.max((limitBounds.height - height) / 2, 0)
@@ -83,6 +91,9 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, padding?: IFourNumber, fi
             data.scaleX *= changeScale
             data.scaleY *= changeScale
         }
+
+        if (scroll === 'x') moveY = 0
+        else if (scroll === 'y') moveX = 0
 
         PointHelper.move(data, moveX, moveY)
         bounds.move(moveX, moveY)
