@@ -12,6 +12,7 @@ export class EditorEvent extends Event implements IEditorEvent {
 
     static BEFORE_SELECT = 'editor.before_select'
     static SELECT = 'editor.select'
+    static AFTER_SELECT = 'editor.after_select'
 
     static BEFORE_HOVER = 'editor.before_hover'
     static HOVER = 'editor.hover'

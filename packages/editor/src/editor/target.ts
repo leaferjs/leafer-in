@@ -18,7 +18,8 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
         editor.closeInnerEditor()
     }
 
-    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, { editor, value: target, oldValue }))
+    const data = { editor, value: target, oldValue }
+    editor.emitEvent(new EditorEvent(EditorEvent.SELECT, data))
     editor.checkOpenedGroups()
 
     if (editor.editing) {
@@ -32,6 +33,8 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
         editor.updateEditTool()
         editor.removeTargetEvents()
     }
+
+    editor.emitEvent(new EditorEvent(EditorEvent.AFTER_SELECT, data))
 }
 
 
