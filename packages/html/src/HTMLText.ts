@@ -1,5 +1,5 @@
-import { IString, IImage } from '@leafer-ui/interface'
-import { Image, boundsType, registerUI, dataProcessor, dataType } from '@leafer-ui/draw'
+import { IString, IImage, ILeaferCanvas, IRenderOptions } from '@leafer-ui/interface'
+import { Image, boundsType, registerUI, dataProcessor, surfaceType, dataType } from '@leafer-ui/draw'
 
 import { IHTMLTextData, IHTMLTextInputData } from '@leafer-in/interface'
 
@@ -19,6 +19,9 @@ export class HTMLText extends Image implements IImage {
 
     @dataType('TextEditor')
     declare public editInner: string
+
+    @surfaceType(false)
+    public textEditing: boolean
 
     constructor(data?: IHTMLTextInputData) {
         super(data)
@@ -70,4 +73,8 @@ export class HTMLText extends Image implements IImage {
         super.__updateBoxBounds()
     }
 
+    override __draw(canvas: ILeaferCanvas, options: IRenderOptions, originCanvas?: ILeaferCanvas): void {
+        if (this.textEditing && !options.exporting) return
+        super.__draw(canvas, options, originCanvas)
+    }
 }
