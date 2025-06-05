@@ -26,7 +26,6 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
         editor.waitLeafer(() => {
             updateMoveCursor(editor)
             editor.updateEditTool()
-            editor.update()
             editor.listenTargetEvents()
         })
     } else {

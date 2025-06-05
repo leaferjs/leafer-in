@@ -137,7 +137,7 @@ export class Editor extends Group implements IEditor {
     }
 
     public updateEditTool(): void {
-        const tool = this.editTool
+        let tool = this.editTool
         if (tool) {
             this.editBox.unload()
             tool.unload()
@@ -145,10 +145,11 @@ export class Editor extends Group implements IEditor {
         }
 
         if (this.editing) {
-            const tag = this.single ? this.list[0].editOuter as string : 'EditTool'
-            this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+            const tag = this.element.editOuter || 'EditTool'
+            tool = this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
             this.editBox.load()
-            this.editTool.load()
+            tool.load()
+            this.update()
         }
     }
 
