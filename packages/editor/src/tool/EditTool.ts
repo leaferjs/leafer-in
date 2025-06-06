@@ -69,10 +69,7 @@ export class EditTool extends InnerEditor implements IEditTool {
     }
 
     public update(): void {
-        const { editor, editBox } = this
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = editor.element.getLayoutBounds('box', editor, true)
-        editBox.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
-        editBox.update({ x: 0, y: 0, width, height })
+        this.editBox.update()
         this.onUpdate()
     }
 

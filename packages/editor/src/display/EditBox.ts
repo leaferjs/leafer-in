@@ -15,6 +15,7 @@ const fourDirection = ['top', 'right', 'bottom', 'left'], editConfig: IEditorCon
 export class EditBox extends Group implements IEditBox {
 
     public editor: IEditor
+
     public dragging: boolean
     public moving: boolean
 
@@ -38,8 +39,12 @@ export class EditBox extends Group implements IEditBox {
 
     public get mergeConfig(): IEditorConfig {
         const { config } = this, { mergeConfig } = this.editor
-        return config ? Object.assign(mergeConfig, config) : mergeConfig
+        return this.mergedConfig = config ? Object.assign(mergeConfig, config) : mergeConfig
     }
+
+    protected _target: IUI
+    public get target(): IUI { return this._target || this.editor.element } // 编辑框贴合操作的元素，默认为编辑器的 element
+    public set target(element: IUI) { this._target = element }
 
     // fliped
     public get flipped(): boolean { return this.flippedX || this.flippedY }
@@ -85,11 +90,9 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public load(): void {
-        this.mergedConfig = this.mergeConfig // 合并配置
-
-        const { element, single } = this.editor
-        const { rect, circle, resizePoints, mergedConfig } = this
-        const { stroke, strokeWidth } = mergedConfig
+        const { single } = this.editor
+        const { target, mergeConfig, rect, circle, resizePoints } = this
+        const { stroke, strokeWidth } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
@@ -103,28 +106,33 @@ export class EditBox extends Group implements IEditBox {
         }
 
         // rotate
-        circle.set(this.getPointStyle(mergedConfig.circle || mergedConfig.rotatePoint || pointsStyle[0]))
+        circle.set(this.getPointStyle(mergeConfig.circle || mergeConfig.rotatePoint || pointsStyle[0]))
 
         // rect
-        rect.set({ stroke, strokeWidth, editConfig, ...(mergedConfig.rect || {}) })
+        rect.set({ stroke, strokeWidth, editConfig, ...(mergeConfig.rect || {}) })
         rect.hittable = !single
         rect.syncEventer = single && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
 
         // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
         if (single) {
-            element.syncEventer = rect
-            this.app.interaction.bottomList = [{ target: rect, proxy: element }]
+            target.syncEventer = rect
+            this.app.interaction.bottomList = [{ target: rect, proxy: target }]
         }
     }
 
-    public update(bounds: IBoundsData): void {
-        this.mergedConfig = this.mergeConfig // 合并配置
+    public update(): void {
+        const { editor } = this
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds('box', editor, true)
+        this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
+        this.updateBounds({ x: 0, y: 0, width, height })
+    }
 
-        const { element, multiple, editMask } = this.editor
-        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines, mergedConfig } = this
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask } = mergedConfig
+    public updateBounds(bounds: IBoundsData): void {
+        const { multiple, editMask } = this.editor
+        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines, mergeConfig } = this
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask } = mergeConfig
 
-        this.visible = !element.locked
+        this.visible = !this.target.locked
         editMask.visible = mask ? true : 0
 
         if (this.view.worldOpacity) {
@@ -146,7 +154,7 @@ export class EditBox extends Group implements IEditBox {
 
                 // visible 
                 resizeP.visible = resizeL.visible = showPoints && !!(resizeable || rotateable)
-                rotateP.visible = showPoints && rotateable && resizeable && !mergedConfig.rotatePoint
+                rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
 
                 if (i % 2) { // top,  right, bottom, left
 
@@ -165,8 +173,8 @@ export class EditBox extends Group implements IEditBox {
             }
 
             // rotate
-            circle.visible = showPoints && rotateable && !!(mergedConfig.circle || mergedConfig.rotatePoint)
-            if (circle.visible) this.layoutCircle(mergedConfig)
+            circle.visible = showPoints && rotateable && !!(mergeConfig.circle || mergeConfig.rotatePoint)
+            if (circle.visible) this.layoutCircle(mergeConfig)
 
             // rect
             if (rect.path) rect.path = null // line可能会变成path优先模式
@@ -174,7 +182,7 @@ export class EditBox extends Group implements IEditBox {
 
             // buttons
             buttons.visible = showPoints && buttons.children.length > 0 || 0
-            if (buttons.visible) this.layoutButtons(mergedConfig)
+            if (buttons.visible) this.layoutButtons(mergeConfig)
         } else rect.set(bounds) // 需要更新大小
     }
 
@@ -253,16 +261,16 @@ export class EditBox extends Group implements IEditBox {
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
-        const { editor, dragStartData } = this, { element } = editor
+        const { editor, dragStartData } = this, { target } = this
         if (point.name === 'rect') {
             this.moving = true
             editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
         }
         dragStartData.x = e.x
         dragStartData.y = e.y
-        dragStartData.point = { x: element.x, y: element.y } // 用于移动
-        dragStartData.bounds = { ...element.getLayoutBounds('box', 'local') } // 用于resize
-        dragStartData.rotation = element.rotation // 用于旋转
+        dragStartData.point = { x: target.x, y: target.y } // 用于移动
+        dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
+        dragStartData.rotation = target.rotation // 用于旋转
         if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = editor.leafList.keys // 记录正在resize中的元素列表
     }
 
@@ -287,7 +295,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        const { editor, } = this
+        const { editor } = this
         if (editor.editing && this.mergedConfig.keyEvent) {
             let x = 0, y = 0
             const distance = e.shiftKey ? 10 : 1
@@ -318,18 +326,17 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected openInner(e: PointerEvent): void {
-        const { editor } = this
+        const { editor, target } = this
         if (editor.single) {
-            const { element } = editor
-            if (element.locked) return
-            if (element.isBranch && !element.editInner) {
-                if ((element as IBox).textBox) {
-                    const { children } = element
+            if (target.locked) return
+            if (target.isBranch && !target.editInner) {
+                if ((target as IBox).textBox) {
+                    const { children } = target
                     const find = children.find(item => item.editable && item instanceof Text) || children.find(item => item instanceof Text)
                     if (find) return editor.openInnerEditor(find) // 文本Box直接进入编辑状态，如便利贴文本
                 }
 
-                editor.openGroup(element as IGroup)
+                editor.openGroup(target as IGroup)
                 editor.target = editor.selector.findDeepOne(e)
             } else {
                 editor.openInnerEditor()
