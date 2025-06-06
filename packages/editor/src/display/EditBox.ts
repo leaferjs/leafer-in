@@ -33,6 +33,14 @@ export class EditBox extends Group implements IEditBox {
 
     public dragStartData = {} as IEditorDragStartData
 
+    public config: IEditorConfig
+    public mergedConfig: IEditorConfig
+
+    public get mergeConfig(): IEditorConfig {
+        const { config } = this, { mergeConfig } = this.editor
+        return config ? Object.assign(mergeConfig, config) : mergeConfig
+    }
+
     // fliped
     public get flipped(): boolean { return this.flippedX || this.flippedY }
     public get flippedX(): boolean { return this.scaleX < 0 }
@@ -77,9 +85,11 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public load(): void {
-        const { mergeConfig, element, single } = this.editor
-        const { rect, circle, resizePoints } = this
-        const { stroke, strokeWidth } = mergeConfig
+        this.mergedConfig = this.mergeConfig // 合并配置
+
+        const { element, single } = this.editor
+        const { rect, circle, resizePoints, mergedConfig } = this
+        const { stroke, strokeWidth } = mergedConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
@@ -93,10 +103,10 @@ export class EditBox extends Group implements IEditBox {
         }
 
         // rotate
-        circle.set(this.getPointStyle(mergeConfig.circle || mergeConfig.rotatePoint || pointsStyle[0]))
+        circle.set(this.getPointStyle(mergedConfig.circle || mergedConfig.rotatePoint || pointsStyle[0]))
 
         // rect
-        rect.set({ stroke, strokeWidth, editConfig, ...(mergeConfig.rect || {}) })
+        rect.set({ stroke, strokeWidth, editConfig, ...(mergedConfig.rect || {}) })
         rect.hittable = !single
         rect.syncEventer = single && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
 
@@ -108,9 +118,11 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public update(bounds: IBoundsData): void {
-        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines, editor } = this
-        const { mergeConfig, element, multiple, editMask } = editor
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask } = mergeConfig
+        this.mergedConfig = this.mergeConfig // 合并配置
+
+        const { element, multiple, editMask } = this.editor
+        const { rect, circle, buttons, resizePoints, rotatePoints, resizeLines, mergedConfig } = this
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask } = mergedConfig
 
         this.visible = !element.locked
         editMask.visible = mask ? true : 0
@@ -134,7 +146,7 @@ export class EditBox extends Group implements IEditBox {
 
                 // visible 
                 resizeP.visible = resizeL.visible = showPoints && !!(resizeable || rotateable)
-                rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
+                rotateP.visible = showPoints && rotateable && resizeable && !mergedConfig.rotatePoint
 
                 if (i % 2) { // top,  right, bottom, left
 
@@ -153,8 +165,8 @@ export class EditBox extends Group implements IEditBox {
             }
 
             // rotate
-            circle.visible = showPoints && rotateable && !!(mergeConfig.circle || mergeConfig.rotatePoint)
-            if (circle.visible) this.layoutCircle(mergeConfig)
+            circle.visible = showPoints && rotateable && !!(mergedConfig.circle || mergedConfig.rotatePoint)
+            if (circle.visible) this.layoutCircle(mergedConfig)
 
             // rect
             if (rect.path) rect.path = null // line可能会变成path优先模式
@@ -162,7 +174,7 @@ export class EditBox extends Group implements IEditBox {
 
             // buttons
             buttons.visible = showPoints && buttons.children.length > 0 || 0
-            if (buttons.visible) this.layoutButtons(mergeConfig)
+            if (buttons.visible) this.layoutButtons(mergedConfig)
         } else rect.set(bounds) // 需要更新大小
     }
 
@@ -214,18 +226,18 @@ export class EditBox extends Group implements IEditBox {
 
 
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
-        const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.editor.mergeConfig
+        const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.mergedConfig
         const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0, editConfig } as IBoxInputData
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
     public getPointsStyle(): IBoxInputData[] {
-        const { point } = this.editor.mergeConfig
+        const { point } = this.mergedConfig
         return point instanceof Array ? point : [point]
     }
 
     public getMiddlePointsStyle(): IBoxInputData[] {
-        const { middlePoint } = this.editor.mergeConfig
+        const { middlePoint } = this.mergedConfig
         return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }
 
@@ -244,7 +256,7 @@ export class EditBox extends Group implements IEditBox {
         const { editor, dragStartData } = this, { element } = editor
         if (point.name === 'rect') {
             this.moving = true
-            editor.opacity = editor.mergeConfig.hideOnMove ? 0 : 1 // move
+            editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
         }
         dragStartData.x = e.x
         dragStartData.y = e.y
@@ -266,7 +278,7 @@ export class EditBox extends Group implements IEditBox {
     protected onDrag(e: DragEvent): void {
         const { editor } = this
         const { pointType } = this.enterPoint = e.current as IEditPoint
-        if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !editor.mergeConfig.resizeable) {
+        if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !this.mergedConfig.resizeable) {
             editor.onRotate(e)
             if (pointType === 'resize-rotate') editor.onScale(e)
         } else if (pointType === 'resize') editor.onScale(e)
@@ -275,8 +287,8 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        const { editor } = this
-        if (editor.editing && editor.mergeConfig.keyEvent) {
+        const { editor, } = this
+        if (editor.editing && this.mergedConfig.keyEvent) {
             let x = 0, y = 0
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
@@ -298,11 +310,11 @@ export class EditBox extends Group implements IEditBox {
 
 
     protected onDoubleTap(e: PointerEvent): void {
-        if (this.editor.mergeConfig.openInner === 'double') this.openInner(e)
+        if (this.mergedConfig.openInner === 'double') this.openInner(e)
     }
 
     protected onLongPress(e: PointerEvent): void {
-        if (this.editor.mergeConfig.openInner === 'long') this.openInner(e)
+        if (this.mergedConfig.openInner === 'long') this.openInner(e)
     }
 
     protected openInner(e: PointerEvent): void {
