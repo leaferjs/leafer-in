@@ -1,13 +1,8 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
-import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9, Plugin } from '@leafer-ui/draw'
-import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
+import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin } from '@leafer-ui/draw'
+import { DragEvent, RotateEvent, ZoomEvent, MoveEvent, useModule } from '@leafer-ui/core'
 
-import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
-
-import { EditorMoveEvent } from './event/EditorMoveEvent'
-import { EditorScaleEvent } from './event/EditorScaleEvent'
-import { EditorRotateEvent } from './event/EditorRotateEvent'
-import { EditorSkewEvent } from './event/EditorSkewEvent'
+import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
 
 import { EditSelect } from './display/EditSelect'
 import { EditBox } from './display/EditBox'
@@ -18,14 +13,14 @@ import { config } from './config'
 import { onTarget, onHover } from './editor/target'
 import { targetAttr, mergeConfigAttr } from './decorator/data'
 import { EditorHelper } from './helper/EditorHelper'
-import { EditDataHelper } from './helper/EditDataHelper'
 import { simulate } from './editor/simulate'
 import { EditToolCreator } from './tool/EditToolCreator'
 import { InnerEditorEvent } from './event/InnerEditorEvent'
 import { EditorGroupEvent } from './event/EditorGroupEvent'
 import { SimulateElement } from './display/SimulateElement'
+import { TransformTool } from './tool/TransformTool'
 
-
+@useModule(TransformTool, ['editBox', 'editTool', 'emitEvent'])
 export class Editor extends Group implements IEditor {
 
     public config: IEditorConfig
@@ -159,232 +154,37 @@ export class Editor extends Group implements IEditor {
         return this.mergeConfig.editSize
     }
 
-    // operate
 
-    public onMove(e: DragEvent | MoveEvent): void {
-        if (e instanceof MoveEvent) {
+    // operate EditorTransformTool will rewrite
 
-            if (e.moveType !== 'drag') {
-                const { moveable, resizeable } = this.mergeConfig
-                const move = e.getLocalMove(this.element)
-                if (moveable === 'move') e.stop(), this.move(move.x, move.y)
-                else if (resizeable === 'zoom') e.stop()
-            }
+    public onMove(_e: DragEvent | MoveEvent): void { }
 
-        } else {
+    public onScale(_e: DragEvent | ZoomEvent): void { }
 
-            const total = { x: e.totalX, y: e.totalY }
+    public onRotate(_e: DragEvent | RotateEvent): void { }
 
-            if (e.shiftKey) {
-                if (Math.abs(total.x) > Math.abs(total.y)) total.y = 0
-                else total.x = 0
-            }
-
-            this.move(DragEvent.getValidMove(this.element, this.editBox.dragStartData.point, total))
-
-        }
-    }
-
-    public onScale(e: DragEvent | ZoomEvent): void {
-        const { element } = this
-        let { around, lockRatio, resizeable, flipable, editSize } = this.mergeConfig
-
-        if (e instanceof ZoomEvent) {
-
-            if (resizeable === 'zoom') e.stop(), this.scaleOf(element.getBoxPoint(e), e.scale, e.scale)
-
-        } else {
-
-            const { direction } = e.current as IEditPoint
-
-            if (e.shiftKey || element.lockRatio) lockRatio = true
-
-            const data = EditDataHelper.getScaleData(element, this.editBox.dragStartData.bounds, direction, e.getInnerTotal(element), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, this.multiple || editSize === 'scale')
-
-            if (this.editTool.onScaleWithDrag) {
-                data.drag = e
-                this.scaleWithDrag(data)
-            } else {
-                this.scaleOf(data.origin, data.scaleX, data.scaleY)
-            }
-
-        }
-    }
-
-    public onRotate(e: DragEvent | RotateEvent): void {
-        const { skewable, rotateable, around, rotateGap } = this.mergeConfig
-        const { direction, name } = e.current as IEditPoint
-        if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
-
-        const { element } = this, { dragStartData } = this.editBox
-        let origin: IPointData, rotation: number
-
-        if (e instanceof RotateEvent) {
-
-            if (rotateable === 'rotate') e.stop(), rotation = e.rotation, origin = element.getBoxPoint(e)
-            else return
-
-            if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
-
-        } else {
-
-            const data = EditDataHelper.getRotateData(element.boxBounds, direction, e.getBoxPoint(element), element.getBoxPoint(dragStartData), e.shiftKey ? null : (element.around || element.origin || around || 'center'))
-            rotation = data.rotation
-            origin = data.origin
-
-        }
-
-        if (element.scaleX * element.scaleY < 0) rotation = -rotation // flippedOne
-        if (e instanceof DragEvent) rotation = dragStartData.rotation + rotation - element.rotation
-
-        rotation = MathHelper.float(MathHelper.getGapRotation(rotation, rotateGap, element.rotation), 2)
-        if (!rotation) return
-
-        this.rotateOf(origin, rotation)
-    }
-
-
-    public onSkew(e: DragEvent): void {
-        const { element } = this
-        const { around } = this.mergeConfig
-
-        const { origin, skewX, skewY } = EditDataHelper.getSkewData(element.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(element), EditDataHelper.getAround(around, e.altKey))
-        if (!skewX && !skewY) return
-
-        this.skewOf(origin, skewX, skewY)
-    }
+    public onSkew(_e: DragEvent): void { }
 
 
     // transform
 
-    public move(x: number | IPointData, y = 0): void {
-        if (!this.checkTransform('moveable')) return
-        if (typeof x === 'object') y = x.y, x = x.x
+    public move(_x: number | IPointData, _y = 0): void { }
 
-        const { element: target } = this, { beforeMove } = this.mergeConfig
-        if (beforeMove) {
-            const check = beforeMove({ target, x, y })
-            if (typeof check === 'object') x = check.x, y = check.y
-            else if (check === false) return
-        }
+    public scaleWithDrag(_data: IEditorScaleEvent): void { }
 
-        const world = target.getWorldPointByLocal({ x, y }, null, true)
-        if (this.multiple) target.safeChange(() => target.move(x, y))
-        const data: IEditorMoveEvent = { target, editor: this, moveX: world.x, moveY: world.y }
+    override scaleOf(_origin: IPointData | IAlign, scaleX: number, _scaleY = scaleX, _resize?: boolean): void { }
 
-        this.emitEvent(new EditorMoveEvent(EditorMoveEvent.BEFORE_MOVE, data))
-        const event = new EditorMoveEvent(EditorMoveEvent.MOVE, data)
-        this.editTool.onMove(event)
-        this.emitEvent(event)
-    }
+    override flip(_axis: IAxis): void { }
 
-    public scaleWithDrag(data: IEditorScaleEvent): void {
-        if (!this.checkTransform('resizeable')) return
+    override rotateOf(_origin: IPointData | IAlign, _rotation: number): void { }
 
-        const { element: target } = this, { beforeScale } = this.mergeConfig
-        if (beforeScale) {
-            const { origin, scaleX, scaleY, drag } = data
-            const check = beforeScale({ target, drag, origin, scaleX, scaleY })
-            if (check === false) return
-        }
+    override skewOf(_origin: IPointData | IAlign, _skewX: number, _skewY = 0, _resize?: boolean): void { }
 
-        data = { ...data, target, editor: this, worldOrigin: target.getWorldPoint(data.origin) }
+    public checkTransform(_type: 'moveable' | 'resizeable' | 'rotateable' | 'skewable'): boolean { return undefined }
 
-        this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
-        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
-        this.editTool.onScaleWithDrag(event)
-        this.emitEvent(event)
-    }
+    protected getWorldOrigin(_origin: IPointData | IAlign): IPointData { return undefined }
 
-
-    override scaleOf(origin: IPointData | IAlign, scaleX: number, scaleY = scaleX, _resize?: boolean): void {
-        if (!this.checkTransform('resizeable')) return
-
-        const { element: target } = this, { beforeScale } = this.mergeConfig
-        if (beforeScale) {
-            const check = beforeScale({ target, origin, scaleX, scaleY })
-            if (typeof check === 'object') scaleX = check.scaleX, scaleY = check.scaleY
-            else if (check === false) return
-        }
-
-        const worldOrigin = this.getWorldOrigin(origin)
-        const transform = this.multiple && this.getChangedTransform(() => target.safeChange(() => target.scaleOf(origin, scaleX, scaleY)))
-        const data: IEditorScaleEvent = { target, editor: this, worldOrigin, scaleX, scaleY, transform }
-
-        this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
-        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
-        this.editTool.onScale(event)
-        this.emitEvent(event)
-    }
-
-    override flip(axis: IAxis): void {
-        if (!this.checkTransform('resizeable')) return
-
-        const { element } = this
-        const worldOrigin = this.getWorldOrigin('center')
-        const transform = this.multiple ? this.getChangedTransform(() => element.safeChange(() => element.flip(axis))) : new Matrix(LeafHelper.getFlipTransform(element, axis))
-        const data: IEditorScaleEvent = { target: element, editor: this, worldOrigin, scaleX: axis === 'x' ? -1 : 1, scaleY: axis === 'y' ? -1 : 1, transform }
-
-        this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
-        const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
-        this.editTool.onScale(event)
-        this.emitEvent(event)
-    }
-
-    override rotateOf(origin: IPointData | IAlign, rotation: number): void {
-        if (!this.checkTransform('rotateable')) return
-
-        const { element: target } = this, { beforeRotate } = this.mergeConfig
-        if (beforeRotate) {
-            const check = beforeRotate({ target, origin, rotation })
-            if (typeof check === 'number') rotation = check
-            else if (check === false) return
-        }
-
-        const worldOrigin = this.getWorldOrigin(origin)
-        const transform = this.multiple && this.getChangedTransform(() => target.safeChange(() => target.rotateOf(origin, rotation)))
-        const data: IEditorRotateEvent = { target, editor: this, worldOrigin, rotation, transform }
-
-        this.emitEvent(new EditorRotateEvent(EditorRotateEvent.BEFORE_ROTATE, data))
-        const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, data)
-        this.editTool.onRotate(event)
-        this.emitEvent(event)
-    }
-
-    override skewOf(origin: IPointData | IAlign, skewX: number, skewY = 0, _resize?: boolean): void {
-        if (!this.checkTransform('skewable')) return
-
-        const { element: target } = this, { beforeSkew } = this.mergeConfig
-        if (beforeSkew) {
-            const check = beforeSkew({ target, origin, skewX, skewY })
-            if (typeof check === 'object') skewX = check.skewX, skewY = check.skewY
-            else if (check === false) return
-        }
-
-        const worldOrigin = this.getWorldOrigin(origin)
-        const transform = this.multiple && this.getChangedTransform(() => target.safeChange(() => target.skewOf(origin, skewX, skewY)))
-        const data: IEditorSkewEvent = { target, editor: this, worldOrigin, skewX, skewY, transform }
-
-        this.emitEvent(new EditorSkewEvent(EditorSkewEvent.BEFORE_SKEW, data))
-        const event = new EditorSkewEvent(EditorSkewEvent.SKEW, data)
-        this.editTool.onSkew(event)
-        this.emitEvent(event)
-    }
-
-    public checkTransform(type: 'moveable' | 'resizeable' | 'rotateable' | 'skewable'): boolean { return this.element && !this.element.locked && this.mergeConfig[type] as boolean }
-
-    protected getWorldOrigin(origin: IPointData | IAlign): IPointData {
-        return this.element.getWorldPoint(LeafHelper.getInnerOrigin(this.element, origin))
-    }
-
-    protected getChangedTransform(func: IFunction): IMatrix {
-        const { element } = this
-        if (this.multiple && !element.canChange) return element.changedTransform
-
-        const oldMatrix = new Matrix(element.worldTransform)
-        func()
-        return new Matrix(element.worldTransform).divide(oldMatrix) // world change transform
-    }
+    protected getChangedTransform(_func: IFunction): IMatrix { return undefined }
 
 
     // group

@@ -1,4 +1,4 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams } from '@leafer-ui/interface'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
 import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent } from '@leafer-ui/core'
 
@@ -47,6 +47,10 @@ export class EditBox extends Group implements IEditBox {
     public set target(element: IUI) { this._target = element }
 
     public get single(): boolean { return this.editor.single }
+
+    protected _transformTool: ITransformTool
+    public get transformTool(): ITransformTool { return this.editor }
+    public set transformTool(tool: ITransformTool) { this._transformTool = tool }
 
     // fliped
     public get flipped(): boolean { return this.flippedX || this.flippedY }
@@ -287,17 +291,17 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onDrag(e: DragEvent): void {
-        const { editor } = this, point = e.current as IEditPoint
+        const { transformTool } = this, point = e.current as IEditPoint
         if (point.name === 'rect') {
-            editor.onMove(e)
+            transformTool.onMove(e)
             updateMoveCursor(this)
         } else {
             const { pointType } = this.enterPoint = point
             if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !this.mergedConfig.resizeable) {
-                editor.onRotate(e)
-                if (pointType === 'resize-rotate') editor.onScale(e)
-            } else if (pointType === 'resize') editor.onScale(e)
-            if (pointType === 'skew') editor.onSkew(e)
+                transformTool.onRotate(e)
+                if (pointType === 'resize-rotate') transformTool.onScale(e)
+            } else if (pointType === 'resize') transformTool.onScale(e)
+            if (pointType === 'skew') transformTool.onSkew(e)
             updateCursor(this, e)
         }
     }
