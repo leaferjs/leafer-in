@@ -3,7 +3,6 @@ import { LeafList } from '@leafer-ui/draw'
 import { IEditor, IUI } from '@leafer-in/interface'
 
 import { simulate } from './simulate'
-import { updateMoveCursor } from './cursor'
 import { EditorEvent } from '../event/EditorEvent'
 
 
@@ -24,7 +23,6 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
 
     if (editor.editing) {
         editor.waitLeafer(() => {
-            updateMoveCursor(editor)
             editor.updateEditTool()
             editor.listenTargetEvents()
         })

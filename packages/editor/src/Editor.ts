@@ -1,6 +1,6 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
 import { Group, DataHelper, MathHelper, LeafList, Matrix, RenderEvent, LeafHelper, Direction9, Plugin } from '@leafer-ui/draw'
-import { DragEvent, RotateEvent, KeyEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
+import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
 
@@ -20,7 +20,6 @@ import { targetAttr, mergeConfigAttr } from './decorator/data'
 import { EditorHelper } from './helper/EditorHelper'
 import { EditDataHelper } from './helper/EditDataHelper'
 import { simulate } from './editor/simulate'
-import { updateCursor } from './editor/cursor'
 import { EditToolCreator } from './tool/EditToolCreator'
 import { InnerEditorEvent } from './event/InnerEditorEvent'
 import { EditorGroupEvent } from './event/EditorGroupEvent'
@@ -526,15 +525,12 @@ export class Editor extends Group implements IEditor {
         if (this.targetChanged) this.update()
     }
 
-    protected onKey(e: KeyEvent): void {
-        updateCursor(this, e)
-    }
 
     // event 
 
     public listenTargetEvents(): void {
         if (!this.targetEventIds.length) {
-            const { app, leafer, editBox, editMask } = this
+            const { app, leafer, editMask } = this
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.onRenderStart, this),
 
@@ -544,9 +540,6 @@ export class Editor extends Group implements IEditor {
                     [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
                     [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
                     [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
-
-                    [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
-                    [KeyEvent.DOWN, editBox.onArrow, editBox]
                 ])
             ]
             if (editMask.visible) editMask.forceRender()
