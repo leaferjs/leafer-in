@@ -31,7 +31,8 @@ export interface IEditTool extends IInnerEditor {
 }
 
 export interface IInnerEditor {
-    tag: string
+    readonly tag: string
+    readonly mode: IInnerEditorMode
     editTarget: IUI
     config: IObject
 
@@ -57,6 +58,8 @@ export interface IInnerEditor {
     onDestroy(): void
     destroy(): void
 }
+
+export type IInnerEditorMode = 'focus' | 'both'
 
 export interface IEditorEvent extends IEvent {
     readonly target?: IUI

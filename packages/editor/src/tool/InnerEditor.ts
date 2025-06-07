@@ -1,5 +1,5 @@
 import { IGroup, IEventListenerId, IUI, IObject } from '@leafer-ui/interface'
-import { IInnerEditor, IEditor, IEditBox } from '@leafer-in/interface'
+import { IInnerEditor, IEditor, IEditBox, IInnerEditorMode } from '@leafer-in/interface'
 
 import { Group } from '@leafer-ui/draw'
 import { EditToolCreator } from './EditToolCreator'
@@ -12,6 +12,8 @@ export class InnerEditor implements IInnerEditor {
 
 
     public get tag() { return 'InnerEditor' }
+
+    public get mode(): IInnerEditorMode { return 'focus' } // 专注模式
 
     public editTarget: IUI
 
@@ -44,7 +46,7 @@ export class InnerEditor implements IInnerEditor {
     public load(): void {
         const { editor } = this
         if (editor) {
-            if (editor.app) editor.selector.hittable = editor.app.tree.hitChildren = false
+            if (editor.app && this.mode === 'focus') editor.selector.hittable = editor.app.tree.hitChildren = false
             this.onLoad()
         }
     }
@@ -56,7 +58,7 @@ export class InnerEditor implements IInnerEditor {
     public unload(): void {
         const { editor } = this
         if (editor) {
-            if (editor.app) editor.selector.hittable = editor.app.tree.hitChildren = true
+            if (editor.app && this.mode === 'focus') editor.selector.hittable = editor.app.tree.hitChildren = true
             this.onUnload()
         }
     }
