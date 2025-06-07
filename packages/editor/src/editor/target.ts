@@ -14,8 +14,9 @@ export function onTarget(editor: IEditor, oldValue: IUI | IUI[]): void {
     } else {
         editor.simulateTarget.remove()
         editor.leafList.reset()
-        editor.closeInnerEditor()
     }
+
+    editor.closeInnerEditor()
 
     const data = { editor, value: target, oldValue }
     editor.emitEvent(new EditorEvent(EditorEvent.SELECT, data))

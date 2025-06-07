@@ -16,7 +16,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
     public editBox: IEditBox
 
-    public editTool?: IEditTool
+    public editTool?: IEditTool // 可能不存在值
 
 
     // operate
@@ -287,6 +287,8 @@ export class TransformTool implements ITransformTool { // Editor use
     }
 
     // need rewrite
-    public emitEvent(_event?: IEvent, _capture?: boolean): void { }
+    public emitEvent(event?: IEvent, capture?: boolean): void {
+        this.editBox.editor.emitEvent(event, capture)
+    }
 
 }
