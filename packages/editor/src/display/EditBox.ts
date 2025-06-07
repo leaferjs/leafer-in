@@ -39,17 +39,17 @@ export class EditBox extends Group implements IEditBox {
 
     public get mergeConfig(): IEditorConfig {
         const { config } = this, { mergeConfig } = this.editor
-        return this.mergedConfig = config ? Object.assign(mergeConfig, config) : mergeConfig
+        return this.mergedConfig = config ? { ...mergeConfig, ...config } : mergeConfig
     }
 
     protected _target: IUI
     public get target(): IUI { return this._target || this.editor.element } // 操作的元素，默认为editor.element
-    public set target(element: IUI) { this._target = element }
+    public set target(target: IUI) { this._target = target }
 
     public get single(): boolean { return this.editor.single }
 
     protected _transformTool: ITransformTool
-    public get transformTool(): ITransformTool { return this.editor }
+    public get transformTool(): ITransformTool { return this._transformTool || this.editor }
     public set transformTool(tool: ITransformTool) { this._transformTool = tool }
 
     // fliped

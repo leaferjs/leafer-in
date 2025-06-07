@@ -12,23 +12,25 @@ import { EditorSkewEvent } from '../event/EditorSkewEvent'
 import { EditDataHelper } from '../helper/EditDataHelper'
 import { ITransformTool } from '@leafer-ui/interface'
 
-export class TransformTool implements ITransformTool {
+export class TransformTool implements ITransformTool { // Editor use
 
     public editBox: IEditBox
 
-    public editTool: IEditTool
+    public editTool?: IEditTool
+
 
     // operate
 
     public onMove(e: DragEvent | MoveEvent): void {
 
-        const { target, mergeConfig } = this.editBox
+        const { target, mergeConfig, dragStartData } = this.editBox
 
         if (e instanceof MoveEvent) {
 
             if (e.moveType !== 'drag') {
                 const { moveable, resizeable } = mergeConfig
                 const move = e.getLocalMove(target)
+
                 if (moveable === 'move') e.stop(), this.move(move.x, move.y)
                 else if (resizeable === 'zoom') e.stop()
             }
@@ -42,15 +44,14 @@ export class TransformTool implements ITransformTool {
                 else total.x = 0
             }
 
-            this.move(DragEvent.getValidMove(target, this.editBox.dragStartData.point, total))
+            this.move(DragEvent.getValidMove(target, dragStartData.point, total))
 
         }
     }
 
     public onScale(e: DragEvent | ZoomEvent): void {
 
-        const { target, mergeConfig, single } = this.editBox
-
+        const { target, mergeConfig, single, dragStartData } = this.editBox
         let { around, lockRatio, resizeable, flipable, editSize } = mergeConfig
 
         if (e instanceof ZoomEvent) {
@@ -60,12 +61,11 @@ export class TransformTool implements ITransformTool {
         } else {
 
             const { direction } = e.current as IEditPoint
-
             if (e.shiftKey || target.lockRatio) lockRatio = true
 
-            const data = EditDataHelper.getScaleData(target, this.editBox.dragStartData.bounds, direction, e.getInnerTotal(target), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, !single || editSize === 'scale')
+            const data = EditDataHelper.getScaleData(target, dragStartData.bounds, direction, e.getInnerTotal(target), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, !single || editSize === 'scale')
 
-            if (this.editTool.onScaleWithDrag) {
+            if (this.editTool && this.editTool.onScaleWithDrag) {
                 data.drag = e
                 this.scaleWithDrag(data)
             } else {
@@ -77,13 +77,12 @@ export class TransformTool implements ITransformTool {
 
     public onRotate(e: DragEvent | RotateEvent): void {
 
-        const { target, mergeConfig } = this.editBox
-
+        const { target, mergeConfig, dragStartData } = this.editBox
         const { skewable, rotateable, around, rotateGap } = mergeConfig
         const { direction, name } = e.current as IEditPoint
+
         if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
 
-        const { dragStartData } = this.editBox
         let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
@@ -113,7 +112,6 @@ export class TransformTool implements ITransformTool {
     public onSkew(e: DragEvent): void {
 
         const { target, mergeConfig } = this.editBox
-
         const { around } = mergeConfig
 
         const { origin, skewX, skewY } = EditDataHelper.getSkewData(target.boxBounds, (e.current as IEditPoint).direction, e.getInnerMove(target), EditDataHelper.getAround(around, e.altKey))
@@ -143,7 +141,7 @@ export class TransformTool implements ITransformTool {
 
         this.emitEvent(new EditorMoveEvent(EditorMoveEvent.BEFORE_MOVE, data))
         const event = new EditorMoveEvent(EditorMoveEvent.MOVE, data)
-        this.editTool.onMove(event)
+        this.doMove(event)
         this.emitEvent(event)
     }
 
@@ -184,7 +182,7 @@ export class TransformTool implements ITransformTool {
 
         this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
-        this.editTool.onScale(event)
+        this.doScale(event)
         this.emitEvent(event)
     }
 
@@ -199,7 +197,7 @@ export class TransformTool implements ITransformTool {
 
         this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
-        this.editTool.onScale(event)
+        this.doScale(event)
         this.emitEvent(event)
     }
 
@@ -221,7 +219,7 @@ export class TransformTool implements ITransformTool {
 
         this.emitEvent(new EditorRotateEvent(EditorRotateEvent.BEFORE_ROTATE, data))
         const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, data)
-        this.editTool.onRotate(event)
+        this.doRotate(event)
         this.emitEvent(event)
     }
 
@@ -243,9 +241,30 @@ export class TransformTool implements ITransformTool {
 
         this.emitEvent(new EditorSkewEvent(EditorSkewEvent.BEFORE_SKEW, data))
         const event = new EditorSkewEvent(EditorSkewEvent.SKEW, data)
-        this.editTool.onSkew(event)
+        this.doSkew(event)
         this.emitEvent(event)
     }
+
+
+    // do
+
+    protected doMove(event: IEditorMoveEvent) {
+        this.editTool.onMove(event)
+    }
+
+    protected doScale(event: IEditorScaleEvent): void {
+        this.editTool.onScale(event)
+    }
+
+    protected doRotate(event: IEditorRotateEvent): void {
+        this.editTool.onRotate(event)
+    }
+
+    protected doSkew(event: IEditorSkewEvent): void {
+        this.editTool.onSkew(event)
+    }
+
+    // helper
 
     public checkTransform(type: 'moveable' | 'resizeable' | 'rotateable' | 'skewable'): boolean {
         const { target, mergeConfig } = this.editBox
@@ -260,7 +279,6 @@ export class TransformTool implements ITransformTool {
     protected getChangedTransform(func: IFunction): IMatrix {
 
         const { target, single } = this.editBox
-
         if (!single && !(target as ISimulateElement).canChange) return (target as ISimulateElement).changedTransform
 
         const oldMatrix = new Matrix(target.worldTransform)
@@ -268,6 +286,7 @@ export class TransformTool implements ITransformTool {
         return new Matrix(target.worldTransform).divide(oldMatrix) // world change transform
     }
 
+    // need rewrite
     public emitEvent(_event?: IEvent, _capture?: boolean): void { }
 
 }
