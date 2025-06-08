@@ -61,11 +61,13 @@ export class TextEditor extends InnerEditor {
 
         this.onFocus = this.onFocus.bind(this)
         this.onInput = this.onInput.bind(this)
+        this.onPaste = this.onPaste.bind(this)
         this.onUpdate = this.onUpdate.bind(this)
         this.onKeydown = this.onKeydown.bind(this)
 
         div.addEventListener("focus", this.onFocus)
         div.addEventListener("input", this.onInput)
+        div.addEventListener("paste", this.onPaste)
         window.addEventListener('keydown', this.onKeydown)
         window.addEventListener('scroll', this.onUpdate)
 
@@ -114,6 +116,41 @@ export class TextEditor extends InnerEditor {
 
             this.onInput()
         }
+    }
+
+    protected onPaste(event: ClipboardEvent) {
+        if (this.isHTMLText) return
+
+        event.preventDefault() // 粘贴普通文本
+
+        const clipboardData = event.clipboardData
+        if (!clipboardData) return
+
+        let text = clipboardData.getData('text/plain').replace(/\r\n?/g, '\n')
+
+        const selection = window.getSelection()
+        if (!selection || !selection.rangeCount) return
+
+        const range = selection.getRangeAt(0)
+        range.deleteContents()
+
+        // 拆分成文本节点和 <br> 元素
+        const lines = text.split('\n')
+        const fragment = document.createDocumentFragment()
+
+        lines.forEach((line, index) => {
+            if (index > 0) fragment.appendChild(document.createElement('br'))
+            fragment.appendChild(document.createTextNode(line))
+        })
+
+        range.insertNode(fragment)
+
+        // 移动光标到插入末尾
+        range.collapse(false)
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        this.onInput()
     }
 
     public onUpdate() {
@@ -183,6 +220,7 @@ export class TextEditor extends InnerEditor {
 
             dom.removeEventListener("focus", this.onFocus)
             dom.removeEventListener("input", this.onInput)
+            dom.removeEventListener("paste", this.onPaste)
             window.removeEventListener('keydown', this.onKeydown)
             window.removeEventListener('scroll', this.onUpdate)
 
