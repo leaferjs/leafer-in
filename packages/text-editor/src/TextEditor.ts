@@ -106,9 +106,11 @@ export class TextEditor extends InnerEditor {
 
             // 手动插入 <br/>
             const br = document.createElement('br')
+            const zwsp = document.createTextNode('\u200B')
             const selection = window.getSelection()
             const range = selection.getRangeAt(0)
             range.deleteContents()
+            range.insertNode(zwsp) //  fix 结尾需要2次换行才能生效的问题（插入零宽字符）
             range.insertNode(br)
 
             range.setStartAfter(br)
