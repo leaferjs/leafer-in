@@ -24,7 +24,7 @@ export class InnerEditor implements IInnerEditor {
 
     public view: IGroup
 
-    public eventIds: IEventListenerId[]
+    public eventIds: IEventListenerId[] = []
 
 
     constructor(editor: IEditor) {
