@@ -94,7 +94,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         } else {
 
-            const data = EditDataHelper.getRotateData(target.boxBounds, direction, e.getBoxPoint(target), target.getBoxPoint(dragStartData), e.shiftKey ? null : (target.around || target.origin || around || 'center'))
+            const data = EditDataHelper.getRotateData(target, direction, e, dragStartData, e.shiftKey ? null : (target.around || target.origin || around || 'center'))
             rotation = data.rotation
             origin = data.origin
 

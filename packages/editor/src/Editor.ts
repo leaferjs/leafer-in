@@ -155,7 +155,9 @@ export class Editor extends Group implements IEditor {
     }
 
 
-    // operate EditorTransformTool will rewrite
+    // TransformTool will rewrite -----
+
+    // operate 
 
     public onMove(_e: DragEvent | MoveEvent): void { }
 
@@ -185,6 +187,8 @@ export class Editor extends Group implements IEditor {
     protected getWorldOrigin(_origin: IPointData | IAlign): IPointData { return undefined }
 
     protected getChangedTransform(_func: IFunction): IMatrix { return undefined }
+
+    // --------
 
 
     // group

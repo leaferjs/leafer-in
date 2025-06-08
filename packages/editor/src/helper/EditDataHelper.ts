@@ -10,10 +10,10 @@ const { within } = MathHelper
 
 export const EditDataHelper = {
 
-    getScaleData(element: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
+    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
 
-        const { boxBounds, widthRange, heightRange, dragBounds, worldBoxBounds } = element
+        const { boxBounds, widthRange, heightRange, dragBounds, worldBoxBounds } = target
         const { width, height } = startBounds
 
         if (around) {
@@ -23,8 +23,8 @@ export const EditDataHelper = {
 
 
         // 获取已经改变的比例
-        const originChangedScaleX = element.scaleX / startBounds.scaleX
-        const originChangedScaleY = element.scaleY / startBounds.scaleY
+        const originChangedScaleX = target.scaleX / startBounds.scaleX
+        const originChangedScaleY = target.scaleY / startBounds.scaleY
         const signX = originChangedScaleX < 0 ? -1 : 1
         const signY = originChangedScaleY < 0 ? -1 : 1
 
@@ -105,7 +105,7 @@ export const EditDataHelper = {
         if (useScaleY) scaleY /= changedScaleY
 
         if (!flipable) {
-            const { worldTransform } = element
+            const { worldTransform } = target
             if (scaleX < 0) scaleX = 1 / boxBounds.width / worldTransform.scaleX
             if (scaleY < 0) scaleY = 1 / boxBounds.height / worldTransform.scaleY
         }
@@ -115,9 +115,9 @@ export const EditDataHelper = {
         toPoint(around || align, boxBounds, origin, true)
 
         if (dragBounds) {
-            const allowBounds = dragBounds === 'parent' ? element.parent.boxBounds : dragBounds
-            const localBounds = new Bounds(element.__localBoxBounds)
-            localBounds.scaleOf(element.getLocalPointByInner(origin), scaleX, scaleY)
+            const allowBounds = dragBounds === 'parent' ? target.parent.boxBounds : dragBounds
+            const localBounds = new Bounds(target.__localBoxBounds)
+            localBounds.scaleOf(target.getLocalPointByInner(origin), scaleX, scaleY)
 
             if (!BoundsHelper.includes(allowBounds, localBounds)) {
                 const realBounds = localBounds.getIntersect(allowBounds)
@@ -128,12 +128,12 @@ export const EditDataHelper = {
         }
 
         if (useScaleX && widthRange) {
-            const nowWidth = boxBounds.width * element.scaleX
+            const nowWidth = boxBounds.width * target.scaleX
             scaleX = within(nowWidth * scaleX, widthRange) / nowWidth
         }
 
         if (useScaleY && heightRange) {
-            const nowHeight = boxBounds.height * element.scaleY
+            const nowHeight = boxBounds.height * target.scaleY
             scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
 
@@ -146,7 +146,7 @@ export const EditDataHelper = {
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
 
-    getRotateData(bounds: IBoundsData, direction: Direction9, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
+    getRotateData(target: IUI, direction: Direction9, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
         let align: IAlign, origin = {} as IPointData
 
         switch (direction) {
@@ -166,9 +166,9 @@ export const EditDataHelper = {
                 align = 'center'
         }
 
-        toPoint(around || align, bounds, origin, true)
+        toPoint(around || align, target.boxBounds, origin, true)
 
-        return { origin, rotation: PointHelper.getRotation(last, origin, current) }
+        return { origin, rotation: PointHelper.getRotation(last, target.getWorldPointByBox(origin), current) }
     },
 
     getSkewData(bounds: IBoundsData, direction: Direction9, move: IPointData, around: IAround): IEditorSkewEvent {
