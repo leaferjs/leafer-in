@@ -1,4 +1,4 @@
-import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventParamsMap } from '@leafer-ui/interface'
+import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventParamsMap, IAnimateList } from '@leafer-ui/interface'
 import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
@@ -12,6 +12,7 @@ const frameDuration = 0.2
 export class Animate extends Eventer implements IAnimate {
 
     public target: IUI | IObject
+    public parent?: IAnimateList
 
     public keyframes: IKeyframe[]
     public config?: IAnimateOptions
@@ -137,13 +138,18 @@ export class Animate extends Eventer implements IAnimate {
         }, 0)
     }
 
+    public emitType(type: string): void {
+        this.emit(type, this)
+        if (this.parent) this.parent.onChildEvent(type, this)
+    }
+
     public play(): void {
         if (this.destroyed) return
 
         this.running = true
         if (!this.started) this.clearTimer(), this.start()
         else if (!this.timer) this.requestAnimate()
-        this.emit(AnimateEvent.PLAY, this)
+        this.emitType(AnimateEvent.PLAY)
     }
 
     public pause(): void {
@@ -151,14 +157,14 @@ export class Animate extends Eventer implements IAnimate {
 
         this.running = false
         this.clearTimer()
-        this.emit(AnimateEvent.PAUSE, this)
+        this.emitType(AnimateEvent.PAUSE)
     }
 
     public stop(): void {
         if (this.destroyed) return
 
         this.complete()
-        this.emit(AnimateEvent.STOP, this)
+        this.emitType(AnimateEvent.STOP)
     }
 
     public seek(time: number | IPercentData): void {
@@ -172,7 +178,7 @@ export class Animate extends Eventer implements IAnimate {
 
         this.animate(0, true)
         this.clearTimer(() => this.requestAnimate())
-        this.emit(AnimateEvent.SEEK, this)
+        this.emitType(AnimateEvent.SEEK)
     }
 
     public kill(complete = true, killStyle?: IUIInputData): void {
@@ -242,7 +248,7 @@ export class Animate extends Eventer implements IAnimate {
             if (totalTime) this.changeDuration(totalTime)
         }
 
-        this.emit(AnimateEvent.CREATED, this)
+        this.emitType(AnimateEvent.CREATED)
     }
 
     public changeDuration(duration: number): void {
@@ -376,7 +382,7 @@ export class Animate extends Eventer implements IAnimate {
         this.setStyle(style)
 
         this.clearTimer()
-        this.emit(AnimateEvent.COMPLETED, this)
+        this.emitType(AnimateEvent.COMPLETED)
     }
 
 
@@ -426,7 +432,7 @@ export class Animate extends Eventer implements IAnimate {
             this.setStyle(betweenStyle)
         }
 
-        this.emit(AnimateEvent.UPDATE, this)
+        this.emitType(AnimateEvent.UPDATE)
     }
 
     public setStyle(style: IObject): void {
@@ -469,14 +475,13 @@ export class Animate extends Eventer implements IAnimate {
         }
     }
 
-
     public destroy(complete?: boolean): void {
         if (!this.destroyed) {
             super.destroy()
 
             if (complete && !this.completed) this.stop()
             else this.pause()
-            this.target = this.config = this.frames = this.fromStyle = this.toStyle = this.style = this.killStyle = null
+            this.target = this.parent = this.config = this.frames = this.fromStyle = this.toStyle = this.style = this.killStyle = null
             this.destroyed = true
         }
     }
