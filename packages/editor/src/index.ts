@@ -47,7 +47,7 @@ Creator.editor = function (options?: IEditorConfig, app?: IApp): IEditor {
 Box.addAttr('textBox', false, dataType)
 
 UI.addAttr('editConfig', undefined, dataType)
-UI.addAttr('editOuter', (ui: UI) => ui.__.__isLinePath ? 'LineEditTool' : 'EditTool', dataType)
+UI.addAttr('editOuter', (ui: UI) => { ui.updateLayout(); return ui.__.__isLinePath ? 'LineEditTool' : 'EditTool' }, dataType) // fix: Line 需要更新布局才能精准确定
 
 UI.addAttr('editInner', 'PathEditor', dataType)
 Group.addAttr('editInner', '', dataType)  // 必须设为空
