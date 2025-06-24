@@ -116,14 +116,18 @@ export const EditDataHelper = {
 
         if (dragBounds) {
             const allowBounds = dragBounds === 'parent' ? target.parent.boxBounds : dragBounds
-            const localBounds = new Bounds(target.__localBoxBounds)
-            localBounds.scaleOf(target.getLocalPointByInner(origin), scaleX, scaleY)
+            const childBounds = new Bounds(target.__localBoxBounds)
 
-            if (!BoundsHelper.includes(allowBounds, localBounds)) {
-                const realBounds = localBounds.getIntersect(allowBounds)
-                const fitScaleX = realBounds.width / localBounds.width, fitScaleY = realBounds.height / localBounds.height
-                if (useScaleX) scaleX *= fitScaleX
-                if (useScaleY) scaleY *= fitScaleY // 后续需优化带旋转的场景
+            if (BoundsHelper.includes(new Bounds(allowBounds).spread(0.1), childBounds)) {
+
+                childBounds.scaleOf(target.getLocalPointByInner(origin), scaleX, scaleY)
+
+                if (!BoundsHelper.includes(allowBounds, childBounds)) {
+                    const realBounds = childBounds.getIntersect(allowBounds)
+                    const fitScaleX = realBounds.width / childBounds.width, fitScaleY = realBounds.height / childBounds.height
+                    if (useScaleX) scaleX *= fitScaleX
+                    if (useScaleY) scaleY *= fitScaleY // 后续需优化带旋转的场景
+                }
             }
         }
 
