@@ -10,7 +10,7 @@ const cacheCursors: IObject = {}
 
 export function updateCursor(editBox: IEditBox, e: IUIEvent): void {
     const { enterPoint: point } = editBox
-    if (!point || !editBox.editor.editing || !editBox.visible) return
+    if (!point || !editBox.editor.editing || !editBox.canUse) return
     if (point.name === 'circle') return // 独立旋转按钮
     if (point.pointType === 'button') { // 普通按钮
         if (!point.cursor) point.cursor = 'pointer'
@@ -40,7 +40,7 @@ export function updateCursor(editBox: IEditBox, e: IUIEvent): void {
 
 export function updateMoveCursor(editBox: IEditBox): void {
     const { moveCursor, moveable } = editBox.mergeConfig
-    editBox.rect.cursor = moveable ? moveCursor : undefined
+    if (editBox.canUse) editBox.rect.cursor = moveable ? moveCursor : undefined
 }
 
 

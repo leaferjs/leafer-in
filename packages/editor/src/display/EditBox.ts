@@ -5,7 +5,6 @@ import { DragEvent, PointerEvent, KeyEvent } from '@leafer-ui/core'
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
 import { updateCursor, updateMoveCursor } from '../editor/cursor'
-import { EditorEvent } from '../event/EditorEvent'
 import { EditPoint } from './EditPoint'
 import { EditDataHelper } from '../helper/EditDataHelper'
 
@@ -58,6 +57,8 @@ export class EditBox extends Group implements IEditBox {
     public get flippedY(): boolean { return this.scaleY < 0 }
     public get flippedOne(): boolean { return this.scaleX * this.scaleY < 0 }
 
+    public get canUse() { return (this.visible && this.view.visible) as boolean } // 编辑框是否处于激活状态
+
     protected __eventIds: IEventListenerId[] = []
 
     constructor(editor: IEditor) {
@@ -95,6 +96,7 @@ export class EditBox extends Group implements IEditBox {
         this.add(view)
     }
 
+
     public load(): void {
         const { target, mergeConfig, single, rect, circle, resizePoints } = this
         const { stroke, strokeWidth } = mergeConfig
@@ -118,12 +120,12 @@ export class EditBox extends Group implements IEditBox {
 
         const syncEventer = single && this.transformTool.editTool
 
+        // 编辑框作为底部虚拟元素， 在 unload() 中重置
         rect.hittable = !syncEventer
         rect.syncEventer = syncEventer && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
 
-        // 编辑框作为底部虚拟元素， 在 onSelect 方法移除
         if (syncEventer) {
-            target.syncEventer = rect
+            target.syncEventer = rect // 在 target 属性装饰中重置
             this.app.interaction.bottomList = [{ target: rect, proxy: target }]
         }
 
@@ -136,6 +138,12 @@ export class EditBox extends Group implements IEditBox {
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })
     }
+
+    public unload(): void {
+        this.visible = false
+        if (this.app) this.rect.syncEventer = this.app.interaction.bottomList = null
+    }
+
 
     public updateBounds(bounds: IBoundsData): void {
         const { editMask } = this.editor
@@ -238,11 +246,6 @@ export class EditBox extends Group implements IEditBox {
     }
 
 
-    public unload(): void {
-        this.visible = false
-    }
-
-
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.mergedConfig
         const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0, editConfig } as IBoxInputData
@@ -259,12 +262,6 @@ export class EditBox extends Group implements IEditBox {
         return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }
 
-    protected onSelect(e: EditorEvent): void {
-        if (e.oldList.length === 1) {
-            e.oldList[0].syncEventer = null
-            if (this.app) this.app.interaction.bottomList = null
-        }
-    }
 
     // drag
 
@@ -314,8 +311,8 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        const { editor } = this
-        if (editor.editing && this.mergeConfig.keyEvent) {
+        const { editor, transformTool } = this
+        if (this.canUse && editor.editing && this.mergeConfig.keyEvent) {
             let x = 0, y = 0
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
@@ -331,7 +328,7 @@ export class EditBox extends Group implements IEditBox {
                 case 'ArrowRight':
                     x = distance
             }
-            if (x || y) editor.move(x, y)
+            if (x || y) transformTool.move(x, y)
         }
     }
 
@@ -384,8 +381,6 @@ export class EditBox extends Group implements IEditBox {
         const { rect, editor, __eventIds: events } = this
 
         events.push(
-            editor.on_(EditorEvent.SELECT, this.onSelect, this),
-
             rect.on_([
                 [DragEvent.START, this.onDragStart, this],
                 [DragEvent.DRAG, this.onDrag, this],

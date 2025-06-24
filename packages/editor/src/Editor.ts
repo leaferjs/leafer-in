@@ -131,19 +131,23 @@ export class Editor extends Group implements IEditor {
     }
 
     public updateEditTool(): void {
+        this.unloadEditTool()
+
+        if (this.editing) {
+            const tag = this.element.editOuter || 'EditTool'
+            const tool = this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+            this.editBox.load()
+            tool.load()
+            this.update()
+        }
+    }
+
+    public unloadEditTool(): void {
         let tool = this.editTool
         if (tool) {
             this.editBox.unload()
             tool.unload()
             this.editTool = null
-        }
-
-        if (this.editing) {
-            const tag = this.element.editOuter || 'EditTool'
-            tool = this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
-            this.editBox.load()
-            tool.load()
-            this.update()
         }
     }
 
@@ -273,7 +277,7 @@ export class Editor extends Group implements IEditor {
         }
     }
 
-    public closeInnerEditor(): void {
+    public closeInnerEditor(onlyInnerEditor?: boolean): void {
         if (this.innerEditing) {
             this.innerEditing = false
 
@@ -281,7 +285,7 @@ export class Editor extends Group implements IEditor {
             this.innerEditor.unload()
             this.emitInnerEvent(InnerEditorEvent.CLOSE)
 
-            this.editTool.load()
+            if (!onlyInnerEditor) this.updateEditTool()
             this.innerEditor = null
         }
     }
