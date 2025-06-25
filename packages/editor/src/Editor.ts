@@ -267,7 +267,7 @@ export class Editor extends Group implements IEditor {
             if (tag && EditToolCreator.list[tag]) {
                 this.editTool.unload()
                 this.innerEditing = true
-                this.innerEditor = this.editToolList[tag] || EditToolCreator.get(tag, this)
+                this.innerEditor = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
                 this.innerEditor.editTarget = editTarget
 
                 this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
