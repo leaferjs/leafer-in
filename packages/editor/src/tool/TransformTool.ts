@@ -78,10 +78,8 @@ export class TransformTool implements ITransformTool { // Editor use
     public onRotate(e: DragEvent | RotateEvent): void {
 
         const { target, mergeConfig, dragStartData } = this.editBox
-        const { skewable, rotateable, around, rotateGap } = mergeConfig
-        const { direction, name } = e.current as IEditPoint
-
-        if (skewable && name === 'resize-line') return this.onSkew(e as DragEvent)
+        const { rotateable, around, rotateAround, rotateGap } = mergeConfig
+        const { direction } = e.current as IEditPoint
 
         let origin: IPointData, rotation: number
 
@@ -94,7 +92,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         } else {
 
-            const data = EditDataHelper.getRotateData(target, direction, e, dragStartData, e.shiftKey ? null : (target.around || target.origin || around || 'center'))
+            const data = EditDataHelper.getRotateData(target, direction, e, dragStartData, e.shiftKey ? null : (rotateAround || target.around || target.origin || around || 'center'))
             rotation = data.rotation
             origin = data.origin
 

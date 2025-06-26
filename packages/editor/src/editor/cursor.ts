@@ -9,7 +9,7 @@ import { EditDataHelper } from '../helper/EditDataHelper'
 const cacheCursors: IObject = {}
 
 export function updateCursor(editBox: IEditBox, e: IUIEvent): void {
-    const { enterPoint: point } = editBox
+    const { enterPoint: point, dragging, skewing, resizing, flippedX, flippedY } = editBox
     if (!point || !editBox.editor.editing || !editBox.canUse) return
     if (point.name === 'circle') return // 独立旋转按钮
     if (point.pointType === 'button') { // 普通按钮
@@ -17,14 +17,17 @@ export function updateCursor(editBox: IEditBox, e: IUIEvent): void {
         return
     }
 
-    let { rotation, flippedX, flippedY } = editBox
+    let { rotation } = editBox
     const { pointType } = point, { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editBox.mergeConfig
 
     let showResize = pointType.includes('resize')
     if (showResize && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResize = false
     const showSkew = skewable && !showResize && (point.name === 'resize-line' || pointType === 'skew')
 
-    const cursor = showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor)
+    const cursor = dragging
+        ? (skewing ? skewCursor : (resizing ? resizeCursor : rotateCursor))
+        : (showSkew ? skewCursor : (showResize ? resizeCursor : rotateCursor))
+
     rotation += (EditDataHelper.getFlipDirection(point.direction, flippedX, flippedY) + 1) * 45
     rotation = Math.round(MathHelper.formatRotation(rotation, true) / 2) * 2
 

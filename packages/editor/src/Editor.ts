@@ -52,9 +52,13 @@ export class Editor extends Group implements IEditor {
     public get multiple(): boolean { return this.list.length > 1 }
     public get single(): boolean { return this.list.length === 1 }
 
+    public get dragPoint(): IEditPoint { return this.editBox.dragPoint }
+
     public get dragging(): boolean { return this.editBox.dragging }
     public get moving(): boolean { return this.editBox.moving }
-    public get dragPoint(): IEditPoint { return this.editBox.dragPoint }
+    public get resizing(): boolean { return this.editBox.resizing }
+    public get rotating(): boolean { return this.editBox.rotating }
+    public get skewing(): boolean { return this.editBox.skewing }
 
     // 组件
 

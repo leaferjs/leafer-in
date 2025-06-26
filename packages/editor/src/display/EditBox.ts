@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
-import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent } from '@leafer-ui/draw'
+import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -17,6 +17,9 @@ export class EditBox extends Group implements IEditBox {
 
     public dragging: boolean
     public moving: boolean
+    public resizing: boolean
+    public rotating: boolean
+    public skewing: boolean
 
     public view: IGroup = new Group()  // 放置默认编辑工具控制点
 
@@ -37,8 +40,8 @@ export class EditBox extends Group implements IEditBox {
     public mergedConfig: IEditorConfig
 
     public get mergeConfig(): IEditorConfig {
-        const { config } = this, { mergeConfig } = this.editor
-        return this.mergedConfig = config ? { ...mergeConfig, ...config } : mergeConfig
+        const { config } = this, { mergeConfig, editBox } = this.editor
+        return this.mergedConfig = config && (editBox !== this) ? { ...mergeConfig, ...config } : mergeConfig // 可能会出现多个editBox的情况
     }
 
     protected _target: IUI
@@ -109,7 +112,7 @@ export class EditBox extends Group implements IEditBox {
         for (let i = 0; i < 8; i++) {
             resizeP = resizePoints[i]
             resizeP.set(this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length]))
-            if (!(i % 2)) resizeP.rotation = (i / 2) * 90
+            resizeP.rotation = ((i - (i % 2 ? 1 : 0)) / 2) * 90
         }
 
         // rotate
@@ -148,10 +151,12 @@ export class EditBox extends Group implements IEditBox {
     public updateBounds(bounds: IBoundsData): void {
         const { editMask } = this.editor
         const { mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask } = mergeConfig
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, spread } = mergeConfig
 
         this.visible = !this.target.locked
         editMask.visible = mask ? true : 0
+
+        if (spread) BoundsHelper.spread(bounds, spread)
 
         if (this.view.worldOpacity) {
             const { width, height } = bounds
@@ -183,7 +188,6 @@ export class EditBox extends Group implements IEditBox {
                         if (hideOnSmall && resizeP.width * 2 > width) resizeP.visible = false
                     } else {
                         resizeL.height = height
-                        resizeP.rotation = 90
                         if (hideOnSmall && resizeP.width * 2 > height) resizeP.visible = false
                     }
                 }
@@ -268,11 +272,21 @@ export class EditBox extends Group implements IEditBox {
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
-        const { editor, dragStartData } = this, { target } = this
+        const { editor, dragStartData } = this, { target } = this, { moveable, resizeable, rotateable, skewable, hideOnMove } = this.mergeConfig
+
+        // 确定模式
         if (point.name === 'rect') {
-            this.moving = true
-            editor.opacity = this.mergeConfig.hideOnMove ? 0 : 1 // move
+            moveable && (this.moving = true)
+            editor.opacity = hideOnMove ? 0 : 1 // move
+        } else {
+            if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !resizeable) {
+                rotateable && (this.rotating = true)
+                if (pointType === 'resize-rotate') resizeable && (this.resizing = true)
+                else if (point.name === 'resize-line') skewable && (this.skewing = true), this.rotating = false
+            } else if (pointType === 'resize') resizeable && (this.resizing = true)
+            if (pointType === 'skew') skewable && (this.skewing = true)
         }
+
         dragStartData.x = e.x
         dragStartData.y = e.y
         dragStartData.point = { x: target.x, y: target.y } // 用于移动
@@ -282,26 +296,23 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onDragEnd(e: DragEvent): void {
-        this.dragging = false
         this.dragPoint = null
-        this.moving = false
+        this.dragging = this.moving = this.resizing = this.rotating = this.skewing = false
         const { name, pointType } = e.current as IEditPoint
         if (name === 'rect') this.editor.opacity = 1 // move
         if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = null
     }
 
     protected onDrag(e: DragEvent): void {
-        const { transformTool } = this, point = e.current as IEditPoint
-        if (point.name === 'rect') {
+        const { transformTool } = this
+        if (this.moving) {
             transformTool.onMove(e)
             updateMoveCursor(this)
         } else {
-            const { pointType } = this.enterPoint = point
-            if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !this.mergeConfig.resizeable) {
-                transformTool.onRotate(e)
-                if (pointType === 'resize-rotate') transformTool.onScale(e)
-            } else if (pointType === 'resize') transformTool.onScale(e)
-            if (pointType === 'skew') transformTool.onSkew(e)
+            this.enterPoint = e.current as IEditPoint // 防止变化
+            if (this.rotating) transformTool.onRotate(e)
+            if (this.resizing) transformTool.onScale(e)
+            if (this.skewing) transformTool.onSkew(e)
             updateCursor(this, e)
         }
     }

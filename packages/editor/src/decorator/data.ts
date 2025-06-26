@@ -45,8 +45,9 @@ export function mergeConfigAttr() {
     return (target: IEditor, key: string) => {
         defineKey(target, key, {
             get() {
-                const { config, element, dragPoint } = this, mergeConfig = { ...config } // 实时合并，后期可优化
-                if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig)
+                const { config, element, dragPoint, editBox } = this, mergeConfig = { ...config } // 实时合并，后期可优化
+                if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig) // 元素上的配置
+                if (editBox.config) Object.assign(mergeConfig, editBox.config) // EditBox 上的配置
                 if (dragPoint) {
                     if (dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
                     if (mergeConfig.editSize === 'font-size') mergeConfig.lockRatio = true // 强制锁定比例

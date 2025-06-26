@@ -27,16 +27,17 @@ export class Stroker extends UI implements IStroker {
         this.strokeAlign = 'center'
     }
 
-    public setTarget(target: IUI | IUI[], style: IRectInputData): void {
-        this.set(style)
+    public setTarget(target: IUI | IUI[], style?: IRectInputData): void {
+        if (style) this.set(style)
         this.target = target
         this.update()
     }
 
-    public update(): void {
+    public update(style?: IRectInputData): void {
         const { list } = this
         if (list.length) {
             setListWithFn(bounds, list, worldBounds)
+            if (style) this.set(style)
             this.set(bounds)
             this.visible = true
         } else this.visible = 0
