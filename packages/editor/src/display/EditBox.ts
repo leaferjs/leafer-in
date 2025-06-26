@@ -1,6 +1,6 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
 import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper } from '@leafer-ui/draw'
-import { DragEvent, PointerEvent, KeyEvent } from '@leafer-ui/core'
+import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
@@ -16,6 +16,8 @@ export class EditBox extends Group implements IEditBox {
     public editor: IEditor
 
     public dragging: boolean
+    public gesturing: boolean
+
     public moving: boolean
     public resizing: boolean
     public rotating: boolean
@@ -60,7 +62,12 @@ export class EditBox extends Group implements IEditBox {
     public get flippedY(): boolean { return this.scaleY < 0 }
     public get flippedOne(): boolean { return this.scaleX * this.scaleY < 0 }
 
-    public get canUse() { return (this.visible && this.view.visible) as boolean } // 编辑框是否处于激活状态
+    public get canUse(): boolean { return (this.visible && this.view.visible) as boolean } // 编辑框是否处于激活状态
+    public get canGesture(): boolean { // 是否支持手势
+        if (!this.canUse) return false
+        const { moveable, resizeable, rotateable } = this.mergeConfig
+        return typeof moveable === 'string' || typeof resizeable === 'string' || typeof rotateable === 'string'
+    }
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -297,7 +304,7 @@ export class EditBox extends Group implements IEditBox {
 
     protected onDragEnd(e: DragEvent): void {
         this.dragPoint = null
-        this.dragging = this.moving = this.resizing = this.rotating = this.skewing = false
+        this.resetDoing()
         const { name, pointType } = e.current as IEditPoint
         if (name === 'rect') this.editor.opacity = 1 // move
         if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = null
@@ -316,6 +323,44 @@ export class EditBox extends Group implements IEditBox {
             updateCursor(this, e)
         }
     }
+
+    protected resetDoing(): void {
+        if (this.canUse) this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
+    }
+
+    // 手势控制元素
+
+    public onMove(e: MoveEvent): void {
+        if (this.canGesture && e.moveType !== 'drag') {
+            e.stop()
+            if (typeof this.mergeConfig.moveable === 'string') {
+                this.gesturing = this.moving = true
+                this.transformTool.onMove(e)
+            }
+        }
+    }
+
+    public onScale(e: ZoomEvent): void {
+        if (this.canGesture) {
+            e.stop()
+            if (typeof this.mergeConfig.resizeable === 'string') {
+                this.gesturing = this.resizing = true
+                this.transformTool.onScale(e)
+            }
+        }
+    }
+
+    public onRotate(e: RotateEvent): void {
+        if (this.canGesture) {
+            e.stop()
+            if (typeof this.mergeConfig.rotateable === 'string') {
+                this.gesturing = this.rotating = true
+                this.transformTool.onRotate(e)
+            }
+        }
+    }
+
+    // 键盘
 
     protected onKey(e: KeyEvent): void {
         updateCursor(this, e)
@@ -407,7 +452,13 @@ export class EditBox extends Group implements IEditBox {
             events.push(
                 editor.app.on_([
                     [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
-                    [KeyEvent.DOWN, this.onArrow, this]
+                    [KeyEvent.DOWN, this.onArrow, this],
+                    [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
+                    [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
+                    [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
+                    [MoveEvent.END, this.resetDoing, this],
+                    [ZoomEvent.END, this.resetDoing, this],
+                    [RotateEvent.END, this.resetDoing, this],
                 ])
             )
         })

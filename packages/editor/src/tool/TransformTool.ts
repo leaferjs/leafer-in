@@ -1,5 +1,5 @@
 import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper } from '@leafer-ui/draw'
+import { MathHelper, Matrix, LeafHelper, AroundHelper } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -23,17 +23,12 @@ export class TransformTool implements ITransformTool { // Editor use
 
     public onMove(e: DragEvent | MoveEvent): void {
 
-        const { target, mergeConfig, dragStartData } = this.editBox
+        const { target, dragStartData } = this.editBox
 
         if (e instanceof MoveEvent) {
 
-            if (e.moveType !== 'drag') {
-                const { moveable, resizeable } = mergeConfig
-                const move = e.getLocalMove(target)
-
-                if (moveable === 'move') e.stop(), this.move(move.x, move.y)
-                else if (resizeable === 'zoom') e.stop()
-            }
+            const move = e.getLocalMove(target)
+            this.move(move.x, move.y)
 
         } else {
 
@@ -52,11 +47,11 @@ export class TransformTool implements ITransformTool { // Editor use
     public onScale(e: DragEvent | ZoomEvent): void {
 
         const { target, mergeConfig, single, dragStartData } = this.editBox
-        let { around, lockRatio, resizeable, flipable, editSize } = mergeConfig
+        let { around, lockRatio, flipable, editSize } = mergeConfig
 
         if (e instanceof ZoomEvent) {
 
-            if (resizeable === 'zoom') e.stop(), this.scaleOf(target.getBoxPoint(e), e.scale, e.scale)
+            this.scaleOf(target.getBoxPoint(e), e.scale, e.scale)
 
         } else {
 
@@ -78,28 +73,23 @@ export class TransformTool implements ITransformTool { // Editor use
     public onRotate(e: DragEvent | RotateEvent): void {
 
         const { target, mergeConfig, dragStartData } = this.editBox
-        const { rotateable, around, rotateAround, rotateGap } = mergeConfig
+        const { around, rotateAround, rotateGap } = mergeConfig
         const { direction } = e.current as IEditPoint
 
         let origin: IPointData, rotation: number
 
         if (e instanceof RotateEvent) {
 
-            if (rotateable === 'rotate') e.stop(), rotation = e.rotation, origin = target.getBoxPoint(e)
-            else return
-
-            if (target.scaleX * target.scaleY < 0) rotation = -rotation // flippedOne
+            rotation = e.rotation
+            origin = rotateAround ? AroundHelper.getPoint(rotateAround, target.boxBounds) : target.getBoxPoint(e)
 
         } else {
 
             const data = EditDataHelper.getRotateData(target, direction, e, dragStartData, e.shiftKey ? null : (rotateAround || target.around || target.origin || around || 'center'))
-            rotation = data.rotation
+            rotation = dragStartData.rotation + data.rotation - target.rotation
             origin = data.origin
 
         }
-
-        if (target.scaleX * target.scaleY < 0) rotation = -rotation // flippedOne
-        if (e instanceof DragEvent) rotation = dragStartData.rotation + rotation - target.rotation
 
         rotation = MathHelper.float(MathHelper.getGapRotation(rotation, rotateGap, target.rotation), 2)
         if (!rotation) return

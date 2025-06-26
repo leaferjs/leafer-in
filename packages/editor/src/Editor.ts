@@ -55,6 +55,8 @@ export class Editor extends Group implements IEditor {
     public get dragPoint(): IEditPoint { return this.editBox.dragPoint }
 
     public get dragging(): boolean { return this.editBox.dragging }
+    public get gesturing(): boolean { return this.editBox.gesturing } // 手势操作元素中
+
     public get moving(): boolean { return this.editBox.moving }
     public get resizing(): boolean { return this.editBox.resizing }
     public get rotating(): boolean { return this.editBox.rotating }
@@ -345,14 +347,7 @@ export class Editor extends Group implements IEditor {
             const { app, leafer, editMask } = this
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.onRenderStart, this),
-
-                app.on_([
-                    [RenderEvent.CHILD_START, this.onAppRenderStart, this],
-
-                    [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
-                    [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
-                    [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
-                ])
+                app.on_(RenderEvent.CHILD_START, this.onAppRenderStart, this)
             ]
             if (editMask.visible) editMask.forceRender()
         }
