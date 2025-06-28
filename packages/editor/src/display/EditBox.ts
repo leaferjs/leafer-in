@@ -4,7 +4,7 @@ import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } 
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
-import { updateCursor, updateMoveCursor } from '../editor/cursor'
+import { updatePointCursor, updateMoveCursor } from '../editor/cursor'
 import { EditPoint } from './EditPoint'
 import { EditDataHelper } from '../helper/EditDataHelper'
 
@@ -311,16 +311,17 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onDrag(e: DragEvent): void {
-        const { transformTool } = this
-        if (this.moving) {
+        const { transformTool, moving, resizing, rotating, skewing } = this
+        if (moving) {
             transformTool.onMove(e)
             updateMoveCursor(this)
-        } else {
-            this.enterPoint = e.current as IEditPoint // 防止变化
-            if (this.rotating) transformTool.onRotate(e)
-            if (this.resizing) transformTool.onScale(e)
-            if (this.skewing) transformTool.onSkew(e)
-            updateCursor(this, e)
+        } else if (resizing || rotating || skewing) {
+            const point = e.current as IEditPoint
+            if (point.pointType) this.enterPoint = point// 防止变化
+            if (rotating) transformTool.onRotate(e)
+            if (resizing) transformTool.onScale(e)
+            if (skewing) transformTool.onSkew(e)
+            updatePointCursor(this, e)
         }
     }
 
@@ -363,7 +364,7 @@ export class EditBox extends Group implements IEditBox {
     // 键盘
 
     protected onKey(e: KeyEvent): void {
-        updateCursor(this, e)
+        updatePointCursor(this, e)
     }
 
     public onArrow(e: IKeyEvent): void {
@@ -429,7 +430,7 @@ export class EditBox extends Group implements IEditBox {
             [DragEvent.END, this.onDragEnd, this],
             [PointerEvent.LEAVE, () => { this.enterPoint = null }],
         ]
-        if (point.name !== 'circle') events.push([PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, updateCursor(this, e) }])
+        if (point.name !== 'circle') events.push([PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, updatePointCursor(this, e) }])
         this.__eventIds.push(point.on_(events))
     }
 

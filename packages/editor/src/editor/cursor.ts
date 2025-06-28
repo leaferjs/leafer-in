@@ -8,7 +8,7 @@ import { EditDataHelper } from '../helper/EditDataHelper'
 
 const cacheCursors: IObject = {}
 
-export function updateCursor(editBox: IEditBox, e: IUIEvent): void {
+export function updatePointCursor(editBox: IEditBox, e: IUIEvent): void {
     const { enterPoint: point, dragging, skewing, resizing, flippedX, flippedY } = editBox
     if (!point || !editBox.editor.editing || !editBox.canUse) return
     if (point.name === 'circle') return // 独立旋转按钮
