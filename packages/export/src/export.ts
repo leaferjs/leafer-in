@@ -1,5 +1,5 @@
 import { IExportModule, IExportOptions, IExportResult, IExportResultFunction, IUI, IExportFileType, IFunction, IRenderOptions, IBoundsData, IBounds, ILocationType, ILeaf } from '@leafer-ui/interface'
-import { Creator, Matrix, TaskProcessor, FileHelper, Bounds, Platform, MathHelper, Resource } from '@leafer-ui/draw'
+import { Creator, Matrix, TaskProcessor, FileHelper, Bounds, Platform, MathHelper, Resource, Export } from '@leafer-ui/draw'
 
 import { getTrimBounds } from './trim'
 
@@ -8,7 +8,7 @@ export const ExportModule: IExportModule = {
 
     syncExport(leaf: IUI, filename: string, options?: IExportOptions | number | boolean): IExportResult {
 
-        this.running = true
+        Export.running = true
 
         let result: IExportResult
         const fileType = FileHelper.fileType(filename)
@@ -140,14 +140,14 @@ export const ExportModule: IExportModule = {
 
         }
 
-        this.running = false
+        Export.running = false
 
         return result
     },
 
     export(leaf: IUI, filename: IExportFileType | string, options?: IExportOptions | number | boolean): Promise<IExportResult> {
 
-        this.running = true
+        Export.running = true
 
         return addTask((success: IExportResultFunction) =>
 
@@ -155,7 +155,7 @@ export const ExportModule: IExportModule = {
 
                 const getResult = async () => {
                     if (!Resource.isComplete) return Platform.requestRender(getResult)
-                    const result: IExportResult = ExportModule.syncExport(leaf, filename, options)
+                    const result: IExportResult = Export.syncExport(leaf, filename, options)
                     if (result.data instanceof Promise) result.data = await result.data
                     success(result)
                     resolve()
