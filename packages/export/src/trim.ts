@@ -19,6 +19,9 @@ export function getTrimBounds(canvas: ILeaferCanvas): IBounds {
     }
 
     const bounds = new Bounds()
-    toBounds(pointBounds, bounds)
-    return bounds.scale(1 / canvas.pixelRatio).ceil()
+    if (pointBounds) {
+        toBounds(pointBounds, bounds)
+        bounds.scale(1 / canvas.pixelRatio).ceil()
+    }
+    return bounds
 }
