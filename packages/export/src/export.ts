@@ -11,133 +11,141 @@ export const ExportModule: IExportModule = {
         Export.running = true
 
         let result: IExportResult
-        const fileType = FileHelper.fileType(filename)
-        const isDownload = filename.includes('.')
-        options = FileHelper.getExportOptions(options)
 
-        const { toURL } = Platform
-        const { download } = Platform.origin
+        try {
+
+            const fileType = FileHelper.fileType(filename)
+            const isDownload = filename.includes('.')
+            options = FileHelper.getExportOptions(options)
+
+            const { toURL } = Platform
+            const { download } = Platform.origin
 
 
-        if (fileType === 'json') {
+            if (fileType === 'json') {
 
-            isDownload && download(toURL(JSON.stringify(leaf.toJSON(options.json)), 'text'), filename)
-            result = { data: isDownload ? true : leaf.toJSON(options.json) }
+                isDownload && download(toURL(JSON.stringify(leaf.toJSON(options.json)), 'text'), filename)
+                result = { data: isDownload ? true : leaf.toJSON(options.json) }
 
-        } else if (fileType === 'svg') {
+            } else if (fileType === 'svg') {
 
-            isDownload && download(toURL(leaf.toSVG(), 'svg'), filename)
-            result = { data: isDownload ? true : leaf.toSVG() }
+                isDownload && download(toURL(leaf.toSVG(), 'svg'), filename)
+                result = { data: isDownload ? true : leaf.toSVG() }
 
-        } else {
-
-            let renderBounds: IBoundsData, trimBounds: IBounds, scaleX = 1, scaleY = 1
-            const { worldTransform, isLeafer, leafer, isFrame } = leaf
-            const { slice, clip, trim, screenshot, padding, onCanvas } = options
-            const smooth = options.smooth === undefined ? (leafer ? leafer.config.smooth : true) : options.smooth
-            const contextSettings = options.contextSettings || (leafer ? leafer.config.contextSettings : undefined)
-
-            const fill = (isLeafer && screenshot) ? (options.fill === undefined ? leaf.fill : options.fill) : options.fill // leafer use 
-            const needFill = FileHelper.isOpaqueImage(filename) || fill, matrix = new Matrix()
-
-            // 获取元素大小
-            if (screenshot) {
-                renderBounds = screenshot === true ? (isLeafer ? leafer.canvas.bounds : leaf.worldRenderBounds) : screenshot
             } else {
-                let relative: ILocationType | ILeaf = options.relative || (isLeafer ? 'inner' : 'local')
 
-                scaleX = worldTransform.scaleX
-                scaleY = worldTransform.scaleY
+                let renderBounds: IBoundsData, trimBounds: IBounds, scaleX = 1, scaleY = 1
+                const { worldTransform, isLeafer, leafer, isFrame } = leaf
+                const { slice, clip, trim, screenshot, padding, onCanvas } = options
+                const smooth = options.smooth === undefined ? (leafer ? leafer.config.smooth : true) : options.smooth
+                const contextSettings = options.contextSettings || (leafer ? leafer.config.contextSettings : undefined)
 
-                switch (relative) {
-                    case 'inner':
-                        matrix.set(worldTransform)
-                        break
-                    case 'local':
-                        matrix.set(worldTransform).divide(leaf.localTransform)
-                        scaleX /= leaf.scaleX
-                        scaleY /= leaf.scaleY
-                        break
-                    case 'world':
-                        scaleX = 1
-                        scaleY = 1
-                        break
-                    case 'page':
-                        relative = leafer || leaf
-                    default:
-                        matrix.set(worldTransform).divide(leaf.getTransform(relative))
-                        const l = relative.worldTransform
-                        scaleX /= scaleX / l.scaleX
-                        scaleY /= scaleY / l.scaleY
+                const fill = (isLeafer && screenshot) ? (options.fill === undefined ? leaf.fill : options.fill) : options.fill // leafer use 
+                const needFill = FileHelper.isOpaqueImage(filename) || fill, matrix = new Matrix()
+
+                // 获取元素大小
+                if (screenshot) {
+                    renderBounds = screenshot === true ? (isLeafer ? leafer.canvas.bounds : leaf.worldRenderBounds) : screenshot
+                } else {
+                    let relative: ILocationType | ILeaf = options.relative || (isLeafer ? 'inner' : 'local')
+
+                    scaleX = worldTransform.scaleX
+                    scaleY = worldTransform.scaleY
+
+                    switch (relative) {
+                        case 'inner':
+                            matrix.set(worldTransform)
+                            break
+                        case 'local':
+                            matrix.set(worldTransform).divide(leaf.localTransform)
+                            scaleX /= leaf.scaleX
+                            scaleY /= leaf.scaleY
+                            break
+                        case 'world':
+                            scaleX = 1
+                            scaleY = 1
+                            break
+                        case 'page':
+                            relative = leafer || leaf
+                        default:
+                            matrix.set(worldTransform).divide(leaf.getTransform(relative))
+                            const l = relative.worldTransform
+                            scaleX /= scaleX / l.scaleX
+                            scaleY /= scaleY / l.scaleY
+                    }
+
+                    renderBounds = leaf.getBounds('render', relative)
                 }
 
-                renderBounds = leaf.getBounds('render', relative)
+
+                // 缩放元素
+                const scaleData = { scaleX: 1, scaleY: 1 }
+                MathHelper.getScaleData(options.scale, options.size, renderBounds, scaleData)
+
+                let pixelRatio = options.pixelRatio || 1
+
+
+                // 导出元素
+                let { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
+                if (clip) x += clip.x, y += clip.y, width = clip.width, height = clip.height
+
+                const renderOptions: IRenderOptions = { exporting: true, matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
+                let canvas = Creator.canvas({ width: Math.floor(width), height: Math.floor(height), pixelRatio, smooth, contextSettings })
+
+                let sliceLeaf: IUI
+                if (slice) {
+                    sliceLeaf = leaf
+                    sliceLeaf.__worldOpacity = 0 // hide slice
+
+                    leaf = leafer || leaf // render all in bounds
+                    renderOptions.bounds = canvas.bounds
+                }
+
+
+                canvas.save()
+
+                if (isFrame && fill !== undefined) {
+                    const oldFill = leaf.get('fill')
+                    leaf.fill = ''
+                    leaf.__render(canvas, renderOptions)
+                    leaf.fill = oldFill as string
+                } else {
+                    leaf.__render(canvas, renderOptions)
+                }
+
+                canvas.restore()
+
+
+                if (sliceLeaf) sliceLeaf.__updateWorldOpacity() // show slice
+
+                if (trim) {
+                    trimBounds = getTrimBounds(canvas)
+                    const old = canvas, { width, height } = trimBounds
+                    const config = { x: 0, y: 0, width, height, pixelRatio }
+
+                    canvas = Creator.canvas(config)
+                    canvas.copyWorld(old, trimBounds, config)
+                }
+
+                if (padding) {
+                    const [top, right, bottom, left] = MathHelper.fourNumber(padding)
+                    const old = canvas, { width, height } = old
+
+                    canvas = Creator.canvas({ width: width + left + right, height: height + top + bottom, pixelRatio })
+                    canvas.copyWorld(old, old.bounds, { x: left, y: top, width, height })
+                }
+
+                if (needFill) canvas.fillWorld(canvas.bounds, fill || '#FFFFFF', 'destination-over')
+                if (onCanvas) onCanvas(canvas)
+
+                const data = filename === 'canvas' ? canvas : canvas.export(filename, options)
+                result = { data, width: canvas.pixelWidth, height: canvas.pixelHeight, renderBounds, trimBounds }
+
             }
 
+        } catch (error) {
 
-            // 缩放元素
-            const scaleData = { scaleX: 1, scaleY: 1 }
-            MathHelper.getScaleData(options.scale, options.size, renderBounds, scaleData)
-
-            let pixelRatio = options.pixelRatio || 1
-
-
-            // 导出元素
-            let { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
-            if (clip) x += clip.x, y += clip.y, width = clip.width, height = clip.height
-
-            const renderOptions: IRenderOptions = { exporting: true, matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
-            let canvas = Creator.canvas({ width: Math.floor(width), height: Math.floor(height), pixelRatio, smooth, contextSettings })
-
-            let sliceLeaf: IUI
-            if (slice) {
-                sliceLeaf = leaf
-                sliceLeaf.__worldOpacity = 0 // hide slice
-
-                leaf = leafer || leaf // render all in bounds
-                renderOptions.bounds = canvas.bounds
-            }
-
-
-            canvas.save()
-
-            if (isFrame && fill !== undefined) {
-                const oldFill = leaf.get('fill')
-                leaf.fill = ''
-                leaf.__render(canvas, renderOptions)
-                leaf.fill = oldFill as string
-            } else {
-                leaf.__render(canvas, renderOptions)
-            }
-
-            canvas.restore()
-
-
-            if (sliceLeaf) sliceLeaf.__updateWorldOpacity() // show slice
-
-            if (trim) {
-                trimBounds = getTrimBounds(canvas)
-                const old = canvas, { width, height } = trimBounds
-                const config = { x: 0, y: 0, width, height, pixelRatio }
-
-                canvas = Creator.canvas(config)
-                canvas.copyWorld(old, trimBounds, config)
-            }
-
-            if (padding) {
-                const [top, right, bottom, left] = MathHelper.fourNumber(padding)
-                const old = canvas, { width, height } = old
-
-                canvas = Creator.canvas({ width: width + left + right, height: height + top + bottom, pixelRatio })
-                canvas.copyWorld(old, old.bounds, { x: left, y: top, width, height })
-            }
-
-            if (needFill) canvas.fillWorld(canvas.bounds, fill || '#FFFFFF', 'destination-over')
-            if (onCanvas) onCanvas(canvas)
-
-            const data = filename === 'canvas' ? canvas : canvas.export(filename, options)
-            result = { data, width: canvas.pixelWidth, height: canvas.pixelHeight, renderBounds, trimBounds }
-
+            result = { data: '', error }
         }
 
         Export.running = false
