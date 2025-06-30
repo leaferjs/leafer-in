@@ -140,8 +140,8 @@ export class Editor extends Group implements IEditor {
         this.unloadEditTool()
 
         if (this.editing) {
-            const tag = this.element.editOuter || 'EditTool'
-            const tool = this.editTool = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+            const name = this.element.editOuter || 'EditTool'
+            const tool = this.editTool = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
             this.editBox.load()
             tool.load()
             this.update()
@@ -265,15 +265,20 @@ export class Editor extends Group implements IEditor {
 
     // inner
 
-    public openInnerEditor(target?: IUI, select?: boolean): void {
+    public openInnerEditor(target?: IUI, nameOrSelect?: string | boolean, select?: boolean): void {
+        let name: string
+        if (typeof nameOrSelect === 'string') name = nameOrSelect
+        else if (!select) select = nameOrSelect
+
         if (target && select) this.target = target
+
         if (this.single) {
             const editTarget = target || this.element
-            const tag = editTarget.editInner
-            if (tag && EditToolCreator.list[tag]) {
+            name || (name = editTarget.editInner)
+            if (name && EditToolCreator.list[name]) {
                 this.editTool.unload()
                 this.innerEditing = true
-                this.innerEditor = this.editToolList[tag] = this.editToolList[tag] || EditToolCreator.get(tag, this)
+                this.innerEditor = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
                 this.innerEditor.editTarget = editTarget
 
                 this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
