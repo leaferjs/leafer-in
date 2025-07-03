@@ -3,7 +3,7 @@ export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
 import { IMotionPathData, IUI, IUnitData, IRotationPointData, IPercentData } from '@leafer-ui/interface'
-import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject } from '@leafer-ui/draw'
+import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
 import { motionPathType } from './decorator'
@@ -50,7 +50,7 @@ ui.getMotionPoint = function (motionDistance: number | IUnitData): IRotationPoin
 
     const { motionRotation } = this
     if (motionRotation === false) delete point.rotation
-    else if (typeof motionRotation === 'number') point.rotation += motionRotation
+    else if (isNumber(motionRotation)) point.rotation += motionRotation
     return point
 }
 

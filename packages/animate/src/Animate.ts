@@ -1,5 +1,5 @@
 import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventParamsMap, IAnimateList } from '@leafer-ui/interface'
-import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition, isArray, isObject } from '@leafer-ui/draw'
+import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition, isArray, isObject, isNumber } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
@@ -99,7 +99,7 @@ export class Animate extends Eventer implements IAnimate {
         else if (ending === 'to') count = 1
         else {
             count = reverse ? 0 : 1
-            if (swing && loop && typeof loop === 'number') count += loop - 1
+            if (swing && loop && isNumber(loop)) count += loop - 1
         }
         return count % 2 ? 'to' : 'from'
     }
@@ -207,8 +207,8 @@ export class Animate extends Eventer implements IAnimate {
 
                 const { duration, autoDuration, delay, autoDelay, easing, swing, loop } = keyframe
 
-                if (swing) item.swing = typeof swing === 'number' ? swing : 2, times = item.swing * 2 - 1
-                if (loop) item.loop = times = typeof loop === 'number' ? loop : 2
+                if (swing) item.swing = isNumber(swing) ? swing : 2, times = item.swing * 2 - 1
+                if (loop) item.loop = times = isNumber(loop) ? loop : 2
 
                 if (duration) {
                     item.duration = duration, totalTime += duration * times
@@ -453,7 +453,7 @@ export class Animate extends Eventer implements IAnimate {
     }
 
     protected needStopLoop(looped: number, times: boolean | number, swing?: boolean,): boolean {
-        return typeof times === 'number' && (!times || looped >= (swing ? times * 2 - 1 : times))
+        return isNumber(times) && (!times || looped >= (swing ? times * 2 - 1 : times))
     }
 
     protected needLoopFrame(): boolean {

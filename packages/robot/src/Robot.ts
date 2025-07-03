@@ -1,5 +1,5 @@
 import { ILeaferCanvas, IRenderOptions, ILeaferImage, IRobot, IRobotData, IRobotInputData, IRobotKeyframe, IRobotActions, IRobotActionName, IRobotComputedKeyframe, IRobotAnimation } from '@leafer-ui/interface'
-import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType, isArray, isObject } from '@leafer-ui/draw'
+import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType, isArray, isObject, isNumber } from '@leafer-ui/draw'
 
 import { RobotData } from './data/RobotData'
 
@@ -78,7 +78,7 @@ export class Robot extends UI implements IRobot {
         if (this.__timer) clearTimeout(this.__timer)
         if (action === undefined) return
 
-        if (typeof action === 'number') {
+        if (isNumber(action)) {
 
             this.now = action
 
@@ -109,7 +109,7 @@ export class Robot extends UI implements IRobot {
 
     protected __createFrames(image: ILeaferImage, frame: IRobotKeyframe, start: number, end: number): void {
         const { offset, size, total } = frame
-        const { width, height } = size && (typeof size === 'number' ? { width: size, height: size } : size) || (total > 1 ? this : image)
+        const { width, height } = size && (isNumber(size) ? { width: size, height: size } : size) || (total > 1 ? this : image)
 
         let x = offset ? offset.x : 0, y = offset ? offset.y : 0
 

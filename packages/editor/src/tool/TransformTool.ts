@@ -1,5 +1,5 @@
 import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject } from '@leafer-ui/draw'
+import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isNumber } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -197,7 +197,7 @@ export class TransformTool implements ITransformTool { // Editor use
         const { beforeRotate } = mergeConfig
         if (beforeRotate) {
             const check = beforeRotate({ target, origin, rotation })
-            if (typeof check === 'number') rotation = check
+            if (isNumber(check)) rotation = check
             else if (check === false) return
         }
 

@@ -1,17 +1,17 @@
 import { IUI, IObject, IUIInputData, IStateStyle, IScaleData, ITransition } from '@leafer-ui/interface'
-import { State, MathHelper, isNull } from '@leafer-ui/core'
+import { State, MathHelper, isNull, isObject } from '@leafer-ui/core'
 
 import { findParentButton } from './helper'
 
 
 export function setStyle(leaf: IUI, style: IStateStyle): void {
-    if (typeof style !== 'object') style = undefined
+    if (!isObject(style)) style = undefined
     updateStyle(leaf, style, 'in')
 }
 
 export function unsetStyle(leaf: IUI, style?: IStateStyle): void {
     const { normalStyle } = leaf
-    if (typeof style !== 'object') style = undefined
+    if (!isObject(style)) style = undefined
     if (normalStyle) {
         if (!style) style = normalStyle
         updateStyle(leaf, style, 'out')

@@ -1,5 +1,5 @@
 import { IFourNumber, IColor, ITransitionMap, IShadowEffect, ITransitionModule, IFunction, IObject } from '@leafer-ui/interface'
-import { MathHelper, ColorConvert, Transition, isArray, isString } from '@leafer-ui/draw'
+import { MathHelper, ColorConvert, Transition, isArray, isString, isNumber } from '@leafer-ui/draw'
 
 
 const { round } = Math
@@ -10,7 +10,7 @@ export const TransitionList: ITransitionMap = {
     stroke: paint,
 
     cornerRadius(from: IFourNumber, to: IFourNumber, t: number): IFourNumber {
-        if (typeof from === 'number' && typeof to === 'number') return number(from, to, t)
+        if (isNumber(from) && isNumber(to)) return number(from, to, t)
         from = fourNumber(from), to = fourNumber(to)
         return from.map((f, i) => number(f, to[i], t))
     },
@@ -20,7 +20,7 @@ export const TransitionList: ITransitionMap = {
             const fl = from.length, tl = to.length, len = number(fl, tl, t, 1)
             return fl < tl ? to.substring(0, len) : from.substring(0, len) //  // 打字机 与 删除文字效果
         }
-        return (typeof from === 'number' || typeof to === 'number') ? MathHelper.float(number(from, to, t), Math.max(getDecimalLen(from), getDecimalLen(to))) : to  // count 数字文字效果
+        return (isNumber(from) || isNumber(to)) ? MathHelper.float(number(from, to, t), Math.max(getDecimalLen(from), getDecimalLen(to))) : to  // count 数字文字效果
     },
 
     boxStyle(from: any, to: any, t: number, target: any): any {
@@ -59,7 +59,7 @@ function getDecimalLen(num: number | string) { // 小数位长度
 }
 
 function value(from: any, to: any, t: number): any {
-    const fromIsNumber = typeof from === 'number', toIsNumber = typeof to === 'number'
+    const fromIsNumber = isNumber(from), toIsNumber = isNumber(to)
     return (fromIsNumber && toIsNumber) ? from + (to - from) * t : ((toIsNumber || fromIsNumber) ? number(from, to, t) : from)
 }
 

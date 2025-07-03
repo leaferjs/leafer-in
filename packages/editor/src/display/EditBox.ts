@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
-import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString } from '@leafer-ui/draw'
+import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -167,7 +167,7 @@ export class EditBox extends Group implements IEditBox {
 
         if (this.view.worldOpacity) {
             const { width, height } = bounds
-            const smallSize = typeof hideOnSmall === 'number' ? hideOnSmall : 10
+            const smallSize = isNumber(hideOnSmall) ? hideOnSmall : 10
             const showPoints = editBox && !(hideOnSmall && width < smallSize && height < smallSize)
 
             let point = {} as IPointData, rotateP: IRect, resizeP: IRect, resizeL: IRect

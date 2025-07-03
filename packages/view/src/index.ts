@@ -1,5 +1,5 @@
 import { ILeaf, IBoundsData, IZoomType, IZoomOptions, IFourNumber, IPointData, ITransition } from '@leafer-ui/interface'
-import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper, isNull, isData, isObject, isArray, isString } from '@leafer-ui/draw'
+import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper, isNull, isData, isObject, isArray, isString, isNumber } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
 
@@ -48,7 +48,7 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomO
                 break
         }
 
-    } else if (typeof zoomType === 'number') {
+    } else if (isNumber(zoomType)) {
         changeScale = zoomType / scaleX
     }
 
