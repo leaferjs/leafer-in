@@ -1,5 +1,5 @@
 import { IBranch, ILeaf, ILine, IPolygon, IText, IPointData } from '@leafer-ui/interface'
-import { Direction9, MatrixHelper, isArray } from '@leafer-ui/draw'
+import { Direction9, MatrixHelper, isArray, isObject } from '@leafer-ui/draw'
 
 import { PathScaler } from './PathScaler'
 
@@ -62,7 +62,7 @@ export function scaleResizePath(leaf: ILeaf, scaleX: number, scaleY: number): vo
 
 export function scaleResizePoints(leaf: ILine | IPolygon, scaleX: number, scaleY: number): void {
     const { points } = leaf
-    typeof points[0] === 'object' ? (points as IPointData[]).forEach(p => { p.x *= scaleX, p.y *= scaleY }) : PathScaler.scalePoints(points as number[], scaleX, scaleY)
+    isObject(points[0]) ? (points as IPointData[]).forEach(p => { p.x *= scaleX, p.y *= scaleY }) : PathScaler.scalePoints(points as number[], scaleX, scaleY)
     leaf.points = points
 }
 

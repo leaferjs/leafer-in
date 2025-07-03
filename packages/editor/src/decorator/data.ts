@@ -1,6 +1,6 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
 import { IEditor } from '@leafer-in/interface'
-import { defineKey, isNull, isArray } from '@leafer-ui/draw'
+import { defineKey, isNull, isArray, isObject } from '@leafer-ui/draw'
 
 import { EditorEvent } from '../event/EditorEvent'
 
@@ -24,7 +24,7 @@ export function targetAttr(fn: IFunction) {
                             const { beforeSelect } = (this as IEditor).config
                             if (beforeSelect) {
                                 const check = beforeSelect({ target: value })
-                                if (typeof check === 'object') value = check
+                                if (isObject(check)) value = check
                                 else if (check === false) return
                             }
                         }

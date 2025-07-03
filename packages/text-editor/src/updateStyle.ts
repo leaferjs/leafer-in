@@ -1,5 +1,5 @@
-import { ColorConvert, isArray } from '@leafer-ui/core'
 import { IFill, IText, IRGB, ITextDecorationType } from '@leafer-ui/interface'
+import { ColorConvert, isArray, isObject } from '@leafer-ui/core'
 
 
 export const textCaseMap = {
@@ -35,7 +35,7 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
     style.fontWeight = text.fontWeight as string
 
     let decorationType: ITextDecorationType
-    if (typeof textDecoration === 'object') {
+    if (isObject(textDecoration)) {
         decorationType = textDecoration.type
         if (textDecoration.color) style.textDecorationColor = ColorConvert.string(textDecoration.color)
     } else {
@@ -67,7 +67,7 @@ function setFill(style: CSSStyleDeclaration, fill: IFill): void {
 
     if (isArray(fill)) fill = fill[0]
 
-    if (typeof fill === 'object') {
+    if (isObject(fill)) {
 
         switch (fill.type) {
             case 'solid':

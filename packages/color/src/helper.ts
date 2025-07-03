@@ -1,4 +1,5 @@
 import { IColor, IObject, IRGBA } from '@leafer-ui/interface'
+import { isObject } from '@leafer-ui/draw'
 
 import { colorNames } from './colors'
 
@@ -57,7 +58,7 @@ export function colorToRGBA(color: IColor, opacity?: number): IRGBA {
             }
         }
 
-    } else if (typeof color === 'object') {
+    } else if (isObject(color)) {
 
         if (color.a === undefined) color.a = 1
         if (useOpacity) color = { ...color }

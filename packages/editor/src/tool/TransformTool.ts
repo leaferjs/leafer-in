@@ -1,5 +1,5 @@
 import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper, AroundHelper } from '@leafer-ui/draw'
+import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -113,13 +113,13 @@ export class TransformTool implements ITransformTool { // Editor use
 
     public move(x: number | IPointData, y = 0): void {
         if (!this.checkTransform('moveable')) return
-        if (typeof x === 'object') y = x.y, x = x.x
+        if (isObject(x)) y = x.y, x = x.x
 
         const { target, mergeConfig, single, editor } = this.editBox
         const { beforeMove } = mergeConfig
         if (beforeMove) {
             const check = beforeMove({ target, x, y })
-            if (typeof check === 'object') x = check.x, y = check.y
+            if (isObject(check)) x = check.x, y = check.y
             else if (check === false) return
         }
 
@@ -160,7 +160,7 @@ export class TransformTool implements ITransformTool { // Editor use
         const { beforeScale } = mergeConfig
         if (beforeScale) {
             const check = beforeScale({ target, origin, scaleX, scaleY })
-            if (typeof check === 'object') scaleX = check.scaleX, scaleY = check.scaleY
+            if (isObject(check)) scaleX = check.scaleX, scaleY = check.scaleY
             else if (check === false) return
         }
 
@@ -219,7 +219,7 @@ export class TransformTool implements ITransformTool { // Editor use
         const { beforeSkew } = mergeConfig
         if (beforeSkew) {
             const check = beforeSkew({ target, origin, skewX, skewY })
-            if (typeof check === 'object') skewX = check.skewX, skewY = check.skewY
+            if (isObject(check)) skewX = check.skewX, skewY = check.skewY
             else if (check === false) return
         }
 

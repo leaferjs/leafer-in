@@ -1,8 +1,10 @@
 import { IBox } from '@leafer-ui/interface'
+import { isObject } from '@leafer-ui/draw'
 
 import { IFlowWrapDrawData, IFlowDrawData, IFlowParseData } from '@leafer-in/interface'
 
 import { alignToInnerXMap, alignToInnerYMap } from './align'
+
 
 const p = {} as IFlowParseData
 
@@ -10,7 +12,7 @@ export function getParseData(box: IBox, isFlowX: boolean): IFlowParseData {
     const { gap, flowAlign: align, flowWrap: wrap, __autoWidth, __autoHeight } = box.__
     const needWrap = wrap && (isFlowX ? !__autoWidth : !__autoHeight)
 
-    if (typeof gap === 'object') {
+    if (isObject(gap)) {
         p.xGap = gap.x || 0
         p.yGap = gap.y || 0
     } else {
@@ -27,7 +29,7 @@ export function getParseData(box: IBox, isFlowX: boolean): IFlowParseData {
         p.isFitXGap = p.xGap === 'fit' && !__autoWidth
         p.isFitYGap = p.yGap === 'fit' && !__autoHeight
 
-        if (typeof align === 'object') {
+        if (isObject(align)) {
             p.contentAlign = align.content || 'top-left'
             p.rowXAlign = align.x || 'from'
             p.rowYAlign = align.y || 'from'

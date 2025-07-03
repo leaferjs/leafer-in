@@ -2,8 +2,8 @@ export { HighCurveHelper } from './HighCurveHelper'
 export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
-import { IMotionPathData, IUI, IUnitData, IRotationPointData } from '@leafer-ui/interface'
-import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin } from '@leafer-ui/draw'
+import { IMotionPathData, IUI, IUnitData, IRotationPointData, IPercentData } from '@leafer-ui/interface'
+import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
 import { motionPathType } from './decorator'
@@ -12,12 +12,10 @@ import { motionPathType } from './decorator'
 Plugin.add('motion-path')
 
 
-Transition.register('motion', function (from: any, to: any, t: number, target: IUI): number {
-    if (!from) from = 0
-    else if (typeof from === 'object') from = UnitConvert.number(from, target.getMotionTotal())
-    if (!to) to = 0
-    else if (typeof to === 'object') to = UnitConvert.number(to, target.getMotionTotal())
-    return Transition.number(from, to, t)
+Transition.register('motion', function (from: number | IPercentData, to: number | IPercentData, t: number, target: IUI): number {
+    if (isObject(from)) from = UnitConvert.number(from, target.getMotionTotal())
+    if (isObject(to)) to = UnitConvert.number(to, target.getMotionTotal())
+    return Transition.number(from || 0, to || 0, t)
 })
 
 Transition.register('motionRotation', function (from: any, to: any, t: number): number {

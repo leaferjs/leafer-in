@@ -1,5 +1,5 @@
 import { IArrowType, IPathDataArrow, IPathDataArrowMap, IUI, IPathCommandData, IPointData } from '@leafer-ui/interface'
-import { DataHelper, PointHelper } from '@leafer-ui/draw'
+import { DataHelper, PointHelper, isObject } from '@leafer-ui/draw'
 
 import { PathMatrixHelper } from '../PathMatrixHelper'
 
@@ -57,7 +57,7 @@ export const arrows: IPathDataArrowMap = {
 
 export function getArrowPath(ui: IUI, arrow: IArrowType, from: IPointData, to: IPointData, scale: number, connectOffset: IPointData, hasDashPattern?: boolean): IPathCommandData {
     const { strokeCap, strokeJoin } = ui.__
-    const { offset, connect, path, dashPath } = (typeof arrow === 'object' ? arrow : arrows[arrow])
+    const { offset, connect, path, dashPath } = isObject(arrow) ? arrow : arrows[arrow]
 
     let connectX = connect ? connect.x : 0
     let offsetX = offset ? offset.x : 0
