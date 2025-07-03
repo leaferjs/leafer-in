@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
-import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper } from '@leafer-ui/draw'
+import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -265,12 +265,12 @@ export class EditBox extends Group implements IEditBox {
 
     public getPointsStyle(): IBoxInputData[] {
         const { point } = this.mergedConfig
-        return point instanceof Array ? point : [point]
+        return isArray(point) ? point : [point]
     }
 
     public getMiddlePointsStyle(): IBoxInputData[] {
         const { middlePoint } = this.mergedConfig
-        return middlePoint instanceof Array ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
+        return isArray(middlePoint) ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
     }
 
 

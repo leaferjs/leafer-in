@@ -1,4 +1,4 @@
-import { ColorConvert } from '@leafer-ui/core'
+import { ColorConvert, isArray } from '@leafer-ui/core'
 import { IFill, IText, IRGB, ITextDecorationType } from '@leafer-ui/interface'
 
 
@@ -57,7 +57,7 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
     style.wordBreak = textWrap === 'break' ? 'break-all' : 'normal'
 
     style.textIndent = (text.paraIndent || 0) * textScale + 'px'
-    style.padding = padding instanceof Array ? padding.map(item => item * textScale + 'px').join(' ') : (padding || 0) * textScale + 'px'
+    style.padding = isArray(padding) ? padding.map(item => item * textScale + 'px').join(' ') : (padding || 0) * textScale + 'px'
     style.textOverflow = textOverflow === 'show' ? '' : (textOverflow === 'hide' ? 'clip' : textOverflow)
 
 }
@@ -65,7 +65,7 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
 function setFill(style: CSSStyleDeclaration, fill: IFill): void {
     let color: string = 'black'
 
-    if (fill instanceof Array) fill = fill[0]
+    if (isArray(fill)) fill = fill[0]
 
     if (typeof fill === 'object') {
 

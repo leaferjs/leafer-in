@@ -1,5 +1,5 @@
 import { ILeaf, ILeafMap, IEventListenerId, IFindMethod, IAnswer, IFindCondition, IBooleanMap, IFinder } from '@leafer-ui/interface'
-import { ChildEvent, DataHelper, Answer, PropertyEvent, LeafHelper } from '@leafer-ui/draw'
+import { ChildEvent, DataHelper, Answer, PropertyEvent, LeafHelper, isArray } from '@leafer-ui/draw'
 
 
 const { Yes, NoAndSkip, YesAndSkip } = Answer
@@ -48,8 +48,8 @@ export class Finder implements IFinder {
                     const leaf = this.getById(condition.id as string, branch)
                     return one ? leaf : (leaf ? [leaf] : [])
                 } else if (condition.tag) {
-                    const { tag } = condition, isArray = tag instanceof Array
-                    return this.getByMethod(isArray ? this.methods.tags : this.methods.tag, branch, one, isArray ? DataHelper.toMap(tag) : tag)
+                    const { tag } = condition, isArr = isArray(tag)
+                    return this.getByMethod(isArr ? this.methods.tags : this.methods.tag, branch, one, isArr ? DataHelper.toMap(tag) : tag)
                 } else {
                     return this.getByMethod(this.methods.className, branch, one, condition.className)
                 }

@@ -1,5 +1,5 @@
 import { ILeaferCanvas, IRenderOptions, ILeaferImage, IRobot, IRobotData, IRobotInputData, IRobotKeyframe, IRobotActions, IRobotActionName, IRobotComputedKeyframe, IRobotAnimation } from '@leafer-ui/interface'
-import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType } from '@leafer-ui/draw'
+import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType, isArray } from '@leafer-ui/draw'
 
 import { RobotData } from './data/RobotData'
 
@@ -66,7 +66,7 @@ export class Robot extends UI implements IRobot {
         if (!robot) return
 
         let start = 0
-        if (robot instanceof Array) robot.forEach(frame => this.__loadRobot(frame, start, start += frame.total || 1))
+        if (isArray(robot)) robot.forEach(frame => this.__loadRobot(frame, start, start += frame.total || 1))
         else this.__loadRobot(robot, 0, robot.total)
     }
 
@@ -84,9 +84,9 @@ export class Robot extends UI implements IRobot {
 
         } else if (typeof action === 'object') {
 
-            const isArray = action instanceof Array
-            const keyframes = isArray ? action : action.keyframes
-            this.__action = isArray ? undefined : action
+            const isArr = isArray(action)
+            const keyframes = isArr ? action : action.keyframes
+            this.__action = isArr ? undefined : action
 
             const { length } = keyframes
             if (length > 1) {

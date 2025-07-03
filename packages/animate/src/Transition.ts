@@ -1,5 +1,5 @@
 import { IFourNumber, IColor, ITransitionMap, IShadowEffect, ITransitionModule, IFunction, IObject } from '@leafer-ui/interface'
-import { MathHelper, ColorConvert, Transition } from '@leafer-ui/draw'
+import { MathHelper, ColorConvert, Transition, isArray } from '@leafer-ui/draw'
 
 
 const { round } = Math
@@ -82,7 +82,7 @@ function paint(from: string, to: string, t: number): any {
 
 
 function shadow(from: IShadowEffect, to: IShadowEffect, t: number): IShadowEffect {
-    if (from instanceof Array || to instanceof Array) return to
+    if (isArray(from) || isArray(to)) return to
     from = from || {} as IShadowEffect, to = to || {} as IShadowEffect
     return {
         x: number(from.x, to.x, t),

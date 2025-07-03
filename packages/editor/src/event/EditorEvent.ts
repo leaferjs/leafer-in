@@ -1,11 +1,11 @@
 import { IUI, IPointData } from '@leafer-ui/interface'
-import { Event } from '@leafer-ui/draw'
+import { Event, isArray } from '@leafer-ui/draw'
 
 import { IEditor, IEditorEvent } from '@leafer-in/interface'
 
 
 function toList(value: IUI | IUI[]): IUI[] {
-    return value ? (value instanceof Array ? value : [value]) : []
+    return value ? (isArray(value) ? value : [value]) : []
 }
 
 export class EditorEvent extends Event implements IEditorEvent {

@@ -1,5 +1,5 @@
 import { IBranch, ILeaf, ILine, IPolygon, IText, IPointData } from '@leafer-ui/interface'
-import { Direction9, MatrixHelper } from '@leafer-ui/draw'
+import { Direction9, MatrixHelper, isArray } from '@leafer-ui/draw'
 
 import { PathScaler } from './PathScaler'
 
@@ -49,7 +49,7 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number,
     leaf.fontSize *= fontScale
 
     const data = leaf.__, { padding } = data
-    if (padding) leaf.padding = padding instanceof Array ? padding.map(item => item * fontScale) : padding * fontScale
+    if (padding) leaf.padding = isArray(padding) ? padding.map(item => item * fontScale) : padding * fontScale
     if (!data.__autoWidth) leaf.width *= fontScale
     if (!data.__autoHeight) leaf.height *= fontScale
 

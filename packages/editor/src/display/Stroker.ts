@@ -1,5 +1,5 @@
 import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
-import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper } from '@leafer-ui/draw'
+import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
 
@@ -102,5 +102,5 @@ export class Stroker extends UI implements IStroker {
 
 function onTarget(stroker: Stroker): void {
     const value = stroker.target
-    stroker.list = value ? (value instanceof Array ? value : [value]) : []
+    stroker.list = value ? (isArray(value) ? value : [value]) : []
 }

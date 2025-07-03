@@ -1,6 +1,6 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
 import { IEditor } from '@leafer-in/interface'
-import { defineKey, isNull } from '@leafer-ui/draw'
+import { defineKey, isNull, isArray } from '@leafer-ui/draw'
 
 import { EditorEvent } from '../event/EditorEvent'
 
@@ -18,7 +18,7 @@ export function targetAttr(fn: IFunction) {
 
                         const isSelect = key === 'target'
                         if (isSelect) {
-                            if (value instanceof Array && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
+                            if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
                             if ((this as IEditor).single) (this as IEditor).element.syncEventer = null // 重置 EditBox.load() 设置
 
                             const { beforeSelect } = (this as IEditor).config

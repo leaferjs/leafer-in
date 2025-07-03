@@ -1,5 +1,5 @@
 import { ILeaf, IBoundsData, IZoomType, IZoomOptions, IFourNumber, IPointData, ITransition } from '@leafer-ui/interface'
-import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper, isNull, isObject } from '@leafer-ui/draw'
+import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper, isNull, isObject, isArray } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
 
@@ -61,10 +61,10 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomO
     } else if (typeof zoomType === 'object') {
 
         const data = { x, y, scaleX, scaleY }
-        const isArray = zoomType instanceof Array
+        const isArr = isArray(zoomType)
 
-        if (isArray || (zoomType as ILeaf).tag) {
-            const list: ILeaf[] = isArray ? zoomType as ILeaf[] : [zoomType as ILeaf]
+        if (isArr || (zoomType as ILeaf).tag) {
+            const list: ILeaf[] = isArr ? zoomType as ILeaf[] : [zoomType as ILeaf]
             bounds.setListWithFn(list, LeafBoundsHelper.worldBounds)
         } else {
             const innerBounds = getFixBounds(zoomType as IBoundsData, limitBounds)
