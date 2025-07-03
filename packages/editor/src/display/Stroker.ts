@@ -1,5 +1,5 @@
 import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
-import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray } from '@leafer-ui/draw'
+import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray, isString } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
 
@@ -84,8 +84,8 @@ export class Stroker extends UI implements IStroker {
 
                     }
 
-                    if (stroke) typeof stroke === 'string' ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
-                    if (fill) typeof fill === 'string' ? Paint.fill(fill, this, canvas) : Paint.fills(fill, this, canvas)
+                    if (stroke) isString(stroke) ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
+                    if (fill) isString(fill) ? Paint.fill(fill, this, canvas) : Paint.fills(fill, this, canvas)
                 }
             }
 

@@ -1,5 +1,5 @@
 import { IFourNumber, IColor, ITransitionMap, IShadowEffect, ITransitionModule, IFunction, IObject } from '@leafer-ui/interface'
-import { MathHelper, ColorConvert, Transition, isArray } from '@leafer-ui/draw'
+import { MathHelper, ColorConvert, Transition, isArray, isString } from '@leafer-ui/draw'
 
 
 const { round } = Math
@@ -16,7 +16,7 @@ export const TransitionList: ITransitionMap = {
     },
 
     text(from: any, to: any, t: number): any {
-        if (typeof from === 'string' && typeof to === 'string') {
+        if (isString(from) && isString(to)) {
             const fl = from.length, tl = to.length, len = number(fl, tl, t, 1)
             return fl < tl ? to.substring(0, len) : from.substring(0, len) //  // 打字机 与 删除文字效果
         }
@@ -77,7 +77,7 @@ function color(from: IColor, to: IColor, t: number): string {
 }
 
 function paint(from: string, to: string, t: number): any {
-    return (typeof from === 'string' && typeof to === 'string') ? color(from, to, t) : to
+    return (isString(from) && isString(to)) ? color(from, to, t) : to
 }
 
 

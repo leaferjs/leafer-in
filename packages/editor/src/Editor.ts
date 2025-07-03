@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
-import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin } from '@leafer-ui/draw'
+import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent, useModule } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
@@ -267,7 +267,7 @@ export class Editor extends Group implements IEditor {
 
     public openInnerEditor(target?: IUI, nameOrSelect?: string | boolean, select?: boolean): void {
         let name: string
-        if (typeof nameOrSelect === 'string') name = nameOrSelect
+        if (isString(nameOrSelect)) name = nameOrSelect
         else if (!select) select = nameOrSelect
 
         if (target && select) this.target = target

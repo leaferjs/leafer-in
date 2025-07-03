@@ -1,5 +1,5 @@
 import { IColor, IObject, IRGBA } from '@leafer-ui/interface'
-import { isObject } from '@leafer-ui/draw'
+import { isObject, isString } from '@leafer-ui/draw'
 
 import { colorNames } from './colors'
 
@@ -20,7 +20,7 @@ export function colorToRGBA(color: IColor, opacity?: number): IRGBA {
     let RGBA: IRGBA
     let useOpacity = opacity !== undefined && opacity !== 1
 
-    if (typeof color === 'string') {
+    if (isString(color)) {
 
         const cacheColor = cache[color]
 

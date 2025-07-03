@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
-import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray } from '@leafer-ui/draw'
+import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -66,7 +66,7 @@ export class EditBox extends Group implements IEditBox {
     public get canGesture(): boolean { // 是否支持手势
         if (!this.canUse) return false
         const { moveable, resizeable, rotateable } = this.mergeConfig
-        return typeof moveable === 'string' || typeof resizeable === 'string' || typeof rotateable === 'string'
+        return isString(moveable) || isString(resizeable) || isString(rotateable)
     }
 
     protected __eventIds: IEventListenerId[] = []
@@ -334,7 +334,7 @@ export class EditBox extends Group implements IEditBox {
     public onMove(e: MoveEvent): void {
         if (this.canGesture && e.moveType !== 'drag') {
             e.stop()
-            if (typeof this.mergeConfig.moveable === 'string') {
+            if (isString(this.mergeConfig.moveable)) {
                 this.gesturing = this.moving = true
                 this.transformTool.onMove(e)
             }
@@ -344,7 +344,7 @@ export class EditBox extends Group implements IEditBox {
     public onScale(e: ZoomEvent): void {
         if (this.canGesture) {
             e.stop()
-            if (typeof this.mergeConfig.resizeable === 'string') {
+            if (isString(this.mergeConfig.resizeable)) {
                 this.gesturing = this.resizing = true
                 this.transformTool.onScale(e)
             }
@@ -354,7 +354,7 @@ export class EditBox extends Group implements IEditBox {
     public onRotate(e: RotateEvent): void {
         if (this.canGesture) {
             e.stop()
-            if (typeof this.mergeConfig.rotateable === 'string') {
+            if (isString(this.mergeConfig.rotateable)) {
                 this.gesturing = this.rotating = true
                 this.transformTool.onRotate(e)
             }

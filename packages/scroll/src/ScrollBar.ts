@@ -1,5 +1,5 @@
 import { IApp, IBounds, IBox, IBoxInputData, IEventListenerId, IGroup } from '@leafer-ui/interface'
-import { Group, RenderEvent, ResizeEvent, Box, Bounds, DataHelper, DragEvent } from '@leafer-ui/core'
+import { Group, RenderEvent, ResizeEvent, Box, Bounds, DataHelper, DragEvent, isString } from '@leafer-ui/core'
 
 import { IScrollBar, IScrollBarConfig, IScrollBarTheme } from '@leafer-in/interface'
 
@@ -41,7 +41,7 @@ export class ScrollBar extends Group implements IScrollBar {
     public changeTheme(theme: IScrollBarTheme): void {
         let style: IBoxInputData
 
-        if (typeof theme === 'string') {
+        if (isString(theme)) {
             style = { fill: 'black', stroke: 'rgba(255,255,255,0.8)' }
             if (theme === 'dark') {
                 style.fill = 'white'

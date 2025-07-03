@@ -1,5 +1,5 @@
 import { IAnimateEasing, IAnimateEasingFunction, ICustomEasingFunction, INumberMap, IObject } from '@leafer-ui/interface'
-import { isArray, isObject } from '@leafer-ui/draw'
+import { isArray, isObject, isString } from '@leafer-ui/draw'
 
 
 const { cos, sin, pow, sqrt, abs, ceil, floor, round, PI } = Math
@@ -69,7 +69,7 @@ export const AnimateEasing = {
 
     get(easing: IAnimateEasing) {
         const { list } = AnimateEasing
-        if (typeof easing === 'string') return list[easing || 'ease']
+        if (isString(easing)) return list[easing || 'ease']
         else if (isObject(easing)) return list[easing.name].apply(list, isArray(easing.value) ? easing.value : [easing.value])
         else return list['ease']
     },

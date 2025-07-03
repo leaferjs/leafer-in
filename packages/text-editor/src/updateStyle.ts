@@ -1,5 +1,5 @@
 import { IFill, IText, IRGB, ITextDecorationType } from '@leafer-ui/interface'
-import { ColorConvert, isArray, isObject } from '@leafer-ui/core'
+import { ColorConvert, isArray, isObject, isString } from '@leafer-ui/core'
 
 
 export const textCaseMap = {
@@ -79,7 +79,7 @@ function setFill(style: CSSStyleDeclaration, fill: IFill): void {
             case 'radial':
             case 'angular':
                 const stop = fill.stops[0]
-                color = ColorConvert.string(typeof stop === 'string' ? stop : stop.color)
+                color = ColorConvert.string(isString(stop) ? stop : stop.color)
                 break
             default:
                 if ((fill as IRGB).r !== undefined) color = ColorConvert.string(fill)
