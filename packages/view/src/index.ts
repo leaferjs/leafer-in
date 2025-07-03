@@ -1,5 +1,5 @@
 import { ILeaf, IBoundsData, IZoomType, IZoomOptions, IFourNumber, IPointData, ITransition } from '@leafer-ui/interface'
-import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper } from '@leafer-ui/draw'
+import { Leafer, Bounds, LeafBoundsHelper, Plugin, PointHelper, isNull, isObject } from '@leafer-ui/draw'
 
 import { getFixBounds, getZoomScale } from './helper'
 
@@ -13,14 +13,14 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomO
 
     let padding: IFourNumber
 
-    if (typeof optionsOrPadding === 'object' && !(optionsOrPadding instanceof Array)) {
+    if (isObject<IZoomOptions>(optionsOrPadding)) {
         padding = optionsOrPadding.padding
         scroll = optionsOrPadding.scroll
         transition = optionsOrPadding.transition
     } else padding = optionsOrPadding
 
     const { zoomLayer } = this
-    const limitBounds = this.canvas.bounds.clone().shrink(padding !== undefined ? padding : 30), bounds = new Bounds()
+    const limitBounds = this.canvas.bounds.clone().shrink(isNull(padding) ? 30 : padding), bounds = new Bounds()
     const center: IPointData = { x: limitBounds.x + limitBounds.width / 2, y: limitBounds.y + limitBounds.height / 2 }
 
     let changeScale: number
