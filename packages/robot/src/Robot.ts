@@ -1,5 +1,5 @@
 import { ILeaferCanvas, IRenderOptions, ILeaferImage, IRobot, IRobotData, IRobotInputData, IRobotKeyframe, IRobotActions, IRobotActionName, IRobotComputedKeyframe, IRobotAnimation } from '@leafer-ui/interface'
-import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType, isArray, isObject, isNumber } from '@leafer-ui/draw'
+import { UI, registerUI, dataProcessor, ImageEvent, surfaceType, ImageManager, dataType, boundsType, isArray, isObject, isNumber, isUndefined } from '@leafer-ui/draw'
 
 import { RobotData } from './data/RobotData'
 
@@ -76,7 +76,7 @@ export class Robot extends UI implements IRobot {
         this.stop()
 
         if (this.__timer) clearTimeout(this.__timer)
-        if (action === undefined) return
+        if (isUndefined(action)) return
 
         if (isNumber(action)) {
 
@@ -129,7 +129,7 @@ export class Robot extends UI implements IRobot {
         let { FPS, loop, __action: a } = this
         if (a) {
             if (a.FPS) FPS = a.FPS
-            if (a.loop !== undefined) loop = a.loop
+            if (!isUndefined(a.loop)) loop = a.loop
         }
 
         this.__timer = setTimeout(() => {

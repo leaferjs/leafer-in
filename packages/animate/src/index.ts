@@ -5,7 +5,7 @@ export { AnimateEvent } from './AnimateEvent'
 
 
 import { IAnimate, IKeyframe, IAnimation, IUIInputData, ITransition, IAnimateType, IFunction } from '@leafer-ui/interface'
-import { UI, State, dataType, Transition, Plugin, isArray } from '@leafer-ui/draw'
+import { UI, State, dataType, Transition, Plugin, isArray, isUndefined } from '@leafer-ui/draw'
 
 import '@leafer-in/color'
 
@@ -38,7 +38,7 @@ UI.addAttr('transition', true, dataType)
 UI.addAttr('transitionOut', undefined, dataType)
 
 ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation | IAnimation[], options?: ITransition, kill?: IAnimateType, isTemp?: boolean): IAnimate {
-    if (keyframe === undefined) return this.__animate
+    if (isUndefined(keyframe)) return this.__animate
 
     const isAnimationList = isArray(keyframe) && !options && kill
     let nextAnimate = isAnimationList ? new AnimateList(this, keyframe as IAnimation[], isTemp) : new Animate(this, keyframe as IUIInputData | IKeyframe[] | IAnimation, options, isTemp)

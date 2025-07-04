@@ -1,5 +1,5 @@
 import { IExportModule, IExportOptions, IExportResult, IExportResultFunction, IUI, IExportFileType, IFunction, IRenderOptions, IBoundsData, IBounds, ILocationType, ILeaf } from '@leafer-ui/interface'
-import { Creator, Matrix, TaskProcessor, FileHelper, Bounds, Platform, MathHelper, Resource, Export } from '@leafer-ui/draw'
+import { Creator, Matrix, TaskProcessor, FileHelper, Bounds, Platform, MathHelper, Resource, Export, isUndefined } from '@leafer-ui/draw'
 
 import { getTrimBounds } from './trim'
 
@@ -37,10 +37,10 @@ export const ExportModule: IExportModule = {
                 let renderBounds: IBoundsData, trimBounds: IBounds, scaleX = 1, scaleY = 1
                 const { worldTransform, isLeafer, leafer, isFrame } = leaf
                 const { slice, clip, trim, screenshot, padding, onCanvas } = options
-                const smooth = options.smooth === undefined ? (leafer ? leafer.config.smooth : true) : options.smooth
+                const smooth = isUndefined(options.smooth) ? (leafer ? leafer.config.smooth : true) : options.smooth
                 const contextSettings = options.contextSettings || (leafer ? leafer.config.contextSettings : undefined)
 
-                const fill = (isLeafer && screenshot) ? (options.fill === undefined ? leaf.fill : options.fill) : options.fill // leafer use 
+                const fill = (isLeafer && screenshot) ? (isUndefined(options.fill) ? leaf.fill : options.fill) : options.fill // leafer use 
                 const needFill = FileHelper.isOpaqueImage(filename) || fill, matrix = new Matrix()
 
                 // 获取元素大小
@@ -104,7 +104,7 @@ export const ExportModule: IExportModule = {
 
                 canvas.save()
 
-                if (isFrame && fill !== undefined) {
+                if (isFrame && !isUndefined(fill)) {
                     const oldFill = leaf.get('fill')
                     leaf.fill = ''
                     leaf.__render(canvas, renderOptions)

@@ -1,4 +1,5 @@
 import { IUI, IStateStyleType, IStateStyle, IStateName } from '@leafer-ui/interface'
+import { isUndefined } from '@leafer-ui/core'
 
 import { unsetStyle } from './style'
 
@@ -22,7 +23,7 @@ function unsetChildrenState(children: IUI[], stateType: IStateStyleType, stateNa
     for (let i = 0, len = children.length; i < len; i++) {
         leaf = children[i]
         if (stateType) unsetPointerState(leaf, stateType)
-        else if (stateName !== undefined) unsetState(leaf, stateName)
+        else if (!isUndefined(stateName)) unsetState(leaf, stateName)
 
         if (leaf.isBranch) unsetChildrenState(leaf.children, stateType, stateName)
     }

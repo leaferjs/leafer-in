@@ -1,5 +1,5 @@
 import { IUI, IStateStyle, IStateStyleType, IStateName } from '@leafer-ui/interface'
-import { State } from '@leafer-ui/core'
+import { State, isUndefined } from '@leafer-ui/core'
 
 import { setStyle } from './style'
 
@@ -38,7 +38,7 @@ function setChildrenState(children: IUI[], stateType: IStateStyleType, stateName
             }
             if (update) setPointerState(leaf, stateType)
 
-        } else if (stateName !== undefined) setState(leaf, stateName)
+        } else if (!isUndefined(stateName)) setState(leaf, stateName)
 
         if (leaf.isBranch) setChildrenState(leaf.children, stateType, stateName)
     }

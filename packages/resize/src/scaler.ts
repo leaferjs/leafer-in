@@ -1,5 +1,5 @@
 import { IBranch, ILeaf, ILine, IPolygon, IText, IPointData } from '@leafer-ui/interface'
-import { Direction9, MatrixHelper, isArray, isObject } from '@leafer-ui/draw'
+import { Direction9, MatrixHelper, isArray, isObject, isUndefined } from '@leafer-ui/draw'
 
 import { PathScaler } from './PathScaler'
 
@@ -20,7 +20,7 @@ export function scaleResize(leaf: ILeaf, scaleX: number, scaleY: number): void {
 export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number, direction?: Direction9): void {
     let fontScale = scaleX
 
-    if (direction !== undefined) {
+    if (!isUndefined(direction)) {
 
         const layout = leaf.__layout
 

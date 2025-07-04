@@ -1,5 +1,5 @@
 import { IAnimate, IAnimateOptions, IKeyframe, IUIInputData, IAnimation, IKeyframesAnimation, IStyleAnimation, IComputedKeyframe, IAnimateEasing, IAnimateEnding, IObject, IFunction, ITimer, IUI, IPercentData, ITransition, IBooleanMap, IEventParamsMap, IAnimateList } from '@leafer-ui/interface'
-import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition, isArray, isObject, isNumber } from '@leafer-ui/draw'
+import { Platform, UnitConvert, useModule, LeafEventer, Eventer, Transition, isArray, isObject, isNumber, isUndefined } from '@leafer-ui/draw'
 
 import { AnimateEasing } from './AnimateEasing'
 import { animateAttr } from './decorator'
@@ -224,7 +224,7 @@ export class Animate extends Eventer implements IAnimate {
 
             }
 
-            if (!item.autoDuration && item.duration === undefined) {
+            if (!item.autoDuration && isUndefined(item.duration)) {
                 if (length > 1) (i > 0 || joinBefore) ? totalAutoTime += times : item.duration = 0 // fromNow不为true时，第一帧无时长
                 else item.duration = this.duration
             }
@@ -259,8 +259,8 @@ export class Animate extends Eventer implements IAnimate {
     public setBefore(item: IComputedKeyframe, data: IObject, before: IObject): void {
         const { fromStyle, toStyle, target } = this // 同时生成完整的 from / to
         for (let key in data) {
-            if (fromStyle[key] === undefined) fromStyle[key] = toStyle[key] = (data === before) ? before[key] : (target as IObject)[key]
-            item.beforeStyle[key] = before[key] === undefined ? toStyle[key] : before[key]
+            if (isUndefined(fromStyle[key])) fromStyle[key] = toStyle[key] = (data === before) ? before[key] : (target as IObject)[key]
+            item.beforeStyle[key] = isUndefined(before[key]) ? toStyle[key] : before[key]
             toStyle[key] = data[key]
         }
     }
@@ -269,7 +269,7 @@ export class Animate extends Eventer implements IAnimate {
         let { frames } = this, { length } = frames, frame: IComputedKeyframe
         for (let i = 0; i < length; i++) {
             frame = frames[i]
-            if (frame.duration === undefined) frame.duration = frame.autoDuration ? partTime * frame.autoDuration : partTime
+            if (isUndefined(frame.duration)) frame.duration = frame.autoDuration ? partTime * frame.autoDuration : partTime
             if (!frame.totalTime) {
                 if (frame.autoDelay) frame.delay = frame.autoDelay * partTime
                 if (frame.delay) frame.totalTime = frame.duration + frame.delay

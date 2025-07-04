@@ -1,5 +1,5 @@
 import { IColor, IObject, IRGBA } from '@leafer-ui/interface'
-import { isObject, isString } from '@leafer-ui/draw'
+import { isObject, isString, isUndefined } from '@leafer-ui/draw'
 
 import { colorNames } from './colors'
 
@@ -18,7 +18,7 @@ let cache: IObject = {}, totalCache = 0
 export function colorToRGBA(color: IColor, opacity?: number): IRGBA {
 
     let RGBA: IRGBA
-    let useOpacity = opacity !== undefined && opacity !== 1
+    let useOpacity = !isUndefined(opacity) && opacity < 1
 
     if (isString(color)) {
 
@@ -60,7 +60,7 @@ export function colorToRGBA(color: IColor, opacity?: number): IRGBA {
 
     } else if (isObject(color)) {
 
-        if (color.a === undefined) color.a = 1
+        if (isUndefined(color.a)) color.a = 1
         if (useOpacity) color = { ...color }
 
         RGBA = color as IRGBA
