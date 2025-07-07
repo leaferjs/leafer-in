@@ -115,7 +115,6 @@ export const ExportModule: IExportModule = {
 
                 canvas.restore()
 
-
                 if (sliceLeaf) sliceLeaf.__updateWorldOpacity() // show slice
 
                 if (trim) {
@@ -125,6 +124,7 @@ export const ExportModule: IExportModule = {
 
                     canvas = Creator.canvas(config)
                     canvas.copyWorld(old, trimBounds, config)
+                    old.destroy()
                 }
 
                 if (padding) {
@@ -133,6 +133,7 @@ export const ExportModule: IExportModule = {
 
                     canvas = Creator.canvas({ width: width + left + right, height: height + top + bottom, pixelRatio })
                     canvas.copyWorld(old, old.bounds, { x: left, y: top, width, height })
+                    old.destroy()
                 }
 
                 if (needFill) canvas.fillWorld(canvas.bounds, fill || '#FFFFFF', 'destination-over')
