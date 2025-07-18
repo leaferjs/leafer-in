@@ -125,7 +125,7 @@ export class EditSelect extends Group implements IEditSelect {
 
             } else if (this.allow(e.target)) {
 
-                if (!e.shiftKey) editor.target = null
+                if (!this.isPressMultipleSelectKey(e)) editor.target = null
 
             }
         }
@@ -209,7 +209,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected allowDrag(e: DragEvent) {
         const { boxSelect, multipleSelect } = this.editor.mergeConfig
         if (this.running && (multipleSelect && boxSelect) && !e.target.draggable) {
-            return (!this.editor.editing && this.allow(e.target)) || (e.shiftKey && !findOne(e.path))
+            return (!this.editor.editing && this.allow(e.target)) || (this.isPressMultipleSelectKey(e) && !findOne(e.path))
         } else {
             return false
         }
@@ -230,7 +230,13 @@ export class EditSelect extends Group implements IEditSelect {
 
     public isMultipleSelect(e: IPointerEvent): boolean {
         const { multipleSelect, continuousSelect } = this.editor.mergeConfig
-        return multipleSelect && (e.shiftKey || continuousSelect)
+        return multipleSelect && (this.isPressMultipleSelectKey(e) || continuousSelect)
+    }
+
+    public isPressMultipleSelectKey(e: IPointerEvent): boolean {
+        const { multipleSelectKey } = this.editor.mergedConfig
+        if (multipleSelectKey) return multipleSelectKey(e)
+        return e.shiftKey
     }
 
     protected __listenEvents(): void {
