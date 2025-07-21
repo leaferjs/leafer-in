@@ -1,6 +1,6 @@
 import { IBounds, ILeaf, ILeafList, IUI, IEventListenerId, IPointerEvent, IFunction } from '@leafer-ui/interface'
-import { Bounds, LeafList, Group } from '@leafer-ui/draw'
-import { PointerEvent, DragEvent, MoveEvent, ZoomEvent } from '@leafer-ui/core'
+import { Bounds, LeafList, Group, isString } from '@leafer-ui/draw'
+import { PointerEvent, DragEvent, MoveEvent, ZoomEvent, Keyboard } from '@leafer-ui/core'
 
 import { IEditSelect, IEditor, ISelectArea, IStroker } from '@leafer-in/interface'
 
@@ -235,7 +235,7 @@ export class EditSelect extends Group implements IEditSelect {
 
     public isPressMultipleSelectKey(e: IPointerEvent): boolean {
         const { multipleSelectKey } = this.editor.mergedConfig
-        if (multipleSelectKey) return multipleSelectKey(e)
+        if (multipleSelectKey) return isString(multipleSelectKey) ? Keyboard.isHoldShortcutKeys(multipleSelectKey) : multipleSelectKey(e)
         return e.shiftKey
     }
 
