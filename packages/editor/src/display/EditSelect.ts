@@ -125,7 +125,7 @@ export class EditSelect extends Group implements IEditSelect {
 
             } else if (this.allow(e.target)) {
 
-                if (!this.isPressMultipleSelectKey(e)) editor.target = null
+                if (!this.isHoldMultipleSelectKey(e)) editor.target = null
 
             }
         }
@@ -209,7 +209,7 @@ export class EditSelect extends Group implements IEditSelect {
     protected allowDrag(e: DragEvent) {
         const { boxSelect, multipleSelect } = this.editor.mergeConfig
         if (this.running && (multipleSelect && boxSelect) && !e.target.draggable) {
-            return (!this.editor.editing && this.allow(e.target)) || (this.isPressMultipleSelectKey(e) && !findOne(e.path))
+            return (!this.editor.editing && this.allow(e.target)) || (this.isHoldMultipleSelectKey(e) && !findOne(e.path))
         } else {
             return false
         }
@@ -230,12 +230,12 @@ export class EditSelect extends Group implements IEditSelect {
 
     public isMultipleSelect(e: IPointerEvent): boolean {
         const { multipleSelect, continuousSelect } = this.editor.mergeConfig
-        return multipleSelect && (this.isPressMultipleSelectKey(e) || continuousSelect)
+        return multipleSelect && (this.isHoldMultipleSelectKey(e) || continuousSelect)
     }
 
-    public isPressMultipleSelectKey(e: IPointerEvent): boolean {
+    public isHoldMultipleSelectKey(e: IPointerEvent): boolean {
         const { multipleSelectKey } = this.editor.mergedConfig
-        if (multipleSelectKey) return isString(multipleSelectKey) ? Keyboard.isHoldShortcutKeys(multipleSelectKey) : multipleSelectKey(e)
+        if (multipleSelectKey) return e.isHoldKeys(multipleSelectKey)
         return e.shiftKey
     }
 

@@ -21,7 +21,7 @@ export function updatePointCursor(editBox: IEditBox, e: IUIEvent): void {
     const { pointType } = point, { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editBox.mergeConfig
 
     let showResize = pointType.includes('resize')
-    if (showResize && rotateable && (e.metaKey || e.ctrlKey || !resizeable)) showResize = false
+    if (showResize && rotateable && (editBox.isHoldRotateKey(e) || !resizeable)) showResize = false
     const showSkew = skewable && !showResize && (point.name === 'resize-line' || pointType === 'skew')
 
     const cursor = dragging

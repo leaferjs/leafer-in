@@ -1,6 +1,6 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool } from '@leafer-ui/interface'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool, IUIEvent } from '@leafer-ui/interface'
 import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber } from '@leafer-ui/draw'
-import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
+import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent, Keyboard } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
@@ -286,7 +286,7 @@ export class EditBox extends Group implements IEditBox {
             moveable && (this.moving = true)
             editor.opacity = hideOnMove ? 0 : 1 // move
         } else {
-            if (pointType.includes('rotate') || e.metaKey || e.ctrlKey || !resizeable) {
+            if (pointType.includes('rotate') || this.isHoldRotateKey(e) || !resizeable) {
                 rotateable && (this.rotating = true)
                 if (pointType === 'resize-rotate') resizeable && (this.resizing = true)
                 else if (point.name === 'resize-line') skewable && (this.skewing = true), this.rotating = false
@@ -362,6 +362,11 @@ export class EditBox extends Group implements IEditBox {
     }
 
     // 键盘
+    public isHoldRotateKey(e: IUIEvent): boolean { // 按住ctrl在控制点上变旋转功能
+        const { rotateKey } = this.mergedConfig
+        if (rotateKey) return e.isHoldKeys(rotateKey)
+        return e.metaKey || e.ctrlKey
+    }
 
     protected onKey(e: KeyEvent): void {
         updatePointCursor(this, e)
