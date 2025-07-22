@@ -1,5 +1,5 @@
 import { IBox } from '@leafer-ui/interface'
-import { isObject, isString } from '@leafer-ui/draw'
+import { isObject, isString, tryToNumber } from '@leafer-ui/draw'
 
 import { IFlowWrapDrawData, IFlowDrawData, IFlowParseData } from '@leafer-in/interface'
 
@@ -16,7 +16,7 @@ export function getParseData(box: IBox, isFlowX: boolean): IFlowParseData {
         p.xGap = gap.x || 0
         p.yGap = gap.y || 0
     } else {
-        p.xGap = p.yGap = gap
+        p.xGap = p.yGap = tryToNumber(gap)
     }
 
     p.isAutoXGap = isString(p.xGap) && !__autoWidth
