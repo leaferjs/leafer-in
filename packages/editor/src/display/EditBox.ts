@@ -158,7 +158,7 @@ export class EditBox extends Group implements IEditBox {
     public updateBounds(bounds: IBoundsData): void {
         const { editMask } = this.editor
         const { mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, spread } = mergeConfig
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, spread, hideRotatePoints, hideResizeLines } = mergeConfig
 
         this.visible = !this.target.locked
         editMask.visible = mask ? true : 0
@@ -177,17 +177,19 @@ export class EditBox extends Group implements IEditBox {
                 AroundHelper.toPoint(AroundHelper.directionData[i], bounds, point)
                 resizeP = resizePoints[i]
                 rotateP = rotatePoints[i]
-                resizeL = resizeLines[Math.floor(i / 2)]
                 resizeP.set(point)
                 rotateP.set(point)
-                resizeL.set(point)
 
                 // visible 
-                resizeP.visible = resizeL.visible = showPoints && !!(resizeable || rotateable)
-                rotateP.visible = showPoints && rotateable && resizeable && !mergeConfig.rotatePoint
+                resizeP.visible = showPoints && !!(resizeable || rotateable)
+                rotateP.visible = showPoints && rotateable && resizeable && !hideRotatePoints
 
                 if (i % 2) { // top,  right, bottom, left
 
+                    resizeL = resizeLines[(i - 1) / 2]
+                    resizeL.set(point)
+
+                    resizeL.visible = resizeP.visible && !hideResizeLines
                     resizeP.visible = rotateP.visible = showPoints && !!middlePoint
 
                     if (((i + 1) / 2) % 2) { // top, bottom
