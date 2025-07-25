@@ -259,7 +259,7 @@ export class Editor extends Group implements IEditor {
 
     public emitGroupEvent(type: string, group?: IGroup): void {
         const event = new EditorGroupEvent(type, { editTarget: group })
-        this.emitEvent(event)
+        if (!group || !group.syncEventer) this.emitEvent(event) // 单选时，元素会自动将事件传递给 editor，避免重复触发
         if (group) group.emitEvent(event)
     }
 
@@ -284,6 +284,7 @@ export class Editor extends Group implements IEditor {
                 this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
                 this.innerEditor.load()
                 this.emitInnerEvent(InnerEditorEvent.OPEN)
+                console.log('hello')
             }
         }
     }
@@ -304,7 +305,7 @@ export class Editor extends Group implements IEditor {
     public emitInnerEvent(type: string): void {
         const { innerEditor } = this, { editTarget } = innerEditor
         const event = new InnerEditorEvent(type, { editTarget, innerEditor })
-        this.emitEvent(event)
+        if (!editTarget.syncEventer) this.emitEvent(event) // 单选时，元素会自动将事件传递给 editor，避免重复触发
         editTarget.emitEvent(event)
     }
 
