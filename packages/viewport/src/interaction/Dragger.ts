@@ -1,19 +1,19 @@
 import { IPointerEvent, IFunction } from '@leafer-ui/interface'
 
-import { Dragger, BoundsHelper, PointHelper } from '@leafer-ui/core'
+import { Dragger, BoundsHelper, PointHelper, isNumber } from '@leafer-ui/core'
 
 
 const dragger = Dragger.prototype
 const { abs } = Math
 
-dragger.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean {
+dragger.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean | number {
     const { moveX, moveY } = this.dragData
     const absMoveX = abs(moveX), absMoveY = abs(moveY), minMove = speed ? 1 : 0.1
-    const dragAnimate = this.interaction.m.dragAnimate && this.canAnimate && this.moving && (absMoveX > minMove || absMoveY > minMove)
+    const dragAnimate = this.canAnimate && this.moving && (absMoveX > minMove || absMoveY > minMove) && this.interaction.m.dragAnimate
 
     if (dragAnimate) {
         const inertia = data.pointerType === 'touch' ? 3 : 1, maxMove = 70
-        speed = speed ? 0.95 : inertia
+        speed = speed ? (isNumber(dragAnimate) ? dragAnimate : 0.95) : inertia
         if (absMoveX * speed > maxMove) speed = maxMove / absMoveX
         else if (absMoveY * speed > maxMove) speed = maxMove / absMoveY
 
