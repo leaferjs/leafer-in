@@ -1,5 +1,5 @@
-import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isNumber } from '@leafer-ui/draw'
+import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix, IUI } from '@leafer-ui/interface'
+import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isNumber, isUndefined } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -23,12 +23,18 @@ export class TransformTool implements ITransformTool { // Editor use
 
     public onMove(e: DragEvent | MoveEvent): void {
 
-        const { target, dragStartData } = this.editBox
+        const { target, mergeConfig, dragStartData, app } = this.editBox
+
+        let move: IPointData, { dragLimitAnimate } = mergeConfig
+        if (isUndefined(dragLimitAnimate)) dragLimitAnimate = app && app.config.pointer.dragLimitAnimate
+
+        const isMoveEnd = e.type === DragEvent.END || e.type === DragEvent.END
+        const checkLimitMove = !dragLimitAnimate || isMoveEnd
 
         if (e instanceof MoveEvent) {
 
-            const move = e.getLocalMove(target)
-            this.move(move.x, move.y)
+            move = e.getLocalMove(target)
+            if (checkLimitMove) DragEvent.limitMove(target, move)
 
         } else {
 
@@ -39,9 +45,13 @@ export class TransformTool implements ITransformTool { // Editor use
                 else total.x = 0
             }
 
-            this.move(DragEvent.getValidMove(target, dragStartData.point, total))
+            move = DragEvent.getValidMove(target, dragStartData.point, total, checkLimitMove)
 
         }
+
+        if (dragLimitAnimate && isMoveEnd) LeafHelper.animateMove(this as unknown as IUI, move, isNumber(dragLimitAnimate) ? dragLimitAnimate : 0.3)  // 是否进行动画
+        else this.move(move)
+
     }
 
     public onScale(e: DragEvent | ZoomEvent): void {
