@@ -114,6 +114,8 @@ export class EditBox extends Group implements IEditBox {
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
 
+        this.visible = !target.locked
+
         let resizeP: IRect
 
         for (let i = 0; i < 8; i++) {
@@ -145,6 +147,7 @@ export class EditBox extends Group implements IEditBox {
     public update(): void {
         const { editor } = this
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds('box', editor, true)
+        this.visible = !this.target.locked
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })
     }
@@ -160,7 +163,6 @@ export class EditBox extends Group implements IEditBox {
         const { mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
         const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, spread, hideRotatePoints, hideResizeLines } = mergeConfig
 
-        this.visible = !this.target.locked
         editMask.visible = mask ? true : 0
 
         if (spread) BoundsHelper.spread(bounds, spread)
