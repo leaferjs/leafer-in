@@ -42,14 +42,13 @@ leaf.resizeHeight = function (height: number): void {
 
 Text.prototype.__scaleResize = function (scaleX: number, scaleY: number): void {
     const { app, editConfig } = this, editor = app && app.editor, dragPoint = editor && editor.dragPoint
-    const { __autoWidth, __autoHeight, textAlign, verticalAlign } = this.__, { boxBounds } = this.__layout
-
-    if (__autoWidth && textAlign !== 'left' && scaleX !== 1) this.x += boxBounds.x
-    if (__autoHeight && verticalAlign !== 'top' && scaleY !== 1) this.y += boxBounds.y
 
     if (this.__.resizeFontSize || (editConfig && editConfig.editSize === 'font-size') || (dragPoint && editor.mergedConfig.editSize === 'font-size')) {
         scaleResizeFontSize(this, scaleX, scaleY, dragPoint && dragPoint.direction)
     } else {
+        const { __autoWidth, __autoHeight, textAlign, verticalAlign } = this.__, { boxBounds } = this.__layout
+        if (__autoWidth && textAlign !== 'left' && scaleX !== 1) this.x += boxBounds.x
+        if (__autoHeight && verticalAlign !== 'top' && scaleY !== 1) this.y += boxBounds.y
         scaleResize(this, scaleX, scaleY)
     }
 }
