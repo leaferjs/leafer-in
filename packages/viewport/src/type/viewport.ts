@@ -1,6 +1,6 @@
 import { ILeaferBase, ILeaferConfig } from '@leafer-ui/interface'
 
-import { MoveEvent, ZoomEvent, DataHelper } from '@leafer-ui/core'
+import { MoveEvent, ZoomEvent, DataHelper, LeafHelper } from '@leafer-ui/core'
 
 
 export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, custom?: boolean): void {
@@ -9,7 +9,10 @@ export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, cu
 
     leafer.__eventIds.push(
         leafer.on_(MoveEvent.BEFORE_MOVE, (e: MoveEvent) => {
-            leafer.zoomLayer.move(leafer.getValidMove(e.moveX, e.moveY))
+            leafer.zoomLayer.move(leafer.getValidMove(e.moveX, e.moveY, false))
+        }),
+        leafer.on_(MoveEvent.END, (e: MoveEvent) => {
+            LeafHelper.animateMove(leafer.zoomLayer, leafer.getValidMove(e.moveX, e.moveY))
         }),
         leafer.on_(ZoomEvent.BEFORE_ZOOM, (e: ZoomEvent) => {
             const { zoomLayer } = leafer

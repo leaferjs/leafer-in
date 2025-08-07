@@ -1,41 +1,37 @@
 import { ILeaferType, IPointData } from '@leafer-ui/interface'
 
-import { Leafer, Bounds } from '@leafer-ui/core'
+import { Leafer, Bounds, Point, DragBoundsHelper } from '@leafer-ui/core'
 
 import { LeaferTypeCreator } from './LeaferTypeCreator'
 
 
 const leafer = Leafer.prototype
-const bounds = new Bounds()
+const bounds = new Bounds(), move = new Point()
 
 leafer.initType = function (type: ILeaferType) {
     LeaferTypeCreator.run(type, this)
 }
 
-leafer.getValidMove = function (moveX: number, moveY: number): IPointData {
+leafer.getValidMove = function (moveX: number, moveY: number, checkLimit = true): IPointData {
     const { scroll, disabled } = this.app.config.move
+    move.set(moveX, moveY)
 
     if (scroll) {
         const type = scroll === true ? '' : scroll
 
-        if (type.includes('x')) moveX = moveX || moveY, moveY = 0
-        else if (type.includes('y')) moveY = moveY || moveX, moveX = 0
-        else Math.abs(moveX) > Math.abs(moveY) ? moveY = 0 : moveX = 0
+        if (type.includes('x')) move.x = move.x || move.y, move.y = 0
+        else if (type.includes('y')) move.y = move.y || move.x, move.x = 0
+        else Math.abs(move.x) > Math.abs(move.y) ? move.y = 0 : move.x = 0
 
-        if (type.includes('limit')) {
-            const { x, y, width, height } = bounds.set(this.__world).addPoint(this.zoomLayer as IPointData)
-            const right = x + width - this.width, bottom = y + height - this.height
-
-            if (x >= 0 && right <= 0) moveX = 0 // includeX
-            else if (moveX > 0) { if (x + moveX > 0) moveX = -x }
-            else if (moveX < 0 && right + moveX < 0) moveX = -right
-
-            if (y >= 0 && bottom <= 0) moveY = 0 // includeY
-            else if (moveY > 0) { if (y + moveY > 0) moveY = -y }
-            else if (moveY < 0 && bottom + moveY < 0) moveY = -bottom
+        if (checkLimit && type.includes('limit')) {
+            bounds.set(this.__world).addPoint(this.zoomLayer as IPointData)
+            DragBoundsHelper.getValidMove(bounds, this.canvas.bounds, 'inner', move, true)
+            if (type.includes('x')) move.y = 0
+            else if (type.includes('y')) move.x = 0
         }
     }
-    return { x: disabled ? 0 : moveX, y: disabled ? 0 : moveY }
+
+    return { x: disabled ? 0 : move.x, y: disabled ? 0 : move.y }
 }
 
 leafer.getValidScale = function (changeScale: number): number {
