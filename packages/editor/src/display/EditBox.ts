@@ -307,7 +307,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onDragEnd(e: DragEvent): void {
-        if (this.mergeConfig.dragLimitAnimate && this.moving) this.transformTool.onMove(e)
+        if (this.moving) this.transformTool.onMove(e)
 
         this.dragPoint = null
         this.resetDoing()
@@ -345,6 +345,11 @@ export class EditBox extends Group implements IEditBox {
                 this.transformTool.onMove(e)
             }
         }
+    }
+
+    public onMoveEnd(e: MoveEvent): void {
+        if (this.moving) this.transformTool.onMove(e)
+        this.resetDoing()
     }
 
     public onScale(e: ZoomEvent): void {
@@ -468,7 +473,7 @@ export class EditBox extends Group implements IEditBox {
                     [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
                     [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
                     [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
-                    [MoveEvent.END, this.resetDoing, this],
+                    [MoveEvent.END, this.onMoveEnd, this],
                     [ZoomEvent.END, this.resetDoing, this],
                     [RotateEvent.END, this.resetDoing, this],
                 ])

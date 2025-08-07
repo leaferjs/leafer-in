@@ -26,9 +26,10 @@ export class TransformTool implements ITransformTool { // Editor use
         const { target, mergeConfig, dragStartData, app } = this.editBox
 
         let move: IPointData, { dragLimitAnimate } = mergeConfig
+
         if (isUndefined(dragLimitAnimate)) dragLimitAnimate = app && app.config.pointer.dragLimitAnimate
 
-        const isMoveEnd = e.type === DragEvent.END || e.type === DragEvent.END
+        const isMoveEnd = e.type === MoveEvent.END || e.type === DragEvent.END
         const checkLimitMove = !dragLimitAnimate || isMoveEnd
 
         if (e instanceof MoveEvent) {
@@ -49,9 +50,10 @@ export class TransformTool implements ITransformTool { // Editor use
 
         }
 
-        if (dragLimitAnimate && isMoveEnd) LeafHelper.animateMove(this as unknown as IUI, move, isNumber(dragLimitAnimate) ? dragLimitAnimate : 0.3)  // 是否进行动画
-        else this.move(move)
-
+        if (move.x || move.y) {
+            if (dragLimitAnimate && isMoveEnd) LeafHelper.animateMove(this as unknown as IUI, move, isNumber(dragLimitAnimate) ? dragLimitAnimate : 0.3)  // 是否进行动画
+            else this.move(move)
+        }
     }
 
     public onScale(e: DragEvent | ZoomEvent): void {
