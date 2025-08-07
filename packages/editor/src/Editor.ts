@@ -284,7 +284,6 @@ export class Editor extends Group implements IEditor {
                 this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
                 this.innerEditor.load()
                 this.emitInnerEvent(InnerEditorEvent.OPEN)
-                console.log('hello')
             }
         }
     }
