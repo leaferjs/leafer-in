@@ -1,5 +1,5 @@
 import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix, IUI } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isNumber, isUndefined } from '@leafer-ui/draw'
+import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isString, isNumber, isUndefined } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -30,7 +30,8 @@ export class TransformTool implements ITransformTool { // Editor use
         if (isUndefined(dragLimitAnimate)) dragLimitAnimate = app && app.config.pointer.dragLimitAnimate
 
         const isMoveEnd = e.type === MoveEvent.END || e.type === DragEvent.END
-        const checkLimitMove = !dragLimitAnimate || isMoveEnd
+        const axisDrag = isString(target.draggable)
+        const checkLimitMove = !dragLimitAnimate || isMoveEnd || axisDrag
 
         if (e instanceof MoveEvent) {
 
@@ -51,7 +52,7 @@ export class TransformTool implements ITransformTool { // Editor use
         }
 
         if (move.x || move.y) {
-            if (dragLimitAnimate && isMoveEnd) LeafHelper.animateMove(this as unknown as IUI, move, isNumber(dragLimitAnimate) ? dragLimitAnimate : 0.3)  // 是否进行动画
+            if (dragLimitAnimate && !axisDrag && isMoveEnd) LeafHelper.animateMove(this as unknown as IUI, move, isNumber(dragLimitAnimate) ? dragLimitAnimate : 0.3)  // 是否进行动画
             else this.move(move)
         }
     }
