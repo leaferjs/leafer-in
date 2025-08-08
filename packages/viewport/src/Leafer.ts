@@ -19,8 +19,8 @@ leafer.getValidMove = function (moveX: number, moveY: number, checkLimit = true)
     if (scroll) {
         const type = scroll === true ? '' : scroll
 
-        if (type.includes('x')) move.x = move.x || move.y, move.y = 0
-        else if (type.includes('y')) move.y = move.y || move.x, move.x = 0
+        if (type.includes('x')) move.y = 0
+        else if (type.includes('y')) move.x = 0
         else Math.abs(move.x) > Math.abs(move.y) ? move.y = 0 : move.x = 0
 
         if (checkLimit && type.includes('limit')) {
