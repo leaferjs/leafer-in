@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
-import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString } from '@leafer-ui/draw'
+import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString, PropertyEvent } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent, useModule } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
@@ -78,6 +78,7 @@ export class Editor extends Group implements IEditor {
     public selector: EditSelect = new EditSelect(this)
     public editMask: EditMask = new EditMask(this)
 
+    public get targetLeafer() { const first = this.list[0]; return first && first.leafer }
     public targetChanged: boolean
     public targetEventIds: IEventListenerId[] = []
 
@@ -344,14 +345,18 @@ export class Editor extends Group implements IEditor {
         if (this.targetChanged) this.update()
     }
 
+    protected onChildScroll(): void {
+        if (this.multiple) this.updateEditBox()
+    }
 
     // event 
 
     public listenTargetEvents(): void {
         if (!this.targetEventIds.length) {
-            const { app, leafer, editMask } = this
+            const { app, leafer, targetLeafer, editMask } = this
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.onRenderStart, this),
+                targetLeafer && targetLeafer.on_(PropertyEvent.SCROLL, this.onChildScroll, this),
                 app.on_(RenderEvent.CHILD_START, this.onAppRenderStart, this)
             ]
             if (editMask.visible) editMask.forceRender()

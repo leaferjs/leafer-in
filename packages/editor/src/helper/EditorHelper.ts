@@ -22,7 +22,7 @@ export const EditorHelper = {
         list.sort(order)
 
         const matrx = new Matrix(element.worldTransform)
-        matrx.divideParent(parent.worldTransform)
+        matrx.divideParent(parent.scrollWorldTransform)
         group.setTransform(matrx)
         group.editable = true
         group.hitChildren = false
