@@ -141,11 +141,22 @@ export class Editor extends Group implements IEditor {
         this.unloadEditTool()
 
         if (this.editing) {
-            const name = this.element.editOuter || 'EditTool'
-            const tool = this.editTool = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
-            this.editBox.load()
-            tool.load()
-            this.update()
+            const target = this.element
+            let name = target.editOuter || 'EditTool'
+
+            const { beforeEditOuter } = this.mergeConfig
+            if (beforeEditOuter) {
+                const check = beforeEditOuter({ target, name })
+                if (isString(check)) name = check
+                else if (check === false) return
+            }
+
+            if (EditToolCreator.list[name]) {
+                const tool = this.editTool = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
+                this.editBox.load()
+                tool.load()
+                this.update()
+            }
         }
     }
 
@@ -274,13 +285,21 @@ export class Editor extends Group implements IEditor {
         if (target && select) this.target = target
 
         if (this.single) {
-            const editTarget = target || this.element
-            name || (name = editTarget.editInner)
-            if (name && EditToolCreator.list[name]) {
+            if (!target) target = this.element
+            if (!name) name = target.editInner
+
+            const { beforeEditInner } = this.mergeConfig
+            if (beforeEditInner) {
+                const check = beforeEditInner({ target, name })
+                if (isString(check)) name = check
+                else if (check === false) return
+            }
+
+            if (EditToolCreator.list[name]) {
                 this.editTool.unload()
                 this.innerEditing = true
                 this.innerEditor = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
-                this.innerEditor.editTarget = editTarget
+                this.innerEditor.editTarget = target
 
                 this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
                 this.innerEditor.load()
