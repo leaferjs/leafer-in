@@ -307,7 +307,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onDragEnd(e: DragEvent): void {
-        if (this.moving) this.transformTool.onMove(e)
+        if (this.moving && this.mergeConfig.dragLimitAnimate && this.target.dragBounds) this.transformTool.onMove(e)
 
         this.dragPoint = null
         this.resetDoing()

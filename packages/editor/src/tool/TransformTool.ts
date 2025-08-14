@@ -23,11 +23,9 @@ export class TransformTool implements ITransformTool { // Editor use
 
     public onMove(e: DragEvent | MoveEvent): void {
 
-        const { target, mergeConfig, dragStartData, app } = this.editBox
+        const { target, mergeConfig, dragStartData } = this.editBox
 
         let move: IPointData, { dragLimitAnimate } = mergeConfig
-
-        if (isUndefined(dragLimitAnimate)) dragLimitAnimate = app && app.config.pointer.dragLimitAnimate
 
         const isMoveEnd = e.type === MoveEvent.END || e.type === DragEvent.END
         const axisDrag = isString(target.draggable)

@@ -1,6 +1,6 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
 import { IEditor } from '@leafer-in/interface'
-import { defineKey, isNull, isArray, isObject } from '@leafer-ui/draw'
+import { defineKey, isNull, isArray, isObject, isUndefined } from '@leafer-ui/draw'
 
 import { EditorEvent } from '../event/EditorEvent'
 
@@ -45,7 +45,7 @@ export function mergeConfigAttr() {
     return (target: IEditor, key: string) => {
         defineKey(target, key, {
             get() {
-                const { config, element, dragPoint, editBox } = this, mergeConfig = { ...config } // 实时合并，后期可优化
+                const { config, element, dragPoint, editBox, app } = this, mergeConfig = { ...config } // 实时合并，后期可优化
                 if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig) // 元素上的配置
                 if (editBox.config) Object.assign(mergeConfig, editBox.config) // EditBox 上的配置
                 if (dragPoint) {
@@ -56,6 +56,7 @@ export function mergeConfigAttr() {
                         isNull(mergeConfig.lockRatio) && (mergeConfig.lockRatio = true)
                     }
                 }
+                if (isUndefined(mergeConfig.dragLimitAnimate)) mergeConfig.dragLimitAnimate = app && app.config.pointer.dragLimitAnimate
                 return (this as IObject).mergedConfig = mergeConfig
             }
         } as ThisType<IEditor>)
