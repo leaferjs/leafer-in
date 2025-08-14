@@ -1,6 +1,7 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
-import { IEditor } from '@leafer-in/interface'
 import { defineKey, isNull, isArray, isObject, isUndefined } from '@leafer-ui/draw'
+
+import { IEditor } from '@leafer-in/interface'
 
 import { EditorEvent } from '../event/EditorEvent'
 

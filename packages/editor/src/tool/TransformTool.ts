@@ -1,5 +1,5 @@
 import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix, IUI } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isString, isNumber, isUndefined } from '@leafer-ui/draw'
+import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isString, isNumber } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
