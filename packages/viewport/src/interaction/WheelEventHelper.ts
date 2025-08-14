@@ -3,6 +3,8 @@ import { IPointData, IWheelEvent, IWheelConfig } from '@leafer-ui/interface'
 import { MathHelper, Platform } from '@leafer-ui/core'
 
 
+const { abs, max } = Math, { sign, within } = MathHelper
+
 export const WheelEventHelper = {
 
     getMove(event: IWheelEvent, config: IWheelConfig): IPointData {
@@ -12,8 +14,9 @@ export const WheelEventHelper = {
             deltaX = deltaY
             deltaY = 0
         }
-        if (deltaX > 50) deltaX = Math.max(50, deltaX / 3)
-        if (deltaY > 50) deltaY = Math.max(50, deltaY / 3)
+        const absX = abs(deltaX), absY = abs(deltaY)
+        if (absX > 50) deltaX = max(50, absX / 3) * sign(deltaX)
+        if (absY > 50) deltaY = max(50, absY / 3) * sign(deltaY)
         return { x: -deltaX * moveSpeed * 2, y: -deltaY * moveSpeed * 2 }
     },
 
@@ -35,11 +38,9 @@ export const WheelEventHelper = {
         }
 
         if (zoom) {
-            zoomSpeed = MathHelper.within(zoomSpeed, 0, 1)
+            zoomSpeed = within(zoomSpeed, 0, 1)
             const min = event.deltaY ? config.delta.y : config.delta.x
-            scale = 1 - delta / (min * 4) * zoomSpeed // zoomSpeed
-            if (scale < 0.5) scale = 0.5
-            if (scale >= 1.5) scale = 1.5
+            scale = within(1 - delta / (min * 4) * zoomSpeed, 0.5, 1.5) // zoomSpeed
         }
 
         return scale
