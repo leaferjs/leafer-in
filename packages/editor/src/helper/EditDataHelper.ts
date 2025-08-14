@@ -6,7 +6,7 @@ import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = Direction9
 const { toPoint } = AroundHelper
-const { within } = MathHelper
+const { within, sign } = MathHelper
 
 export const EditDataHelper = {
 
@@ -25,8 +25,8 @@ export const EditDataHelper = {
         // 获取已经改变的比例
         const originChangedScaleX = target.scaleX / startBounds.scaleX
         const originChangedScaleY = target.scaleY / startBounds.scaleY
-        const signX = originChangedScaleX < 0 ? -1 : 1
-        const signY = originChangedScaleY < 0 ? -1 : 1
+        const signX = sign(originChangedScaleX)
+        const signY = sign(originChangedScaleY)
 
         const changedScaleX = scaleMode ? originChangedScaleX : signX * boxBounds.width / width
         const changedScaleY = scaleMode ? originChangedScaleY : signY * boxBounds.height / height
@@ -142,8 +142,8 @@ export const EditDataHelper = {
         }
 
         // 防止小于1px
-        if (useScaleX && Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = (scaleX < 0 ? -1 : 1) / worldBoxBounds.width
-        if (useScaleY && Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = (scaleY < 0 ? -1 : 1) / worldBoxBounds.height
+        if (useScaleX && Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = sign(scaleX) / worldBoxBounds.width
+        if (useScaleY && Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = sign(scaleY) / worldBoxBounds.height
 
         if (lockRatio && scaleX !== scaleY) scaleY = scaleX = Math.min(scaleX, scaleY)
 
