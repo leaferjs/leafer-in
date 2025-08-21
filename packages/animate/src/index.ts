@@ -37,6 +37,18 @@ UI.addAttr('animationOut', undefined, dataType)
 UI.addAttr('transition', true, dataType)
 UI.addAttr('transitionOut', undefined, dataType)
 
+ui.set = function (data: IUIInputData, transition?: ITransition | 'temp'): void {
+    if (data) {
+        if (transition) {
+            if (transition === 'temp') {
+                this.lockNormalStyle = true
+                Object.assign(this, data)
+                this.lockNormalStyle = false
+            } else this.animate(data, transition)
+        } else Object.assign(this, data)
+    }
+}
+
 ui.animate = function (keyframe?: IUIInputData | IKeyframe[] | IAnimation | IAnimation[], options?: ITransition, kill?: IAnimateType, isTemp?: boolean): IAnimate {
     if (isUndefined(keyframe)) return this.__animate
 
