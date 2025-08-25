@@ -34,11 +34,11 @@ export const PathArrowModule: IPathArrowModule = {
                     i += 3
                     break
                 case C:  // bezierCurveTo(x1, y1, x2, y2, x, y)
-                    if (count === 1 || i + 7 === len) copyPoints(data, last, now, i + 3)
+                    if (count === 1 || i + 7 >= len - 3) copyPoints(data, last, now, i + 3) // C 或 C + L结束
                     i += 7
                     break
                 case Q:  // quadraticCurveTo(x1, y1, x, y)
-                    if (count === 1 || i + 5 === len) copyPoints(data, last, now, i + 1)
+                    if (count === 1 || i + 5 >= len - 3) copyPoints(data, last, now, i + 1) // Q 或 Q + L结束
                     i += 5
                     break
                 case Z:  // closepath()
@@ -68,7 +68,13 @@ export const PathArrowModule: IPathArrowModule = {
                     i += 4
                     break
                 case U: // arcTo(x1, y1, x2, y2, radius)
-                    if (count === 1 || i + 6 === len) copyPoints(data, last, now, i + 1)
+                    if (count === 1 || i + 6 >= len - 3) { // U 或 U + L结束
+                        copyPoints(data, last, now, i + 1)
+                        if (i + 6 !== len) { // 避免与结束点重合
+                            now.x -= (now.x - last.x) / 10
+                            now.y -= (now.y - last.y) / 10
+                        }
+                    }
                     i += 6
                     break
             }
