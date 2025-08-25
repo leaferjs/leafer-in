@@ -15,8 +15,8 @@ export const PathArrowModule: IPathArrowModule = {
 
     list: arrows,
 
-    addArrows(ui: IUI, changeRenderPath?: boolean): void {
-        const { startArrow, endArrow, strokeWidth, dashPattern, __pathForRender: data } = ui.__
+    addArrows(ui: IUI): void {
+        const { startArrow, endArrow, strokeWidth, dashPattern, __pathForRender: data, __clonePathForArrow: clonePathForArrow } = ui.__
 
         let command: number, i = 0, len = data.length, count = 0, useStartArrow = startArrow && startArrow !== 'none'
 
@@ -85,7 +85,7 @@ export const PathArrowModule: IPathArrowModule = {
             if (count === 2 && useStartArrow) copy(second, command === L ? now : last)
 
             if (i === len) {
-                const path = ui.__.__pathForRender = changeRenderPath ? [...data] : data
+                const path = ui.__.__pathForRender = clonePathForArrow ? [...data] : data
                 const pathForArrow: IPathCommandData = ui.__.__pathForArrow = []
 
                 if (useStartArrow) {
