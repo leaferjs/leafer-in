@@ -16,7 +16,9 @@ export const PathArrowModule: IPathArrowModule = {
     list: arrows,
 
     addArrows(ui: IUI): void {
-        const { startArrow, endArrow, strokeWidth, dashPattern, __pathForRender: data, __clonePathForArrow: clonePathForArrow } = ui.__
+        const { startArrow, endArrow, strokeWidth, dashPattern, __pathForRender: data, cornerRadius } = ui.__
+
+        const clonePathForArrow = !cornerRadius // cornerRadius会创建新的render路径，所以不用再clone
 
         let command: number, i = 0, len = data.length, count = 0, useStartArrow = startArrow && startArrow !== 'none'
 

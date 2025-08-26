@@ -4,8 +4,8 @@ export { PathArrowModule } from './PathArrowModule'
 export { PathMatrixHelper } from './PathMatrixHelper'
 export { arrowType } from './decorator'
 
-import { IUI, ILeaferCanvas, IUIData, ILineData } from '@leafer-ui/interface'
-import { PathArrow, UI, UIData, LineData, Plugin, Paint, defineKey } from '@leafer-ui/draw'
+import { IUI, ILeaferCanvas } from '@leafer-ui/interface'
+import { PathArrow, UI, Plugin, Paint } from '@leafer-ui/draw'
 import { PathArrowModule } from './PathArrowModule'
 import { arrowType } from './decorator'
 
@@ -28,12 +28,4 @@ Object.assign(Paint, {
             canvas.stroke()
         }
     }
-})
-
-defineKey(UIData.prototype, '__clonePathForArrow', {
-    get() { return (this as IUIData).__pathInputed || (this as IUIData).cornerRadius }
-})
-
-defineKey(LineData.prototype, '__clonePathForArrow', {
-    get() { return super.__clonePathForArrow || (this as ILineData).points }
 })
