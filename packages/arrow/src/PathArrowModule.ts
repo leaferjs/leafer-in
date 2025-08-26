@@ -1,4 +1,4 @@
-import { IPathArrowModule, IUI, IPathCommandData, IPointData } from '@leafer-ui/interface'
+import { IPathArrowModule, IUI, IPathCommandData, IPointData, IPathDataArrow } from '@leafer-ui/interface'
 import { PathCommandMap as Command, PointHelper } from '@leafer-ui/draw'
 
 import { arrows, getArrowPath } from './data/arrows'
@@ -132,8 +132,18 @@ export const PathArrowModule: IPathArrowModule = {
         }
 
 
+    },
+
+    register(name: string, data: IPathDataArrow): void {
+        this.list[name] = data
+    },
+
+    get(name: string): IPathDataArrow {
+        return this.list[name]
     }
+
 }
+
 
 
 function copyPoints(data: IPathCommandData, from: IPointData, to: IPointData, startIndex: number): void {
