@@ -1,4 +1,4 @@
-import { IArrow, IArrowData, IArrowInputData, IArrowType } from '@leafer-ui/interface'
+import { IArrow, IArrowData, IArrowInputData, IArrowStyle } from '@leafer-ui/interface'
 import { Line, registerUI, dataProcessor } from '@leafer-ui/draw'
 
 import { ArrowData } from './data/ArrowData'
@@ -14,7 +14,7 @@ export class Arrow extends Line implements IArrow {
     declare public __: IArrowData
 
     @arrowType('angle')
-    declare public endArrow?: IArrowType
+    declare public endArrow?: IArrowStyle
 
     constructor(data?: IArrowInputData) {
         super(data)

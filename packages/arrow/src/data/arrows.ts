@@ -1,4 +1,4 @@
-import { IArrowType, IPathDataArrow, IPathDataArrowMap, IUI, IPathCommandData, IPointData } from '@leafer-ui/interface'
+import { IArrowStyle, IArrowTypeData, IPathDataArrow, IPathDataArrowMap, IUI, IPathCommandData, IPointData } from '@leafer-ui/interface'
 import { DataHelper, PointHelper, isObject } from '@leafer-ui/draw'
 
 import { PathMatrixHelper } from '../PathMatrixHelper'
@@ -55,9 +55,21 @@ export const arrows: IPathDataArrowMap = {
 
 }
 
-export function getArrowPath(ui: IUI, arrow: IArrowType, from: IPointData, to: IPointData, scale: number, connectOffset: IPointData, hasDashPattern?: boolean): IPathCommandData {
+export function getArrowPath(ui: IUI, arrow: IArrowStyle, from: IPointData, to: IPointData, size: number, connectOffset: IPointData, hasDashPattern?: boolean): IPathCommandData {
+    let pathData: IPathDataArrow, scale: number
+
     const { strokeCap, strokeJoin } = ui.__
-    const { offset, connect, path, dashPath } = isObject(arrow) ? arrow : arrows[arrow]
+
+    if (isObject(arrow)) {
+        if ((arrow as IArrowTypeData).type) {
+            scale = (arrow as IArrowTypeData).scale
+            pathData = arrows[(arrow as IArrowTypeData).type]
+        } else pathData = arrow as IPathDataArrow
+    } else {
+        pathData = arrows[arrow]
+    }
+
+    const { offset, connect, path, dashPath } = pathData
 
     let connectX = connect ? connect.x : 0
     let offsetX = offset ? offset.x : 0
@@ -71,9 +83,12 @@ export function getArrowPath(ui: IUI, arrow: IArrowType, from: IPointData, to: I
         else if (strokeJoin === 'bevel' && offset.bevelJoin) offsetX += offset.bevelJoin
     }
 
-    if (offsetX) layout(data, offsetX, 0)
-    layout(data, to.x, to.y, scale, scale, getAngle(from, to))
+    if (scale) layout(data, 0, 0, scale, scale) // 预留箭头比例缩放功能
 
-    connectOffset.x = (connectX + offsetX) * scale
+    if (offsetX) layout(data, offsetX, 0)
+
+    layout(data, to.x, to.y, size, size, getAngle(from, to)) // scale rotate 先围绕 data 数据应用后，再加 to
+
+    connectOffset.x = (connectX + offsetX) * size
     return data
 }
