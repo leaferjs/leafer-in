@@ -40,7 +40,8 @@ export const WheelEventHelper = {
         if (zoom) {
             zoomSpeed = within(zoomSpeed, 0, 1)
             const min = event.deltaY ? config.delta.y : config.delta.x
-            scale = within(1 - delta / (min * 4) * zoomSpeed, 0.5, 1.5) // zoomSpeed
+            const absScale = within(1 - abs(delta) / (min * 4) * zoomSpeed, 0.5, 2)
+            scale = delta > 0 ? absScale : 1 / absScale // 让 scale 放大、缩小可以定位在有规律的刻度上
         }
 
         return scale
