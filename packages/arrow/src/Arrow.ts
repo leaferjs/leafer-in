@@ -1,5 +1,5 @@
-import { IArrow, IArrowData, IArrowInputData, IArrowStyle } from '@leafer-ui/interface'
-import { Line, registerUI, dataProcessor } from '@leafer-ui/draw'
+import { IArrow, IArrowData, IArrowInputData, IArrowStyle, IPathDataArrow } from '@leafer-ui/interface'
+import { Line, registerUI, dataProcessor, PathArrow } from '@leafer-ui/draw'
 
 import { ArrowData } from './data/ArrowData'
 import { arrowType } from './decorator'
@@ -19,6 +19,10 @@ export class Arrow extends Line implements IArrow {
     constructor(data?: IArrowInputData) {
         super(data)
         this.__.__useArrow = true
+    }
+
+    static registerArrow(name: string, data: IPathDataArrow): void {
+        PathArrow.register(name, data)
     }
 
 }
