@@ -1,5 +1,5 @@
 import { IBoundsData, IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
-import { AroundHelper, MathHelper, PointHelper, BoundsHelper, Bounds, Direction9 } from '@leafer-ui/draw'
+import { AroundHelper, MathHelper, PointHelper, Direction9, DragBoundsHelper } from '@leafer-ui/draw'
 
 import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
@@ -115,20 +115,10 @@ export const EditDataHelper = {
         toPoint(around || align, boxBounds, origin, true)
 
         if (dragBounds) {
-            const allowBounds = dragBounds === 'parent' ? target.parent.boxBounds : dragBounds
-            const childBounds = new Bounds(target.__localBoxBounds)
-
-            if (BoundsHelper.includes(new Bounds(allowBounds).spread(0.1), childBounds)) {
-
-                childBounds.scaleOf(target.getLocalPointByInner(origin), scaleX, scaleY)
-
-                if (!BoundsHelper.includes(allowBounds, childBounds)) {
-                    const realBounds = childBounds.getIntersect(allowBounds)
-                    const fitScaleX = realBounds.width / childBounds.width, fitScaleY = realBounds.height / childBounds.height
-                    if (useScaleX) scaleX *= fitScaleX
-                    if (useScaleY) scaleY *= fitScaleY // 后续需优化带旋转的场景
-                }
-            }
+            const scaleData = { x: scaleX, y: scaleY }
+            DragBoundsHelper.limitScaleOf(target, origin, scaleData)
+            scaleX = scaleData.x
+            scaleY = scaleData.y
         }
 
         if (useScaleX && widthRange) {
