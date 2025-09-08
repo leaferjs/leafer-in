@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/scroll",
-  "version": "1.9.5",
+  "version": "1.9.6",
   "description": "@leafer-in/scroll",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -30,8 +30,8 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-ui/core": "^1.9.5",
-    "@leafer-ui/interface": "^1.9.5",
-    "@leafer-in/interface": "^1.9.5"
+    "@leafer-ui/core": "^1.9.6",
+    "@leafer-ui/interface": "^1.9.6",
+    "@leafer-in/interface": "^1.9.6"
   }
 }
