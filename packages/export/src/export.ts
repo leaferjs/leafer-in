@@ -142,6 +142,10 @@ export const ExportModule: IExportModule = {
                 const data = filename === 'canvas' ? canvas : canvas.export(filename, options)
                 result = { data, width: canvas.pixelWidth, height: canvas.pixelHeight, renderBounds, trimBounds }
 
+                // 及时清理缓存画布
+                const app = leafer && leafer.app
+                if (app && app.canvasManager) app.canvasManager.clearRecycled()
+
             }
 
         } catch (error) {
