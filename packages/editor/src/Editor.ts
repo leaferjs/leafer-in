@@ -1,5 +1,5 @@
-import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp } from '@leafer-ui/interface'
-import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString, PropertyEvent } from '@leafer-ui/draw'
+import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp, ILeaferMode } from '@leafer-ui/interface'
+import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString, PropertyEvent, LeaferEvent } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent, useModule } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
@@ -376,7 +376,8 @@ export class Editor extends Group implements IEditor {
             this.targetEventIds = [
                 leafer.on_(RenderEvent.START, this.onRenderStart, this),
                 targetLeafer && targetLeafer.on_(PropertyEvent.SCROLL, this.onChildScroll, this),
-                app.on_(RenderEvent.CHILD_START, this.onAppRenderStart, this)
+                app.on_(RenderEvent.CHILD_START, this.onAppRenderStart, this),
+                app.on_(LeaferEvent.UPDATE_MODE, (data: { mode: ILeaferMode }) => { if (data.mode && data.mode !== 'normal') this.cancel() })
             ]
             if (editMask.visible) editMask.forceRender()
         }

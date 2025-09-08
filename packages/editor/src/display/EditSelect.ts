@@ -17,7 +17,7 @@ export class EditSelect extends Group implements IEditSelect {
     public editor: IEditor
 
     public get dragging(): boolean { return !!this.originList }
-    public get running(): boolean { const { editor } = this; return this.hittable && editor.visible && editor.hittable && editor.mergeConfig.selector }
+    public get running(): boolean { const { editor } = this; return this.hittable && editor.visible && editor.hittable && editor.mergeConfig.selector && this.app.mode === 'normal' }
     public get isMoveMode(): boolean { return this.app && this.app.interaction.moveMode }
 
     public hoverStroker: IStroker = new Stroker()
