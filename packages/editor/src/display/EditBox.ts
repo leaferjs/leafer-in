@@ -1,5 +1,5 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, IEventParams, ITransformTool, IUIEvent } from '@leafer-ui/interface'
-import { Group, Box, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber } from '@leafer-ui/draw'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -25,7 +25,7 @@ export class EditBox extends Group implements IEditBox {
 
     public view: IGroup = new Group()  // 放置默认编辑工具控制点
 
-    public rect: IBox = new Box({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
+    public rect: IEditPoint = new EditPoint({ name: 'rect', hitFill: 'all', hitStroke: 'none', strokeAlign: 'center', hitRadius: 5 }) // target rect
     public circle: IEditPoint = new EditPoint({ name: 'circle', strokeAlign: 'center', around: 'center', cursor: 'crosshair', hitRadius: 5 }) // rotate point
     public buttons: IGroup = new Group({ around: 'center', hitSelf: false, visible: 0 })
 
@@ -101,6 +101,7 @@ export class EditBox extends Group implements IEditBox {
         }
 
         this.listenPointEvents(circle, 'rotate', 2)
+        this.listenPointEvents(rect, 'move', 8) // center
 
         view.addMany(...rotatePoints, rect, circle, buttons, ...resizeLines, ...resizePoints)
         this.add(view)
@@ -108,8 +109,8 @@ export class EditBox extends Group implements IEditBox {
 
 
     public load(): void {
-        const { target, mergeConfig, single, rect, circle, resizePoints } = this
-        const { stroke, strokeWidth } = mergeConfig
+        const { target, mergeConfig, single, rect, circle, resizePoints, resizeLines } = this
+        const { stroke, strokeWidth, resizeLine } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
@@ -122,6 +123,7 @@ export class EditBox extends Group implements IEditBox {
             resizeP = resizePoints[i]
             resizeP.set(this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length]))
             resizeP.rotation = ((i - (i % 2 ? 1 : 0)) / 2) * 90
+            if (i % 2) resizeLines[(i - 1) / 2].set({ pointType: 'resize', rotation: (i - 1) / 2 * 90, ...(resizeLine || {}) } as IEditPointInputData)
         }
 
         // rotate
@@ -195,10 +197,10 @@ export class EditBox extends Group implements IEditBox {
                     resizeP.visible = rotateP.visible = showPoints && !!middlePoint
 
                     if (((i + 1) / 2) % 2) { // top, bottom
-                        resizeL.width = width
+                        resizeL.width = width + resizeL.height
                         if (hideOnSmall && resizeP.width * 2 > width) resizeP.visible = false
                     } else {
-                        resizeL.height = height
+                        resizeL.width = height + resizeL.height
                         if (hideOnSmall && resizeP.width * 2 > height) resizeP.visible = false
                     }
                 }
@@ -286,7 +288,7 @@ export class EditBox extends Group implements IEditBox {
         const { editor, dragStartData } = this, { target } = this, { moveable, resizeable, rotateable, skewable, hideOnMove } = this.mergeConfig
 
         // 确定模式
-        if (point.name === 'rect') {
+        if (pointType === 'move') {
             moveable && (this.moving = true)
             editor.opacity = hideOnMove ? 0 : 1 // move
         } else {
@@ -311,8 +313,8 @@ export class EditBox extends Group implements IEditBox {
 
         this.dragPoint = null
         this.resetDoing()
-        const { name, pointType } = e.current as IEditPoint
-        if (name === 'rect') this.editor.opacity = 1 // move
+        const { pointType } = e.current as IEditPoint
+        if (pointType === 'move') this.editor.opacity = 1 // move
         if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = null
     }
 
@@ -320,15 +322,14 @@ export class EditBox extends Group implements IEditBox {
         const { transformTool, moving, resizing, rotating, skewing } = this
         if (moving) {
             transformTool.onMove(e)
-            updateMoveCursor(this)
         } else if (resizing || rotating || skewing) {
             const point = e.current as IEditPoint
             if (point.pointType) this.enterPoint = point// 防止变化
             if (rotating) transformTool.onRotate(e)
             if (resizing) transformTool.onScale(e)
             if (skewing) transformTool.onSkew(e)
-            updatePointCursor(this, e)
         }
+        updatePointCursor(this, e)
     }
 
     protected resetDoing(): void {
@@ -440,14 +441,16 @@ export class EditBox extends Group implements IEditBox {
         point.direction = direction
         point.pointType = type
 
-        const events: IEventParams[] = [
-            [DragEvent.START, this.onDragStart, this],
-            [DragEvent.DRAG, this.onDrag, this],
-            [DragEvent.END, this.onDragEnd, this],
-            [PointerEvent.LEAVE, () => { this.enterPoint = null }],
-        ]
-        if (point.name !== 'circle') events.push([PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, updatePointCursor(this, e) }])
-        this.__eventIds.push(point.on_(events))
+        this.__eventIds.push(
+            point.on_([
+                [DragEvent.START, this.onDragStart, this],
+                [DragEvent.DRAG, this.onDrag, this],
+                [DragEvent.END, this.onDragEnd, this],
+
+                [PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, updatePointCursor(this, e) }],
+                [PointerEvent.LEAVE, () => { this.enterPoint = null }]
+            ])
+        )
     }
 
     protected __listenEvents(): void {
@@ -455,11 +458,6 @@ export class EditBox extends Group implements IEditBox {
 
         events.push(
             rect.on_([
-                [DragEvent.START, this.onDragStart, this],
-                [DragEvent.DRAG, this.onDrag, this],
-                [DragEvent.END, this.onDragEnd, this],
-
-                [PointerEvent.ENTER, () => updateMoveCursor(this)],
                 [PointerEvent.DOUBLE_TAP, this.onDoubleTap, this],
                 [PointerEvent.LONG_PRESS, this.onLongPress, this]
             ])

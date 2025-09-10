@@ -11,14 +11,20 @@ const cacheCursors: IObject = {}
 export function updatePointCursor(editBox: IEditBox, e: IUIEvent): void {
     const { enterPoint: point, dragging, skewing, resizing, flippedX, flippedY } = editBox
     if (!point || !editBox.editor.editing || !editBox.canUse) return
+    if (point.name === 'rect') return updateMoveCursor(editBox) // rect 移动元素
     if (point.name === 'circle') return // 独立旋转按钮
-    if (point.pointType === 'button') { // 普通按钮
+
+    let { rotation } = editBox
+    const { pointType } = point, { moveCursor, resizeCursor, rotateCursor, skewCursor, moveable, resizeable, rotateable, skewable } = editBox.mergeConfig
+
+    if (pointType === 'move') { // 移动类型
+        point.cursor = moveCursor
+        if (!moveable) point.visible = false
+        return
+    } else if (pointType === 'button') { // 普通按钮
         if (!point.cursor) point.cursor = 'pointer'
         return
     }
-
-    let { rotation } = editBox
-    const { pointType } = point, { resizeCursor, rotateCursor, skewCursor, resizeable, rotateable, skewable } = editBox.mergeConfig
 
     let showResize = pointType.includes('resize')
     if (showResize && rotateable && (editBox.isHoldRotateKey(e) || !resizeable)) showResize = false
