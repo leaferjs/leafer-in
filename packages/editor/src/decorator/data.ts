@@ -19,6 +19,9 @@ export function targetAttr(fn: IFunction) {
 
                         const isSelect = key === 'target'
                         if (isSelect) {
+                            (this as IEditor).setDimOthers(false);
+                            (this as IEditor).setBright(false)
+
                             if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
                             if ((this as IEditor).single) (this as IEditor).element.syncEventer = null // 重置 EditBox.load() 设置
 

@@ -1,5 +1,5 @@
 import { IGroupInputData, IUI, IEventListenerId, IPointData, ILeafList, IEditSize, IGroup, IObject, IAlign, IAxis, IFunction, IMatrix, IApp, ILeaferMode } from '@leafer-ui/interface'
-import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString, PropertyEvent, LeaferEvent } from '@leafer-ui/draw'
+import { Group, DataHelper, LeafList, RenderEvent, LeafHelper, Direction9, Plugin, isString, PropertyEvent, LeaferEvent, isArray } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent, useModule } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditor, IEditorConfig, IEditTool, IEditorScaleEvent, IInnerEditor, ISimulateElement } from '@leafer-in/interface'
@@ -29,11 +29,13 @@ export class Editor extends Group implements IEditor {
     readonly mergeConfig: IEditorConfig
     readonly mergedConfig: IEditorConfig
 
+    @targetAttr(onTarget)
+    public target?: IUI | IUI[]
+
     @targetAttr(onHover)
     public hoverTarget?: IUI
 
-    @targetAttr(onTarget)
-    public target?: IUI | IUI[]
+    public dimTarget?: IGroup | IGroup[] // 需要淡化的容器
 
     // 列表
 
@@ -119,6 +121,20 @@ export class Editor extends Group implements IEditor {
 
     public shiftItem(item: IUI): void {
         this.hasItem(item) ? this.removeItem(item) : this.addItem(item)
+    }
+
+    // 淡化 / 突出
+
+    public setDimOthers(value: boolean | number, attrName: 'bright' | 'dim' = 'dim', list?: IUI[]): void {
+        if (!list) {
+            const { dimTarget, targetLeafer } = this
+            list = dimTarget ? (isArray(dimTarget) ? dimTarget : [dimTarget]) : [targetLeafer]
+        }
+        if (list[0] && list[0][attrName] !== (value || false)) list.forEach(item => DataHelper.stintSet(item, attrName, value))
+    }
+
+    public setBright(value: boolean): void {
+        this.setDimOthers(value, 'bright', this.list)
     }
 
     // update

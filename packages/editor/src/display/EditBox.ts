@@ -161,11 +161,14 @@ export class EditBox extends Group implements IEditBox {
 
 
     public updateBounds(bounds: IBoundsData): void {
-        const { editMask } = this.editor
-        const { mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, spread, hideRotatePoints, hideResizeLines } = mergeConfig
+        const { editor, mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
+        const { editMask } = editor
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, dimOthers, bright, spread, hideRotatePoints, hideResizeLines } = mergeConfig
 
         editMask.visible = mask ? true : 0
+
+        editor.setDimOthers(dimOthers)
+        editor.setBright(!!dimOthers || bright)
 
         if (spread) BoundsHelper.spread(bounds, spread)
 
