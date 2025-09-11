@@ -104,14 +104,14 @@ export const ExportModule: IExportModule = {
 
                 canvas.save()
 
-                if (isFrame && !isUndefined(fill)) {
-                    const oldFill = leaf.get('fill')
-                    leaf.fill = ''
-                    leaf.__render(canvas, renderOptions)
-                    leaf.fill = oldFill as string
-                } else {
-                    leaf.__render(canvas, renderOptions)
-                }
+
+                const igroneFill = isFrame && !isUndefined(fill), oldFill = leaf.get('fill')
+                if (igroneFill) leaf.fill = ''
+
+                Platform.render(leaf, canvas, renderOptions)
+
+                if (igroneFill) leaf.fill = oldFill as string
+
 
                 canvas.restore()
 
