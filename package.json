@@ -47,6 +47,7 @@
     "@leafer-in/filter": "1.9.6",
     "@leafer-in/color": "1.9.6",
     "@leafer-in/resize": "1.9.6",
+    "@leafer-in/bright": "1.9.6",
     "@leafer-in/interface": "1.9.6"
   }
 }
