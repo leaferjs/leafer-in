@@ -15,17 +15,19 @@ export function targetAttr(fn: IFunction) {
                 const old = (this as IObject)[privateKey]
                 if (old !== value) {
 
-                    if ((this as IEditor).config) { // Editor
+                    const t = this as IEditor
+
+                    if (t.config) { // Editor
 
                         const isSelect = key === 'target'
                         if (isSelect) {
-                            (this as IEditor).setDimOthers(false);
-                            (this as IEditor).setBright(false)
+                            t.setDimOthers(false)
+                            t.setBright(false)
 
                             if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
-                            if ((this as IEditor).single) (this as IEditor).element.syncEventer = null // 重置 EditBox.load() 设置
+                            if (t.single) t.element.syncEventer = null // 重置 EditBox.load() 设置
 
-                            const { beforeSelect } = (this as IEditor).config
+                            const { beforeSelect } = t.config
                             if (beforeSelect) {
                                 const check = beforeSelect({ target: value })
                                 if (isObject(check)) value = check
@@ -34,7 +36,7 @@ export function targetAttr(fn: IFunction) {
                         }
 
                         const type = isSelect ? EditorEvent.BEFORE_SELECT : EditorEvent.BEFORE_HOVER
-                        if (this.hasEvent(type)) this.emitEvent(new EditorEvent(type, { editor: this as IEditor, value: value as IUI, oldValue: old }))
+                        if (this.hasEvent(type)) this.emitEvent(new EditorEvent(type, { editor: t, value: value as IUI, oldValue: old }))
                     }
 
                     (this as IObject)[privateKey] = value, fn(this, old)
