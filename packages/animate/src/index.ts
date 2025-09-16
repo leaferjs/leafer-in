@@ -37,6 +37,7 @@ UI.addAttr('animationOut', undefined, dataType)
 UI.addAttr('transition', true, dataType)
 UI.addAttr('transitionOut', undefined, dataType)
 
+// @leafer-in/state will rewrite
 ui.set = function (data: IUIInputData, transition?: ITransition | 'temp'): void {
     if (data) {
         if (transition) {

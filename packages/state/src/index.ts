@@ -1,6 +1,6 @@
 export { stateType, stateStyleType } from './decorator'
 
-import { IUI, IStateStyleType, IStateName, IText } from '@leafer-ui/interface'
+import { IUI, IStateStyleType, IStateName, IText, IUIInputData, ITransition } from '@leafer-ui/interface'
 import { State, UI, Text, dataType, Plugin, getDescriptor, doBoundsType, defineKey } from '@leafer-ui/core'
 
 import { setPointerState, setState } from './set'
@@ -73,6 +73,19 @@ UI.addAttr('disabledStyle', undefined, stateStyleType)
 UI.addAttr('placeholderStyle', undefined, stateStyleType)
 
 UI.addAttr('button', false, dataType)
+
+// @leafer-in/animate will rewrite
+ui.set = function (data: IUIInputData, transition?: ITransition | 'temp'): void {
+    if (data) {
+        if (transition) {
+            if (transition === 'temp') {
+                this.lockNormalStyle = true
+                Object.assign(this, data)
+                this.lockNormalStyle = false
+            } else this.animate(data, transition)
+        } else Object.assign(this, data)
+    }
+}
 
 ui.focus = function (value: boolean = true): void {
     this.waitLeafer(() => {
