@@ -1,5 +1,5 @@
 import { IEvent, IPointData, IAlign, IAxis, IFunction, IMatrix, IUI } from '@leafer-ui/interface'
-import { MathHelper, Matrix, LeafHelper, AroundHelper, isObject, isString, isNumber } from '@leafer-ui/draw'
+import { MathHelper, PointHelper, Matrix, LeafHelper, AroundHelper, isObject, isString, isNumber } from '@leafer-ui/draw'
 import { DragEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditPoint, IEditTool, IEditorScaleEvent, ISimulateElement, IEditorMoveEvent, IEditorRotateEvent, IEditorSkewEvent } from '@leafer-in/interface'
@@ -11,6 +11,7 @@ import { EditorSkewEvent } from '../event/EditorSkewEvent'
 
 import { EditDataHelper } from '../helper/EditDataHelper'
 import { ITransformTool } from '@leafer-ui/interface'
+
 
 export class TransformTool implements ITransformTool { // Editor use
 
@@ -33,6 +34,10 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const total = { x: e.totalX, y: e.totalY }
 
+        if (e instanceof MoveEvent) {
+            PointHelper.move(total, target.getWorldPointByLocal(dragStartData.totalOffset, null, true))
+        }
+
         if (e.shiftKey) {
             if (Math.abs(total.x) > Math.abs(total.y)) total.y = 0
             else total.x = 0
@@ -49,27 +54,30 @@ export class TransformTool implements ITransformTool { // Editor use
     public onScale(e: DragEvent | ZoomEvent): void {
 
         const { target, mergeConfig, single, dragStartData } = this.editBox
-        let { around, lockRatio, flipable, editSize } = mergeConfig
+        let { around, lockRatio, flipable, editSize } = mergeConfig, totalMove: IPointData | number
 
         if (e instanceof ZoomEvent) {
-
-            this.scaleOf(target.getBoxPoint(e), e.scale, e.scale)
-
+            around = target.getBoxPoint(e)
+            totalMove = e.totalScale
         } else {
-
-            const { direction } = e.current as IEditPoint
-            if (e.shiftKey || target.lockRatio) lockRatio = true
-
-            const data = EditDataHelper.getScaleData(target, dragStartData.bounds, direction, e.getInnerTotal(target), lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, !single || editSize === 'scale')
-
-            if (this.editTool && this.editTool.onScaleWithDrag) {
-                data.drag = e
-                this.scaleWithDrag(data)
-            } else {
-                this.scaleOf(data.origin, data.scaleX, data.scaleY)
-            }
-
+            totalMove = e.getInnerTotal(target)
         }
+
+        const { direction } = e.current as IEditPoint
+        if (e.shiftKey || target.lockRatio) lockRatio = true
+
+        const data = EditDataHelper.getScaleData(target, dragStartData.bounds, direction, totalMove, lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, !single || editSize === 'scale')
+
+        const targetX = target.x, targetY = target.y
+
+        if (e instanceof DragEvent && this.editTool && this.editTool.onScaleWithDrag) {
+            data.drag = e
+            this.scaleWithDrag(data)
+        } else {
+            this.scaleOf(data.origin, data.scaleX, data.scaleY)
+        }
+
+        PointHelper.move(dragStartData.totalOffset, target.x - targetX, target.y - targetY)
     }
 
     public onRotate(e: DragEvent | RotateEvent): void {
@@ -96,7 +104,11 @@ export class TransformTool implements ITransformTool { // Editor use
         rotation = MathHelper.float(MathHelper.getGapRotation(rotation, rotateGap, target.rotation), 2)
         if (!rotation) return
 
+        const targetX = target.x, targetY = target.y
+
         this.rotateOf(origin, rotation)
+
+        PointHelper.move(dragStartData.totalOffset, target.x - targetX, target.y - targetY)
     }
 
     public onSkew(e: DragEvent): void {

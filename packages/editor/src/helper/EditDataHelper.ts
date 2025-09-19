@@ -1,5 +1,5 @@
 import { IBoundsData, IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
-import { AroundHelper, MathHelper, PointHelper, Direction9, DragBoundsHelper } from '@leafer-ui/draw'
+import { AroundHelper, MathHelper, PointHelper, Direction9, DragBoundsHelper, isNumber } from '@leafer-ui/draw'
 
 import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
@@ -10,17 +10,11 @@ const { within, sign } = MathHelper
 
 export const EditDataHelper = {
 
-    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMove: IPointData, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
+    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMoveOrScale: IPointData | number, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
 
         const { boxBounds, widthRange, heightRange, dragBounds, worldBoxBounds } = target
         const { width, height } = startBounds
-
-        if (around) {
-            totalMove.x *= 2
-            totalMove.y *= 2
-        }
-
 
         // 获取已经改变的比例
         const originChangedScaleX = target.scaleX / startBounds.scaleX
@@ -31,72 +25,85 @@ export const EditDataHelper = {
         const changedScaleX = scaleMode ? originChangedScaleX : signX * boxBounds.width / width
         const changedScaleY = scaleMode ? originChangedScaleY : signY * boxBounds.height / height
 
-        totalMove.x *= scaleMode ? originChangedScaleX : signX
-        totalMove.y *= scaleMode ? originChangedScaleY : signY
+        if (isNumber(totalMoveOrScale)) {
 
-        const topScale = (-totalMove.y + height) / height
-        const rightScale = (totalMove.x + width) / width
-        const bottomScale = (totalMove.y + height) / height
-        const leftScale = (-totalMove.x + width) / width
+            scaleX = scaleY = Math.sqrt(totalMoveOrScale)
 
-        switch (direction) {
-            case top:
-                scaleY = topScale
-                align = 'bottom'
-                break
-            case right:
-                scaleX = rightScale
-                align = 'left'
-                break
-            case bottom:
-                scaleY = bottomScale
-                align = 'top'
-                break
-            case left:
-                scaleX = leftScale
-                align = 'right'
-                break
-            case topLeft:
-                scaleY = topScale
-                scaleX = leftScale
-                align = 'bottom-right'
-                break
-            case topRight:
-                scaleY = topScale
-                scaleX = rightScale
-                align = 'bottom-left'
-                break
-            case bottomRight:
-                scaleY = bottomScale
-                scaleX = rightScale
-                align = 'top-left'
-                break
-            case bottomLeft:
-                scaleY = bottomScale
-                scaleX = leftScale
-                align = 'top-right'
-        }
+        } else {
 
-        if (lockRatio) {
-            if (lockRatio === 'corner' && direction % 2) {
-                lockRatio = false
-            } else {
-                let scale: number
-                switch (direction) {
-                    case top:
-                    case bottom:
-                        scale = scaleY
-                        break
-                    case left:
-                    case right:
-                        scale = scaleX
-                        break
-                    default:
-                        scale = Math.sqrt(Math.abs(scaleX * scaleY))
-                }
-                scaleX = scaleX < 0 ? -scale : scale
-                scaleY = scaleY < 0 ? -scale : scale
+            if (around) {
+                totalMoveOrScale.x *= 2
+                totalMoveOrScale.y *= 2
             }
+
+            totalMoveOrScale.x *= scaleMode ? originChangedScaleX : signX
+            totalMoveOrScale.y *= scaleMode ? originChangedScaleY : signY
+
+            const topScale = (-totalMoveOrScale.y + height) / height
+            const rightScale = (totalMoveOrScale.x + width) / width
+            const bottomScale = (totalMoveOrScale.y + height) / height
+            const leftScale = (-totalMoveOrScale.x + width) / width
+
+            switch (direction) {
+                case top:
+                    scaleY = topScale
+                    align = 'bottom'
+                    break
+                case right:
+                    scaleX = rightScale
+                    align = 'left'
+                    break
+                case bottom:
+                    scaleY = bottomScale
+                    align = 'top'
+                    break
+                case left:
+                    scaleX = leftScale
+                    align = 'right'
+                    break
+                case topLeft:
+                    scaleY = topScale
+                    scaleX = leftScale
+                    align = 'bottom-right'
+                    break
+                case topRight:
+                    scaleY = topScale
+                    scaleX = rightScale
+                    align = 'bottom-left'
+                    break
+                case bottomRight:
+                    scaleY = bottomScale
+                    scaleX = rightScale
+                    align = 'top-left'
+                    break
+                case bottomLeft:
+                    scaleY = bottomScale
+                    scaleX = leftScale
+                    align = 'top-right'
+            }
+
+            if (lockRatio) {
+                if (lockRatio === 'corner' && direction % 2) {
+                    lockRatio = false
+                } else {
+                    let scale: number
+                    switch (direction) {
+                        case top:
+                        case bottom:
+                            scale = scaleY
+                            break
+                        case left:
+                        case right:
+                            scale = scaleX
+                            break
+                        default:
+                            scale = Math.sqrt(Math.abs(scaleX * scaleY))
+                    }
+                    scaleX = scaleX < 0 ? -scale : scale
+                    scaleY = scaleY < 0 ? -scale : scale
+                }
+            }
+
         }
 
         const useScaleX = scaleX !== 1, useScaleY = scaleY !== 1

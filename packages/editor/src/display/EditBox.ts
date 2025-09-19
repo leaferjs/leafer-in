@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber } from '@leafer-ui/draw'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber, getPointData } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -68,6 +68,7 @@ export class EditBox extends Group implements IEditBox {
         const { moveable, resizeable, rotateable } = this.mergeConfig
         return isString(moveable) || isString(resizeable) || isString(rotateable)
     }
+    public get canDragAnimate(): boolean { return (this.moving && this.mergeConfig.dragLimitAnimate && this.target.dragBounds) as any as boolean }
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -288,12 +289,11 @@ export class EditBox extends Group implements IEditBox {
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
-        const { editor } = this, { moveable, resizeable, rotateable, skewable, hideOnMove } = this.mergeConfig
+        const { editor } = this, { moveable, resizeable, rotateable, skewable } = this.mergeConfig
 
         // 确定模式
         if (pointType === 'move') {
             moveable && (this.moving = true)
-            editor.opacity = hideOnMove ? 0 : 1 // move
         } else {
             if (pointType.includes('rotate') || this.isHoldRotateKey(e) || !resizeable) {
                 rotateable && (this.rotating = true)
@@ -308,12 +308,11 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onDragEnd(e: DragEvent): void {
-        if (this.moving && this.mergeConfig.dragLimitAnimate && this.target.dragBounds) this.transformTool.onMove(e)
+        if (this.canDragAnimate) this.transformTool.onMove(e)
 
-        this.dragPoint = null
         this.resetDoing()
+        this.dragPoint = null
         const { pointType } = e.current as IEditPoint
-        if (pointType === 'move') this.editor.opacity = 1 // move
         if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = null
     }
 
@@ -333,9 +332,12 @@ export class EditBox extends Group implements IEditBox {
 
     public recordStart(e: IUIEvent): void {
         if (this.canUse) {
+            if (this.moving || e.type === MoveEvent.START) this.editor.opacity = this.mergeConfig.hideOnMove ? 0 : 1 // move
+
             const { dragStartData, target } = this
             dragStartData.x = e.x
             dragStartData.y = e.y
+            dragStartData.totalOffset = getPointData() // 缩放、旋转造成的总偏移量，一般用于手势操作的move纠正
             dragStartData.point = { x: target.x, y: target.y } // 用于移动
             dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
             dragStartData.rotation = target.rotation // 用于旋转
@@ -343,7 +345,11 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected resetDoing(): void {
-        if (this.canUse) this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
+        if (this.canUse) {
+            this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
+            this.editor.opacity = 1
+            this.update() // 移动端手势操作hideOnMove移动需强制更新一次
+        }
     }
 
     // 手势控制元素
@@ -359,7 +365,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onMoveEnd(e: MoveEvent): void {
-        if (this.moving) this.transformTool.onMove(e)
+        if (this.canDragAnimate) this.transformTool.onMove(e)
         this.resetDoing()
     }
 
