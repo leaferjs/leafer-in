@@ -31,23 +31,14 @@ export class TransformTool implements ITransformTool { // Editor use
         const axisDrag = isString(target.draggable)
         const checkLimitMove = !dragLimitAnimate || isMoveEnd || axisDrag
 
-        if (e instanceof MoveEvent) {
+        const total = { x: e.totalX, y: e.totalY }
 
-            move = e.getLocalMove(target)
-            if (checkLimitMove) DragEvent.limitMove(target, move)
-
-        } else {
-
-            const total = { x: e.totalX, y: e.totalY }
-
-            if (e.shiftKey) {
-                if (Math.abs(total.x) > Math.abs(total.y)) total.y = 0
-                else total.x = 0
-            }
-
-            move = DragEvent.getValidMove(target, dragStartData.point, total, checkLimitMove)
-
+        if (e.shiftKey) {
+            if (Math.abs(total.x) > Math.abs(total.y)) total.y = 0
+            else total.x = 0
         }
+
+        move = DragEvent.getValidMove(target, dragStartData.point, total, checkLimitMove)
 
         if (move.x || move.y) {
             if (dragLimitAnimate && !axisDrag && isMoveEnd) LeafHelper.animateMove(this as unknown as IUI, move, isNumber(dragLimitAnimate) ? dragLimitAnimate : 0.3)  // 是否进行动画

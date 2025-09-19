@@ -288,7 +288,7 @@ export class EditBox extends Group implements IEditBox {
     protected onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
-        const { editor, dragStartData } = this, { target } = this, { moveable, resizeable, rotateable, skewable, hideOnMove } = this.mergeConfig
+        const { editor } = this, { moveable, resizeable, rotateable, skewable, hideOnMove } = this.mergeConfig
 
         // 确定模式
         if (pointType === 'move') {
@@ -303,11 +303,7 @@ export class EditBox extends Group implements IEditBox {
             if (pointType === 'skew') skewable && (this.skewing = true)
         }
 
-        dragStartData.x = e.x
-        dragStartData.y = e.y
-        dragStartData.point = { x: target.x, y: target.y } // 用于移动
-        dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
-        dragStartData.rotation = target.rotation // 用于旋转
+        this.recordStart(e)
         if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = editor.leafList.keys // 记录正在resize中的元素列表
     }
 
@@ -333,6 +329,17 @@ export class EditBox extends Group implements IEditBox {
             if (skewing) transformTool.onSkew(e)
         }
         updatePointCursor(this, e)
+    }
+
+    public recordStart(e: IUIEvent): void {
+        if (this.canUse) {
+            const { dragStartData, target } = this
+            dragStartData.x = e.x
+            dragStartData.y = e.y
+            dragStartData.point = { x: target.x, y: target.y } // 用于移动
+            dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
+            dragStartData.rotation = target.rotation // 用于旋转
+        }
     }
 
     protected resetDoing(): void {
@@ -471,12 +478,15 @@ export class EditBox extends Group implements IEditBox {
                 editor.app.on_([
                     [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
                     [KeyEvent.DOWN, this.onArrow, this],
+
+                    [[MoveEvent.START, ZoomEvent.START, RotateEvent.START], this.recordStart, this],
+
                     [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
                     [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
                     [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
+
                     [MoveEvent.END, this.onMoveEnd, this],
-                    [ZoomEvent.END, this.resetDoing, this],
-                    [RotateEvent.END, this.resetDoing, this],
+                    [[ZoomEvent.END, RotateEvent.END], this.resetDoing, this],
                 ])
             )
         })
