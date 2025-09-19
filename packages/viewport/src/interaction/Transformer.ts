@@ -3,6 +3,8 @@ import { IMoveEvent, IZoomEvent, IRotateEvent, ITimer } from '@leafer-ui/interfa
 import { InteractionBase, MoveEvent, ZoomEvent, RotateEvent } from '@leafer-ui/core'
 
 
+let totalX: number, totalY: number, totalScale: number, totalRotation: number
+
 export class Transformer {
 
     public get transforming(): boolean { return !!(this.moveData || this.zoomData || this.rotateData) }
@@ -23,11 +25,14 @@ export class Transformer {
 
         if (!this.moveData) {
             this.setPath(data)
-            this.moveData = { ...data, moveX: 0, moveY: 0 }
+            totalX = 0, totalY = 0
+            this.moveData = { ...data, moveX: 0, moveY: 0, totalX, totalY }
             interaction.emit(MoveEvent.START, this.moveData)
         }
 
         data.path = this.moveData.path
+        data.totalX = totalX = totalX + data.moveX
+        data.totalY = totalY = totalY + data.moveY
         interaction.emit(MoveEvent.BEFORE_MOVE, data)
         interaction.emit(MoveEvent.MOVE, data)
 
@@ -39,11 +44,13 @@ export class Transformer {
 
         if (!this.zoomData) {
             this.setPath(data)
-            this.zoomData = { ...data, scale: 1 }
+            totalScale = 1
+            this.zoomData = { ...data, scale: 1, totalScale }
             interaction.emit(ZoomEvent.START, this.zoomData)
         }
 
         data.path = this.zoomData.path
+        data.totalScale = totalScale = totalScale * data.scale
         interaction.emit(ZoomEvent.BEFORE_ZOOM, data)
         interaction.emit(ZoomEvent.ZOOM, data)
 
@@ -55,11 +62,13 @@ export class Transformer {
 
         if (!this.rotateData) {
             this.setPath(data)
-            this.rotateData = { ...data, rotation: 0 }
+            totalRotation = 0
+            this.rotateData = { ...data, rotation: 0, totalRotation }
             interaction.emit(RotateEvent.START, this.rotateData)
         }
 
         data.path = this.rotateData.path
+        data.totalRotation = totalRotation = totalRotation + data.rotation
         interaction.emit(RotateEvent.BEFORE_ROTATE, data)
         interaction.emit(RotateEvent.ROTATE, data)
 
@@ -82,9 +91,9 @@ export class Transformer {
 
     public transformEnd(): void {
         const { interaction, moveData, zoomData, rotateData } = this
-        if (moveData) interaction.emit(MoveEvent.END, moveData)
-        if (zoomData) interaction.emit(ZoomEvent.END, zoomData)
-        if (rotateData) interaction.emit(RotateEvent.END, rotateData)
+        if (moveData) interaction.emit(MoveEvent.END, { ...moveData, totalX, totalY } as IMoveEvent)
+        if (zoomData) interaction.emit(ZoomEvent.END, { ...zoomData, totalScale } as IZoomEvent)
+        if (rotateData) interaction.emit(RotateEvent.END, { ...rotateData, totalRotation } as IRotateEvent)
         this.reset()
     }
 
