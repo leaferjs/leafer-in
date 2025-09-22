@@ -95,7 +95,7 @@ export class EditSelect extends Group implements IEditSelect {
         if (e.multiTouch) return
 
         const { editor } = this
-        const { select } = editor.mergeConfig
+        const { select, selectKeep } = editor.mergeConfig
 
         if (select === 'tap') this.checkAndSelect(e)
         else if (this.waitSelect) this.waitSelect()
@@ -103,7 +103,7 @@ export class EditSelect extends Group implements IEditSelect {
         if (this.needRemoveItem) {
             editor.removeItem(this.needRemoveItem)
         } else if (this.isMoveMode) {
-            editor.target = null  // move.dragEmpty
+            if (!selectKeep) editor.target = null  // move.dragEmpty
         }
 
     }
@@ -125,7 +125,7 @@ export class EditSelect extends Group implements IEditSelect {
 
             } else if (this.allow(e.target)) {
 
-                if (!this.isHoldMultipleSelectKey(e)) editor.target = null
+                if (!this.isHoldMultipleSelectKey(e) && !this.editor.mergedConfig.selectKeep) editor.target = null
 
             }
         }
