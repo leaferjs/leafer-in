@@ -179,21 +179,17 @@ export class TextEditor extends InnerEditor {
 
         if (data.__autoWidth) {
             width += 20 // 加大一点防止换行
-            if (data.autoSizeAlign) {
-                switch (data.textAlign) {
-                    case 'center': offsetX = -width / 2; break
-                    case 'right': offsetX = -width
-                }
+            switch (data.textAlign) {
+                case 'center': offsetX = data.autoSizeAlign ? -width / 2 : -10; break
+                case 'right': offsetX = data.autoSizeAlign ? -width : -20
             }
         }
 
         if (data.__autoHeight) {
             height += 20
-            if (data.autoSizeAlign) {
-                switch (data.verticalAlign) {
-                    case 'middle': offsetY = -height / 2; break
-                    case 'bottom': offsetY = -height
-                }
+            switch (data.verticalAlign) {
+                case 'middle': offsetY = data.autoSizeAlign ? -height / 2 : -10; break
+                case 'bottom': offsetY = data.autoSizeAlign ? -height : -20
             }
         }
 
