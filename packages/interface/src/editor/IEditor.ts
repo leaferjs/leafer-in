@@ -1,4 +1,4 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent } from '@leafer-ui/interface'
 
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
@@ -84,16 +84,23 @@ export interface IEditorGroupEvent extends IEditorEvent {
 }
 
 
-export interface IEditorMoveEvent extends IEditorEvent {
+export interface IEditorTransformEvent extends IEditorEvent {
+    transform?: IMatrixData
+
+    operateEvent?: IDragEvent | IMoveEvent | IZoomEvent | IRotateEvent // 操作源事件
+    isStart?: boolean // 是否开始
+    isEnd?: boolean // 是否结束
+}
+
+export interface IEditorMoveEvent extends IEditorTransformEvent {
     readonly moveX: number
     readonly moveY: number
 }
 
-export interface IEditorScaleEvent extends IEditorEvent {
+export interface IEditorScaleEvent extends IEditorTransformEvent {
     // scaleOf(origin, scaleX, scaleY, resize) / transform(transform, resize)
     readonly scaleX?: number
     readonly scaleY?: number
-    transform?: IMatrixData
 
     readonly direction?: number
     readonly lockRatio?: boolean | 'corner'
@@ -102,15 +109,13 @@ export interface IEditorScaleEvent extends IEditorEvent {
     drag?: IDragEvent
 }
 
-export interface IEditorRotateEvent extends IEditorEvent {
+export interface IEditorRotateEvent extends IEditorTransformEvent {
     // rotateOf(origin, rotation)
-    transform?: IMatrixData
     readonly rotation?: number
 }
 
-export interface IEditorSkewEvent extends IEditorEvent {
+export interface IEditorSkewEvent extends IEditorTransformEvent {
     // skewOf(origin, skewX, skewY)
-    transform?: IMatrixData
     readonly skewX?: number
     readonly skewY?: number
 }
