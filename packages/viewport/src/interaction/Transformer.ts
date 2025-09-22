@@ -7,12 +7,16 @@ let totalX: number, totalY: number, totalScale: number, totalRotation: number
 
 export class Transformer {
 
-    public get transforming(): boolean { return !!(this.moveData || this.zoomData || this.rotateData) }
+    public get transforming(): boolean { return this.moving || this.zooming || this.rotating }
+    public get moving(): boolean { return !!this.moveData }
+    public get zooming(): boolean { return !!this.zoomData }
+    public get rotating(): boolean { return !!this.rotateData }
+
+    public moveData: IMoveEvent
+    public zoomData: IZoomEvent
+    public rotateData: IRotateEvent
 
     protected interaction: InteractionBase
-    protected moveData: IMoveEvent
-    protected zoomData: IZoomEvent
-    protected rotateData: IRotateEvent
     protected transformTimer: ITimer
 
     constructor(interaction: InteractionBase) {

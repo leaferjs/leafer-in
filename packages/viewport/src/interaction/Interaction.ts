@@ -1,6 +1,6 @@
-import { IMoveEvent, IZoomEvent, IRotateEvent, IWheelEvent, IKeepTouchData, IPointData, IEvent, IPointerEvent } from '@leafer-ui/interface'
+import { IMoveEvent, IZoomEvent, IRotateEvent, IWheelEvent, IKeepTouchData, IPointData, IEvent, IPointerEvent, ISingleGestureConfig } from '@leafer-ui/interface'
 
-import { InteractionBase, PointHelper } from '@leafer-ui/core'
+import { InteractionBase, PointHelper, isObject } from '@leafer-ui/core'
 
 import { WheelEventHelper } from './WheelEventHelper'
 import { Transformer } from './Transformer'
@@ -64,15 +64,38 @@ interaction.wheel = function (data: IWheelEvent): void {
 
 
 interaction.multiTouch = function (data: IPointerEvent, list: IKeepTouchData[]): void {
-    if (this.config.multiTouch.disabled) return
-    const { move, rotation, scale, center } = MultiTouchHelper.getData(list)
-
-    Object.assign(data, center)
-    data.multiTouch = true
-
+    const { disabled, singleGesture } = this.config.multiTouch
+    if (disabled) return
     this.pointerWaitCancel()
 
-    this.rotate(getRotateEventData(rotation, data))
-    this.zoom(getZoomEventData(scale, data))
-    this.move(getMoveEventData(move, data))
+    let gestureData = MultiTouchHelper.getData(list)
+    let { moving, zooming, rotating } = this.transformer
+
+    if (singleGesture) {
+
+        if (!this.transformer.transforming) {
+
+            const type = MultiTouchHelper.detect(gestureData, isObject(singleGesture) ? singleGesture : {} as ISingleGestureConfig)
+
+            switch (type) {
+                case 'move': moving = true; break
+                case 'zoom': zooming = true; break
+                case 'rotate': rotating = true; break
+                default: return
+            }
+
+            MultiTouchHelper.reset()
+
+        }
+
+        if (!moving) gestureData.center = MultiTouchHelper.state.center
+
+    } else moving = zooming = rotating = true
+
+    Object.assign(data, gestureData.center)
+    data.multiTouch = true
+
+    if (rotating) this.rotate(getRotateEventData(gestureData.rotation, data))
+    if (zooming) this.zoom(getZoomEventData(gestureData.scale, data))
+    if (moving) this.move(getMoveEventData(gestureData.move, data))
 }
