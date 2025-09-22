@@ -68,7 +68,7 @@ export class EditBox extends Group implements IEditBox {
         const { moveable, resizeable, rotateable } = this.mergeConfig
         return isString(moveable) || isString(resizeable) || isString(rotateable)
     }
-    public get canDragAnimate(): boolean { return (this.moving && this.mergeConfig.dragLimitAnimate && this.target.dragBounds) as any as boolean }
+    public get canDragLimitAnimate(): boolean { return (this.moving && this.mergeConfig.dragLimitAnimate && this.target.dragBounds) as any as boolean }
 
     protected __eventIds: IEventListenerId[] = []
 
@@ -286,10 +286,10 @@ export class EditBox extends Group implements IEditBox {
 
     // drag
 
-    protected onDragStart(e: DragEvent): void {
+    public onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
-        const { editor } = this, { moveable, resizeable, rotateable, skewable } = this.mergeConfig
+        const { moveable, resizeable, rotateable, skewable } = this.mergeConfig
 
         // 确定模式
         if (pointType === 'move') {
@@ -303,20 +303,10 @@ export class EditBox extends Group implements IEditBox {
             if (pointType === 'skew') skewable && (this.skewing = true)
         }
 
-        this.recordStart(e)
-        if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = editor.leafList.keys // 记录正在resize中的元素列表
+        this.onTransformStart(e)
     }
 
-    protected onDragEnd(e: DragEvent): void {
-        if (this.canDragAnimate) this.transformTool.onMove(e)
-
-        this.resetDoing()
-        this.dragPoint = null
-        const { pointType } = e.current as IEditPoint
-        if (pointType && pointType.includes('resize')) ResizeEvent.resizingKeys = null
-    }
-
-    protected onDrag(e: DragEvent): void {
+    public onDrag(e: DragEvent): void {
         const { transformTool, moving, resizing, rotating, skewing } = this
         if (moving) {
             transformTool.onMove(e)
@@ -330,9 +320,17 @@ export class EditBox extends Group implements IEditBox {
         updatePointCursor(this, e)
     }
 
-    public recordStart(e: IUIEvent): void {
+    public onDragEnd(e: DragEvent): void {
+        this.onTransformEnd(e)
+        this.dragPoint = null
+    }
+
+    // 操作事件共用
+
+    public onTransformStart(e: IUIEvent): void {
         if (this.canUse) {
-            if (this.moving || e.type === MoveEvent.START) this.editor.opacity = this.mergeConfig.hideOnMove ? 0 : 1 // move
+            if (this.moving) this.editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
+            if (this.resizing) ResizeEvent.resizingKeys = this.editor.leafList.keys // 记录正在resize中的元素列表
 
             const { dragStartData, target } = this
             dragStartData.x = e.x
@@ -344,11 +342,14 @@ export class EditBox extends Group implements IEditBox {
         }
     }
 
-    protected resetDoing(): void {
+    public onTransformEnd(e: IUIEvent): void {
         if (this.canUse) {
+            if (this.canDragLimitAnimate && (e instanceof DragEvent || e instanceof MoveEvent)) this.transformTool.onMove(e)
+            if (this.resizing) ResizeEvent.resizingKeys = null
+
             this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
             this.editor.opacity = 1
-            this.update() // 移动端手势操作hideOnMove移动需强制更新一次
+            this.update() // 移动端手势操作hideOnMove移动需强制更新一次           
         }
     }
 
@@ -357,24 +358,19 @@ export class EditBox extends Group implements IEditBox {
     public onMove(e: MoveEvent): void {
         if (this.canGesture && e.moveType !== 'drag') {
             e.stop()
-            if (isString(this.mergeConfig.moveable)) {
+            if (isString(this.mergedConfig.moveable)) {
                 this.gesturing = this.moving = true
-                this.transformTool.onMove(e)
+                e.type === MoveEvent.START ? this.onTransformStart(e) : this.transformTool.onMove(e)
             }
         }
-    }
-
-    public onMoveEnd(e: MoveEvent): void {
-        if (this.canDragAnimate) this.transformTool.onMove(e)
-        this.resetDoing()
     }
 
     public onScale(e: ZoomEvent): void {
         if (this.canGesture) {
             e.stop()
-            if (isString(this.mergeConfig.resizeable)) {
+            if (isString(this.mergedConfig.resizeable)) {
                 this.gesturing = this.resizing = true
-                this.transformTool.onScale(e)
+                e.type === ZoomEvent.START ? this.onTransformStart(e) : this.transformTool.onScale(e)
             }
         }
     }
@@ -382,14 +378,15 @@ export class EditBox extends Group implements IEditBox {
     public onRotate(e: RotateEvent): void {
         if (this.canGesture) {
             e.stop()
-            if (isString(this.mergeConfig.rotateable)) {
+            if (isString(this.mergedConfig.rotateable)) {
                 this.gesturing = this.rotating = true
-                this.transformTool.onRotate(e)
+                e.type === RotateEvent.START ? this.onTransformStart(e) : this.transformTool.onRotate(e)
             }
         }
     }
 
     // 键盘
+
     public isHoldRotateKey(e: IUIEvent): boolean { // 按住ctrl在控制点上变旋转功能
         const { rotateKey } = this.mergedConfig
         if (rotateKey) return e.isHoldKeys(rotateKey)
@@ -401,8 +398,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        const { editor, transformTool } = this
-        if (this.canUse && editor.editing && this.mergeConfig.keyEvent) {
+        if (this.canUse && this.mergeConfig.keyEvent) {
             let x = 0, y = 0
             const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
@@ -418,7 +414,7 @@ export class EditBox extends Group implements IEditBox {
                 case 'ArrowRight':
                     x = distance
             }
-            if (x || y) transformTool.move(x, y)
+            if (x || y) this.transformTool.move(x, y)
         }
     }
 
@@ -485,14 +481,11 @@ export class EditBox extends Group implements IEditBox {
                     [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
                     [KeyEvent.DOWN, this.onArrow, this],
 
-                    [[MoveEvent.START, ZoomEvent.START, RotateEvent.START], this.recordStart, this],
+                    [[MoveEvent.START, MoveEvent.BEFORE_MOVE], this.onMove, this, true],
+                    [[ZoomEvent.START, ZoomEvent.BEFORE_ZOOM], this.onScale, this, true],
+                    [[RotateEvent.START, RotateEvent.BEFORE_ROTATE], this.onRotate, this, true],
 
-                    [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
-                    [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
-                    [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
-
-                    [MoveEvent.END, this.onMoveEnd, this],
-                    [[ZoomEvent.END, RotateEvent.END], this.resetDoing, this],
+                    [[MoveEvent.END, ZoomEvent.END, RotateEvent.END], this.onTransformEnd, this],
                 ])
             )
         })
