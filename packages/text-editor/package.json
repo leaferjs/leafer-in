@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/text-editor",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "description": "@leafer-in/text-editor",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -30,9 +30,9 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-in/editor": "^1.9.7",
-    "@leafer-ui/core": "^1.9.7",
-    "@leafer-ui/interface": "^1.9.7",
-    "@leafer-in/interface": "^1.9.7"
+    "@leafer-in/editor": "^1.9.8",
+    "@leafer-ui/core": "^1.9.8",
+    "@leafer-ui/interface": "^1.9.8",
+    "@leafer-in/interface": "^1.9.8"
   }
 }
