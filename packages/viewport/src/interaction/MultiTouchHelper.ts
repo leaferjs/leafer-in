@@ -28,7 +28,7 @@ export const MultiTouchHelper = {
     },
 
     getType(data: IMultiTouchData, config: ISingleGestureConfig): IGestureType {
-        const moveScore = Math.hypot(data.move.x, data.move.y) / (config.move || 6)
+        const moveScore = Math.hypot(data.move.x, data.move.y) / (config.move || 5)
         const scaleScore = Math.abs(data.scale - 1) / (config.scale || 0.03)
         const rotateScore = Math.abs(data.rotation) / (config.rotation || 2)
 
@@ -53,13 +53,13 @@ export const MultiTouchHelper = {
 
         if (type === state.type) { // 连续多帧一样的类型才进行锁定
             state.typeCount++
-            if (state.typeCount >= (config.count || 2) && type !== 'none') return type
+            if (state.typeCount >= (config.count || 3) && type !== 'none') return type
         } else {
             state.type = type
             state.typeCount = 1
         }
 
-        if ((Date.now() - state.startTime) >= (config.time || 200)) return M.getType(state.totalData, config) // 限制最长识别时间
+        if ((Date.now() - state.startTime) >= (config.time || 160)) return M.getType(state.totalData, config) // 限制最长识别时间
 
         return 'none'
     },
