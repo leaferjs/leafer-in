@@ -21,18 +21,18 @@ export function targetAttr(fn: IFunction) {
 
                         const isSelect = key === 'target'
                         if (isSelect) {
-                            t.setDimOthers(false)
-                            t.setBright(false)
-
-                            if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
-                            if (t.single) t.element.syncEventer = null // 重置 EditBox.load() 设置
-
                             const { beforeSelect } = t.config
                             if (beforeSelect) {
                                 const check = beforeSelect({ target: value })
                                 if (isObject(check)) value = check
                                 else if (check === false) return
                             }
+
+                            t.setDimOthers(false)
+                            t.setBright(false)
+
+                            if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
+                            if (t.single) t.element.syncEventer = null // 重置 EditBox.load() 设置
                         }
 
                         const type = isSelect ? EditorEvent.BEFORE_SELECT : EditorEvent.BEFORE_HOVER
