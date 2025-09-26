@@ -62,7 +62,7 @@ export class EditBox extends Group implements IEditBox {
     public get flippedY(): boolean { return this.scaleY < 0 }
     public get flippedOne(): boolean { return this.scaleX * this.scaleY < 0 }
 
-    public get canUse(): boolean { return (this.visible && this.view.visible) as boolean } // 编辑框是否处于激活状态
+    public get canUse(): boolean { return (this.app && this.visible && this.view.visible) as boolean } // 编辑框是否处于激活状态
     public get canGesture(): boolean { // 是否支持手势
         if (!this.canUse) return false
         const { moveable, resizeable, rotateable } = this.mergeConfig
