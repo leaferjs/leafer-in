@@ -32,7 +32,10 @@ export function targetAttr(fn: IFunction) {
                             t.setBright(false)
 
                             if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
-                            if (t.single) t.element.syncEventer = null // 重置 EditBox.load() 设置
+                            if (t.single) {
+                                delete t.element.syncEventer // 重置 EditBox.load() 同步事件设置
+                                delete t.element.__world.ignorePixelSnap // 重置 EditBox.load() 忽略对齐像素设置
+                            }
                         }
 
                         const type = isSelect ? EditorEvent.BEFORE_SELECT : EditorEvent.BEFORE_HOVER

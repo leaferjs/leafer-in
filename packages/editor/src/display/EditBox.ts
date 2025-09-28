@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber, isNull, getPointData } from '@leafer-ui/draw'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -111,7 +111,7 @@ export class EditBox extends Group implements IEditBox {
 
     public load(): void {
         const { target, mergeConfig, single, rect, circle, resizePoints, resizeLines } = this
-        const { stroke, strokeWidth, resizeLine } = mergeConfig
+        const { stroke, strokeWidth, resizeLine, ignorePixelSnap } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
@@ -141,6 +141,9 @@ export class EditBox extends Group implements IEditBox {
             target.syncEventer = rect // 同步给 rect 冒泡，在 target 属性装饰器中重置
             this.app.interaction.bottomList = [{ target: rect, proxy: target }]
         }
+
+        // 忽略元素像素对齐，在 target 属性装饰器中重置
+        if (single) DataHelper.stintSet(target.__world, 'ignorePixelSnap', ignorePixelSnap)
 
         updateMoveCursor(this)
     }
