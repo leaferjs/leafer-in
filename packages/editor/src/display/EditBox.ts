@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber, getPointData } from '@leafer-ui/draw'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, isArray, isString, isNumber, isNull, getPointData } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -133,14 +133,12 @@ export class EditBox extends Group implements IEditBox {
         // rect
         rect.set({ stroke, strokeWidth, editConfig, ...(mergeConfig.rect || {}) })
 
-        const syncEventer = single && this.transformTool.editTool
-
         // 编辑框作为底部虚拟元素， 在 unload() 中重置
-        rect.hittable = !syncEventer
-        rect.syncEventer = syncEventer && this.editor  // 单选下 rect 的事件不会冒泡，需要手动传递给editor
+        const rectThrough = isNull(mergeConfig.rectThrough) ? single : mergeConfig.rectThrough
+        rect.hittable = !rectThrough
 
-        if (syncEventer) {
-            target.syncEventer = rect // 在 target 属性装饰中重置
+        if (rectThrough) {
+            target.syncEventer = rect // 同步给 rect 冒泡，在 target 属性装饰器中重置
             this.app.interaction.bottomList = [{ target: rect, proxy: target }]
         }
 
