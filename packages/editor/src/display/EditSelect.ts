@@ -45,8 +45,10 @@ export class EditSelect extends Group implements IEditSelect {
     protected onHover(): void {
         const { editor } = this
         if (this.running && !this.dragging && !editor.dragging) {
-            const { stroke, strokeWidth, hover, hoverStyle } = editor.mergeConfig
-            this.hoverStroker.setTarget(hover ? this.editor.hoverTarget : null, { stroke, strokeWidth, ...(hoverStyle || {}) })
+            const { hoverTarget, mergeConfig } = editor, config = { ...mergeConfig }
+            if (hoverTarget && hoverTarget.editConfig) Object.assign(config, hoverTarget.editConfig) // hover元素上的配置
+            const { stroke, strokeWidth, hover, hoverStyle } = config
+            this.hoverStroker.setTarget(hover ? hoverTarget : null, { stroke, strokeWidth, ...(hoverStyle || {}) })
         } else {
             this.hoverStroker.target = null
         }

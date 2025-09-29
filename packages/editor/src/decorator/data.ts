@@ -55,7 +55,15 @@ export function mergeConfigAttr() {
         defineKey(target, key, {
             get() {
                 const { config, element, dragPoint, editBox, app } = this, mergeConfig = { ...config } // 实时合并，后期可优化
-                if (element && element.editConfig) Object.assign(mergeConfig, element.editConfig) // 元素上的配置
+                if (element && element.editConfig) {
+                    let { editConfig } = element
+                    if (editConfig.hover || editConfig.hoverStyle) { // 元素的hover样式，不能覆盖到总配置里
+                        editConfig = { ...editConfig }
+                        delete editConfig.hover
+                        delete editConfig.hoverStyle
+                    }
+                    Object.assign(mergeConfig, editConfig) // 元素上的配置
+                }
                 if (editBox.config) Object.assign(mergeConfig, editBox.config) // EditBox 上的配置
                 if (dragPoint) {
                     if (dragPoint.editConfig) Object.assign(mergeConfig, dragPoint.editConfig)
