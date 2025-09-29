@@ -123,7 +123,7 @@ export const EditDataHelper = {
 
         if (dragBounds) {
             const scaleData = { x: scaleX, y: scaleY }
-            DragBoundsHelper.limitScaleOf(target, origin, scaleData)
+            DragBoundsHelper.limitScaleOf(target, origin, scaleData, lockRatio as boolean)
             scaleX = scaleData.x
             scaleY = scaleData.y
         }
@@ -142,7 +142,11 @@ export const EditDataHelper = {
         if (useScaleX && Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = sign(scaleX) / worldBoxBounds.width
         if (useScaleY && Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = sign(scaleY) / worldBoxBounds.height
 
-        if (lockRatio && scaleX !== scaleY) scaleY = scaleX = Math.min(scaleX, scaleY)
+        if (lockRatio && scaleX !== scaleY) {
+            const lockScale = Math.min(Math.abs(scaleX), Math.abs(scaleY))
+            scaleX = scaleX < 0 ? - lockScale : lockScale
+            scaleY = scaleY < 0 ? - lockScale : lockScale
+        }
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
