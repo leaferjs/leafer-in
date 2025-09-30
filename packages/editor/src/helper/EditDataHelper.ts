@@ -5,13 +5,12 @@ import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer
 
 
 const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = Direction9
-const { toPoint } = AroundHelper
-const { within, sign } = MathHelper
+const { toPoint } = AroundHelper, { within, sign } = MathHelper, { abs } = Math
 
 export const EditDataHelper = {
 
     getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMoveOrScale: IPointData | number, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
-        let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1
+        let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1, lockScale: number
 
         const { boxBounds, widthRange, heightRange, dragBounds, worldBoxBounds } = target
         const { width, height } = startBounds
@@ -86,21 +85,20 @@ export const EditDataHelper = {
                 if (lockRatio === 'corner' && direction % 2) {
                     lockRatio = false
                 } else {
-                    let scale: number
                     switch (direction) {
                         case top:
                         case bottom:
-                            scale = scaleY
+                            scaleX = scaleY
                             break
                         case left:
                         case right:
-                            scale = scaleX
+                            scaleY = scaleX
                             break
                         default:
-                            scale = Math.sqrt(Math.abs(scaleX * scaleY))
+                            lockScale = Math.sqrt(abs(scaleX * scaleY))
+                            scaleX = sign(scaleX) * lockScale
+                            scaleY = sign(scaleY) * lockScale
                     }
-                    scaleX = scaleX < 0 ? -scale : scale
-                    scaleY = scaleY < 0 ? -scale : scale
                 }
             }
 
@@ -139,13 +137,13 @@ export const EditDataHelper = {
         }
 
         // 防止小于1px
-        if (useScaleX && Math.abs(scaleX * worldBoxBounds.width) < 1) scaleX = sign(scaleX) / worldBoxBounds.width
-        if (useScaleY && Math.abs(scaleY * worldBoxBounds.height) < 1) scaleY = sign(scaleY) / worldBoxBounds.height
+        if (useScaleX && abs(scaleX * worldBoxBounds.width) < 1) scaleX = sign(scaleX) / worldBoxBounds.width
+        if (useScaleY && abs(scaleY * worldBoxBounds.height) < 1) scaleY = sign(scaleY) / worldBoxBounds.height
 
         if (lockRatio && scaleX !== scaleY) {
-            const lockScale = Math.min(Math.abs(scaleX), Math.abs(scaleY))
-            scaleX = scaleX < 0 ? - lockScale : lockScale
-            scaleY = scaleY < 0 ? - lockScale : lockScale
+            lockScale = Math.min(abs(scaleX), abs(scaleY))
+            scaleX = sign(scaleX) * lockScale
+            scaleY = sign(scaleY) * lockScale
         }
 
         return { origin, scaleX, scaleY, direction, lockRatio, around }
