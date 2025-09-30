@@ -1,5 +1,6 @@
 import { IBoundsData, IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
-import { AroundHelper, MathHelper, PointHelper, Direction9, DragBoundsHelper, isNumber } from '@leafer-ui/draw'
+import { AroundHelper, MathHelper, PointHelper, Direction9, isNumber } from '@leafer-ui/draw'
+import { DragBoundsHelper } from '@leafer-ui/core'
 
 import { IEditorScaleEvent, IEditorSkewEvent, IEditorRotateEvent } from '@leafer-in/interface'
 
