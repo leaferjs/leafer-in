@@ -62,7 +62,7 @@ export class EditBox extends Group implements IEditBox {
     public get flippedY(): boolean { return this.scaleY < 0 }
     public get flippedOne(): boolean { return this.scaleX * this.scaleY < 0 }
 
-    public get canUse(): boolean { return (this.app && this.visible && this.view.visible) as boolean } // 编辑框是否处于激活状态
+    public get canUse(): boolean { return this.app && this.editor.editing } // 编辑框是否处于激活状态
     public get canGesture(): boolean { // 是否支持手势
         if (!this.canUse) return false
         const { moveable, resizeable, rotateable } = this.mergeConfig
@@ -330,29 +330,25 @@ export class EditBox extends Group implements IEditBox {
     // 操作事件共用
 
     public onTransformStart(e: IUIEvent): void {
-        if (this.canUse) {
-            if (this.moving) this.editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
-            if (this.resizing) ResizeEvent.resizingKeys = this.editor.leafList.keys // 记录正在resize中的元素列表
+        if (this.moving) this.editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
+        if (this.resizing) ResizeEvent.resizingKeys = this.editor.leafList.keys // 记录正在resize中的元素列表
 
-            const { dragStartData, target } = this
-            dragStartData.x = e.x
-            dragStartData.y = e.y
-            dragStartData.totalOffset = getPointData() // 缩放、旋转造成的总偏移量，一般用于手势操作的move纠正
-            dragStartData.point = { x: target.x, y: target.y } // 用于移动
-            dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
-            dragStartData.rotation = target.rotation // 用于旋转
-        }
+        const { dragStartData, target } = this
+        dragStartData.x = e.x
+        dragStartData.y = e.y
+        dragStartData.totalOffset = getPointData() // 缩放、旋转造成的总偏移量，一般用于手势操作的move纠正
+        dragStartData.point = { x: target.x, y: target.y } // 用于移动
+        dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
+        dragStartData.rotation = target.rotation // 用于旋转
     }
 
     public onTransformEnd(e: IUIEvent): void {
-        if (this.canUse) {
-            if (this.canDragLimitAnimate && (e instanceof DragEvent || e instanceof MoveEvent)) this.transformTool.onMove(e)
-            if (this.resizing) ResizeEvent.resizingKeys = null
+        if (this.canDragLimitAnimate && (e instanceof DragEvent || e instanceof MoveEvent)) this.transformTool.onMove(e)
+        if (this.resizing) ResizeEvent.resizingKeys = null
 
-            this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
-            this.editor.opacity = 1
-            this.editor.update() // 移动端手势操作hideOnMove移动需强制更新一次           
-        }
+        this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
+        this.editor.opacity = 1
+        this.editor.update() // 移动端手势操作hideOnMove移动需强制更新一次           
     }
 
     // 手势控制元素
