@@ -383,6 +383,14 @@ export class EditBox extends Group implements IEditBox {
         }
     }
 
+    public onGestureStart(e: IUIEvent): void {
+        if (this.canGesture && (e as MoveEvent).moveType !== 'drag') this.onTransformStart(e)
+    }
+
+    public onGestureEnd(e: IUIEvent): void {
+        if (this.canGesture && (e as MoveEvent).moveType !== 'drag') this.onTransformEnd(e)
+    }
+
     // 键盘
 
     public isHoldRotateKey(e: IUIEvent): boolean { // 按住ctrl在控制点上变旋转功能
@@ -479,11 +487,12 @@ export class EditBox extends Group implements IEditBox {
                     [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
                     [KeyEvent.DOWN, this.onArrow, this],
 
-                    [[MoveEvent.START, MoveEvent.BEFORE_MOVE], this.onMove, this, true],
-                    [[ZoomEvent.START, ZoomEvent.BEFORE_ZOOM], this.onScale, this, true],
-                    [[RotateEvent.START, RotateEvent.BEFORE_ROTATE], this.onRotate, this, true],
+                    [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
+                    [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
+                    [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
 
-                    [[MoveEvent.END, ZoomEvent.END, RotateEvent.END], this.onTransformEnd, this],
+                    [[MoveEvent.START, ZoomEvent.START, RotateEvent.START], this.onGestureStart, this],
+                    [[MoveEvent.END, ZoomEvent.END, RotateEvent.END], this.onGestureEnd, this],
                 ])
             )
         })
