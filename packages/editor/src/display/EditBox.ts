@@ -148,6 +148,7 @@ export class EditBox extends Group implements IEditBox {
         updateMoveCursor(this)
     }
 
+    // 必须来自 editor.update()，需同步更新编辑工具 
     public update(): void {
         const { editor } = this
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds('box', editor, true)
@@ -350,7 +351,7 @@ export class EditBox extends Group implements IEditBox {
 
             this.dragging = this.gesturing = this.moving = this.resizing = this.rotating = this.skewing = false
             this.editor.opacity = 1
-            this.update() // 移动端手势操作hideOnMove移动需强制更新一次           
+            this.editor.update() // 移动端手势操作hideOnMove移动需强制更新一次           
         }
     }
 
