@@ -287,7 +287,7 @@ export class Editor extends Group implements IEditor {
 
     public emitGroupEvent(type: string, group?: IGroup): void {
         const event = new EditorGroupEvent(type, { editTarget: group })
-        if (!group || !group.syncEventer) this.emitEvent(event) // 单选时，元素会自动将事件传递给 editor，避免重复触发
+        this.emitEvent(event)
         if (group) group.emitEvent(event)
     }
 
@@ -340,7 +340,7 @@ export class Editor extends Group implements IEditor {
     public emitInnerEvent(type: string): void {
         const { innerEditor } = this, { editTarget } = innerEditor
         const event = new InnerEditorEvent(type, { editTarget, innerEditor })
-        if (!editTarget.syncEventer) this.emitEvent(event) // 单选时，元素会自动将事件传递给 editor，避免重复触发
+        this.emitEvent(event)
         editTarget.emitEvent(event)
     }
 
