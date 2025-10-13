@@ -84,8 +84,8 @@ export class Stroker extends UI implements IStroker {
 
                     }
 
-                    if (stroke) isString(stroke) ? Paint.stroke(stroke, this, canvas) : Paint.strokes(stroke, this, canvas)
-                    if (fill) isString(fill) ? Paint.fill(fill, this, canvas) : Paint.fills(fill, this, canvas)
+                    if (stroke) isString(stroke) ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
+                    if (fill) isString(fill) ? Paint.fill(fill, this, canvas, options) : Paint.fills(fill, this, canvas, options)
                 }
             }
 
