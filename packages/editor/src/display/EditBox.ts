@@ -330,7 +330,7 @@ export class EditBox extends Group implements IEditBox {
     // 操作事件共用
 
     public onTransformStart(e: IUIEvent): void {
-        if (this.moving) this.editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
+        if (this.moving || this.gesturing) this.editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
         if (this.resizing) ResizeEvent.resizingKeys = this.editor.leafList.keys // 记录正在resize中的元素列表
 
         const { dragStartData, target } = this
@@ -358,7 +358,11 @@ export class EditBox extends Group implements IEditBox {
             e.stop()
             if (isString(this.mergedConfig.moveable)) {
                 this.gesturing = this.moving = true
-                e.type === MoveEvent.START ? this.onTransformStart(e) : this.transformTool.onMove(e)
+                switch (e.type) {
+                    case MoveEvent.START: this.onTransformStart(e); break
+                    case MoveEvent.END: this.onTransformEnd(e); break
+                    default: this.transformTool.onMove(e)
+                }
             }
         }
     }
@@ -368,7 +372,11 @@ export class EditBox extends Group implements IEditBox {
             e.stop()
             if (isString(this.mergedConfig.resizeable)) {
                 this.gesturing = this.resizing = true
-                e.type === ZoomEvent.START ? this.onTransformStart(e) : this.transformTool.onScale(e)
+                switch (e.type) {
+                    case ZoomEvent.START: this.onTransformStart(e); break
+                    case ZoomEvent.END: this.onTransformEnd(e); break
+                    default: this.transformTool.onScale(e)
+                }
             }
         }
     }
@@ -378,17 +386,13 @@ export class EditBox extends Group implements IEditBox {
             e.stop()
             if (isString(this.mergedConfig.rotateable)) {
                 this.gesturing = this.rotating = true
-                e.type === RotateEvent.START ? this.onTransformStart(e) : this.transformTool.onRotate(e)
+                switch (e.type) {
+                    case ZoomEvent.START: this.onTransformStart(e); break
+                    case ZoomEvent.END: this.onTransformEnd(e); break
+                    default: this.transformTool.onRotate(e)
+                }
             }
         }
-    }
-
-    public onGestureStart(e: IUIEvent): void {
-        if (this.canGesture && (e as MoveEvent).moveType !== 'drag') this.onTransformStart(e)
-    }
-
-    public onGestureEnd(e: IUIEvent): void {
-        if (this.canGesture && (e as MoveEvent).moveType !== 'drag') this.onTransformEnd(e)
     }
 
     // 键盘
@@ -487,12 +491,9 @@ export class EditBox extends Group implements IEditBox {
                     [[KeyEvent.HOLD, KeyEvent.UP], this.onKey, this],
                     [KeyEvent.DOWN, this.onArrow, this],
 
-                    [MoveEvent.BEFORE_MOVE, this.onMove, this, true],
-                    [ZoomEvent.BEFORE_ZOOM, this.onScale, this, true],
-                    [RotateEvent.BEFORE_ROTATE, this.onRotate, this, true],
-
-                    [[MoveEvent.START, ZoomEvent.START, RotateEvent.START], this.onGestureStart, this],
-                    [[MoveEvent.END, ZoomEvent.END, RotateEvent.END], this.onGestureEnd, this],
+                    [[MoveEvent.START, MoveEvent.BEFORE_MOVE, MoveEvent.END], this.onMove, this, true],
+                    [[ZoomEvent.START, ZoomEvent.BEFORE_ZOOM, ZoomEvent.END], this.onScale, this, true],
+                    [[RotateEvent.START, RotateEvent.BEFORE_ROTATE, RotateEvent.END], this.onRotate, this, true]
                 ])
             )
         })
