@@ -153,6 +153,13 @@ export class Editor extends Group implements IEditor {
         this.update()
     }
 
+
+    // editTool
+
+    public getEditTool(name: string): IEditTool {
+        return this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
+    }
+
     public updateEditTool(): void {
         this.unloadEditTool()
 
@@ -168,7 +175,7 @@ export class Editor extends Group implements IEditor {
             }
 
             if (EditToolCreator.list[name]) {
-                const tool = this.editTool = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
+                const tool = this.editTool = this.getEditTool(name)
                 this.editBox.load()
                 tool.load()
                 this.update()
@@ -293,6 +300,10 @@ export class Editor extends Group implements IEditor {
 
     // inner
 
+    public getInnerEditor(name: string): IInnerEditor {
+        return this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
+    }
+
     public openInnerEditor(target?: IUI, nameOrSelect?: string | boolean, select?: boolean): void {
         let name: string
         if (isString(nameOrSelect)) name = nameOrSelect
@@ -314,7 +325,7 @@ export class Editor extends Group implements IEditor {
             if (EditToolCreator.list[name]) {
                 this.editTool.unload()
                 this.innerEditing = true
-                this.innerEditor = this.editToolList[name] = this.editToolList[name] || EditToolCreator.get(name, this)
+                this.innerEditor = this.getInnerEditor(name)
                 this.innerEditor.editTarget = target
 
                 this.emitInnerEvent(InnerEditorEvent.BEFORE_OPEN)
