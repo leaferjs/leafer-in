@@ -111,10 +111,11 @@ export class EditBox extends Group implements IEditBox {
 
     public load(): void {
         const { target, mergeConfig, single, rect, circle, resizePoints, resizeLines } = this
-        const { stroke, strokeWidth, resizeLine, ignorePixelSnap } = mergeConfig
+        const { stroke, strokeWidth, ignorePixelSnap } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
+        const resizeLinesStyle = this.getResizeLinesStyle()
 
         this.visible = !target.locked
 
@@ -124,7 +125,7 @@ export class EditBox extends Group implements IEditBox {
             resizeP = resizePoints[i]
             resizeP.set(this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length]))
             resizeP.rotation = ((i - (i % 2 ? 1 : 0)) / 2) * 90
-            if (i % 2) resizeLines[(i - 1) / 2].set({ pointType: 'resize', rotation: (i - 1) / 2 * 90, ...(resizeLine || {}) } as IEditPointInputData)
+            if (i % 2) resizeLines[(i - 1) / 2].set({ pointType: 'resize', rotation: (i - 1) / 2 * 90, ...(resizeLinesStyle[((i - 1) / 2) % resizeLinesStyle.length] || {}) } as IEditPointInputData)
         }
 
         // rotate
@@ -283,6 +284,11 @@ export class EditBox extends Group implements IEditBox {
     public getMiddlePointsStyle(): IBoxInputData[] {
         const { middlePoint } = this.mergedConfig
         return isArray(middlePoint) ? middlePoint : (middlePoint ? [middlePoint] : this.getPointsStyle())
+    }
+
+    public getResizeLinesStyle(): IBoxInputData[] {
+        const { resizeLine } = this.mergedConfig
+        return isArray(resizeLine) ? resizeLine : [resizeLine]
     }
 
 
