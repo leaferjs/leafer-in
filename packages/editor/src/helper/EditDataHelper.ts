@@ -147,6 +147,9 @@ export const EditDataHelper = {
             scaleY = sign(scaleY) * lockScale
         }
 
+        isFinite(scaleX) || (scaleX = 1)
+        isFinite(scaleY) || (scaleY = 1)
+
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
 
