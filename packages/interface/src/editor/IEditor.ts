@@ -15,6 +15,9 @@ export interface IEditor extends IEditorBase {
 
     targetEventIds: IEventListenerId[]
 
+    getEditTool(name: string): IEditTool
+    getInnerEditor(name: string): IInnerEditor
+
     checkOpenedGroups(): void
 
     listenTargetEvents(): void
