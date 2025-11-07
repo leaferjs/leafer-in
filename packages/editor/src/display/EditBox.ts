@@ -131,7 +131,7 @@ export class EditBox extends Group implements IEditBox {
         circle.set(this.getPointStyle(mergeConfig.circle || mergeConfig.rotatePoint || pointsStyle[0]))
 
         // rect
-        rect.set({ stroke, strokeWidth, editConfig, ...(mergeConfig.rect || {}) })
+        rect.set({ stroke, strokeWidth, opacity: 1, editConfig, ...(mergeConfig.rect || {}) })
 
         // 编辑框作为底部虚拟元素， 在 unload() 中重置
         const rectThrough = isNull(mergeConfig.rectThrough) ? single : mergeConfig.rectThrough
@@ -271,7 +271,7 @@ export class EditBox extends Group implements IEditBox {
 
     public getPointStyle(userStyle?: IBoxInputData): IBoxInputData {
         const { stroke, strokeWidth, pointFill, pointSize, pointRadius } = this.mergedConfig
-        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0, editConfig } as IBoxInputData
+        const defaultStyle = { fill: pointFill, stroke, strokeWidth, around: 'center', strokeAlign: 'center', opacity: 1, width: pointSize, height: pointSize, cornerRadius: pointRadius, offsetX: 0, offsetY: 0, editConfig } as IBoxInputData
         return userStyle ? Object.assign(defaultStyle, userStyle) : defaultStyle
     }
 
