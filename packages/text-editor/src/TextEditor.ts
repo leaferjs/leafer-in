@@ -80,8 +80,10 @@ export class TextEditor extends InnerEditor {
             range.selectNodeContents(div)
         } else {
             const node = div.childNodes[0]
-            range.setStartAfter(node)
-            range.setEndAfter(node)
+            if (node) {
+                range.setStartAfter(node)
+                range.setEndAfter(node)
+            }
             range.collapse(true)
         }
 
