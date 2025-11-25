@@ -111,6 +111,10 @@ export class Editor extends Group implements IEditor {
         return this.leafList.has(item)
     }
 
+    public getItem(index?: number): IUI {
+        return this.list[index || 0]
+    }
+
     public addItem(item: IUI): void {
         if (!this.hasItem(item) && !item.locked) this.leafList.add(item), this.target = this.leafList.list as IUI[]
     }
