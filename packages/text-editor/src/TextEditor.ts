@@ -35,6 +35,8 @@ export class TextEditor extends InnerEditor {
         config.keyEvent = false
 
         const div = this.editDom = document.createElement('div')
+        div.classList.add('leafer-text-editor')
+
         const { style } = div
         div.contentEditable = 'true'
         style.position = 'fixed' // 防止文本输入到边界时产生滚动
