@@ -6,9 +6,10 @@ export function arrowType(defaultValue?: IValue) {
         set(value: IValue) {
             if (this.__setAttr(key, value)) {
                 const data = (this as IUI).__
-                doStrokeType(this)
                 const useArrow = data.startArrow !== 'none' || data.endArrow !== 'none'
-                if (useArrow || data.__useArrow !== useArrow) doBoundsType(this)
+                if (data.__useArrow !== useArrow) doBoundsType(this)
+                data.__useArrow = useArrow
+                doStrokeType(this)
             }
         }
     }))
