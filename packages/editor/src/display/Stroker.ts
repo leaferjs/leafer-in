@@ -7,7 +7,7 @@ import { targetAttr } from '../decorator/data'
 
 
 const { abs } = Math
-const { copy, scale } = MatrixHelper
+const { copy } = MatrixHelper
 const { setListWithFn } = BoundsHelper
 const { worldBounds } = LeafBoundsHelper
 const matrix = getMatrixData() as IMatrixWithOptionHalfData
@@ -62,27 +62,13 @@ export class Stroker extends UI implements IStroker {
                     copy(matrix, worldTransform)
                     matrix.half = strokeWidth % 2
 
-                    if (aScaleX !== aScaleY) { // need no scale stroke, use rect path
+                    canvas.setWorld(matrix, options.matrix)
+                    canvas.beginPath()
 
-                        scale(matrix, 1 / aScaleX, 1 / aScaleY)
-                        canvas.setWorld(matrix, options.matrix)
-                        canvas.beginPath()
-                        data.strokeWidth = strokeWidth
+                    if (leaf.__.__useArrow) leaf.__drawPath(canvas)
+                    else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
 
-                        const { x, y, width, height } = leaf.__layout.boxBounds
-                        canvas.rect(x * aScaleX, y * aScaleY, width * aScaleX, height * aScaleY)
-
-                    } else {
-
-                        canvas.setWorld(matrix, options.matrix)
-                        canvas.beginPath()
-
-                        if (leaf.__.__useArrow) leaf.__drawPath(canvas)
-                        else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
-
-                        data.strokeWidth = strokeWidth / abs(worldTransform.scaleX)
-
-                    }
+                    data.strokeWidth = strokeWidth / Math.max(aScaleX, aScaleY)
 
                     if (stroke) isString(stroke) ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
                     if (fill) isString(fill) ? Paint.fill(fill, this, canvas, options) : Paint.fills(fill, this, canvas, options)
