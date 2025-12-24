@@ -1,5 +1,5 @@
-import { IUI, ILeaferCanvas, IRenderOptions, IRectInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
-import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray, isString } from '@leafer-ui/draw'
+import { IUI, ILeaferCanvas, IRenderOptions, IUIInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
+import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray, isString, surfaceType } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
 
@@ -20,6 +20,9 @@ export class Stroker extends UI implements IStroker {
 
     public list: IUI[] = []
 
+    @surfaceType('render-path')
+    public strokePathType: 'path' | 'render-path'
+
     constructor() {
         super()
         this.visible = 0
@@ -27,13 +30,13 @@ export class Stroker extends UI implements IStroker {
         this.strokeAlign = 'center'
     }
 
-    public setTarget(target: IUI | IUI[], style?: IRectInputData): void {
+    public setTarget(target: IUI | IUI[], style?: IUIInputData): void {
         if (style) this.set(style)
         this.target = target
         this.update()
     }
 
-    public update(style?: IRectInputData): void {
+    public update(style?: IUIInputData): void {
         const { list } = this
         if (list.length) {
             setListWithFn(bounds, list, worldBounds)
@@ -65,8 +68,13 @@ export class Stroker extends UI implements IStroker {
                     canvas.setWorld(matrix, options.matrix)
                     canvas.beginPath()
 
-                    if (leaf.__.__useArrow) leaf.__drawPath(canvas)
-                    else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+
+                    if (this.strokePathType === 'path') {
+                        leaf.__drawPath(canvas)
+                    } else {
+                        if (leaf.__.__useArrow) leaf.__drawPath(canvas)
+                        else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+                    }
 
                     data.strokeWidth = strokeWidth / Math.max(aScaleX, aScaleY)
 
