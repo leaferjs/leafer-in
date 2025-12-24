@@ -93,6 +93,7 @@ export class Finder implements IFinder {
         for (let i = 0, len = children.length; i < len; i++) {
             child = children[i]
             result = method(child, options)
+            if (typeof result === 'boolean') result = result ? 1 : 0
             if (result === Yes || result === YesAndSkip) {
                 if (list) {
                     list.push(child)
