@@ -9,8 +9,6 @@ Plugin.add('view')
 
 Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomOptions | IFourNumber, scroll?: 'x' | 'y' | boolean, transition?: ITransition): IBoundsData {
 
-    this.killAnimate()
-
     let padding: IFourNumber
 
     if (isData<IZoomOptions>(optionsOrPadding)) {
@@ -23,8 +21,10 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomO
     const limitBounds = this.canvas.bounds.clone().shrink(isNull(padding) ? 30 : padding), bounds = new Bounds()
     const center: IPointData = { x: limitBounds.x + limitBounds.width / 2, y: limitBounds.y + limitBounds.height / 2 }
 
+    zoomLayer.killAnimate()
+
     let changeScale: number
-    const { x, y, scaleX, scaleY } = zoomLayer.__
+    const { x, y, scaleX, scaleY } = zoomLayer.__, { boxBounds } = zoomLayer
 
     if (isString(zoomType)) {
 
@@ -36,14 +36,14 @@ Leafer.prototype.zoom = function (zoomType: IZoomType, optionsOrPadding?: IZoomO
                 changeScale = getZoomScale(scaleX, 'out')
                 break
             case 'fit':
-                zoomType = this.boxBounds
+                zoomType = boxBounds
                 break
             case 'fit-width':
-                zoomType = new Bounds(this.boxBounds)
+                zoomType = new Bounds(boxBounds)
                 zoomType.height = 0
                 break
             case 'fit-height':
-                zoomType = new Bounds(this.boxBounds)
+                zoomType = new Bounds(boxBounds)
                 zoomType.width = 0
                 break
         }
