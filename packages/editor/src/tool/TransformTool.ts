@@ -57,7 +57,7 @@ export class TransformTool implements ITransformTool { // Editor use
         let { around, lockRatio, flipable, editSize } = mergeConfig, totalMove: IPointData | number
 
         if (e instanceof ZoomEvent) {
-            around = target.getBoxPoint(e)
+            if (!around) around = target.getBoxPoint(e)
             totalMove = e.totalScale
         } else {
             totalMove = e.getInnerTotal(target)
