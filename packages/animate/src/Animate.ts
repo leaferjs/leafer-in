@@ -76,7 +76,7 @@ export class Animate extends Eventer implements IAnimate {
 
     public frames: IComputedKeyframe[]
 
-    protected nowIndex: number
+    protected nowIndex = 0
     protected get frame(): IComputedKeyframe { return this.frames[this.nowIndex] }
     protected get frameTotalTime(): number { return this.frame.totalTime || this.frame.duration || 0 }
     protected frameLooped: number
@@ -85,7 +85,7 @@ export class Animate extends Eventer implements IAnimate {
     protected easingFn: IFunction
 
     protected requestAnimateTime: number
-    protected playedTotalTime: number // 已播放完的帧总时长
+    protected playedTotalTime = 0 // 已播放完的帧总时长
 
     public get nowReverse(): boolean { return (this.mainReverse ? 1 : 0) + (this.frameReverse ? 1 : 0) === 1 }
     protected mainReverse: boolean
@@ -167,17 +167,34 @@ export class Animate extends Eventer implements IAnimate {
         this.emitType(AnimateEvent.STOP)
     }
 
-    public seek(time: number | IPercentData): void {
+    public seek(time: number | IPercentData, includeDelay?: boolean): void {
         if (this.destroyed) return
 
-        if (isObject(time)) time = UnitConvert.number(time, this.duration)
+        const { delay } = this
+        if (isObject(time)) time = UnitConvert.number(time, this.duration + (includeDelay ? delay : 0))
 
+        if (includeDelay) time -= delay
         if (time) time /= this.speed
+
+        let waitBeginTime: number
+        if (time < 0) { // 在delay时间内
+            waitBeginTime = -time
+            time = 0
+        }
+
         if (!this.started || time < this.time) this.start(true)
         this.time = time
 
-        this.animate(0, true)
-        this.clearTimer(() => this.requestAnimate())
+        if (!waitBeginTime) this.animate(0, true)
+
+        this.clearTimer(() => {
+            if (waitBeginTime) {
+                this.timer = setTimeout(() => {
+                    this.timer = 0
+                    this.begin()
+                }, waitBeginTime * 1000)
+            } else this.requestAnimate()
+        })
         this.emitType(AnimateEvent.SEEK)
     }
 
