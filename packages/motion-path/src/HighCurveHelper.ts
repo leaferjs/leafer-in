@@ -1,10 +1,10 @@
 import { IMatrixData, IPathCommandData, IMotionPathData, IRotationPointData, IPointData, IUnitData } from '@leafer-ui/interface'
-import { BezierHelper, MatrixHelper, PathCommandMap, PointHelper, UnitConvert } from '@leafer-ui/draw'
+import { BezierHelper, MatrixHelper, MathHelper, PathCommandMap, PointHelper, UnitConvert } from '@leafer-ui/draw'
 
 import { HighBezierHelper } from './HighBezierHelper'
 
 
-const { M, L, C, Z } = PathCommandMap
+const { M, L, C, Z } = PathCommandMap, { float } = MathHelper
 const tempPoint = {} as IPointData, tempFrom = {} as IPointData
 
 export const HighCurveHelper = {
@@ -149,7 +149,7 @@ export const HighCurveHelper = {
         const { segments, data } = distanceData, path: IPathCommandData = []
         motionDistance = UnitConvert.number(motionDistance, distanceData.total)
 
-        let total = 0, distance: number, to = {} as IRotationPointData
+        let total = 0, distance: number, cutDistance: number, to = {} as IRotationPointData
         let i = 0, index = 0, x: number = 0, y: number = 0, toX: number, toY: number, command: number
         let x1: number, y1: number, x2: number, y2: number, t: number
 
@@ -163,14 +163,17 @@ export const HighCurveHelper = {
                     toY = data[i + 2]
                     distance = segments[index]
 
-                    if (total + distance >= motionDistance || !distanceData.total) {
+                    if (total + distance > motionDistance || !distanceData.total) {
                         if (!i) x = toX, y = toY // first M
                         tempFrom.x = x
                         tempFrom.y = y
                         to.x = toX
                         to.y = toY
-                        PointHelper.getDistancePoint(tempFrom, to, motionDistance - total, true)
-                        path.push(command, to.x, to.y)
+                        cutDistance = float(motionDistance - total)
+                        if (cutDistance) {
+                            PointHelper.getDistancePoint(tempFrom, to, cutDistance, true)
+                            path.push(command, to.x, to.y)
+                        }
                         return path
                     }
 
@@ -185,9 +188,12 @@ export const HighCurveHelper = {
                     toY = data[i + 6]
                     distance = segments[index]
 
-                    if (total + distance >= motionDistance) {
-                        t = HighBezierHelper.getT(motionDistance - total, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
-                        HighBezierHelper.cut(path, t, x, y, x1, y1, x2, y2, toX, toY)
+                    if (total + distance > motionDistance) {
+                        cutDistance = float(motionDistance - total)
+                        if (cutDistance) {
+                            t = HighBezierHelper.getT(cutDistance, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
+                            HighBezierHelper.cut(path, t, x, y, x1, y1, x2, y2, toX, toY)
+                        }
                         return path
                     }
 
