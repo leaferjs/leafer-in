@@ -68,6 +68,9 @@ export class Animate extends Eventer implements IAnimate {
     public join: boolean
 
     @animateAttr()
+    public jump: boolean
+
+    @animateAttr()
     public attrs: string[]
 
     protected killStyle: IUIInputData
@@ -182,7 +185,7 @@ export class Animate extends Eventer implements IAnimate {
             time = 0
         }
 
-        if (!this.started || time < this.time) this.start(true)
+        if (!this.started || time < this.time || !time) this.start(true)
         this.time = time
 
         if (!waitBeginTime) this.animate(0, true)
@@ -364,17 +367,20 @@ export class Animate extends Eventer implements IAnimate {
     protected start(seek?: boolean): void {
         this.requestAnimateTime = 1 // started
 
-        const { reverse } = this
+        const { reverse, jump } = this
         if (reverse || this.mainReverse) this.mainReverse = reverse
         if (this.looped) this.looped = 0
 
         if (seek) this.begin(true)
         else {
             const { delay } = this
-            if (delay) this.timer = setTimeout(() => {
-                this.timer = 0
-                this.begin()
-            }, delay / this.speed * 1000)
+            if (delay) {
+                if (jump) this.begin(true)
+                this.timer = setTimeout(() => {
+                    this.timer = 0
+                    this.begin()
+                }, delay / this.speed * 1000)
+            }
             else this.begin()
         }
     }
