@@ -88,6 +88,9 @@ export class Animate extends Eventer implements IAnimate {
     protected easingFn: IFunction
 
     protected requestAnimateTime: number
+    protected requestAnimatePageTime: number
+    protected waitRequestRender: boolean
+
     protected playedTotalTime = 0 // 已播放完的帧总时长
 
     public get nowReverse(): boolean { return (this.mainReverse ? 1 : 0) + (this.frameReverse ? 1 : 0) === 1 }
@@ -151,7 +154,7 @@ export class Animate extends Eventer implements IAnimate {
 
         this.running = true
         if (!this.started) this.clearTimer(), this.start()
-        else if (!this.timer) this.requestAnimate()
+        else if (!this.timer) this.startRequestAnimate()
         this.emitType(AnimateEvent.PLAY)
     }
 
@@ -196,7 +199,7 @@ export class Animate extends Eventer implements IAnimate {
                     this.timer = 0
                     this.begin()
                 }, waitBeginTime * 1000)
-            } else this.requestAnimate()
+            } else this.startRequestAnimate()
         })
         this.emitType(AnimateEvent.SEEK)
     }
@@ -297,16 +300,30 @@ export class Animate extends Eventer implements IAnimate {
         }
     }
 
+    protected startRequestAnimate(): void {
+        this.requestAnimateTime = Date.now()
+        this.requestAnimatePageTime = 0
+        if (!this.waitRequestRender) this.requestAnimate()
+    }
 
     protected requestAnimate(): void {
-        this.requestAnimateTime = Date.now()
+        this.waitRequestRender = true
         Platform.requestRender(this.animate.bind(this))
     }
 
-    protected animate(_runtime?: number, seek?: boolean): void {
+    protected animate(pageTime?: number, seek?: boolean): void {
         if (!seek) {
+            this.waitRequestRender = false
             if (!this.running) return
-            this.time += (Date.now() - this.requestAnimateTime) / 1000
+
+            let frameTime: number
+            if (pageTime && this.requestAnimatePageTime) frameTime = pageTime - this.requestAnimatePageTime
+            else frameTime = Date.now() - this.requestAnimateTime
+
+            this.time += frameTime / 1000
+
+            this.requestAnimatePageTime = pageTime
+            this.requestAnimateTime = Date.now()
         }
 
         const { duration } = this, realTime = this.time * this.speed
@@ -388,7 +405,7 @@ export class Animate extends Eventer implements IAnimate {
     protected begin(seek?: boolean): void {
         this.playedTotalTime = this.time = 0
         this.mainReverse ? this.setTo() : this.setFrom()
-        if (!seek) this.requestAnimate()
+        if (!seek) this.startRequestAnimate()
     }
 
     protected end(): void {
