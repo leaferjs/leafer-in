@@ -1,27 +1,69 @@
-import { IPointerEvent, IFunction } from '@leafer-ui/interface'
+import { IPointerEvent, IFunction, IDragEvent } from '@leafer-ui/interface'
 
-import { Dragger, BoundsHelper, PointHelper, isNumber } from '@leafer-ui/core'
+import { Dragger, BoundsHelper, PointHelper, MoveEvent, isNumber } from '@leafer-ui/core'
 
 
 const dragger = Dragger.prototype
-const { abs } = Math
+const { abs, min, max, hypot } = Math
 
-dragger.checkDragEndAnimate = function (data: IPointerEvent, speed?: number): boolean | number {
-    const { moveX, moveY } = this.dragData
-    const absMoveX = abs(moveX), absMoveY = abs(moveY), minMove = speed ? 1 : 0.1
-    const dragAnimate = this.canAnimate && this.moving && (absMoveX > minMove || absMoveY > minMove) && this.interaction.m.dragAnimate
+dragger.checkDragEndAnimate = function (data: IPointerEvent): boolean | number {
+    const { interaction } = this
+    const dragAnimate = this.canAnimate && this.moving && interaction.m.dragAnimate
 
     if (dragAnimate) {
-        const inertia = data.pointerType === 'touch' ? 3 : 1, maxMove = 70
-        speed = speed ? (isNumber(dragAnimate) ? dragAnimate : 0.95) : inertia
-        if (absMoveX * speed > maxMove) speed = maxMove / absMoveX
-        else if (absMoveY * speed > maxMove) speed = maxMove / absMoveY
 
-        data = { ...data }
-        PointHelper.move(data, moveX * speed, moveY * speed)
+        const inertia = isNumber(dragAnimate) ? dragAnimate : 0.95
+        const stopMove = 0.15
+        const maxMove = 150
 
-        this.drag(data)
-        this.animate(() => { this.dragEnd(data, 1) })
+        let moveX = 0, moveY = 0, flickSpeed = 0 // 快速滑动加速
+        let totalWeight = 0, weight: number, w = 3, s: number, frame: IDragEvent
+
+        const { dragDataList } = this, len = dragDataList.length
+        for (let i = len - 1; i >= max(len - 3, 0); i--) {
+            frame = dragDataList[i]
+            if (frame.time && (Date.now() - frame.time > 100)) break
+            weight = w--
+
+            moveX += frame.moveX * weight
+            moveY += frame.moveY * weight
+            totalWeight += weight
+
+            s = hypot(frame.moveX, frame.moveY)
+            if (s > flickSpeed) flickSpeed = s
+        }
+
+        if (totalWeight) moveX /= totalWeight, moveY /= totalWeight
+
+        if (flickSpeed > 8) {
+            const t = min((flickSpeed - 8) / 17, 1)
+            const boost = 1.15 + t * (1.6 - 1.15)
+            moveX *= boost
+            moveY *= boost
+        }
+
+        const maxAbs = max(abs(moveX), abs(moveY))
+        if (maxAbs > maxMove) {
+            s = maxMove / maxAbs
+            moveX *= s
+            moveY *= s
+        }
+
+        const step = () => {
+            moveX *= inertia
+            moveY *= inertia
+
+            data = { ...data }
+            if (abs(moveX) < stopMove && abs(moveY) < stopMove) return this.dragEndReal(data)
+
+            PointHelper.move(data, moveX, moveY)
+            this.drag(data)
+
+            this.animate(step)
+            interaction.emit(MoveEvent.DRAG_ANIMATE, data)
+        }
+
+        this.animate(step)
     }
 
     return dragAnimate
@@ -31,6 +73,13 @@ dragger.animate = function (func?: IFunction, off?: 'off'): void { // dragEnd an
     const animateWait = func || this.animateWait
     if (animateWait) this.interaction.target.nextRender(animateWait, null, off)
     this.animateWait = func
+}
+
+dragger.stopAnimate = function (): void {
+    this.animate(null, 'off')
+    this.interaction.target.nextRender(() => {
+        if (this.dragData) this.dragEndReal(this.dragData)
+    })
 }
 
 dragger.checkDragOut = function (data: IPointerEvent): void {

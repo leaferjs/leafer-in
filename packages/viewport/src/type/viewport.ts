@@ -9,7 +9,12 @@ export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, cu
 
     leafer.__eventIds.push(
         leafer.on_(MoveEvent.BEFORE_MOVE, (e: MoveEvent) => {
-            leafer.zoomLayer.move(leafer.getValidMove(e.moveX, e.moveY, false))
+            const move = leafer.getValidMove(e.moveX, e.moveY, false)
+            leafer.zoomLayer.move(move)
+        }),
+        leafer.on_(MoveEvent.DRAG_ANIMATE, () => {
+            const move = leafer.getValidMove(0, 0)
+            if (move.x || move.y) leafer.interaction.stopDragAnimate()
         }),
         leafer.on_(MoveEvent.END, (e: MoveEvent) => {
             LeafHelper.animateMove(leafer.zoomLayer, leafer.getValidMove(e.moveX, e.moveY))
