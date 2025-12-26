@@ -25,7 +25,7 @@ leafer.getValidMove = function (moveX: number, moveY: number, checkLimit = true)
 
         if (checkLimit && type.includes('limit')) {
             bounds.set(this.__world).addPoint(this.zoomLayer as IPointData)
-            DragBoundsHelper.getValidMove(bounds, this.canvas.bounds, 'inner', move, true)
+            DragBoundsHelper.getValidMove(bounds, this.canvas.bounds, 'auto', move, true)
             if (type.includes('x')) move.y = 0
             else if (type.includes('y')) move.x = 0
         }
