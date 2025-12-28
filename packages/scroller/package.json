@@ -1,0 +1,37 @@
+{
+  "name": "@leafer-in/scroller",
+  "version": "1.0.0",
+  "description": "@leafer-in/scroller",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/scroller.esm.min.js",
+  "exports": {
+    "import": "./dist/scroller.esm.min.js",
+    "require": "./dist/scroller.min.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/scroller.min.js",
+  "jsdelivr": "dist/scroller.min.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/scroller",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer scroller",
+    "leafer-scroller",
+    "leafer-in",
+    "scroller",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/core": "^1.9.10",
+    "@leafer-ui/interface": "^1.9.10",
+    "@leafer-in/interface": "^1.9.10"
+  }
+}
