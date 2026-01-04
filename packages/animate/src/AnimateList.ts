@@ -58,8 +58,8 @@ export class AnimateList extends Animate implements IAnimateList {
         this.emitType(AnimateEvent.STOP)
     }
 
-    public override seek(time: number | IPercentData): void {
-        this.each(item => item.seek(time))
+    public override seek(time: number | IPercentData, includeDelay?: boolean): void {
+        this.each(item => item.seek(time, includeDelay))
         this.emitType(AnimateEvent.SEEK)
     }
 
