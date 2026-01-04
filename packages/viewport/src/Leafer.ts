@@ -3,6 +3,7 @@ import { ILeaferType, IPointData } from '@leafer-ui/interface'
 import { Leafer, Bounds, Point, DragBoundsHelper } from '@leafer-ui/core'
 
 import { LeaferTypeCreator } from './LeaferTypeCreator'
+import { getScrollType } from './helper'
 
 
 const leafer = Leafer.prototype
@@ -13,21 +14,21 @@ leafer.initType = function (type: ILeaferType) {
 }
 
 leafer.getValidMove = function (moveX: number, moveY: number, checkLimit = true): IPointData {
-    const { scroll, disabled } = this.app.config.move
+    const { disabled } = this.app.config.move
     move.set(moveX, moveY)
 
-    if (scroll) {
-        const type = scroll === true ? '' : scroll
+    const scrollType = getScrollType(this)
+    if (scrollType) {
 
-        if (type.includes('x')) move.y = 0
-        else if (type.includes('y')) move.x = 0
+        if (scrollType.includes('x')) move.y = 0
+        else if (scrollType.includes('y')) move.x = 0
         else Math.abs(move.x) > Math.abs(move.y) ? move.y = 0 : move.x = 0
 
-        if (checkLimit && type.includes('limit')) {
+        if (checkLimit && scrollType.includes('limit')) {
             bounds.set(this.__world).addPoint(this.zoomLayer as IPointData)
             DragBoundsHelper.getValidMove(bounds, this.canvas.bounds, 'auto', move, true)
-            if (type.includes('x')) move.y = 0
-            else if (type.includes('y')) move.x = 0
+            if (scrollType.includes('x')) move.y = 0
+            else if (scrollType.includes('y')) move.x = 0
         }
     }
 
