@@ -14,7 +14,7 @@ leafer.initType = function (type: ILeaferType) {
 }
 
 leafer.getValidMove = function (moveX: number, moveY: number, checkLimit = true): IPointData {
-    const { disabled } = this.app.config.move
+    const { disabled, scrollSpread } = this.app.config.move
     move.set(moveX, moveY)
 
     const scrollType = getScrollType(this)
@@ -26,6 +26,7 @@ leafer.getValidMove = function (moveX: number, moveY: number, checkLimit = true)
 
         if (checkLimit && scrollType.includes('limit')) {
             bounds.set(this.__world).addPoint(this.zoomLayer as IPointData)
+            if (scrollSpread) bounds.spread(scrollSpread)
             DragBoundsHelper.getValidMove(bounds, this.canvas.bounds, 'auto', move, true)
             if (scrollType.includes('x')) move.y = 0
             else if (scrollType.includes('y')) move.x = 0
