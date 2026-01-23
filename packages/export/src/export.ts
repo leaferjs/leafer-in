@@ -1,4 +1,4 @@
-import { IExportModule, IExportOptions, IExportResult, IExportResultFunction, IUI, IExportFileType, IFunction, IRenderOptions, IBoundsData, IBounds, ILocationType, ILeaf, IPointData } from '@leafer-ui/interface'
+import { IExportModule, IExportOptions, IExportResult, IExportResultFunction, IUI, IExportFileType, IFunction, IRenderOptions, IBoundsData, IBounds, ILocationType, ILeaf } from '@leafer-ui/interface'
 import { Creator, Matrix, TaskProcessor, FileHelper, Bounds, Platform, MathHelper, Resource, Export, isUndefined } from '@leafer-ui/draw'
 
 import { getTrimBounds } from './trim'
