@@ -1,4 +1,4 @@
-import { IExportModule, IExportOptions, IExportResult, IExportResultFunction, IUI, IExportFileType, IFunction, IRenderOptions, IBoundsData, IBounds, ILocationType, ILeaf } from '@leafer-ui/interface'
+import { IExportModule, IExportOptions, IExportResult, IExportResultFunction, IUI, IExportFileType, IFunction, IRenderOptions, IBoundsData, IBounds, ILocationType, ILeaf, IPointData } from '@leafer-ui/interface'
 import { Creator, Matrix, TaskProcessor, FileHelper, Bounds, Platform, MathHelper, Resource, Export, isUndefined } from '@leafer-ui/draw'
 
 import { getTrimBounds } from './trim'
@@ -87,7 +87,10 @@ export const ExportModule: IExportModule = {
 
                 // 导出元素
                 let { x, y, width, height } = new Bounds(renderBounds).scale(scaleData.scaleX, scaleData.scaleY)
-                if (clip) x += clip.x, y += clip.y, width = clip.width, height = clip.height
+                if (clip) {
+                    x += clip.x, y += clip.y, width = clip.width, height = clip.height
+                    if (clip.rotation) matrix.rotateOfInner({ x, y }, -clip.rotation)
+                }
 
                 const renderOptions: IRenderOptions = { exporting: true, matrix: matrix.scale(1 / scaleData.scaleX, 1 / scaleData.scaleY).invert().translate(-x, -y).withScale(1 / scaleX * scaleData.scaleX, 1 / scaleY * scaleData.scaleY) }
                 let canvas = Creator.canvas({ width: Math.floor(width), height: Math.floor(height), pixelRatio, smooth, contextSettings })
