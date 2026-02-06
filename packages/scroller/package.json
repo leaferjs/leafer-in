@@ -30,8 +30,8 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-ui/core": "^1.9.10",
-    "@leafer-ui/interface": "^1.9.10",
-    "@leafer-in/interface": "^1.9.10"
+    "@leafer-ui/core": "^2.0.0",
+    "@leafer-ui/interface": "^2.0.0",
+    "@leafer-in/interface": "^2.0.0"
   }
 }
