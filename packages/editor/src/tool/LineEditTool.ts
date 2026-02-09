@@ -102,7 +102,7 @@ export class LineEditTool extends EditTool {
 
     onUpdate() {
         const { editBox } = this, { rotatePoints, resizeLines, resizePoints, rect } = editBox
-        const line = this.editor.element as ILine
+        const line = editBox.target as ILine
 
         let fromTo: IFromToData, leftOrRight: boolean
         if (line.pathInputed) fromTo = this.getFromToByPath(line.__.path)

@@ -20,7 +20,10 @@ export class InnerEditor implements IInnerEditor {
     public config: IObject
 
     public editor: IEditor
-    public get editBox(): IEditBox { return this.editor.editBox }
+
+    protected _editBox: IEditBox
+    public get editBox(): IEditBox { return this._editBox || this.editor.editBox } // 编辑框，默认为editor.editBox
+    public set editBox(value: IEditBox) { this._editBox = value }
 
     public view: IGroup
 
