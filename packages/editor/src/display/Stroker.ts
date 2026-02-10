@@ -1,5 +1,5 @@
 import { IUI, ILeaferCanvas, IRenderOptions, IUIInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
-import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray, isString, surfaceType } from '@leafer-ui/draw'
+import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray, isString, surfaceType, ColorConvert } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
 
@@ -78,8 +78,16 @@ export class Stroker extends UI implements IStroker {
 
                     data.strokeWidth = strokeWidth / Math.max(aScaleX, aScaleY)
 
+                    if (data.shadow) {
+                        const shadow = data.shadow[0], { scaleX, scaleY } = this.getRenderScaleData(true, shadow.scaleFixed)
+                        canvas.save(), canvas.setWorldShadow(shadow.x * scaleX, shadow.y * scaleY, shadow.blur * scaleX, ColorConvert.string(shadow.color))
+                    }
+
                     if (stroke) isString(stroke) ? Paint.stroke(stroke, this, canvas, options) : Paint.strokes(stroke, this, canvas, options)
                     if (fill) isString(fill) ? Paint.fill(fill, this, canvas, options) : Paint.fills(fill, this, canvas, options)
+
+                    if (data.shadow) canvas.restore()
+
                 }
             }
 
