@@ -74,6 +74,8 @@ function setFill(style: CSSStyleDeclaration, fill: IFill): void {
                 color = ColorConvert.string(fill.color)
                 break
             case 'image':
+            case 'film':
+            case 'video':
                 break
             case 'linear':
             case 'radial':
