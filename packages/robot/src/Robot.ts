@@ -46,6 +46,9 @@ export class Robot extends UI implements IRobot {
         super(data)
     }
 
+    public togglePlay(): void {
+        this.running ? this.pause() : this.play()
+    }
 
     public play(): void {
         this.running = true
