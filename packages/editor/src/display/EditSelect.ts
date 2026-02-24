@@ -125,6 +125,8 @@ export class EditSelect extends Group implements IEditSelect {
                     editor.target = find
                 }
 
+                e.path.needUpdate = true // 需要更新一下path
+
             } else if (this.allow(e.target)) {
 
                 if (!this.isHoldMultipleSelectKey(e) && !this.editor.mergedConfig.selectKeep) editor.target = null
