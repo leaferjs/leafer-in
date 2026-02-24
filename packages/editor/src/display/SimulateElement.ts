@@ -22,6 +22,7 @@ export class SimulateElement extends Rect implements ISimulateElement {
         super()
 
         this.visible = this.hittable = false
+        this.skipJSON = true
 
         this.on(PropertyEvent.CHANGE, (event: PropertyEvent) => {
 
