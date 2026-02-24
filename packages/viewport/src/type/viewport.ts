@@ -37,9 +37,14 @@ export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, cu
             LeafHelper.animateMove(leafer.zoomLayer, leafer.getValidMove(e.moveX, e.moveY))
         }),
         leafer.on_(ZoomEvent.BEFORE_ZOOM, (e: ZoomEvent) => {
-            const { zoomLayer } = leafer
+            const { zoomLayer, layouter } = leafer
             const changeScale = leafer.getValidScale(e.scale)
-            if (changeScale !== 1) zoomLayer.scaleOfWorld(e, changeScale)
+            if (changeScale !== 1) {
+                layouter.stop()
+                LeafHelper.updateMatrix(leafer) // 节省一次重复布局
+                zoomLayer.scaleOfWorld(e, changeScale)
+                layouter.start()
+            }
         })
     )
 }
