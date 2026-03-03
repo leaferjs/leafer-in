@@ -12,8 +12,8 @@ export function scaleFixedType(defaultValue?: IValue) {
                 doBoundsType(this)
                 if (!isNumber(value)) value = value ? 1 : 0
                 stintSet(layout, 'scaleFixed', value)
-                stintSet(layout, 'hasOuter', value && value < 1)
-                if (!layout.hasOuter && layout.localOuterBounds) layout.localOuterBounds = undefined
+                stintSet(layout, 'outerScale', value ? 1 / value : 0)
+                if (!layout.outerScale && layout.localOuterBounds) layout.localOuterBounds = undefined
             }
         }
     }))

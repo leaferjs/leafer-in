@@ -15,10 +15,10 @@ LeafHelper.updateScaleFixedWorld = function (t: ILeaf): void {
 }
 
 LeafHelper.updateOuterBounds = function (t: ILeaf): void {
-    const layout = t.__layout, { scaleFixed, localRenderBounds } = layout
+    const layout = t.__layout, { localRenderBounds } = layout
     const localOuterBounds = layout.localOuterBounds || (layout.localOuterBounds = {} as IBoundsData)
     const { width, height } = localRenderBounds
-    const scale = (1 / scaleFixed - 1)
+    const scale = layout.outerScale - 1
     copyAndSpread(localOuterBounds, localRenderBounds, [height * scale, width * scale])
     if (t.parent) t.parent.__layout.renderChange()
 }
