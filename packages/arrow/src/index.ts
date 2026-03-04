@@ -20,12 +20,28 @@ UI.addAttr('endArrow', 'none', arrowType)
 
 Object.assign(PathArrow, PathArrowModule)
 Object.assign(Paint, {
-    strokeArrow(_stroke: string, ui: IUI, canvas: ILeaferCanvas, _renderOptions: IRenderOptions): void {
-        if (ui.__.dashPattern) {  // fix: dashPattern Arrow
+    strokeArrow(stroke: string, ui: IUI, canvas: ILeaferCanvas, _renderOptions: IRenderOptions): void {
+        const { __startArrowPath, __endArrowPath, dashPattern } = ui.__
+        if (dashPattern) canvas.dashPattern = null // fix: dashPattern Arrow
+
+        if (__startArrowPath) {
             canvas.beginPath()
-            ui.__drawPathByData(canvas, ui.__.__pathForArrow)
-            canvas.dashPattern = null
+            ui.__drawPathByData(canvas, __startArrowPath.data)
             canvas.stroke()
+            if (__startArrowPath.fill) {
+                canvas.fillStyle = stroke
+                canvas.fill()
+            }
+        }
+
+        if (__endArrowPath) {
+            canvas.beginPath()
+            ui.__drawPathByData(canvas, __endArrowPath.data)
+            canvas.stroke()
+            if (__endArrowPath.fill) {
+                canvas.fillStyle = stroke
+                canvas.fill()
+            }
         }
     }
 })

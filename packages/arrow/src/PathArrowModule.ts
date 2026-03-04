@@ -1,11 +1,12 @@
-import { IPathArrowModule, IUI, IPathCommandData, IPointData, IPathDataArrow } from '@leafer-ui/interface'
-import { PathCommandMap as Command, PointHelper } from '@leafer-ui/draw'
+import { IPathArrowModule, IUI, IPathCommandData, IPointData, IPathDataArrow, IArrowPathData } from '@leafer-ui/interface'
+import { PathCommandMap as Command, PointHelper, DataHelper } from '@leafer-ui/draw'
 
-import { arrows, getArrowPath } from './data/arrows'
+import { arrows, fillArrows, getArrowPath } from './data/arrows'
 
 
 const { M, L, C, Q, Z, N, D, X, G, F, O, P, U } = Command
-const { copy, copyFrom, getDistancePoint, } = PointHelper
+const { copy, copyFrom, getDistancePoint } = PointHelper
+const { stintSet } = DataHelper
 
 const connectPoint = {} as IPointData
 const first = {} as IPointData, second = {} as IPointData
@@ -14,17 +15,24 @@ const last = {} as IPointData, now = {} as IPointData
 export const PathArrowModule: IPathArrowModule = {
 
     list: arrows,
+    fillList: fillArrows,
 
-    addArrows(ui: IUI): void {
-        const { startArrow, endArrow, strokeWidth, dashPattern, __pathForRender: data, cornerRadius } = ui.__
+    addArrows(ui: IUI, updateCache?: boolean): void {
+        const uData = ui.__
+        const { startArrow, endArrow, __strokeWidth: strokeWidth, dashPattern, __pathForRender: data, cornerRadius } = uData
 
         const clonePathForArrow = !cornerRadius // cornerRadius会创建新的render路径，所以不用再clone
 
-        let command: number, i = 0, len = data.length, count = 0, useStartArrow = startArrow && startArrow !== 'none'
+        if (!updateCache) uData.__strokeWidthCache = strokeWidth
+
+        let startArrowPath: IArrowPathData, singleStartArrow: boolean, endArrowPath: IArrowPathData, singleEndArrow: boolean
+        let command: number, i = 0, len = data.length, count = 0, checkSecond: boolean, useStartArrow = startArrow && startArrow !== 'none'
 
         while (i < len) {
 
             command = data[i]
+
+            checkSecond = count === 1 && useStartArrow // 获取第二个点
 
             switch (command) {
                 case M:  // moveto(x, y)
@@ -32,15 +40,22 @@ export const PathArrowModule: IPathArrowModule = {
                     if (count < 2 || i + 6 >= len) { // 3 + 3 可能是两个连续L命令结束
                         copyFrom(now, data[i + 1], data[i + 2])
                         if (!count && useStartArrow) copy(first, now)
+                        if (checkSecond) copy(second, now)
                     }
                     i += 3
                     break
                 case C:  // bezierCurveTo(x1, y1, x2, y2, x, y)
-                    if (count === 1 || i + 7 >= len - 3) copyPoints(data, last, now, i + 3) // C 或 C + L结束
+                    if (count === 1 || i + 7 >= len - 3) {
+                        copyPoints(data, last, now, i + 3) // C 或 C + L结束
+                        if (checkSecond) second.x = data[i + 1], second.y = data[i + 2]
+                    }
                     i += 7
                     break
                 case Q:  // quadraticCurveTo(x1, y1, x, y)
-                    if (count === 1 || i + 5 >= len - 3) copyPoints(data, last, now, i + 1) // Q 或 Q + L结束
+                    if (count === 1 || i + 5 >= len - 3) {
+                        copyPoints(data, last, now, i + 1) // Q 或 Q + L结束
+                        if (checkSecond) copy(second, last)
+                    }
                     i += 5
                     break
                 case Z:  // closepath()
@@ -72,6 +87,7 @@ export const PathArrowModule: IPathArrowModule = {
                 case U: // arcTo(x1, y1, x2, y2, radius)
                     if (count === 1 || i + 6 >= len - 3) { // U 或 U + L结束
                         copyPoints(data, last, now, i + 1)
+                        if (checkSecond) copy(second, last)
                         if (i + 6 !== len) { // 避免与结束点重合
                             now.x -= (now.x - last.x) / 10
                             now.y -= (now.y - last.y) / 10
@@ -84,15 +100,14 @@ export const PathArrowModule: IPathArrowModule = {
             count++
 
             if (count === 1 && command !== M) return // no arrow
-            if (count === 2 && useStartArrow) copy(second, command === L ? now : last)
 
             if (i === len) {
-                const path = ui.__.__pathForRender = clonePathForArrow ? [...data] : data
-                const pathForArrow: IPathCommandData = ui.__.__pathForArrow = []
+                const path = uData.__pathForRender = clonePathForArrow ? [...data] : data
 
                 if (useStartArrow) {
-                    const startArrowPath = getArrowPath(ui, startArrow, second, first, strokeWidth, connectPoint, !!dashPattern)
-                    dashPattern ? pathForArrow.push(...startArrowPath) : path.push(...startArrowPath)
+                    startArrowPath = getArrowPath(ui, startArrow, second, first, strokeWidth, connectPoint, !!dashPattern)
+                    singleStartArrow = (startArrowPath.fill || dashPattern) as boolean
+                    if (!singleStartArrow) path.push(...startArrowPath.data)
 
                     if (connectPoint.x) {
                         getDistancePoint(first, second, -connectPoint.x, true)
@@ -102,8 +117,9 @@ export const PathArrowModule: IPathArrowModule = {
                 }
 
                 if (endArrow && endArrow !== 'none') {
-                    const endArrowPath = getArrowPath(ui, endArrow, last, now, strokeWidth, connectPoint, !!dashPattern)
-                    dashPattern ? pathForArrow.push(...endArrowPath) : path.push(...endArrowPath)
+                    endArrowPath = getArrowPath(ui, endArrow, last, now, strokeWidth, connectPoint, !!dashPattern)
+                    singleEndArrow = (endArrowPath.fill || dashPattern) as boolean
+                    if (!singleEndArrow) path.push(...endArrowPath.data)
 
                     if (connectPoint.x) {
                         getDistancePoint(now, last, -connectPoint.x, true)
@@ -129,13 +145,26 @@ export const PathArrowModule: IPathArrowModule = {
             } else {
                 copy(last, now)
             }
+
+            stintSet(uData, '__startArrowPath', singleStartArrow && startArrowPath)
+            stintSet(uData, '__endArrowPath', singleEndArrow && endArrowPath)
         }
 
 
     },
 
-    register(name: string, data: IPathDataArrow): void {
+    updateArrow(ui: IUI): void {
+        const data = ui.__
+        if (data.strokeScaleFixed) {
+            if (data.__strokeWidthCache !== data.__strokeWidth) {
+                ui.__updateRenderPath(true)
+            }
+        }
+    },
+
+    register(name: string, data: IPathDataArrow, fillData?: IPathDataArrow): void {
         this.list[name] = data
+        if (fillData) this.fillList[name] = data
     },
 
     get(name: string): IPathDataArrow {
