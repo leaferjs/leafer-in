@@ -5,12 +5,12 @@ import { arrows, fillArrows, getArrowPath } from './data/arrows'
 
 
 const { M, L, C, Q, Z, N, D, X, G, F, O, P, U } = Command
-const { copy, copyFrom, getDistancePoint } = PointHelper
+const { copy, copyFrom, getDistancePoint, isSame } = PointHelper
 const { stintSet } = DataHelper
 
 const connectPoint = {} as IPointData
 const first = {} as IPointData, second = {} as IPointData
-const last = {} as IPointData, now = {} as IPointData
+const old = {} as IPointData, last = {} as IPointData, now = {} as IPointData
 
 export const PathArrowModule: IPathArrowModule = {
 
@@ -26,35 +26,33 @@ export const PathArrowModule: IPathArrowModule = {
         if (!updateCache) uData.__strokeWidthCache = strokeWidth
 
         let startArrowPath: IArrowPathData, singleStartArrow: boolean, endArrowPath: IArrowPathData, singleEndArrow: boolean
-        let command: number, i = 0, len = data.length, count = 0, checkSecond: boolean, useStartArrow = startArrow && startArrow !== 'none'
+        let command: number, i = 0, len = data.length, count = 0, useStartArrow = startArrow && startArrow !== 'none'
 
         while (i < len) {
 
             command = data[i]
 
-            checkSecond = count === 1 && useStartArrow // 获取第二个点
-
             switch (command) {
                 case M:  // moveto(x, y)
                 case L:  // lineto(x, y)
                     if (count < 2 || i + 6 >= len) { // 3 + 3 可能是两个连续L命令结束
+                        copy(old, now)
                         copyFrom(now, data[i + 1], data[i + 2])
                         if (!count && useStartArrow) copy(first, now)
-                        if (checkSecond) copy(second, now)
                     }
                     i += 3
                     break
                 case C:  // bezierCurveTo(x1, y1, x2, y2, x, y)
                     if (count === 1 || i + 7 >= len - 3) {
                         copyPoints(data, last, now, i + 3) // C 或 C + L结束
-                        if (checkSecond) second.x = data[i + 1], second.y = data[i + 2]
+                        old.x = data[i + 1], old.y = data[i + 2]
                     }
                     i += 7
                     break
                 case Q:  // quadraticCurveTo(x1, y1, x, y)
                     if (count === 1 || i + 5 >= len - 3) {
                         copyPoints(data, last, now, i + 1) // Q 或 Q + L结束
-                        if (checkSecond) copy(second, last)
+                        copy(old, last)
                     }
                     i += 5
                     break
@@ -87,7 +85,7 @@ export const PathArrowModule: IPathArrowModule = {
                 case U: // arcTo(x1, y1, x2, y2, radius)
                     if (count === 1 || i + 6 >= len - 3) { // U 或 U + L结束
                         copyPoints(data, last, now, i + 1)
-                        if (checkSecond) copy(second, last)
+                        copy(old, last)
                         if (i + 6 !== len) { // 避免与结束点重合
                             now.x -= (now.x - last.x) / 10
                             now.y -= (now.y - last.y) / 10
@@ -100,6 +98,7 @@ export const PathArrowModule: IPathArrowModule = {
             count++
 
             if (count === 1 && command !== M) return // no arrow
+            if (count === 2 && useStartArrow) copy(second, command === L ? now : (isSame(old, first) ? last : old)) // 获取第二个点， 防止C命令起点和控制点相同的情况
 
             if (i === len) {
                 const path = uData.__pathForRender = clonePathForArrow ? [...data] : data
@@ -117,6 +116,8 @@ export const PathArrowModule: IPathArrowModule = {
                 }
 
                 if (endArrow && endArrow !== 'none') {
+                    if (isSame(last, now)) copy(last, old) // 防止C命令结束点和控制点相同的情况
+
                     endArrowPath = getArrowPath(ui, endArrow, last, now, strokeWidth, connectPoint, !!dashPattern)
                     singleEndArrow = (endArrowPath.fill || dashPattern) as boolean
                     if (!singleEndArrow) path.push(...endArrowPath.data)
