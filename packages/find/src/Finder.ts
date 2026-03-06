@@ -1,4 +1,4 @@
-import { ILeaf, ILeafMap, IEventListenerId, IFindMethod, IAnswer, IFindCondition, IBooleanMap, IFinder } from '@leafer-ui/interface'
+import { ILeaf, ILeafMap, IEventListenerId, IFindMethod, IAnswer, IFindCondition, IBooleanMap, IFinder, ISelectorConfig, ILeafer } from '@leafer-ui/interface'
 import { ChildEvent, DataHelper, Answer, PropertyEvent, LeafHelper, isArray, isUndefined } from '@leafer-ui/draw'
 
 
@@ -9,8 +9,8 @@ export class Finder implements IFinder {
 
     public target?: ILeaf // target 不存在时，为临时选择器（不能缓存数据）
 
-    protected innerIdMap: ILeafMap = {}
-    protected idMap: ILeafMap = {}
+    protected innerIdMap: ILeafMap
+    protected idMap: ILeafMap
 
     protected findLeaf: ILeaf
 
@@ -25,7 +25,16 @@ export class Finder implements IFinder {
     protected __eventIds: IEventListenerId[]
 
 
-    constructor(target: ILeaf) {
+    constructor(target: ILeaf, _config: ISelectorConfig) {
+        this.idMap = {}
+        this.innerIdMap = {}
+
+        const app = (target && target.app) as ILeafer
+        if (app) {
+            app.idMap ? this.idMap = app.idMap : app.idMap = this.idMap
+            app.innerIdMap ? this.innerIdMap = app.innerIdMap : app.innerIdMap = this.innerIdMap
+        }
+
         if (this.target = target) this.__listenEvents()
     }
 
