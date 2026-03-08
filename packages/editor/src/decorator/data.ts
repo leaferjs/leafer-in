@@ -28,8 +28,11 @@ export function targetAttr(fn: IFunction) {
                                 else if (check === false) return
                             }
 
-                            t.setDimOthers(false)
-                            t.setBright(false)
+                            const { dimOthers, bright } = t.editBox.mergedConfig || t.config // 没有配置时不强制取消bright
+                            if (!isUndefined(dimOthers) || !isUndefined(bright)) {
+                                t.setDimOthers(false)
+                                t.setBright(false)
+                            }
 
                             if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
                             if (t.single) {

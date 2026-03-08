@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData } from '@leafer-ui/draw'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -171,8 +171,10 @@ export class EditBox extends Group implements IEditBox {
 
         editMask.visible = mask ? true : 0
 
-        editor.setDimOthers(dimOthers)
-        editor.setBright(!!dimOthers || bright)
+        if (!isUndefined(dimOthers) || !isUndefined(bright)) {  // 没有配置时不强制bright
+            editor.setDimOthers(dimOthers)
+            editor.setBright(!!dimOthers || bright)
+        }
 
         if (spread) BoundsHelper.spread(bounds, spread)
 
