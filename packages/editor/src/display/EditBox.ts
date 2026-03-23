@@ -301,12 +301,12 @@ export class EditBox extends Group implements IEditBox {
     public onDragStart(e: DragEvent): void {
         this.dragging = true
         const point = this.dragPoint = e.current as IEditPoint, { pointType } = point
-        const { moveable, resizeable, rotateable, skewable, beforeCopy } = this.mergeConfig
+        const { moveable, resizeable, rotateable, skewable, onCopy } = this.mergeConfig
 
         // 确定模式
         if (pointType === 'move') {
             // alt复制钩子
-            if (e.altKey && beforeCopy && beforeCopy() && this.editor.single) this.app.interaction.replaceDownTarget(this.target)
+            if (e.altKey && onCopy && onCopy() && this.editor.single) this.app.interaction.replaceDownTarget(this.target)
             moveable && (this.moving = true)
         } else {
             if (pointType.includes('rotate') || this.isHoldRotateKey(e) || !resizeable) {
