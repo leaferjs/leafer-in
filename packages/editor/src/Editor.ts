@@ -80,6 +80,8 @@ export class Editor extends Group implements IEditor {
     public selector: EditSelect = new EditSelect(this)
     public editMask: EditMask = new EditMask(this)
 
+    public hasDimOthers?: boolean
+
     public get targetLeafer() { const first = this.list[0]; return first && first.leafer }
     public targetChanged: boolean
     public targetEventIds: IEventListenerId[] = []

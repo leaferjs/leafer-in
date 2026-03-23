@@ -174,6 +174,7 @@ export class EditBox extends Group implements IEditBox {
         if (!isUndefined(dimOthers) || !isUndefined(bright)) {  // 没有配置时不强制bright
             editor.setDimOthers(dimOthers)
             editor.setBright(!!dimOthers || bright)
+            editor.hasDimOthers = true
         }
 
         if (spread) BoundsHelper.spread(bounds, spread)
