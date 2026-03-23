@@ -15,6 +15,9 @@ export const config: IEditorConfig = {
 
     rotateGap: 45,
 
+    arrowStep: 1,
+    arrowFastStep: 10,
+
     buttonsDirection: 'bottom',
     buttonsMargin: 12,
 

@@ -419,23 +419,28 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onArrow(e: IKeyEvent): void {
-        if (this.canUse && this.mergeConfig.keyEvent) {
+        if (this.canUse) {
             let x = 0, y = 0
-            const distance = e.shiftKey ? 10 : 1
             switch (e.code) {
                 case 'ArrowDown':
-                    y = distance
+                    y = 1
                     break
                 case 'ArrowUp':
-                    y = -distance
+                    y = -1
                     break
                 case 'ArrowLeft':
-                    x = -distance
+                    x = -1
                     break
                 case 'ArrowRight':
-                    x = distance
+                    x = 1
             }
-            if (x || y) this.transformTool.move(x, y)
+            if (x || y) {
+                const { keyEvent, arrowStep, arrowFastStep } = this.mergeConfig
+                if (keyEvent) {
+                    const step = e.shiftKey ? arrowFastStep : arrowStep
+                    this.transformTool.move(x * step, y * step)
+                }
+            }
         }
     }
 
