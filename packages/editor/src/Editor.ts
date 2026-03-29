@@ -143,6 +143,12 @@ export class Editor extends Group implements IEditor {
         this.setDimOthers(value, 'bright', this.list)
     }
 
+    public cancelDimOthers(): void {
+        this.setDimOthers(false)
+        this.setBright(false)
+        this.hasDimOthers = undefined
+    }
+
     // update
 
     public update(): void {

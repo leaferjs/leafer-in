@@ -28,11 +28,7 @@ export function targetAttr(fn: IFunction) {
                                 else if (check === false) return
                             }
 
-                            if (t.hasDimOthers) {
-                                t.setDimOthers(false)
-                                t.setBright(false)
-                                t.hasDimOthers = undefined
-                            }
+                            if (t.hasDimOthers) t.cancelDimOthers()
 
                             if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
                             if (t.single) {

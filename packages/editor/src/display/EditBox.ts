@@ -175,6 +175,8 @@ export class EditBox extends Group implements IEditBox {
             editor.setDimOthers(dimOthers)
             editor.setBright(!!dimOthers || bright)
             editor.hasDimOthers = true
+        } else if (editor.hasDimOthers) {
+            editor.cancelDimOthers()
         }
 
         if (spread) BoundsHelper.spread(bounds, spread)
