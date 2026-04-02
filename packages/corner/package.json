@@ -1,0 +1,37 @@
+{
+  "name": "@leafer-in/corner",
+  "version": "2.0.6",
+  "description": "@leafer-in/corner",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/corner.esm.js",
+  "exports": {
+    "import": "./dist/corner.esm.min.js",
+    "require": "./dist/corner.min.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/corner.min.js",
+  "jsdelivr": "dist/corner.min.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/corner",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer corner",
+    "leafer-corner",
+    "leafer-in",
+    "corner",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/draw": "^2.0.6",
+    "@leafer-ui/interface": "^2.0.6",
+    "@leafer-in/interface": "^2.0.6"
+  }
+}
