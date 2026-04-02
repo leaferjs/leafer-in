@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/robot",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "@leafer-in/robot",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -30,8 +30,8 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-ui/draw": "^2.0.6",
-    "@leafer-ui/interface": "^2.0.6",
-    "@leafer-in/interface": "^2.0.6"
+    "@leafer-ui/draw": "^2.0.7",
+    "@leafer-ui/interface": "^2.0.7",
+    "@leafer-in/interface": "^2.0.7"
   }
 }

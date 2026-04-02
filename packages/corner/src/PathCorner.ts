@@ -14,7 +14,7 @@ PathCorner.smooth = function smooth(data: IPathCommandData, cornerRadius: number
     if (isNeedConvert(data)) data = PathConvert.toCanvasData(data, true)
 
     let command: number, lastCommand: number, commandLen
-    let i = 0, count = 0, x = 0, y = 0, startX = 0, startY = 0, startR = 0, secondX = 0, secondY = 0, lastX = 0, lastY = 0, r: number, x1: number, y1: number, x2: number, y2: number, toX: number, toY: number
+    let i = 0, countCommand = 0, x = 0, y = 0, startX = 0, startY = 0, startR = 0, secondX = 0, secondY = 0, lastX = 0, lastY = 0, r: number, x1: number, y1: number, x2: number, y2: number, toX: number, toY: number
     if (isArray(cornerRadius)) cornerRadius = cornerRadius[0] || 0
 
     const len = data.length, three = len === 9 // 3个点时可以加大圆角
@@ -22,21 +22,25 @@ PathCorner.smooth = function smooth(data: IPathCommandData, cornerRadius: number
 
     while (i < len) {
         command = data[i]
-        r = radius ? (isUndefined(radius[count]) ? cornerRadius : radius[count]) : cornerRadius
+        r = radius ? (isUndefined(radius[countCommand]) ? cornerRadius : radius[countCommand]) : cornerRadius
         switch (command) {
             case M:  //moveto(x, y)
                 startX = lastX = data[i + 1]
                 startY = lastY = data[i + 2]
                 startR = r
                 i += 3
+                const end = findEndPoint(data, i)
                 switch (data[i]) { // next command
                     case L: // lineTo()
                         secondX = data[i + 1]
                         secondY = data[i + 2]
-                        three ? smooth.push(M, startX, startY) : smooth.push(M, getCenterX(startX, secondX), getCenterY(startY, secondY))
+                        if (three) smooth.push(M, startX, startY)
+                        else {
+                            if (end) smooth.push(M, getCenterX(startX, secondX), getCenterY(startY, secondY))
+                            else smooth.push(M, startX, startY)
+                        }
                         break
                     case C: // bezierCurveTo()
-                        const end = findEndPoint(data, i)
                         if (end) {
                             const { left, right } = setAfterC(data, i, r, end.x, end.y, startX, startY, data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6])
                             if (left && right) {
@@ -107,12 +111,7 @@ PathCorner.smooth = function smooth(data: IPathCommandData, cornerRadius: number
                 i += commandLen
         }
         lastCommand = command
-        count++
-    }
-
-    if (command !== Z) {
-        smooth[1] = startX
-        smooth[2] = startY
+        countCommand++
     }
 
     return smooth
