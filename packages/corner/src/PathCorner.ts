@@ -4,7 +4,7 @@ import { PathCorner, PointHelper, PathCommandMap as Command, PathNumberCommandLe
 import { getCorrectT, getTangentDistance } from './helper'
 
 
-const { M, L, C, Z } = Command
+const { M, L, C, Z } = Command, { abs } = Math
 const { getCenterX, getCenterY } = PointHelper
 const { arcTo } = PathCommandDataHelper
 
@@ -12,6 +12,7 @@ PathCorner.smooth = function smooth(data: IPathCommandData, cornerRadius: number
 
     const radius = (data as any as IPathCommandDataWithRadius).radius // 独立圆角
     if (isNeedConvert(data)) data = PathConvert.toCanvasData(data, true)
+    else data = [...data] // 防止C命令修改数据造成污染
 
     let command: number, lastCommand: number, commandLen
     let i = 0, countCommand = 0, x = 0, y = 0, startX = 0, startY = 0, startR = 0, secondX = 0, secondY = 0, lastX = 0, lastY = 0, r: number, x1: number, y1: number, x2: number, y2: number, toX: number, toY: number
@@ -94,6 +95,8 @@ PathCorner.smooth = function smooth(data: IPathCommandData, cornerRadius: number
                         toX = startX, toY = startY
                         setBeforeC(smooth, r, lastX, lastY, x1, y1, x2, y2, x, y, toX, toY, three)
                         break
+                    default:
+                        smooth.push(C, x1, y1, x2, y2, x, y)
                 }
                 lastX = x
                 lastY = y
@@ -173,7 +176,15 @@ function findEndPoint(data: IPathCommandData, i: number): IPointData {
 
 
 function setAfterC(data: IPathCommandData, i: number, cornerRadius: number, lastX: number, lastY: number, fromX: number, fromY: number, x1: number, y1: number, x2: number, y2: number, toX: number, toY: number) {
-    const d = getTangentDistance(cornerRadius, fromX, fromY, lastX, lastY, x1, y1)
+    let targetX = x1, targetY = y1
+    if (isSame(x1, fromX) && isSame(y1, fromY)) {
+        targetX = x2; targetY = y2
+        if (isSame(x2, fromX) && isSame(y2, fromY)) {
+            targetX = toX; targetY = toY
+        }
+    }
+
+    const d = getTangentDistance(cornerRadius, fromX, fromY, lastX, lastY, targetX, targetY)
     const t = getCorrectT(d, fromX, fromY, x1, y1, x2, y2, toX, toY)
     const two = BezierHelper.cut(t, fromX, fromY, x1, y1, x2, y2, toX, toY)
     const { left, right } = two
@@ -187,7 +198,15 @@ function setAfterC(data: IPathCommandData, i: number, cornerRadius: number, last
 }
 
 function setBeforeC(smooth: IPathCommandData, cornerRadius: number, fromX: number, fromY: number, x1: number, y1: number, x2: number, y2: number, toX: number, toY: number, nextX: number, nextY: number, three: boolean) {
-    const d = getTangentDistance(cornerRadius, toX, toY, x2, y2, nextX, nextY) // 反向
+    let targetX = x2, targetY = y2
+    if (isSame(targetX, toX) && isSame(targetY, toY)) {
+        targetX = x1; targetY = y1
+        if (isSame(targetX, toX) && isSame(targetY, toY)) {
+            targetX = fromX; targetY = fromY
+        }
+    }
+
+    const d = getTangentDistance(cornerRadius, toX, toY, targetX, targetY, nextX, nextY) // 反向
     const t = getCorrectT(d, toX, toY, x2, y2, x1, y1, fromX, fromY) // 反向
     const { left, right } = BezierHelper.cut(1 - t, fromX, fromY, x1, y1, x2, y2, toX, toY)
 
@@ -197,4 +216,9 @@ function setBeforeC(smooth: IPathCommandData, cornerRadius: number, fromX: numbe
     } else {
         smooth.push(C, x1, y1, x2, y2, toX, toY)
     }
+}
+
+
+function isSame(a: number, b: number): boolean {
+    return abs(a - b) < 0.01
 }
