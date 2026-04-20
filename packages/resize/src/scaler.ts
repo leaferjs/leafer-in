@@ -48,10 +48,18 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number,
 
     leaf.fontSize *= fontScale
 
-    const data = leaf.__, { padding } = data
+    const data = leaf.__, { padding, lineHeight, letterSpacing } = data
     if (padding) leaf.padding = isArray(padding) ? padding.map(item => item * fontScale) : padding * fontScale
     if (!data.__autoWidth) leaf.width *= fontScale
     if (!data.__autoHeight) leaf.height *= fontScale
+
+    if (isObject(lineHeight)) {
+        if (lineHeight.type === 'px') data.lineHeight = { type: 'px', value: lineHeight.value * fontScale }
+    } else if (lineHeight) data.lineHeight = lineHeight * fontScale
+
+    if (isObject(letterSpacing)) {
+        if (letterSpacing.type === 'px') data.letterSpacing = { type: 'px', value: letterSpacing.value * fontScale }
+    } else if (letterSpacing) data.letterSpacing = letterSpacing * fontScale
 
 }
 
