@@ -1,6 +1,6 @@
 {
   "name": "@leafer-in/corner",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "@leafer-in/corner",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
@@ -30,8 +30,8 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-ui/draw": "^2.1.1",
-    "@leafer-ui/interface": "^2.1.1",
-    "@leafer-in/interface": "^2.1.1"
+    "@leafer-ui/draw": "^2.1.2",
+    "@leafer-ui/interface": "^2.1.2",
+    "@leafer-in/interface": "^2.1.2"
   }
 }
