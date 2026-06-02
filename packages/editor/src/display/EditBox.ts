@@ -151,8 +151,8 @@ export class EditBox extends Group implements IEditBox {
 
     // 必须来自 editor.update()，需同步更新编辑工具 
     public update(): void {
-        const { editor } = this
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds('box', editor, true)
+        const { editor, mergeConfig } = this
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds(mergeConfig.editBoxType, editor, true)
         this.visible = !this.target.locked
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })
@@ -165,9 +165,9 @@ export class EditBox extends Group implements IEditBox {
 
 
     public updateBounds(bounds: IBoundsData): void {
-        const { editor, mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
+        const { editor, mergedConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
         const { editMask } = editor
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, dimOthers, bright, spread, hideRotatePoints, hideResizeLines } = mergeConfig
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, dimOthers, bright, spread, hideRotatePoints, hideResizeLines } = mergedConfig
 
         editMask.visible = mask ? true : 0
 
@@ -221,7 +221,7 @@ export class EditBox extends Group implements IEditBox {
             }
 
             // rotate
-            circle.visible = showPoints && rotateable && !!(mergeConfig.circle || mergeConfig.rotatePoint)
+            circle.visible = showPoints && rotateable && !!(mergedConfig.circle || mergedConfig.rotatePoint)
             if (circle.visible) this.layoutCircle()
 
             // rect
@@ -344,7 +344,8 @@ export class EditBox extends Group implements IEditBox {
     // 操作事件共用
 
     public onTransformStart(e: IUIEvent): void {
-        if (this.moving || this.gesturing) this.editor.opacity = this.mergedConfig.hideOnMove ? 0 : 1 // move
+        const { hideOnMove, editBoxType } = this.mergedConfig
+        if (this.moving || this.gesturing) this.editor.opacity = hideOnMove ? 0 : 1 // move
         if (this.resizing) ResizeEvent.resizingKeys = this.editor.leafList.keys // 记录正在resize中的元素列表
 
         const { dragStartData, target } = this
@@ -352,7 +353,7 @@ export class EditBox extends Group implements IEditBox {
         dragStartData.y = e.y
         dragStartData.totalOffset = getPointData() // 缩放、旋转造成的总偏移量，一般用于手势操作的move纠正
         dragStartData.point = { x: target.x, y: target.y } // 用于移动
-        dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
+        dragStartData.bounds = { ...target.getLayoutBounds(editBoxType, 'local') } // 用于resize
         dragStartData.rotation = target.rotation // 用于旋转
     }
 

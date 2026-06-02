@@ -1,21 +1,34 @@
-
-import { Leaf, Path, Line, Text, Polygon, Group, Box, UI } from '@leafer-ui/draw'
+import { IBoundsType, ILeaf, IPointData } from '@leafer-ui/interface'
+import { Leaf, Path, Line, Text, Polygon, Group, Box, UI, MatrixHelper } from '@leafer-ui/draw'
 
 import { scaleResize, scaleResizeFontSize, scaleResizeGroup, scaleResizePath, scaleResizePoints } from './scaler'
 
 
 // leaf
+const leaf = Leaf.prototype as ILeaf, tempPoint = {} as IPointData, { scale, toOuterPoint } = MatrixHelper
 
-const leaf = Leaf.prototype
-
-leaf.scaleResize = function (scaleX: number, scaleY = scaleX, noResize?: boolean): void {
+leaf.scaleResize = function (scaleX: number, scaleY = scaleX, noResize?: boolean, boundsType?: IBoundsType): void {
     const data = this as UI
     if (noResize || (data.editConfig && data.editConfig.editSize === 'scale')) {
         data.scaleX *= scaleX
         data.scaleY *= scaleY
     } else {
-        if (scaleX < 0) data.scaleX *= -1, scaleX = -scaleX
-        if (scaleY < 0) data.scaleY *= -1, scaleY = -scaleY
+        const local = this.__localMatrix
+        if (scaleX < 0) data.scaleX *= -1, scaleX = -scaleX, scale(local, -1, 1)
+        if (scaleY < 0) data.scaleY *= -1, scaleY = -scaleY, scale(local, 1, -1)
+
+        if (boundsType === 'stroke') {
+            const { boxBounds, strokeBounds } = this.__layout, { x, y, width, height } = strokeBounds
+            tempPoint.x = (x - boxBounds.x) * (scaleX - 1)
+            tempPoint.y = (y - boxBounds.y) * (scaleY - 1)
+            toOuterPoint(local, tempPoint, tempPoint, true)
+            this.x += tempPoint.x
+            this.y += tempPoint.y
+
+            scaleX = (width * scaleX - (width - boxBounds.width)) / boxBounds.width
+            scaleY = (height * scaleY - (height - boxBounds.height)) / boxBounds.height
+        }
+
         this.__scaleResize(scaleX, scaleY)
     }
 }

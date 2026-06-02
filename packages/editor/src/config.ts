@@ -30,6 +30,7 @@ export const config: IEditorConfig = {
 
     selector: true,
     editBox: true,
+    editBoxType: 'box',
     hover: true,
     select: 'press',
     openInner: 'double',

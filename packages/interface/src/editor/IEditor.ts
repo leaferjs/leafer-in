@@ -1,4 +1,4 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent, IEditorConfig } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent, IEditorConfig, IBoundsType } from '@leafer-ui/interface'
 
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
@@ -90,6 +90,7 @@ export interface IEditorGroupEvent extends IEditorEvent {
 
 export interface IEditorTransformEvent extends IEditorEvent {
     transform?: IMatrixData
+    editBoxType?: IBoundsType
 
     operateEvent?: IDragEvent | IMoveEvent | IZoomEvent | IRotateEvent // 操作源事件
     isStart?: boolean // 是否开始
