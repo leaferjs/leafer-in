@@ -21,7 +21,7 @@ export class Stroker extends UI implements IStroker {
     public list: IUI[] = []
 
     @surfaceType('render-path')
-    public strokePathType: 'path' | 'render-path'
+    public strokePathType: 'path' | 'render-path' | 'box' | 'stroke'
 
     constructor() {
         super()
@@ -68,12 +68,21 @@ export class Stroker extends UI implements IStroker {
                     canvas.setWorld(matrix, options.matrix)
                     canvas.beginPath()
 
-
-                    if (this.strokePathType === 'path') {
-                        leaf.__drawPath(canvas)
-                    } else {
-                        if (leaf.__.__useArrow) leaf.__drawPath(canvas)
-                        else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
+                    switch (this.strokePathType) {
+                        case 'box':
+                            const { boxBounds } = leaf.__layout
+                            canvas.rect(boxBounds.x, boxBounds.y, boxBounds.width, boxBounds.height)
+                            break
+                        case 'stroke':
+                            const { strokeBounds } = leaf.__layout
+                            canvas.rect(strokeBounds.x, strokeBounds.y, strokeBounds.width, strokeBounds.height)
+                            break
+                        case 'path':
+                            leaf.__drawPath(canvas)
+                            break
+                        default:
+                            if (leaf.__.__useArrow) leaf.__drawPath(canvas)
+                            else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
                     }
 
                     data.strokeWidth = strokeWidth / Math.max(aScaleX, aScaleY)

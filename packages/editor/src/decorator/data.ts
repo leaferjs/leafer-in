@@ -60,10 +60,11 @@ export function mergeConfigAttr() {
 
                 if (element && element.editConfig) {
                     let { editConfig } = element
-                    if (editConfig.hover || editConfig.hoverStyle) { // 元素的hover样式，不能覆盖到总配置里
+                    if (editConfig.hover || editConfig.hoverStyle || editConfig.hoverPathType) { // 元素的hover样式，不能覆盖到总配置里
                         editConfig = { ...editConfig }
                         delete editConfig.hover
                         delete editConfig.hoverStyle
+                        delete editConfig.hoverPathType
                     }
                     Object.assign(mergeConfig, editConfig) // 元素上的配置
                 }
