@@ -4,7 +4,7 @@ import { registerUI, dataProcessor, pathType, Star, rewrite, rewriteAble, Box } 
 import { StarBoxData } from './data/StarBoxData'
 
 
-const ellipse = Star.prototype
+const star = Star.prototype
 
 @rewriteAble()
 @registerUI()
@@ -21,7 +21,7 @@ export class StarBox<TInputData = IStarBoxInputData> extends Box<TInputData> imp
     @dataProcessor(StarBoxData)
     declare public __: IStarBoxData
 
-    @rewrite(ellipse.__updatePath)
+    @rewrite(star.__updatePath)
     public __updatePath(): void { }
 
 }
