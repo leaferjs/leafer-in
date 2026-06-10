@@ -11,10 +11,11 @@ export function addViewport(leafer: ILeaferBase, mergeConfig?: ILeaferConfig, cu
 
     leafer.__eventIds.push(
         leafer.on_(MoveEvent.BEFORE_MOVE, (e: MoveEvent) => {
-            const move = leafer.getValidMove(e.moveX, e.moveY, false)
+            const limit = getScrollType(leafer).includes('limit'), stopLimit = leafer.app.config.move.scrollLimit === 'stop'
+            const move = leafer.getValidMove(e.moveX, e.moveY, limit && stopLimit)
 
             // check limit
-            if (getScrollType(leafer).includes('limit')) {
+            if (limit && !stopLimit) {
                 const testMove = leafer.getValidMove(0, 0)
                 if (testMove.x || testMove.y) {
                     const maxX = 100, maxY = 200, resistance = e.moveType === 'drag' ? 0.3 : 0.05
