@@ -33,6 +33,7 @@ import { Creator, UI, Group, Text, Box, dataType, Plugin } from '@leafer-ui/draw
 import '@leafer-in/resize'
 
 import { Editor } from './Editor'
+import { EditToolCreator } from './tool/EditToolCreator'
 
 
 Plugin.add('editor', 'resize')
@@ -47,7 +48,11 @@ Creator.editor = function (options?: IEditorConfig, app?: IApp): IEditor {
 Box.addAttr('textBox', false, dataType)
 
 UI.addAttr('editConfig', undefined, dataType)
-UI.addAttr('editOuter', (ui: UI) => { ui.updateLayout(); return ui.__.__isLinePath ? 'LineEditTool' : 'EditTool' }, dataType) // fix: Line 需要更新布局才能精准确定
+UI.addAttr('editOuter', (ui: UI) => {
+    ui.updateLayout()  // fix: Line 需要更新布局才能精准确定
+    const name = (ui.tag === 'Line' ? '' : ui.tag) + 'EditTool'
+    return ui.__.__isLinePath ? 'LineEditTool' : (EditToolCreator.list[name] ? name : 'EditTool')
+}, dataType)
 
 UI.addAttr('editInner', 'PathEditor', dataType)
 Group.addAttr('editInner', '', dataType)  // 必须设为空
