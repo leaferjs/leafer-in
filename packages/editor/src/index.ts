@@ -50,7 +50,7 @@ Box.addAttr('textBox', false, dataType)
 UI.addAttr('editConfig', undefined, dataType)
 UI.addAttr('editOuter', (ui: UI) => {
     ui.updateLayout()  // fix: Line 需要更新布局才能精准确定
-    const name = (ui.tag === 'Line' ? '' : ui.tag) + 'EditTool'
+    const name = (ui.tag === 'Line' || ui.pathInputed ? '' : ui.tag) + 'EditTool'
     return ui.__.__isLinePath ? 'LineEditTool' : (EditToolCreator.list[name] ? name : 'EditTool')
 }, dataType)
 
