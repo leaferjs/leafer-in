@@ -27,7 +27,7 @@ export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
 
-import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction, IApp } from '@leafer-in/interface'
+import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction, IApp, ILine } from '@leafer-in/interface'
 import { Creator, UI, Group, Text, Box, dataType, Plugin } from '@leafer-ui/draw'
 
 import '@leafer-in/resize'
@@ -50,7 +50,7 @@ Box.addAttr('textBox', false, dataType)
 UI.addAttr('editConfig', undefined, dataType)
 UI.addAttr('editOuter', (ui: UI) => {
     ui.updateLayout()  // fix: Line 需要更新布局才能精准确定
-    const name = (ui.tag === 'Line' || ui.pathInputed ? '' : ui.tag) + 'EditTool'
+    const name = (ui.tag === 'Line' || ui.pathInputed ? '' : ((ui as ILine).points ? 'Points' : ui.tag)) + 'EditTool'
     return ui.__.__isLinePath ? 'LineEditTool' : (EditToolCreator.list[name] ? name : 'EditTool')
 }, dataType)
 
