@@ -1,4 +1,4 @@
-import { IBoundsType, ILeaf, IPointData } from '@leafer-ui/interface'
+import { IBoundsType, ILeaf, IPointData, ILocationType } from '@leafer-ui/interface'
 import { Leaf, Path, Line, Text, Polygon, Group, Box, UI, MatrixHelper } from '@leafer-ui/draw'
 
 import { scaleResize, scaleResizeFontSize, scaleResizeGroup, scaleResizePath, scaleResizePoints } from './scaler'
@@ -39,15 +39,15 @@ leaf.__scaleResize = function (scaleX: number, scaleY: number): void {
 }
 
 
-leaf.resizeWidth = function (width: number): void {
-    const scale = width / this.getBounds('box', 'local').width || 1 // 不允许为0
-    this.scaleOf(this.__layout.boxBounds, scale, this.__.lockRatio ? scale : 1, true)
+leaf.resizeWidth = function (width: number, relative: ILocationType = 'inner'): void {
+    const scale = width / this.getBounds('box', relative).width || 1 // 不允许为0
+    this.scaleOf('top-left', scale, this.__.lockRatio ? scale : 1, true)
 }
 
 
-leaf.resizeHeight = function (height: number): void {
-    const scale = height / this.getBounds('box', 'local').height || 1 // 不允许为0
-    this.scaleOf(this.__layout.boxBounds, this.__.lockRatio ? scale : 1, scale, true)
+leaf.resizeHeight = function (height: number, relative: ILocationType = 'inner'): void {
+    const scale = height / this.getBounds('box', relative).height || 1 // 不允许为0
+    this.scaleOf('top-left', this.__.lockRatio ? scale : 1, scale, true)
 }
 
 
