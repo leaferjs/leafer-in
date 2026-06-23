@@ -7,8 +7,8 @@ import { InnerEditor } from './InnerEditor'
 @registerEditTool()
 export class EditTool extends InnerEditor implements IEditTool {
 
-    static registerEditTool() {
-        EditToolCreator.register(this)
+    static registerEditTool(name?: string) {
+        EditToolCreator.register(this, name)
     }
 
 

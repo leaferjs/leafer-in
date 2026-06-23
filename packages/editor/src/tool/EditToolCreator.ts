@@ -18,10 +18,11 @@ export const EditToolCreator = {
 
     list: {} as IObject,
 
-    register(EditTool: IObject): void {
+    register(EditTool: IObject, name?: string): void {
         const { tag } = EditTool.prototype as IEditTool
-        list[tag] && debug.repeat(tag)
-        list[tag] = EditTool
+        name || (name = tag)
+        list[name] && debug.repeat(name)
+        list[name] = EditTool
     },
 
     get(tag: string, editor: IEditor): IEditTool {
