@@ -14,7 +14,7 @@ export const EditDataHelper = {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1, lockScale: number
 
         const { widthRange, heightRange, dragBounds, worldTransform, boxBounds } = target
-        const { width, height } = startBounds
+        const { width, height } = startBounds, worldScaleX = abs(worldTransform.scaleX), worldScaleY = abs(worldTransform.scaleY)
         const innerBounds = target.getBounds(boundsType, 'inner')
 
         // 获取已经改变的比例
@@ -112,9 +112,8 @@ export const EditDataHelper = {
         if (useScaleY) scaleY /= changedScaleY
 
         if (!flipable) {
-            const { worldTransform } = target
-            if (scaleX < 0) scaleX = 1 / innerBounds.width / worldTransform.scaleX
-            if (scaleY < 0) scaleY = 1 / innerBounds.height / worldTransform.scaleY
+            if (scaleX < 0) scaleX = 1 / innerBounds.width / worldScaleX
+            if (scaleY < 0) scaleY = 1 / innerBounds.height / worldScaleY
         }
 
         // 检查限制
@@ -140,16 +139,17 @@ export const EditDataHelper = {
             scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
 
-        // 防止小于1px
-        let minWidth = 1 * abs(worldTransform.scaleX), minHeight = 1 * abs(worldTransform.scaleY)
+        // 防止小于1px, 需要考虑 editSize 的各种情况
+        let minWidth = 1, minHeight = 1
 
         if (boundsType !== 'box') {
-            minWidth += innerBounds.width - boxBounds.width
-            minHeight += innerBounds.height - boxBounds.height
+            minWidth += (innerBounds.width - boxBounds.width) * worldScaleX
+            minHeight += (innerBounds.height - boxBounds.height) * worldScaleY
         }
 
-        if (useScaleX && abs(scaleX * innerBounds.width) < minWidth) scaleX = sign(scaleX) * minWidth / innerBounds.width
-        if (useScaleY && abs(scaleY * innerBounds.height) < minHeight) scaleY = sign(scaleY) * minHeight / innerBounds.height
+        const worldWidth = worldScaleX * innerBounds.width, worldHeight = worldScaleY * innerBounds.height
+        if (useScaleX && abs(scaleX * worldWidth) < minWidth) scaleX = sign(scaleX) * minWidth / worldWidth
+        if (useScaleY && abs(scaleY * worldHeight) < minHeight) scaleY = sign(scaleY) * minHeight / worldHeight
 
         if (lockRatio && scaleX !== scaleY) {
             lockScale = Math.min(abs(scaleX), abs(scaleY))
