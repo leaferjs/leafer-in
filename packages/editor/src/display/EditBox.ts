@@ -151,8 +151,8 @@ export class EditBox extends Group implements IEditBox {
 
     // 必须来自 editor.update()，需同步更新编辑工具 
     public update(): void {
-        const { editor, mergeConfig } = this
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds(mergeConfig.editBoxType, editor, true)
+        const { editor } = this
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds('box', editor, true)
         this.visible = !this.target.locked
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })
@@ -165,9 +165,9 @@ export class EditBox extends Group implements IEditBox {
 
 
     public updateBounds(bounds: IBoundsData): void {
-        const { editor, mergedConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
+        const { editor, mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
         const { editMask } = editor
-        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, mask, dimOthers, bright, spread, hideRotatePoints, hideResizeLines } = mergedConfig
+        const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, editBoxType, mask, dimOthers, bright, spread, hideRotatePoints, hideResizeLines } = mergeConfig
 
         editMask.visible = mask ? true : 0
 
@@ -179,6 +179,7 @@ export class EditBox extends Group implements IEditBox {
             editor.cancelDimOthers()
         }
 
+        if (editBoxType === 'stroke') BoundsHelper.spread(bounds, editor.element.__layout.strokeBoxSpread)
         if (spread) BoundsHelper.spread(bounds, spread)
 
         if (this.view.worldOpacity) {
@@ -221,7 +222,7 @@ export class EditBox extends Group implements IEditBox {
             }
 
             // rotate
-            circle.visible = showPoints && rotateable && !!(mergedConfig.circle || mergedConfig.rotatePoint)
+            circle.visible = showPoints && rotateable && !!(mergeConfig.circle || mergeConfig.rotatePoint)
             if (circle.visible) this.layoutCircle()
 
             // rect
