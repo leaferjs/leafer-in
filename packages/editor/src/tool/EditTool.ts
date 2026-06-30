@@ -1,4 +1,5 @@
 import { IEditorScaleEvent, IEditorRotateEvent, IEditTool, IEditorSkewEvent, IEditorMoveEvent } from '@leafer-in/interface'
+import { defineKey } from '@leafer-ui/draw'
 
 import { registerEditTool, EditToolCreator } from './EditToolCreator'
 import { InnerEditor } from './InnerEditor'
@@ -7,8 +8,9 @@ import { InnerEditor } from './InnerEditor'
 @registerEditTool()
 export class EditTool extends InnerEditor implements IEditTool {
 
-    static registerEditTool(name?: string) {
+    static registerEditTool(name?: string, changeTag?: boolean) {
         EditToolCreator.register(this, name)
+        if (changeTag) defineKey(this.prototype, 'tag', { get() { return name } })
     }
 
 
