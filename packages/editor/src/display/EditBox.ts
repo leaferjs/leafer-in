@@ -179,7 +179,7 @@ export class EditBox extends Group implements IEditBox {
             editor.cancelDimOthers()
         }
 
-        if (editBoxType === 'stroke') BoundsHelper.spread(bounds, editor.element.__layout.strokeBoxSpread)
+        if (editBoxType === 'stroke') BoundsHelper.spread(bounds, this.target.__layout.strokeBoxSpread)
         if (spread) BoundsHelper.spread(bounds, spread)
 
         if (this.view.worldOpacity) {

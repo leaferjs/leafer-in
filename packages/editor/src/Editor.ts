@@ -199,11 +199,9 @@ export class Editor extends Group implements IEditor {
     public unloadEditTool(onlyTool?: boolean): void {
         let tool = this.editTool
         if (tool) {
-            if (!onlyTool) {
-                this.editBox.unload()
-                this.editTool = null
-            }
+            if (!onlyTool) this.editBox.unload()
             tool.unload()
+            if (!onlyTool) this.editTool = null
             tool.editTarget = null
         }
     }
