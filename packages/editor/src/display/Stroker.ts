@@ -1,4 +1,4 @@
-import { IUI, ILeaferCanvas, IRenderOptions, IUIInputData, IMatrixWithOptionHalfData } from '@leafer-ui/interface'
+import { IUI, ILeaferCanvas, IRenderOptions, IUIInputData, IMatrixWithOptionHalfData, ILine } from '@leafer-ui/interface'
 import { Paint, UI, MatrixHelper, getBoundsData, getMatrixData, BoundsHelper, LeafBoundsHelper, isArray, isString, surfaceType, ColorConvert } from '@leafer-ui/draw'
 
 import { IStroker } from '@leafer-in/interface'
@@ -81,7 +81,7 @@ export class Stroker extends UI implements IStroker {
                             leaf.__drawPath(canvas)
                             break
                         default:
-                            if (leaf.__.__useArrow) leaf.__drawPath(canvas)
+                            if ((leaf as ILine).__.points || leaf.__.__useArrow) leaf.__drawPath(canvas)
                             else leaf.__.__pathForRender ? leaf.__drawRenderPath(canvas) : leaf.__drawPathByBox(canvas)
                     }
 
