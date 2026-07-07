@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined, FourNumberHelper } from '@leafer-ui/draw'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -171,7 +171,7 @@ export class EditBox extends Group implements IEditBox {
 
         if (editBoxType === 'stroke') {
             const { scaleX, scaleY } = target.worldTransform, { strokeBoxSpread } = target.__layout
-            BoundsHelper.spread(bounds, [strokeBoxSpread * Math.abs(scaleY), strokeBoxSpread * Math.abs(scaleX)])
+            strokeBoxSpread && BoundsHelper.spread(bounds, [strokeBoxSpread * Math.abs(scaleY), strokeBoxSpread * Math.abs(scaleX)])
         }
 
         if (spread) BoundsHelper.spread(bounds, spread)

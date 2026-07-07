@@ -1,4 +1,4 @@
-import { IPointData, IAround, IAlign, IUI, ILayoutBoundsData, IBoundsType } from '@leafer-ui/interface'
+import { IPointData, IAround, IAlign, IUI, ILayoutBoundsData } from '@leafer-ui/interface'
 import { AroundHelper, MathHelper, PointHelper, Direction9, isNumber } from '@leafer-ui/draw'
 import { DragBoundsHelper } from '@leafer-ui/core'
 
@@ -10,12 +10,11 @@ const { toPoint } = AroundHelper, { within, sign } = MathHelper, { abs } = Math
 
 export const EditDataHelper = {
 
-    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMoveOrScale: IPointData | number, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean, boundsType: IBoundsType = 'box'): IEditorScaleEvent {
+    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMoveOrScale: IPointData | number, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1, lockScale: number
 
         const { widthRange, heightRange, dragBounds, worldTransform, boxBounds } = target
         const { width, height } = startBounds, worldScaleX = abs(worldTransform.scaleX), worldScaleY = abs(worldTransform.scaleY)
-        const innerBounds = target.getBounds(boundsType, 'inner')
 
         // 获取已经改变的比例
         const originChangedScaleX = target.scaleX / startBounds.scaleX
@@ -23,8 +22,8 @@ export const EditDataHelper = {
         const signX = sign(originChangedScaleX)
         const signY = sign(originChangedScaleY)
 
-        const changedScaleX = scaleMode ? originChangedScaleX : signX * innerBounds.width / width
-        const changedScaleY = scaleMode ? originChangedScaleY : signY * innerBounds.height / height
+        const changedScaleX = scaleMode ? originChangedScaleX : signX * boxBounds.width / width
+        const changedScaleY = scaleMode ? originChangedScaleY : signY * boxBounds.height / height
 
         if (isNumber(totalMoveOrScale)) {
 
@@ -112,15 +111,13 @@ export const EditDataHelper = {
         if (useScaleY) scaleY /= changedScaleY
 
         if (!flipable) {
-            if (scaleX < 0) scaleX = 1 / innerBounds.width / worldScaleX
-            if (scaleY < 0) scaleY = 1 / innerBounds.height / worldScaleY
+            if (scaleX < 0) scaleX = 1 / boxBounds.width / worldScaleX
+            if (scaleY < 0) scaleY = 1 / boxBounds.height / worldScaleY
         }
 
         // 检查限制
 
-        toPoint(around || align, innerBounds, origin, true)
-
-        this.checkOrigin(target, origin, boundsType)
+        toPoint(around || align, boxBounds, origin, true)
 
         if (dragBounds) {
             const scaleData = { x: scaleX, y: scaleY }
@@ -130,24 +127,19 @@ export const EditDataHelper = {
         }
 
         if (useScaleX && widthRange) {
-            const nowWidth = innerBounds.width * target.scaleX
+            const nowWidth = boxBounds.width * target.scaleX
             scaleX = within(nowWidth * scaleX, widthRange) / nowWidth
         }
 
         if (useScaleY && heightRange) {
-            const nowHeight = innerBounds.height * target.scaleY
+            const nowHeight = boxBounds.height * target.scaleY
             scaleY = within(nowHeight * scaleY, heightRange) / nowHeight
         }
 
         // 防止小于1px, 需要考虑 editSize 的各种情况
-        let minWidth = 1, minHeight = 1
+        const minWidth = 1, minHeight = 1
 
-        if (boundsType !== 'box') {
-            minWidth += (innerBounds.width - boxBounds.width) * worldScaleX
-            minHeight += (innerBounds.height - boxBounds.height) * worldScaleY
-        }
-
-        const worldWidth = worldScaleX * innerBounds.width, worldHeight = worldScaleY * innerBounds.height
+        const worldWidth = worldScaleX * boxBounds.width, worldHeight = worldScaleY * boxBounds.height
         if (useScaleX && abs(scaleX * worldWidth) < minWidth) scaleX = sign(scaleX) * minWidth / worldWidth
         if (useScaleY && abs(scaleY * worldHeight) < minHeight) scaleY = sign(scaleY) * minHeight / worldHeight
 
@@ -163,7 +155,7 @@ export const EditDataHelper = {
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
 
-    getRotateData(target: IUI, direction: Direction9, current: IPointData, last: IPointData, around: IAround, boundsType: IBoundsType = 'box'): IEditorRotateEvent {
+    getRotateData(target: IUI, direction: Direction9, current: IPointData, last: IPointData, around: IAround): IEditorRotateEvent {
         let align: IAlign, origin = {} as IPointData
 
         switch (direction) {
@@ -183,14 +175,12 @@ export const EditDataHelper = {
                 align = 'center'
         }
 
-        toPoint(around || align, target.getBounds(boundsType, 'inner'), origin, true)
-
-        this.checkOrigin(target, origin, boundsType)
+        toPoint(around || align, target.boxBounds, origin, true)
 
         return { origin, rotation: PointHelper.getRotation(last, target.getWorldPointByBox(origin), current) }
     },
 
-    getSkewData(target: IUI, direction: Direction9, move: IPointData, around: IAround, boundsType: IBoundsType = 'box'): IEditorSkewEvent {
+    getSkewData(target: IUI, direction: Direction9, move: IPointData, around: IAround): IEditorSkewEvent {
         let align: IAlign, origin = {} as IPointData, skewX = 0, skewY = 0
         let last: IPointData
 
@@ -220,29 +210,17 @@ export const EditDataHelper = {
                 skewY = 1
         }
 
-        const innerBounds = target.getBounds(boundsType, 'inner')
-        const { width, height } = innerBounds
+        const { boxBounds } = target, { width, height } = boxBounds
 
         last.x = last.x * width
         last.y = last.y * height
 
-        toPoint(around || align, innerBounds, origin, true)
-
-        this.checkOrigin(target, origin, boundsType)
+        toPoint(around || align, boxBounds, origin, true)
 
         const rotation = PointHelper.getRotation(last, origin, { x: last.x + (skewX ? move.x : 0), y: last.y + (skewY ? move.y : 0) })
         skewX ? skewX = -rotation : skewY = rotation
 
         return { origin, skewX, skewY }
-    },
-
-
-    checkOrigin(target: IUI, origin: IPointData, boundsType: IBoundsType): void {
-        if (boundsType !== 'box') {
-            const { boxBounds } = target, innerBounds = target.getBounds(boundsType, 'inner')
-            origin.x += innerBounds.x - boxBounds.x
-            origin.y += innerBounds.y - boxBounds.y
-        }
     },
 
 

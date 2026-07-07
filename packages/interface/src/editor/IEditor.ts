@@ -1,4 +1,4 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent, IEditorConfig, IBoundsType } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent, IEditorConfig } from '@leafer-ui/interface'
 
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
