@@ -16,6 +16,11 @@ export const registerInnerEditor = registerEditTool
 
 export const EditToolCreator = {
 
+    // 默认名称
+    EditTool: 'EditTool',
+    LineEditTool: 'LineEditTool',
+    PointsEditTool: 'PointsEditTool',
+
     list: {} as IObject,
 
     register(EditTool: IObject, name?: string): void {

@@ -27,7 +27,7 @@ export { EditDataHelper } from './helper/EditDataHelper'
 export { EditSelectHelper } from './helper/EditSelectHelper'
 
 
-import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction, IApp, ILine } from '@leafer-in/interface'
+import { IEditor, IEditorConfig, IEditToolFunction, IEditorConfigFunction, IApp, IUI } from '@leafer-in/interface'
 import { Creator, UI, Group, Text, Box, dataType, Plugin } from '@leafer-ui/draw'
 
 import '@leafer-in/resize'
@@ -48,10 +48,12 @@ Creator.editor = function (options?: IEditorConfig, app?: IApp): IEditor {
 Box.addAttr('textBox', false, dataType)
 
 UI.addAttr('editConfig', undefined, dataType)
-UI.addAttr('editOuter', (ui: UI) => {
+UI.addAttr('editOuter', (ui: IUI) => {
     ui.updateLayout()  // fix: Line 需要更新布局才能精准确定
-    const name = (ui.tag === 'Line' || ui.pathInputed ? '' : ((ui as ILine).points ? 'Points' : ui.tag)) + 'EditTool'
-    return ui.__.__isLinePath ? 'LineEditTool' : (EditToolCreator.list[name] ? name : 'EditTool')
+    const { EditTool, LineEditTool, PointsEditTool } = EditToolCreator
+    const name = (ui.pathInputed || ui.isPointsMode) ? PointsEditTool : ui.tag + 'EditTool'
+    const hasTool = EditToolCreator.list[name]
+    return ui.__.__isLinePath && !(name == PointsEditTool && hasTool) ? LineEditTool : (hasTool ? name : EditTool)
 }, dataType)
 
 UI.addAttr('editInner', 'PathEditor', dataType)
