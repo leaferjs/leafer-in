@@ -10,7 +10,7 @@ const { toPoint } = AroundHelper, { within, sign } = MathHelper, { abs } = Math
 
 export const EditDataHelper = {
 
-    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMoveOrScale: IPointData | number, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean, boundsType: IBoundsType): IEditorScaleEvent {
+    getScaleData(target: IUI, startBounds: ILayoutBoundsData, direction: Direction9, totalMoveOrScale: IPointData | number, lockRatio: boolean | 'corner', around: IAround, flipable: boolean, scaleMode: boolean, boundsType: IBoundsType = 'box'): IEditorScaleEvent {
         let align: IAlign, origin = {} as IPointData, scaleX: number = 1, scaleY: number = 1, lockScale: number
 
         const { widthRange, heightRange, dragBounds, worldTransform, boxBounds } = target
@@ -163,7 +163,7 @@ export const EditDataHelper = {
         return { origin, scaleX, scaleY, direction, lockRatio, around }
     },
 
-    getRotateData(target: IUI, direction: Direction9, current: IPointData, last: IPointData, around: IAround, boundsType: IBoundsType): IEditorRotateEvent {
+    getRotateData(target: IUI, direction: Direction9, current: IPointData, last: IPointData, around: IAround, boundsType: IBoundsType = 'box'): IEditorRotateEvent {
         let align: IAlign, origin = {} as IPointData
 
         switch (direction) {
@@ -190,7 +190,7 @@ export const EditDataHelper = {
         return { origin, rotation: PointHelper.getRotation(last, target.getWorldPointByBox(origin), current) }
     },
 
-    getSkewData(target: IUI, direction: Direction9, move: IPointData, around: IAround, boundsType: IBoundsType,): IEditorSkewEvent {
+    getSkewData(target: IUI, direction: Direction9, move: IPointData, around: IAround, boundsType: IBoundsType = 'box'): IEditorSkewEvent {
         let align: IAlign, origin = {} as IPointData, skewX = 0, skewY = 0
         let last: IPointData
 

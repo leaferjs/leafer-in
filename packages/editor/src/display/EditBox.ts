@@ -1,5 +1,5 @@
 import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined } from '@leafer-ui/draw'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined, FourNumberHelper } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
 import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
@@ -165,9 +165,16 @@ export class EditBox extends Group implements IEditBox {
 
 
     public updateBounds(bounds: IBoundsData): void {
-        const { editor, mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
+        const { editor, target, mergeConfig, single, rect, circle, buttons, resizePoints, rotatePoints, resizeLines } = this
         const { editMask } = editor
         const { middlePoint, resizeable, rotateable, hideOnSmall, editBox, editBoxType, mask, dimOthers, bright, spread, hideRotatePoints, hideResizeLines } = mergeConfig
+
+        if (editBoxType === 'stroke') {
+            const { scaleX, scaleY } = target.worldTransform, { strokeBoxSpread } = target.__layout
+            BoundsHelper.spread(bounds, [strokeBoxSpread * Math.abs(scaleY), strokeBoxSpread * Math.abs(scaleX)])
+        }
+
+        if (spread) BoundsHelper.spread(bounds, spread)
 
         editMask.visible = mask ? true : 0
 
@@ -178,9 +185,6 @@ export class EditBox extends Group implements IEditBox {
         } else if (editor.hasDimOthers) {
             editor.cancelDimOthers()
         }
-
-        if (editBoxType === 'stroke') BoundsHelper.spread(bounds, this.target.__layout.strokeBoxSpread)
-        if (spread) BoundsHelper.spread(bounds, spread)
 
         if (this.view.worldOpacity) {
             const { width, height } = bounds
@@ -345,7 +349,7 @@ export class EditBox extends Group implements IEditBox {
     // 操作事件共用
 
     public onTransformStart(e: IUIEvent): void {
-        const { hideOnMove, editBoxType } = this.mergedConfig
+        const { hideOnMove } = this.mergedConfig
         if (this.moving || this.gesturing) this.editor.opacity = hideOnMove ? 0 : 1 // move
         if (this.resizing) ResizeEvent.resizingKeys = this.editor.leafList.keys // 记录正在resize中的元素列表
 
@@ -354,7 +358,7 @@ export class EditBox extends Group implements IEditBox {
         dragStartData.y = e.y
         dragStartData.totalOffset = getPointData() // 缩放、旋转造成的总偏移量，一般用于手势操作的move纠正
         dragStartData.point = { x: target.x, y: target.y } // 用于移动
-        dragStartData.bounds = { ...target.getLayoutBounds(editBoxType, 'local') } // 用于resize
+        dragStartData.bounds = { ...target.getLayoutBounds('box', 'local') } // 用于resize
         dragStartData.rotation = target.rotation // 用于旋转
     }
 

@@ -90,7 +90,6 @@ export interface IEditorGroupEvent extends IEditorEvent {
 
 export interface IEditorTransformEvent extends IEditorEvent {
     transform?: IMatrixData
-    editBoxType?: IBoundsType
 
     operateEvent?: IDragEvent | IMoveEvent | IZoomEvent | IRotateEvent // 操作源事件
     isStart?: boolean // 是否开始

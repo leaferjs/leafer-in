@@ -54,7 +54,7 @@ export class TransformTool implements ITransformTool { // Editor use
     public onScale(e: DragEvent | ZoomEvent): void {
 
         const { target, mergeConfig, single, dragStartData } = this.editBox
-        let { around, lockRatio, flipable, editSize, editBoxType } = mergeConfig, totalMove: IPointData | number
+        let { around, lockRatio, flipable, editSize } = mergeConfig, totalMove: IPointData | number
 
         if (e instanceof ZoomEvent) {
             if (!around) around = target.getBoxPoint(e)
@@ -66,7 +66,7 @@ export class TransformTool implements ITransformTool { // Editor use
         const { direction } = e.current as IEditPoint
         if (e.shiftKey || target.lockRatio) lockRatio = true
 
-        const data = EditDataHelper.getScaleData(target, dragStartData.bounds, direction, totalMove, lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, !single || editSize === 'scale', editBoxType)
+        const data = EditDataHelper.getScaleData(target, dragStartData.bounds, direction, totalMove, lockRatio, EditDataHelper.getAround(around, e.altKey), flipable, !single || editSize === 'scale')
 
         const targetX = target.x, targetY = target.y
 
@@ -83,7 +83,7 @@ export class TransformTool implements ITransformTool { // Editor use
     public onRotate(e: DragEvent | RotateEvent): void {
 
         const { target, mergeConfig, dragStartData } = this.editBox
-        const { around, rotateAround, rotateGap, diagonalRotateKey, editBoxType } = mergeConfig
+        const { around, rotateAround, rotateGap, diagonalRotateKey } = mergeConfig
         const { direction } = e.current as IEditPoint
 
         let origin: IPointData, rotation: number
@@ -97,7 +97,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
             const isDiagonalRotate = diagonalRotateKey ? e.isHoldKeys(diagonalRotateKey) : e.shiftKey // 对角旋转
 
-            const data = EditDataHelper.getRotateData(target, direction, e, dragStartData, isDiagonalRotate ? null : (rotateAround || target.around || target.origin || around || 'center'), editBoxType)
+            const data = EditDataHelper.getRotateData(target, direction, e, dragStartData, isDiagonalRotate ? null : (rotateAround || target.around || target.origin || around || 'center'))
             rotation = dragStartData.rotation + data.rotation - target.rotation
             origin = data.origin
 
@@ -116,9 +116,9 @@ export class TransformTool implements ITransformTool { // Editor use
     public onSkew(e: DragEvent): void {
 
         const { target, mergeConfig } = this.editBox
-        const { around, editBoxType } = mergeConfig
+        const { around } = mergeConfig
 
-        const { origin, skewX, skewY } = EditDataHelper.getSkewData(target, (e.current as IEditPoint).direction, e.getInnerMove(target), EditDataHelper.getAround(around, e.altKey), editBoxType)
+        const { origin, skewX, skewY } = EditDataHelper.getSkewData(target, (e.current as IEditPoint).direction, e.getInnerMove(target), EditDataHelper.getAround(around, e.altKey))
         if (!skewX && !skewY) return
 
         this.skewOf(origin, skewX, skewY)
@@ -173,7 +173,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const { target, mergeConfig, single, editor } = this.editBox
 
-        const { beforeScale, editBoxType } = mergeConfig
+        const { beforeScale } = mergeConfig
         if (beforeScale) {
             const check = beforeScale({ target, origin, scaleX, scaleY })
             if (isObject(check)) scaleX = check.scaleX, scaleY = check.scaleY
@@ -182,7 +182,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const worldOrigin = this.getWorldOrigin(origin)
         const transform = !single && this.getChangedTransform(() => (target as ISimulateElement).safeChange(() => target.scaleOf(origin, scaleX, scaleY)))
-        const data: IEditorScaleEvent = { target, editor, worldOrigin, scaleX, scaleY, transform, editBoxType }
+        const data: IEditorScaleEvent = { target, editor, worldOrigin, scaleX, scaleY, transform }
 
         this.emitEvent(new EditorScaleEvent(EditorScaleEvent.BEFORE_SCALE, data))
         const event = new EditorScaleEvent(EditorScaleEvent.SCALE, data)
@@ -210,7 +210,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const { target, mergeConfig, single, editor } = this.editBox
 
-        const { beforeRotate, editBoxType } = mergeConfig
+        const { beforeRotate } = mergeConfig
         if (beforeRotate) {
             const check = beforeRotate({ target, origin, rotation })
             if (isNumber(check)) rotation = check
@@ -219,7 +219,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const worldOrigin = this.getWorldOrigin(origin)
         const transform = !single && this.getChangedTransform(() => (target as ISimulateElement).safeChange(() => target.rotateOf(origin, rotation)))
-        const data: IEditorRotateEvent = { target, editor, worldOrigin, rotation, transform, editBoxType }
+        const data: IEditorRotateEvent = { target, editor, worldOrigin, rotation, transform }
 
         this.emitEvent(new EditorRotateEvent(EditorRotateEvent.BEFORE_ROTATE, data))
         const event = new EditorRotateEvent(EditorRotateEvent.ROTATE, data)
@@ -232,7 +232,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const { target, mergeConfig, single, editor } = this.editBox
 
-        const { beforeSkew, editBoxType } = mergeConfig
+        const { beforeSkew } = mergeConfig
         if (beforeSkew) {
             const check = beforeSkew({ target, origin, skewX, skewY })
             if (isObject(check)) skewX = check.skewX, skewY = check.skewY
@@ -241,7 +241,7 @@ export class TransformTool implements ITransformTool { // Editor use
 
         const worldOrigin = this.getWorldOrigin(origin)
         const transform = !single && this.getChangedTransform(() => (target as ISimulateElement).safeChange(() => target.skewOf(origin, skewX, skewY)))
-        const data: IEditorSkewEvent = { target, editor, worldOrigin, skewX, skewY, transform, editBoxType }
+        const data: IEditorSkewEvent = { target, editor, worldOrigin, skewX, skewY, transform }
 
         this.emitEvent(new EditorSkewEvent(EditorSkewEvent.BEFORE_SKEW, data))
         const event = new EditorSkewEvent(EditorSkewEvent.SKEW, data)

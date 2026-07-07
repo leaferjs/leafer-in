@@ -28,36 +28,36 @@ export class EditTool extends InnerEditor implements IEditTool {
     }
 
     public onScale(e: IEditorScaleEvent): void {
-        const { scaleX, scaleY, transform, worldOrigin, editor, editBoxType } = e
+        const { scaleX, scaleY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
             const resize = editor.getEditSize(target) !== 'scale'
-            if (transform) target.transformWorld(transform, resize, false, editBoxType)
-            else target.scaleOfWorld(worldOrigin, scaleX, scaleY, resize, false, editBoxType)
+            if (transform) target.transformWorld(transform, resize, false)
+            else target.scaleOfWorld(worldOrigin, scaleX, scaleY, resize, false)
         })
         app.unlockLayout()
     }
 
     public onRotate(e: IEditorRotateEvent): void {
-        const { rotation, transform, worldOrigin, editor, editBoxType } = e
+        const { rotation, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
             const resize = editor.getEditSize(target) !== 'scale'
-            if (transform) target.transformWorld(transform, resize, false, editBoxType)
+            if (transform) target.transformWorld(transform, resize, false)
             else target.rotateOfWorld(worldOrigin, rotation)
         })
         app.unlockLayout()
     }
 
     public onSkew(e: IEditorSkewEvent): void {
-        const { skewX, skewY, transform, worldOrigin, editor, editBoxType } = e
+        const { skewX, skewY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
         list.forEach(target => {
             const resize = editor.getEditSize(target) !== 'scale'
-            if (transform) target.transformWorld(transform, resize, false, editBoxType)
+            if (transform) target.transformWorld(transform, resize, false)
             else target.skewOfWorld(worldOrigin, skewX, skewY, resize)
         })
         app.unlockLayout()
