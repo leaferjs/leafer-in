@@ -2,8 +2,8 @@ export { HighCurveHelper } from './HighCurveHelper'
 export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
-import { IMotionPathData, IUI, IUnitData, IRotationPointData, IPercentData } from '@leafer-ui/interface'
-import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber } from '@leafer-ui/draw'
+import { IMotionPathData, IMotionVertical, IUI, IUnitData, IRotationPointData, IPercentData, IMotionVerticalType } from '@leafer-ui/interface'
+import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber, PointHelper } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
 import { motionPathType } from './decorator'
@@ -26,6 +26,7 @@ Transition.register('motionRotation', function (from: any, to: any, t: number): 
 const ui = UI.prototype
 const { updateMatrix, updateAllMatrix } = LeafHelper
 const { updateBounds } = BranchHelper
+const { toVertical } = PointHelper
 
 
 // addAttr
@@ -33,24 +34,56 @@ UI.addAttr('motionPath', undefined, motionPathType)
 UI.addAttr('motionPrecision', 1, motionPathType)
 
 UI.addAttr('motion', undefined, motionPathType)
+UI.addAttr('motionVertical', 'below', motionPathType)
 UI.addAttr('motionRotation', true, motionPathType)
 
+
+ui.getMotionPath = function (): IUI {
+    return getMotionPath(this)
+}
 
 ui.getMotionPathData = function (): IMotionPathData {
     return getMotionPathData(getMotionPath(this))
 }
 
-ui.getMotionPoint = function (motionDistance: number | IUnitData): IRotationPointData {
-    const path = getMotionPath(this)
-    const data = getMotionPathData(path)
+ui.getMotionContentHeight = function (): number {
+    return this.__layout.boxBounds.height
+}
+
+ui.getMotionPoint = function (motionDistance: number | IUnitData, motionVertical?: IMotionVertical, pathElement?: IUI, offsetX: number = 0, offsetY: number = 0): IRotationPointData {
+    if (!pathElement) pathElement = getMotionPath(this)
+    const data = getMotionPathData(pathElement)
     if (!data.total) return {} as IRotationPointData
 
-    const point = HighCurveHelper.getDistancePoint(data, motionDistance, path.motionPrecision)
-    MatrixHelper.toOuterPoint(path.localTransform, point)
+    const point = HighCurveHelper.getDistancePoint(data, motionDistance, pathElement.motionPrecision, offsetX)
 
     const { motionRotation } = this
-    if (motionRotation === false) delete point.rotation
-    else if (isNumber(motionRotation)) point.rotation += motionRotation
+    if (isNumber(motionRotation)) point.rotation += motionRotation
+
+    let verticalType: IMotionVerticalType, verticalOffset: number
+
+    if (isObject(motionVertical)) verticalType = motionVertical.type, verticalOffset = motionVertical.offset
+    else if (isNumber(motionVertical)) verticalOffset = motionVertical
+    else verticalType = motionVertical
+
+    if (verticalType !== 'below' || offsetY) {
+
+        const { rotation } = point, height = this.getMotionContentHeight()
+        if (verticalOffset) offsetY += verticalType === 'above' ? -verticalOffset : verticalOffset
+
+        switch (verticalType) {
+            case 'above':
+                toVertical(point, rotation, -height + offsetY); break
+            case 'center':
+                toVertical(point, rotation, -height / 2 + offsetY); break
+            case 'below':
+            default:
+                toVertical(point, rotation, offsetY)
+        }
+    }
+
+    MatrixHelper.toOuterPoint(pathElement.localTransform, point)
+
     return point
 }
 
@@ -89,7 +122,12 @@ function updateMotion(leaf: IUI): void {
 
     } else {
 
-        leaf.set(leaf.getMotionPoint(motion)) // 动画路径
+        if (leaf.motionText) leaf.__updateMotionText() // 扩展文本路径
+        else {
+            const point = leaf.getMotionPoint(motion)
+            if (leaf.motionRotation === false) delete point.rotation
+            leaf.set(point) // 动画路径
+        }
 
         if (!leaf.__hasAutoLayout) { // 手动更新布局
             if (leaf.isBranch) updateAllMatrix(leaf), updateBounds(leaf, leaf)
@@ -115,5 +153,6 @@ function getMotionPath(leaf: IUI): IUI {
 function getMotionPathData(leaf: IUI): IMotionPathData {
     const data = leaf.__
     if (data.__pathForMotion) return data.__pathForMotion
-    return data.__pathForMotion = HighCurveHelper.getMotionPathData(leaf.getPath(true, true))
+    const path = data.__pathForMotion = HighCurveHelper.getMotionPathData(leaf.getPath(true, true))
+    return path
 }
