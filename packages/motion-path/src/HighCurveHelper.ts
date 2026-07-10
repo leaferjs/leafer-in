@@ -43,7 +43,7 @@ export const HighCurveHelper = {
 
     getMotionPathData(data: IPathCommandData): IMotionPathData {
         let total = 0, distance: number, segments: number[] = []
-        let i = 0, x = 0, y = 0, toX: number, toY: number, command: number
+        let i = 0, x = 0, y = 0, toX: number, toY: number, command: number, closed: boolean
 
         const len = data.length
         while (i < len) {
@@ -67,6 +67,7 @@ export const HighCurveHelper = {
                     i += 7
                     break
                 case Z: //closepath()
+                    closed = true
                     i += 1
                 default:
                     distance = 0
@@ -77,16 +78,19 @@ export const HighCurveHelper = {
             total += distance
         }
 
-        return { total, segments, data }
+        return { total, segments, data, closed }
 
     },
 
 
-    getDistancePoint(distanceData: IMotionPathData, motionDistance: number | IUnitData, motionPrecision?: number): IRotationPointData {
-        const { segments, data } = distanceData
-        motionDistance = UnitConvert.number(motionDistance, distanceData.total)
+    getDistancePoint(distanceData: IMotionPathData, motionDistance: number | IUnitData, motionPrecision?: number, offsetX?: number): IRotationPointData {
+        const { segments, data, total } = distanceData
+        motionDistance = UnitConvert.number(motionDistance, total)
+        if (offsetX) motionDistance += offsetX
 
-        let total = 0, distance: number, to = {} as IRotationPointData
+        if (motionDistance > total) motionDistance = motionDistance % total
+
+        let nowDistance = 0, distance: number, to = {} as IRotationPointData
         let i = 0, index = 0, x: number = 0, y: number = 0, toX: number, toY: number, command: number
         let x1: number, y1: number, x2: number, y2: number, t: number
 
@@ -100,15 +104,22 @@ export const HighCurveHelper = {
                     toY = data[i + 2]
                     distance = segments[index]
 
-                    if (total + distance >= motionDistance || !distanceData.total) {
-                        if (!i) x = toX, y = toY // first M
-                        tempFrom.x = x
-                        tempFrom.y = y
+                    if (nowDistance + distance >= motionDistance || !distanceData.total) {
                         to.x = toX
                         to.y = toY
-                        PointHelper.getDistancePoint(tempFrom, to, motionDistance - total, true)
-                        to.rotation = PointHelper.getAngle(tempFrom, to)
-                        return to
+
+                        if (i) {
+                            tempFrom.x = x
+                            tempFrom.y = y
+                            PointHelper.getDistancePoint(tempFrom, to, motionDistance - nowDistance, true)
+                            to.rotation = PointHelper.getAngle(tempFrom, to)
+                            return to
+                        } else {
+                            // first M
+                            const nextPoint = HighCurveHelper.getDistancePoint(distanceData, motionPrecision, motionPrecision, offsetX)
+                            to.rotation = nextPoint.rotation
+                            return to
+                        }
                     }
 
                     x = toX
@@ -120,9 +131,9 @@ export const HighCurveHelper = {
                     toY = data[i + 6]
                     distance = segments[index]
 
-                    if (total + distance >= motionDistance) {
+                    if (nowDistance + distance >= motionDistance) {
                         x1 = data[i + 1], y1 = data[i + 2], x2 = data[i + 3], y2 = data[i + 4]
-                        t = HighBezierHelper.getT(motionDistance - total, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
+                        t = HighBezierHelper.getT(motionDistance - nowDistance, distance, x, y, x1, y1, x2, y2, toX, toY, motionPrecision)
                         BezierHelper.getPointAndSet(t, x, y, x1, y1, x2, y2, toX, toY, to)
                         to.rotation = HighBezierHelper.getRotation(t, x, y, x1, y1, x2, y2, toX, toY)
                         return to
@@ -139,7 +150,7 @@ export const HighCurveHelper = {
             }
 
             index++
-            total += distance
+            nowDistance += distance
         }
 
         return to
