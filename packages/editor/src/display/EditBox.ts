@@ -119,10 +119,11 @@ export class EditBox extends Group implements IEditBox {
 
         this.visible = !target.locked
 
-        let resizeP: IRect
+        let resizeP: IBox
 
         for (let i = 0; i < 8; i++) {
             resizeP = resizePoints[i]
+            if (resizeP.children.length) resizeP.clear()
             resizeP.set(this.getPointStyle((i % 2) ? middlePointsStyle[((i - 1) / 2) % middlePointsStyle.length] : pointsStyle[(i / 2) % pointsStyle.length]))
             resizeP.rotation = ((i - (i % 2 ? 1 : 0)) / 2) * 90
             if (i % 2) resizeLines[(i - 1) / 2].set({ pointType: 'resize', rotation: (i - 1) / 2 * 90, ...(resizeLinesStyle[((i - 1) / 2) % resizeLinesStyle.length] || {}) } as IEditPointInputData)

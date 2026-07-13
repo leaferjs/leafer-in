@@ -1,5 +1,7 @@
-import { IGroup, IGroupInputData, ILeaf, IUI } from '@leafer-ui/interface'
+import { IEditorConfig, IGroup, IGroupInputData, ILeaf, IUI } from '@leafer-ui/interface'
 import { Group, Matrix } from '@leafer-ui/draw'
+
+import { IEditor } from '@leafer-in/interface'
 
 
 const order = (a: ILeaf, b: ILeaf) => a.parent.children.indexOf(a) - b.parent.children.indexOf(b)
@@ -69,6 +71,10 @@ export const EditorHelper = {
         list.forEach(leaf => {
             if (leaf.parent) leaf.parent.addAt(leaf, 0)
         })
-    }
+    },
+
+    // need rewrite
+    mergeMaskConfig(_mergeConfig: IEditorConfig, _editor: IEditor): void { },
+    getSiblingMaskElements(_editor: IEditor): IUI[] { return undefined }
 
 }

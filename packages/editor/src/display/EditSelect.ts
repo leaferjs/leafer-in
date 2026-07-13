@@ -8,6 +8,7 @@ import { Stroker } from './Stroker'
 import { SelectArea } from './SelectArea'
 import { EditSelectHelper } from '../helper/EditSelectHelper'
 import { EditorEvent } from '../event/EditorEvent'
+import { EditorHelper } from '../helper/EditorHelper'
 
 
 const { findOne, findByBounds } = EditSelectHelper
@@ -56,7 +57,11 @@ export class EditSelect extends Group implements IEditSelect {
 
     protected onSelect(): void {
         if (this.running) {
-            this.targetStroker.setTarget(this.editor.list)
+            const { editor } = this
+            let { list } = editor
+            const maskList = EditorHelper.getSiblingMaskElements(editor)
+            if (maskList) list = maskList.concat(list)
+            this.targetStroker.setTarget(list)
             this.hoverStroker.target = null
         }
     }
