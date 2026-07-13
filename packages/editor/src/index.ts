@@ -21,6 +21,7 @@ export { EditTool } from './tool/EditTool'
 export { LineEditTool } from './tool/LineEditTool'
 export { TransformTool } from './tool/TransformTool'
 
+export { editToolMergeConfigAttr } from './decorator/data'
 
 export { EditorHelper } from './helper/EditorHelper'
 export { EditDataHelper } from './helper/EditDataHelper'

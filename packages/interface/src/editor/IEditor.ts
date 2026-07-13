@@ -37,8 +37,13 @@ export interface IInnerEditor {
     readonly tag: string
     readonly mode: IInnerEditorMode
     editTarget: IUI
-    config: IObject
     editConfig?: IEditorConfig
+
+    config: IObject
+    readonly userConfig: IObject
+    mergeConfig?: IObject
+    mergedConfig?: IObject
+    configKeepKeys?: string[]
 
     editor: IEditor
     editBox: IEditBox
@@ -48,6 +53,8 @@ export interface IInnerEditor {
 
     onCreate(): void
     create(): void
+
+    preMergedConfig?(mergedConfig: IObject): void
 
     // 状态
     onLoad(): void

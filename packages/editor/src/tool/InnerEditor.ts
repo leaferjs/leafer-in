@@ -16,10 +16,10 @@ export class InnerEditor implements IInnerEditor {
     public get mode(): IInnerEditorMode { return 'focus' } // 专注模式
 
     public editTarget: IUI
+    public editConfig?: IEditorConfig
 
     public config: IObject
-
-    public editConfig?: IEditorConfig
+    public get userConfig(): IObject { return (this.editBox.mergeConfig[this.tag] || {}) }
 
     public editor: IEditor
 

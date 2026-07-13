@@ -1,9 +1,10 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
-import { defineKey, isNull, isArray, isObject, isUndefined } from '@leafer-ui/draw'
+import { defineKey, isNull, isArray, isObject, isUndefined, DataHelper } from '@leafer-ui/draw'
 
-import { IEditor } from '@leafer-in/interface'
+import { IEditor, IInnerEditor } from '@leafer-in/interface'
 
 import { EditorEvent } from '../event/EditorEvent'
+import { EditorHelper } from '../helper/EditorHelper'
 
 
 export function targetAttr(fn: IFunction) {
@@ -58,6 +59,8 @@ export function mergeConfigAttr() {
                 if (innerEditor) innerEditor.editConfig && Object.assign(mergeConfig, innerEditor.editConfig) // innerEditor 上的配置
                 else if (editTool) editTool.editConfig && Object.assign(mergeConfig, editTool.editConfig) // editTool 上的配置
 
+                if (element && element.mask) EditorHelper.mergeMaskConfig(mergeConfig, this) // 扩展
+
                 if (element && element.editConfig) {
                     let { editConfig } = element
                     if (editConfig.hover || editConfig.hoverStyle || editConfig.hoverPathType) { // 元素的hover样式，不能覆盖到总配置里
@@ -84,4 +87,29 @@ export function mergeConfigAttr() {
     }
 }
 
+
+
+// 合并编辑工具配置装饰器
+export function editToolMergeConfigAttr() {
+    return (target: IInnerEditor, key: string) => {
+        defineKey(target, key, {
+            get() {
+                const t = this as IInnerEditor
+                const { config, userConfig, configKeepKeys } = t, mergedConfig: IObject = config ? DataHelper.clone(config) : {}
+
+                if (configKeepKeys) {
+                    for (let key in userConfig) {
+                        if (!configKeepKeys.includes(key)) mergedConfig[key] = userConfig[key] // 不直接覆盖 configKeepKeys
+                    }
+                }
+
+                if (t.preMergedConfig) t.preMergedConfig(mergedConfig)
+
+                if (configKeepKeys) configKeepKeys.forEach(key => { userConfig[key] && Object.assign(mergedConfig[key], userConfig[key]) }) // 单独 assign configKeepKeys
+
+                return t.mergedConfig = mergedConfig
+            }
+        } as ThisType<any>)
+    }
+}
 
