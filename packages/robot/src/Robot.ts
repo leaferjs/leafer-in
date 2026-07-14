@@ -155,7 +155,7 @@ export class Robot extends UI implements IRobot {
             const data = this.__
             const width = nowFrame.width / data.pixelRatio
             const height = nowFrame.height / data.pixelRatio
-            if (data.width !== width || data.height !== height) this.forceUpdate('width')
+            if (data.width !== width || data.height !== height) this.forceUpdate()
 
             data.__naturalWidth = width
             data.__naturalHeight = height
