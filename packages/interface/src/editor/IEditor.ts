@@ -56,6 +56,9 @@ export interface IInnerEditor {
 
     preMergedConfig?(mergedConfig: IObject): void
 
+    getEditBoxPoint(editTargetPoint: IPointData, change?: boolean): IPointData
+    getEditTargetPoint(editBoxPoint: IPointData, change?: boolean): IPointData
+
     // 状态
     onLoad(): void
     load(): void

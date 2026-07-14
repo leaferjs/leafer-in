@@ -1,8 +1,11 @@
-import { IGroup, IEventListenerId, IUI, IObject, IEditorConfig } from '@leafer-ui/interface'
+import { IGroup, IEventListenerId, IUI, IObject, IPointData, IEditorConfig } from '@leafer-ui/interface'
 import { IInnerEditor, IEditor, IEditBox, IInnerEditorMode } from '@leafer-in/interface'
 
-import { Group } from '@leafer-ui/draw'
+import { Group, PointHelper } from '@leafer-ui/draw'
 import { EditToolCreator } from './EditToolCreator'
+
+
+const { abs } = Math, { scale } = PointHelper
 
 export class InnerEditor implements IInnerEditor {
 
@@ -35,6 +38,19 @@ export class InnerEditor implements IInnerEditor {
     constructor(editor: IEditor) {
         this.editor = editor
         this.create()
+    }
+
+
+    public getEditBoxPoint(editTargetPoint: IPointData, change?: boolean): IPointData {
+        const point = change ? editTargetPoint : { x: editTargetPoint.x, y: editTargetPoint.y }, { scaleX, scaleY } = this.editTarget.worldTransform
+        scale(point, abs(scaleX), abs(scaleY))
+        return point
+    }
+
+    public getEditTargetPoint(editBoxPoint: IPointData, change?: boolean): IPointData {
+        const point = change ? editBoxPoint : { x: editBoxPoint.x, y: editBoxPoint.y }, { scaleX, scaleY } = this.editTarget.worldTransform
+        scale(point, Math.abs(1 / scaleX), abs(1 / scaleY))
+        return point
     }
 
 
