@@ -1,8 +1,8 @@
-import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData } from '@leafer-ui/interface'
-import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined } from '@leafer-ui/draw'
+import { IRect, IEventListenerId, IBoundsData, IPointData, IKeyEvent, IGroup, IBox, IBoxInputData, IAlign, IUI, IEditorConfig, IEditorDragStartData, ITransformTool, IUIEvent, IEditPointInputData, IObject } from '@leafer-ui/interface'
+import { Group, Text, AroundHelper, Direction9, ResizeEvent, BoundsHelper, DataHelper, isArray, isString, isNumber, isNull, getPointData, isUndefined, Debug } from '@leafer-ui/draw'
 import { DragEvent, PointerEvent, KeyEvent, RotateEvent, ZoomEvent, MoveEvent } from '@leafer-ui/core'
 
-import { IEditBox, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
+import { IEditBox, IEditBoxWidget, IEditor, IEditPoint, IEditPointType } from '@leafer-in/interface'
 
 import { updatePointCursor, updateMoveCursor } from '../editor/cursor'
 import { EditPoint } from './EditPoint'
@@ -10,6 +10,7 @@ import { EditDataHelper } from '../helper/EditDataHelper'
 
 
 const fourDirection = ['top', 'right', 'bottom', 'left'], editConfig: IEditorConfig = undefined
+const debug = Debug.get('EditBox')
 
 export class EditBox extends Group implements IEditBox {
 
@@ -32,11 +33,15 @@ export class EditBox extends Group implements IEditBox {
     public resizePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public rotatePoints: IEditPoint[] = [] // topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
     public resizeLines: IEditPoint[] = [] // top, right, bottom, left
+    public linkPoints: IEditPoint[]  // top, right, bottom, left
 
     public enterPoint: IEditPoint
     public dragPoint: IEditPoint // 正在拖拽的控制点
 
     public dragStartData = {} as IEditorDragStartData
+
+    public rectBounds: IBoundsData
+    public showPoints: boolean
 
     public config: IEditorConfig
     public mergedConfig: IEditorConfig
@@ -78,6 +83,7 @@ export class EditBox extends Group implements IEditBox {
         this.visible = false
         this.create()
         this.__listenEvents()
+        this.createWidgets()
     }
 
     public create() {
@@ -104,10 +110,9 @@ export class EditBox extends Group implements IEditBox {
         this.listenPointEvents(circle, 'rotate', 2)
         this.listenPointEvents(rect, 'move', 8) // center
 
-        view.addMany(...rotatePoints, rect, circle, buttons, ...resizeLines, ...resizePoints)
+        view.add([...rotatePoints, rect, circle, buttons, ...resizeLines, ...resizePoints])
         this.add(view)
     }
-
 
     public load(): void {
         const { target, mergeConfig, single, rect, circle, resizePoints, resizeLines } = this
@@ -148,6 +153,7 @@ export class EditBox extends Group implements IEditBox {
         if (single) DataHelper.stintSet(target.__world, 'ignorePixelSnap', ignorePixelSnap)
 
         updateMoveCursor(this)
+        this.loadWidgets()
     }
 
     // 必须来自 editor.update()，需同步更新编辑工具 
@@ -157,9 +163,11 @@ export class EditBox extends Group implements IEditBox {
         this.visible = !this.target.locked
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })
+        this.updateWidgets()
     }
 
     public unload(): void {
+        this.unloadWidgets()
         this.visible = false
         if (this.app) this.rect.syncEventer = this.app.interaction.bottomList = null
     }
@@ -176,6 +184,7 @@ export class EditBox extends Group implements IEditBox {
         }
 
         if (spread) BoundsHelper.spread(bounds, spread)
+        this.rectBounds = bounds
 
         editMask.visible = mask ? true : 0
 
@@ -190,7 +199,7 @@ export class EditBox extends Group implements IEditBox {
         if (this.view.worldOpacity) {
             const { width, height } = bounds
             const smallSize = isNumber(hideOnSmall) ? hideOnSmall : 10
-            const showPoints = editBox && !(hideOnSmall && width < smallSize && height < smallSize)
+            const showPoints = this.showPoints = editBox && !(hideOnSmall && width < smallSize && height < smallSize)
 
             let point = {} as IPointData, rotateP: IRect, resizeP: IRect, resizeL: IRect
 
@@ -529,9 +538,42 @@ export class EditBox extends Group implements IEditBox {
         this.off_(this.__eventIds)
     }
 
+    // widgets
+
+    static WidgetList: IObject = {}
+
+    protected widgets: IEditBoxWidget[] = []
+
+    static registerWidget(Widget: IObject): void {
+        const { tag } = Widget.prototype as IEditBoxWidget
+        EditBox.WidgetList[tag] && debug.repeat(tag)
+        EditBox.WidgetList[tag] = Widget
+    }
+
+    protected createWidgets(): void {
+        Object.values(EditBox.WidgetList).forEach(item => { this.widgets.push(new item(this)) })
+    }
+
+    protected loadWidgets(): void {
+        this.widgets.forEach(item => item.onLoad())
+    }
+
+    protected updateWidgets(): void {
+        this.widgets.forEach(item => item.onUpdate())
+    }
+
+    protected unloadWidgets(): void {
+        this.widgets.forEach(item => item.onUnload())
+    }
+
+    protected destroyWidgets(): void {
+        this.widgets.forEach(item => item.onDestroy())
+    }
+
     public destroy(): void {
         this.editor = null
         this.__removeListenEvents()
+        this.destroyWidgets()
         super.destroy()
     }
 
