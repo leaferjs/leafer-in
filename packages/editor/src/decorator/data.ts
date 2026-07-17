@@ -31,7 +31,10 @@ export function targetAttr(fn: IFunction) {
 
                             if (t.hasDimOthers) t.cancelDimOthers()
 
-                            if (isArray(value) && value.length > 1 && value[0].locked) value.splice(0, 1) // fix: 单个锁定 + shift多选
+                            if (isArray(value) && value.length > 1 && value.some(item => item.locked || item.editable === 'single')) {
+                                value = value.filter(item => !(item.locked || item.editable === 'single')) // 锁定、单选元素不能参与多选
+                            }
+
                             if (t.single) {
                                 delete t.element.syncEventer // 重置 EditBox.load() 同步事件设置
                                 delete t.element.__world.ignorePixelSnap // 重置 EditBox.load() 忽略对齐像素设置
