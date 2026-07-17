@@ -112,7 +112,8 @@ export class LineEditTool extends EditTool {
             const { from, to } = fromTo
             line.innerToWorld(from, from, false, editBox)
             line.innerToWorld(to, to, false, editBox)
-            rect.pen.clearPath().moveTo(from.x, from.y).lineTo(to.x, to.y)
+            const { x, y } = editBox.rectBounds
+            rect.pen.clearPath().moveTo(from.x - x, from.y - y).lineTo(to.x - x, to.y - y)
             copy(resizePoints[7] as IPointData, from)
             copy(rotatePoints[7] as IPointData, from)
             copy(resizePoints[3] as IPointData, to)
