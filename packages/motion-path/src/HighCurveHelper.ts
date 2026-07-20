@@ -4,7 +4,7 @@ import { BezierHelper, MatrixHelper, MathHelper, PathCommandMap, PointHelper, Un
 import { HighBezierHelper } from './HighBezierHelper'
 
 
-const { M, L, C, Z } = PathCommandMap, { float } = MathHelper
+const { M, L, C, Z } = PathCommandMap, { float } = MathHelper, { set, getAngle, getDistanceFrom, getDistancePoint } = PointHelper
 const tempPoint = {} as IPointData, tempFrom = {} as IPointData
 
 export const HighCurveHelper = {
@@ -43,17 +43,19 @@ export const HighCurveHelper = {
 
     getMotionPathData(data: IPathCommandData): IMotionPathData {
         let total = 0, distance: number, segments: number[] = []
-        let i = 0, x = 0, y = 0, toX: number, toY: number, command: number, closed: boolean
+        let i = 0, x = 0, y = 0, startX = 0, startY = 0, toX: number, toY: number, command: number, closed: boolean
 
         const len = data.length
         while (i < len) {
             command = data[i]
             switch (command) {
                 case M: //moveto(x, y)
+                    startX = data[i + 1]
+                    startY = data[i + 2]
                 case L: //lineto(x, y)
                     toX = data[i + 1]
                     toY = data[i + 2]
-                    distance = (command === L && i > 0) ? PointHelper.getDistanceFrom(x, y, toX, toY) : 0
+                    distance = (command === L && i > 0) ? getDistanceFrom(x, y, toX, toY) : 0
                     x = toX
                     y = toY
                     i += 3
@@ -68,7 +70,9 @@ export const HighCurveHelper = {
                     break
                 case Z: //closepath()
                     closed = true
+                    distance = getDistanceFrom(x, y, startX, startY)
                     i += 1
+                    break
                 default:
                     distance = 0
 
@@ -91,7 +95,7 @@ export const HighCurveHelper = {
         if (motionDistance > total) motionDistance = motionDistance % total
 
         let nowDistance = 0, distance: number, to = {} as IRotationPointData
-        let i = 0, index = 0, x: number = 0, y: number = 0, toX: number, toY: number, command: number
+        let i = 0, index = 0, x: number = 0, y: number = 0, startX = 0, startY = 0, toX: number, toY: number, command: number
         let x1: number, y1: number, x2: number, y2: number, t: number
 
         const len = data.length
@@ -99,20 +103,20 @@ export const HighCurveHelper = {
             command = data[i]
             switch (command) {
                 case M: //moveto(x, y)
+                    startX = data[i + 1]
+                    startY = data[i + 2]
                 case L: //lineto(x, y)
                     toX = data[i + 1]
                     toY = data[i + 2]
                     distance = segments[index]
 
                     if (nowDistance + distance >= motionDistance || !distanceData.total) {
-                        to.x = toX
-                        to.y = toY
+                        set(to, toX, toY)
 
                         if (i) {
-                            tempFrom.x = x
-                            tempFrom.y = y
-                            PointHelper.getDistancePoint(tempFrom, to, motionDistance - nowDistance, true)
-                            to.rotation = PointHelper.getAngle(tempFrom, to)
+                            set(tempFrom, x, y)
+                            getDistancePoint(tempFrom, to, motionDistance - nowDistance, true)
+                            to.rotation = getAngle(tempFrom, to)
                             return to
                         } else {
                             // first M
@@ -144,7 +148,21 @@ export const HighCurveHelper = {
                     i += 7
                     break
                 case Z: //closepath()
+                    toX = startX
+                    toY = startY
+                    distance = segments[index]
+
+                    if (nowDistance + distance >= motionDistance) {
+                        set(tempFrom, x, y), set(to, toX, toY)
+                        getDistancePoint(tempFrom, to, motionDistance - nowDistance, true)
+                        to.rotation = getAngle(tempFrom, to)
+                        return to
+                    }
+
+                    x = toX
+                    y = toY
                     i += 1
+                    break
                 default:
                     distance = 0
             }
@@ -161,7 +179,7 @@ export const HighCurveHelper = {
         motionDistance = UnitConvert.number(motionDistance, distanceData.total)
 
         let total = 0, distance: number, cutDistance: number, to = {} as IRotationPointData
-        let i = 0, index = 0, x: number = 0, y: number = 0, toX: number, toY: number, command: number
+        let i = 0, index = 0, x: number = 0, y: number = 0, startX = 0, startY = 0, toX: number, toY: number, command: number
         let x1: number, y1: number, x2: number, y2: number, t: number
 
         const len = data.length
@@ -169,6 +187,8 @@ export const HighCurveHelper = {
             command = data[i]
             switch (command) {
                 case M: //moveto(x, y)
+                    startX = data[i + 1]
+                    startY = data[i + 2]
                 case L: //lineto(x, y)
                     toX = data[i + 1]
                     toY = data[i + 2]
@@ -176,13 +196,11 @@ export const HighCurveHelper = {
 
                     if (total + distance > motionDistance || !distanceData.total) {
                         if (!i) x = toX, y = toY // first M
-                        tempFrom.x = x
-                        tempFrom.y = y
-                        to.x = toX
-                        to.y = toY
+                        set(tempFrom, x, y)
+                        set(to, toX, toY)
                         cutDistance = float(motionDistance - total)
                         if (cutDistance) {
-                            PointHelper.getDistancePoint(tempFrom, to, cutDistance, true)
+                            getDistancePoint(tempFrom, to, cutDistance, true)
                             path.push(command, to.x, to.y)
                         }
                         return path
@@ -214,8 +232,26 @@ export const HighCurveHelper = {
                     path.push(command, x1, y1, x2, y2, toX, toY)
                     break
                 case Z: //closepath()
+                    toX = startX
+                    toY = startY
+                    distance = segments[index]
+
+                    if (total + distance > motionDistance) {
+                        set(tempFrom, x, y)
+                        set(to, toX, toY)
+                        cutDistance = float(motionDistance - total)
+                        if (cutDistance) {
+                            getDistancePoint(tempFrom, to, cutDistance, true)
+                            path.push(L, to.x, to.y)
+                        }
+                        return path
+                    }
+
+                    x = toX
+                    y = toY
                     i += 1
                     path.push(command)
+                    break
                 default:
                     distance = 0
 
