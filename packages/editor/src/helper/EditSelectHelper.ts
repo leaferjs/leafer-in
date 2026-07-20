@@ -22,16 +22,20 @@ function eachFind(children: IUI[], list: IUI[], bounds: IBounds): void {
         child = children[i], data = child.__
         if (data.hittable && data.visible && !data.locked && bounds.hit(child.__world)) {
 
-            if (data.editable) {
-                if (child.isBranch && !data.hitChildren) {
-                    if (data.hitSelf) list.push(child)
-                    continue
-                } else if (child.isFrame) {
+            if (data.editable && data.editable !== 'single') {
+                if (child.isFrame) {
                     if (bounds.includes(child.__layout.boxBounds, child.__world)) {
                         list.push(child)
                         continue
                     }
-                } else if (bounds.hit(child.__layout.boxBounds, child.__world) && data.hitSelf) list.push(child)
+                } else if (bounds.hit(child.__layout.boxBounds, child.__world) && data.hitSelf) {
+                    if (child.isBranch) {
+                        if (!data.hitChildren) {
+                            list.push(child)
+                            continue
+                        }
+                    } else list.push(child)
+                }
             }
 
             if (child.isBranch) eachFind(child.children, list, bounds)
