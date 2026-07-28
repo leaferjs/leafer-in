@@ -2,8 +2,8 @@ export { HighCurveHelper } from './HighCurveHelper'
 export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
-import { IMotionPathData, IMotionVertical, IUI, IUnitData, IRotationPointData, IPercentData, IMotionVerticalType } from '@leafer-ui/interface'
-import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber, PointHelper } from '@leafer-ui/draw'
+import { IMotionPathData, IMotionVertical, IUI, IUnitData, IRotationPointData, IPercentData, IMotionVerticalType, IPointData } from '@leafer-ui/interface'
+import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber, PointHelper, AroundHelper } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
 import { motionPathType } from './decorator'
@@ -27,6 +27,7 @@ const ui = UI.prototype
 const { updateMatrix, updateAllMatrix } = LeafHelper
 const { updateBounds } = BranchHelper
 const { toVertical } = PointHelper
+const tempPoint = {} as IPointData
 
 
 // addAttr
@@ -34,6 +35,7 @@ UI.addAttr('motionPath', undefined, motionPathType)
 UI.addAttr('motionPrecision', 1, motionPathType)
 
 UI.addAttr('motion', undefined, motionPathType)
+UI.addAttr('motionAround', undefined, motionPathType)
 UI.addAttr('motionVertical', 'below', motionPathType)
 UI.addAttr('motionRotation', true, motionPathType)
 
@@ -57,8 +59,15 @@ ui.getMotionPoint = function (motionDistance: number | IUnitData, motionVertical
 
     const point = HighCurveHelper.getDistancePoint(data, motionDistance, pathElement.motionPrecision, offsetX)
 
-    const { motionRotation } = this
+    const { motionRotation, motionAround } = this
     if (isNumber(motionRotation)) point.rotation += motionRotation
+
+    if (motionAround && motionAround !== 'top-left') {
+        AroundHelper.toPoint(motionAround, this.__layout.boxBounds, tempPoint)
+        PointHelper.set(tempPoint, point.x - tempPoint.x * this.scaleX, point.y - tempPoint.y * this.scaleY)
+        if (point.rotation) PointHelper.rotate(tempPoint, point.rotation, point)
+        PointHelper.copy(point, tempPoint)
+    }
 
     let verticalType: IMotionVerticalType, verticalOffset: number
 
