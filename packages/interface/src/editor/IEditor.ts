@@ -25,17 +25,25 @@ export interface IEditor extends IEditorBase {
 }
 
 export interface IEditTool extends IInnerEditor {
+    readonly isMotionElement?: boolean
+    readonly isFlowElement?: boolean
+
     // 操作
     onMove(e: IEditorMoveEvent): void
     onScale(e: IEditorScaleEvent): void
     onScaleWithDrag?(e: IEditorScaleEvent): void
     onRotate(e: IEditorRotateEvent): void
     onSkew(e: IEditorSkewEvent): void
+
+    // 扩展
+    onMoveMotion(e: IEditorMoveEvent): void
+    onMoveFlow(e: IEditorMoveEvent): void
 }
 
 export interface IInnerEditor {
     readonly tag: string
     readonly mode: IInnerEditorMode
+
     editTarget: IUI
     editConfig?: IEditorConfig
 
