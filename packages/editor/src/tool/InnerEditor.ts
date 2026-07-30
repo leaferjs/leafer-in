@@ -61,6 +61,15 @@ export class InnerEditor implements IInnerEditor {
     }
 
 
+    public showView(): void {
+        this.view.opacity = 1
+    }
+
+    public hideView(): void {
+        this.view.opacity = 0
+    }
+
+
     // 状态
 
     public onLoad(): void { }

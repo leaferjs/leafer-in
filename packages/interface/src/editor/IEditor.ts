@@ -67,6 +67,9 @@ export interface IInnerEditor {
     getEditBoxPoint(editTargetPoint: IPointData, change?: boolean): IPointData
     getEditTargetPoint(editBoxPoint: IPointData, change?: boolean): IPointData
 
+    showView(): void
+    hideView(): void
+
     // 状态
     onLoad(): void
     load(): void

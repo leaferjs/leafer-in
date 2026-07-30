@@ -114,6 +114,15 @@ export class EditBox extends Group implements IEditBox {
         this.add(view)
     }
 
+    public showView(): void {
+        this.view.opacity = 1
+        this.update()
+    }
+
+    public hideView(): void {
+        this.view.opacity = 0
+    }
+
     public load(): void {
         const { target, mergeConfig, single, rect, circle, resizePoints, resizeLines } = this
         const { stroke, strokeWidth, ignorePixelSnap } = mergeConfig
