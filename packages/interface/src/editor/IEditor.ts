@@ -1,4 +1,4 @@
-import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent, IEditorConfig } from '@leafer-ui/interface'
+import { IUI, IPointData, IAround, IDragEvent, IEvent, IEventListenerId, IMatrixData, IEditorBase, IGroup, IObject, IMoveEvent, IZoomEvent, IRotateEvent, IEditorConfig, OptionalKeys } from '@leafer-ui/interface'
 
 import { IEditBox } from './IEditBox'
 import { IEditSelect } from './IEditSelect'
@@ -47,11 +47,11 @@ export interface IInnerEditor {
     editTarget: IUI
     editConfig?: IEditorConfig
 
-    config: IObject
+    config: IInnerEditorConfig
     readonly userConfig: IObject
-    mergeConfig?: IObject
-    mergedConfig?: IObject
-    configKeepKeys?: string[]
+    mergeConfig: IInnerEditorConfig
+    mergedConfig: IInnerEditorConfig
+    configKeepKeys: OptionalKeys<IInnerEditorConfig>[]
 
     editor: IEditor
     editBox: IEditBox
@@ -80,11 +80,18 @@ export interface IInnerEditor {
     onUpdate(): void
     update(): void
 
+    updateEditBoxConfig(): void
+    unloadEditBoxConfig(): void
+
     onDestroy(): void
     destroy(): void
 }
 
 export type IInnerEditorMode = 'focus' | 'both'
+
+export interface IInnerEditorConfig extends IObject {
+    editBox?: IEditorConfig
+}
 
 export interface IEditorEvent extends IEvent {
     readonly target?: IUI

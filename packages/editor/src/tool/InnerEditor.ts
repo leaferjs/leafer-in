@@ -1,8 +1,9 @@
-import { IGroup, IEventListenerId, IUI, IObject, IPointData, IEditorConfig } from '@leafer-ui/interface'
-import { IInnerEditor, IEditor, IEditBox, IInnerEditorMode } from '@leafer-in/interface'
+import { IGroup, IEventListenerId, IUI, IObject, IPointData, IEditorConfig, OptionalKeys } from '@leafer-ui/interface'
+import { IInnerEditor, IEditor, IEditBox, IInnerEditorMode, IInnerEditorConfig } from '@leafer-in/interface'
 
 import { Group, PointHelper } from '@leafer-ui/draw'
 import { EditToolCreator } from './EditToolCreator'
+import { editToolMergeConfigAttr } from '../decorator/data'
 
 
 const { abs } = Math, { scale } = PointHelper
@@ -21,8 +22,14 @@ export class InnerEditor implements IInnerEditor {
     public editTarget: IUI
     public editConfig?: IEditorConfig
 
-    public config: IObject
+    public config: IInnerEditorConfig
     public get userConfig(): IObject { return (this.editBox.mergeConfig[this.tag] || {}) }
+
+    @editToolMergeConfigAttr()
+    public readonly mergeConfig: IInnerEditorConfig
+    public readonly mergedConfig: IInnerEditorConfig
+
+    public configKeepKeys: OptionalKeys<IInnerEditorConfig>[] = ['editBox']
 
     public editor: IEditor
 
@@ -82,15 +89,30 @@ export class InnerEditor implements IInnerEditor {
     }
 
     public onUpdate(): void { }
-    public update(): void { this.onUpdate() }
+    public update(): void {
+        if (this.editor) {
+            this.updateEditBoxConfig()
+            this.onUpdate()
+        }
+    }
 
     public onUnload(): void { }
     public unload(): void {
         const { editor } = this
         if (editor) {
+            this.unloadEditBoxConfig()
             if (editor.app && this.mode === 'focus') editor.selector.hittable = editor.app.tree.hitChildren = true
             this.onUnload()
         }
+    }
+
+    public updateEditBoxConfig(): void {
+        const { mergeConfig } = this
+        if (mergeConfig) this.editBox.config = mergeConfig.editBox
+    }
+
+    public unloadEditBoxConfig(): void {
+        this.editBox.config = undefined
     }
 
     public onDestroy(): void { }

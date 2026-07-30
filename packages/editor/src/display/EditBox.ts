@@ -167,8 +167,9 @@ export class EditBox extends Group implements IEditBox {
 
     // 必须来自 editor.update()，需同步更新编辑工具 
     public update(): void {
-        const { editor } = this
-        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = this.target.getLayoutBounds('box', editor, true)
+        const { editor, target } = this
+        if (!target) return
+        const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getLayoutBounds('box', editor, true)
         this.visible = !this.target.locked
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })

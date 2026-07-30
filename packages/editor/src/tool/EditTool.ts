@@ -72,12 +72,14 @@ export class EditTool extends InnerEditor implements IEditTool {
     }
 
     public update(): void {
+        this.updateEditBoxConfig()
         this.editBox.update()
         this.onUpdate()
     }
 
     public unload(): void {
         this.editBox.view.visible = false
+        this.unloadEditBoxConfig()
         this.onUnload()
     }
 
