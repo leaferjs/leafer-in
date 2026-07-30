@@ -2,7 +2,7 @@ export { HighCurveHelper } from './HighCurveHelper'
 export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
-import { IMotionPathData, IMotionVertical, IUI, IUnitData, IRotationPointData, IPercentData, IMotionVerticalType, IPointData } from '@leafer-ui/interface'
+import { IMotionPathData, IMotionVertical, IUI, IUnitData, IRotationPointData, IPercentData, IMotionVerticalType, IPointData, IAround } from '@leafer-ui/interface'
 import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber, PointHelper, AroundHelper } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
@@ -52,14 +52,14 @@ ui.getMotionContentHeight = function (): number {
     return this.__layout.boxBounds.height
 }
 
-ui.getMotionPoint = function (motionDistance: number | IUnitData, motionVertical?: IMotionVertical, pathElement?: IUI, offsetX: number = 0, offsetY: number = 0): IRotationPointData {
+ui.getMotionPoint = function (motionDistance: number | IUnitData, motionAround?: IAround, motionVertical?: IMotionVertical, offsetX: number = 0, offsetY: number = 0, pathElement?: IUI): IRotationPointData {
     if (!pathElement) pathElement = getMotionPath(this)
     const data = getMotionPathData(pathElement)
     if (!data.total) return {} as IRotationPointData
 
     const point = HighCurveHelper.getDistancePoint(data, motionDistance, pathElement.motionPrecision, offsetX)
 
-    const { motionRotation, motionAround } = this
+    const { motionRotation } = this
     if (isNumber(motionRotation)) point.rotation += motionRotation
 
     if (motionAround && motionAround !== 'top-left') {
@@ -133,7 +133,7 @@ function updateMotion(leaf: IUI): void {
 
         if (leaf.motionText) leaf.__updateMotionText() // 扩展文本路径
         else {
-            const point = leaf.getMotionPoint(motion)
+            const point = leaf.getMotionPoint(motion, leaf.motionAround)
             if (leaf.motionRotation === false) delete point.rotation
             leaf.set(point) // 动画路径
         }
