@@ -33,7 +33,7 @@ function eachFind(children: IUI[], list: IUI[], bounds: IBounds, mode: 'hit' | '
                     isFind = bounds[mode](child.__layout.boxBounds, child.__world) && data.hitSelf
 
                     if (child.isBranch) {
-                        if (!data.hitChildren) {
+                        if (!data.hitChildren || (isFind && child.children.every(item => !item.editable))) {
                             if (isFind) list.push(child)
                             continue
                         }
