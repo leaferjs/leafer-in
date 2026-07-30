@@ -161,7 +161,7 @@ export class EditBox extends Group implements IEditBox {
         // 忽略元素像素对齐，在 target 属性装饰器中重置
         if (single) DataHelper.stintSet(target.__world, 'ignorePixelSnap', ignorePixelSnap)
 
-        updateMoveCursor(this)
+        this.updateMoveCursor()
         this.loadWidgets()
     }
 
@@ -323,6 +323,17 @@ export class EditBox extends Group implements IEditBox {
     }
 
 
+    // 光标
+
+    public updateMoveCursor(): void {
+        updateMoveCursor(this)
+    }
+
+    public updatePointCursor(e: IUIEvent): void {
+        updatePointCursor(this, e)
+    }
+
+
     // drag
 
     public onDragStart(e: DragEvent): void {
@@ -358,7 +369,7 @@ export class EditBox extends Group implements IEditBox {
             if (resizing) transformTool.onScale(e)
             if (skewing) transformTool.onSkew(e)
         }
-        updatePointCursor(this, e)
+        this.updatePointCursor(e)
     }
 
     public onDragEnd(e: DragEvent): void {
@@ -444,7 +455,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     protected onKey(e: KeyEvent): void {
-        updatePointCursor(this, e)
+        this.updatePointCursor(e)
     }
 
     public onArrow(e: IKeyEvent): void {
@@ -514,7 +525,7 @@ export class EditBox extends Group implements IEditBox {
                 [DragEvent.DRAG, this.onDrag, this],
                 [DragEvent.END, this.onDragEnd, this],
 
-                [PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, updatePointCursor(this, e) }],
+                [PointerEvent.ENTER, (e: PointerEvent) => { this.enterPoint = point, this.updatePointCursor(e) }],
                 [PointerEvent.LEAVE, () => { this.enterPoint = null }]
             ])
         )
