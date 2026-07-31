@@ -154,8 +154,7 @@ export class Editor extends Group implements IEditor {
     public update(): void {
         if (this.editing) {
             if (!this.element.parent) return this.cancel()
-            if (this.innerEditing) this.innerEditor.update()
-            this.editTool.update()
+            this.innerEditing ? this.innerEditor.update() : this.editTool.update() // 同一时间只能有一个工具更新
             this.selector.update()
         }
     }
