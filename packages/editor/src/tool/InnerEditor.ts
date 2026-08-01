@@ -92,6 +92,7 @@ export class InnerEditor implements IInnerEditor {
     public update(): void {
         if (this.editor) {
             this.updateEditBoxConfig()
+            this.editBox.update()
             this.onUpdate()
         }
     }

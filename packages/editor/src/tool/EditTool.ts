@@ -67,20 +67,18 @@ export class EditTool extends InnerEditor implements IEditTool {
     // 状态
 
     public load(): void {
-        this.editBox.view.visible = true
-        this.onLoad()
-    }
-
-    public update(): void {
-        this.updateEditBoxConfig()
-        this.editBox.update()
-        this.onUpdate()
+        if (this.editor) {
+            this.editBox.view.visible = true
+            this.onLoad()
+        }
     }
 
     public unload(): void {
-        this.editBox.view.visible = false
-        this.unloadEditBoxConfig()
-        this.onUnload()
+        if (this.editor) {
+            this.editBox.view.visible = false
+            this.unloadEditBoxConfig()
+            this.onUnload()
+        }
     }
 
 }
