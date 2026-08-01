@@ -153,10 +153,7 @@ export class EditBox extends Group implements IEditBox {
         const rectThrough = isNull(mergeConfig.rectThrough) ? single : mergeConfig.rectThrough
         rect.hittable = !rectThrough
 
-        if (rectThrough) {
-            target.syncEventer = rect // 同步给 rect 冒泡，在 target 属性装饰器中重置
-            this.app.interaction.bottomList = [{ target: rect, proxy: target }]
-        }
+        if (rectThrough) this.addBottomList()
 
         // 忽略元素像素对齐，在 target 属性装饰器中重置
         if (single) DataHelper.stintSet(target.__world, 'ignorePixelSnap', ignorePixelSnap)
@@ -179,6 +176,17 @@ export class EditBox extends Group implements IEditBox {
     public unload(): void {
         this.unloadWidgets()
         this.visible = false
+        this.removeBottomList()
+    }
+
+
+    public addBottomList(): void {
+        const { target, rect } = this
+        target.syncEventer = rect // 同步给 rect 冒泡，在 target 属性装饰器中重置
+        this.app.interaction.bottomList = [{ target: rect, proxy: target }]
+    }
+
+    public removeBottomList(): void {
         if (this.app) this.rect.syncEventer = this.app.interaction.bottomList = null
     }
 
