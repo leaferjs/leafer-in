@@ -93,6 +93,7 @@ export const HighCurveHelper = {
         if (offsetX) motionDistance += offsetX
 
         if (motionDistance > total) motionDistance = motionDistance % total
+        if (motionDistance < 0) motionDistance = total + motionDistance
 
         let nowDistance = 0, distance: number, to = {} as IRotationPointData
         let i = 0, index = 0, x: number = 0, y: number = 0, startX = 0, startY = 0, toX: number, toY: number, command: number

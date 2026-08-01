@@ -2,7 +2,7 @@ export { HighCurveHelper } from './HighCurveHelper'
 export { HighBezierHelper } from './HighBezierHelper'
 export { motionPathType } from './decorator'
 
-import { IMotionPathData, IMotionVertical, IUI, IUnitData, IRotationPointData, IPercentData, IMotionVerticalType, IPointData, IAround } from '@leafer-ui/interface'
+import { IMotionPathData, IUI, IUnitData, IRotationPointData, IPercentData, IPointData, IAround } from '@leafer-ui/interface'
 import { isNull, MatrixHelper, LeafHelper, BranchHelper, Transition, UI, UnitConvert, Plugin, isObject, isNumber, PointHelper, AroundHelper } from '@leafer-ui/draw'
 
 import { HighCurveHelper } from './HighCurveHelper'
@@ -48,11 +48,7 @@ ui.getMotionPathData = function (): IMotionPathData {
     return getMotionPathData(getMotionPath(this))
 }
 
-ui.getMotionContentHeight = function (): number {
-    return this.__layout.boxBounds.height
-}
-
-ui.getMotionPoint = function (motionDistance: number | IUnitData, motionAround?: IAround, motionVertical?: IMotionVertical, offsetX: number = 0, offsetY: number = 0, pathElement?: IUI): IRotationPointData {
+ui.getMotionPoint = function (motionDistance: number | IUnitData, motionAround?: IAround, offsetX: number = 0, offsetY: number = 0, pathElement?: IUI): IRotationPointData {
     if (!pathElement) pathElement = getMotionPath(this)
     const data = getMotionPathData(pathElement)
     if (!data.total) return {} as IRotationPointData
@@ -69,27 +65,7 @@ ui.getMotionPoint = function (motionDistance: number | IUnitData, motionAround?:
         PointHelper.copy(point, tempPoint)
     }
 
-    let verticalType: IMotionVerticalType, verticalOffset: number
-
-    if (isObject(motionVertical)) verticalType = motionVertical.type, verticalOffset = motionVertical.offset
-    else if (isNumber(motionVertical)) verticalOffset = motionVertical
-    else verticalType = motionVertical
-
-    if (verticalType !== 'below' || offsetY) {
-
-        const { rotation } = point, height = this.getMotionContentHeight()
-        if (verticalOffset) offsetY += verticalType === 'above' ? -verticalOffset : verticalOffset
-
-        switch (verticalType) {
-            case 'above':
-                toVertical(point, rotation, -height + offsetY); break
-            case 'center':
-                toVertical(point, rotation, -height / 2 + offsetY); break
-            case 'below':
-            default:
-                toVertical(point, rotation, offsetY)
-        }
-    }
+    if (offsetY) toVertical(point, point.rotation, offsetY)
 
     MatrixHelper.toOuterPoint(pathElement.localTransform, point)
 
