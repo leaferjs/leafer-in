@@ -289,6 +289,7 @@ export class Editor extends Group implements IEditor {
         if (opened.length) {
             let { list } = opened
             if (this.editing) list = [], opened.forEach(item => this.list.every(leaf => !LeafHelper.hasParent(leaf, item)) && list.push(item))
+            else list = [...list] // 防止 list 循环时被修改
             list.forEach(item => this.closeGroup(item as IGroup))
         }
         if (this.editing && !this.selector.dragging) this.checkDeepSelect()
