@@ -43,6 +43,7 @@ export class Stroker extends UI implements IStroker {
             if (style) this.set(style)
             this.set(bounds)
             this.visible = true
+            this.forceUpdate('surface') // 防止bounds相同不更新
         } else this.visible = 0
     }
 
