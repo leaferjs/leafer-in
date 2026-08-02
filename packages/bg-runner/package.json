@@ -1,0 +1,36 @@
+{
+  "name": "@leafer-in/bg-runner",
+  "version": "2.2.9",
+  "description": "@leafer-in/bg-runner",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/bg-runner.esm.js",
+  "exports": {
+    "import": "./dist/bg-runner.esm.js",
+    "require": "./dist/bg-runner.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/bg-runner.js",
+  "jsdelivr": "dist/bg-runner.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/bg-runner",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer bg-runner",
+    "leafer-bg-runner",
+    "leafer-in",
+    "bg-runner",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/draw": "^1.9.10 || ^2.0.0",
+    "@leafer-ui/interface": "^1.9.10 || ^2.0.0"
+  }
+}
