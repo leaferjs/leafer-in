@@ -28,4 +28,6 @@ export * from '@leafer-in/scale-fixed'
 export * from '@leafer-in/box'
 export * from '@leafer-in/corner'
 
+export * from '@leafer-in/bg-runner'
+
 export * from '@leafer-in/interface'

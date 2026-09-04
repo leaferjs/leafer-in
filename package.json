@@ -52,6 +52,7 @@
     "@leafer-in/scale-fixed": "2.2.10",
     "@leafer-in/box": "2.2.10",
     "@leafer-in/corner": "2.2.10",
+    "@leafer-in/bg-runner": "2.2.10",
     "@leafer-in/interface": "2.2.10"
   }
 }
