@@ -29,7 +29,7 @@ UI.addAttr('autoHeight', undefined, autoBoundsType)
 UI.addAttr('autoBox', undefined, boundsType)
 
 
-const { copyAndSpread } = BoundsHelper
+const { copyAndSpread, unsign } = BoundsHelper
 
 box.__updateFlowLayout = function (): void {
     const { leaferIsCreated, flow } = this
@@ -62,7 +62,10 @@ box.__updateContentBounds = function (): void {
 
     if (padding) {
         if (same) layout.shrinkContent()
+
         copyAndSpread(layout.contentBounds, layout.boxBounds, padding, true)
+        unsign(layout.contentBounds) // fix: 防止产生负数宽高，导致排版异常
+
     } else {
         if (!same) layout.shrinkContentCancel()
     }
