@@ -53,6 +53,7 @@ function assignRemainSpace(list: IUI[], totalSpace: number, countGrow: number): 
 export function resizeWidth(child: IUI, local: IBoundsData, size: number): number {
     const { widthRange, lockRatio } = child.__
     const realSize = widthRange ? within(size, widthRange) : size
+    if (!local.width) child.__.width = local.width = 1 // fix: 防止宽度为0导致NaN
     const scale = realSize / local.width
     child.scaleResize(scale, lockRatio ? scale : 1)
     local.width = realSize

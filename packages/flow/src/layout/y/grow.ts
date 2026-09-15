@@ -53,6 +53,7 @@ function assignRemainSpace(list: IUI[], totalSpace: number, countGrow: number): 
 export function resizeHeight(child: IUI, local: IBoundsData, size: number): number {
     const { heightRange, lockRatio } = child.__
     const realSize = heightRange ? within(size, heightRange) : size
+    if (!local.height) child.__.height = local.height = 1 // fix: 防止高度为0导致NaN
     const scale = realSize / local.height
     child.scaleResize(lockRatio ? scale : 1, scale)
     local.height = realSize
