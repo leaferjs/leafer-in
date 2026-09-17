@@ -36,8 +36,11 @@ export interface IEditTool extends IInnerEditor {
     onSkew(e: IEditorSkewEvent): void
 
     // 扩展
-    onMoveMotion(e: IEditorMoveEvent): void
-    onMoveFlow(e: IEditorMoveEvent): void
+    onMoveMotion(e: IEditorMoveEvent): boolean
+    onMoveFlow(e: IEditorMoveEvent): boolean
+    onScaleFlow(e: IEditorScaleEvent): boolean
+    onRotateFlow(e: IEditorRotateEvent): boolean
+    onSkewFlow(e: IEditorSkewEvent): boolean
 }
 
 export interface IInnerEditor {

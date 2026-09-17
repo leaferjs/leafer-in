@@ -19,8 +19,9 @@ export class EditTool extends InnerEditor implements IEditTool {
     // 操作
 
     public onMove(e: IEditorMoveEvent): void {
-        if (this.isMotionElement) return this.onMoveMotion(e)
-        else if (this.isFlowElement) return this.onMoveFlow(e)
+        if (this.isMotionElement && this.onMoveMotion(e)) return
+        if (this.isFlowElement && this.onMoveFlow(e)) return
+
         const { moveX, moveY, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -29,6 +30,8 @@ export class EditTool extends InnerEditor implements IEditTool {
     }
 
     public onScale(e: IEditorScaleEvent): void {
+        if (this.isFlowElement && this.onScaleFlow(e)) return
+
         const { scaleX, scaleY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -41,6 +44,8 @@ export class EditTool extends InnerEditor implements IEditTool {
     }
 
     public onRotate(e: IEditorRotateEvent): void {
+        if (this.isFlowElement && this.onRotateFlow(e)) return
+
         const { rotation, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -53,6 +58,8 @@ export class EditTool extends InnerEditor implements IEditTool {
     }
 
     public onSkew(e: IEditorSkewEvent): void {
+        if (this.isFlowElement && this.onSkewFlow(e)) return
+
         const { skewX, skewY, transform, worldOrigin, editor } = e
         const { app, list } = editor
         app.lockLayout()
@@ -89,6 +96,9 @@ export interface EditTool {
     readonly isMotionElement?: boolean
     readonly isFlowElement?: boolean
 
-    onMoveMotion(e: IEditorMoveEvent): void
-    onMoveFlow(e: IEditorMoveEvent): void
+    onMoveMotion(e: IEditorMoveEvent): boolean
+    onMoveFlow(e: IEditorMoveEvent): boolean
+    onScaleFlow(e: IEditorScaleEvent): boolean
+    onRotateFlow(e: IEditorRotateEvent): boolean
+    onSkewFlow(e: IEditorSkewEvent): boolean
 }

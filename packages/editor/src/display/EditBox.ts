@@ -354,6 +354,7 @@ export class EditBox extends Group implements IEditBox {
             // alt复制钩子
             if (e.altKey && onCopy && onCopy() && this.editor.single) this.app.interaction.replaceDownTarget(this.target)
             moveable && (this.moving = true)
+            if (this.moving) this.widgetsMoveStart(e)
         } else {
             if (pointType.includes('rotate') || this.isHoldRotateKey(e) || !resizeable) {
                 rotateable && (this.rotating = true)
@@ -370,6 +371,7 @@ export class EditBox extends Group implements IEditBox {
         const { transformTool, moving, resizing, rotating, skewing } = this
         if (moving) {
             transformTool.onMove(e)
+            this.widgetsMove(e)
         } else if (resizing || rotating || skewing) {
             const point = e.current as IEditPoint
             if (point.pointType) this.enterPoint = point// 防止变化
@@ -381,6 +383,7 @@ export class EditBox extends Group implements IEditBox {
     }
 
     public onDragEnd(e: DragEvent): void {
+        if (this.moving) this.widgetsMoveEnd(e)
         this.onTransformEnd(e)
         this.dragPoint = null
     }
@@ -418,9 +421,9 @@ export class EditBox extends Group implements IEditBox {
             if (isString(this.mergedConfig.moveable)) {
                 this.gesturing = this.moving = true
                 switch (e.type) {
-                    case MoveEvent.START: this.onTransformStart(e); break
-                    case MoveEvent.END: this.onTransformEnd(e); break
-                    default: this.transformTool.onMove(e)
+                    case MoveEvent.START: this.onTransformStart(e), this.widgetsMoveStart(e); break
+                    case MoveEvent.END: this.onTransformEnd(e), this.widgetsMoveEnd(e); break
+                    default: this.transformTool.onMove(e), this.widgetsMove(e)
                 }
             }
         }
@@ -593,6 +596,18 @@ export class EditBox extends Group implements IEditBox {
 
     protected unloadWidgets(): void {
         this.widgets.forEach(item => item.onUnload())
+    }
+
+    protected widgetsMoveStart(e: DragEvent | MoveEvent): void {
+        this.widgets.forEach(item => item.onMove && item.onMoveStart(e))
+    }
+
+    protected widgetsMove(e: DragEvent | MoveEvent): void {
+        this.widgets.forEach(item => item.onMove && item.onMove(e))
+    }
+
+    protected widgetsMoveEnd(e: DragEvent | MoveEvent): void {
+        this.widgets.forEach(item => item.onMove && item.onMoveEnd(e))
     }
 
     protected destroyWidgets(): void {
