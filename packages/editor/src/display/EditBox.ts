@@ -586,6 +586,10 @@ export class EditBox extends Group implements IEditBox {
         Object.values(EditBox.WidgetList).forEach(item => { this.widgets.push(new item(this)) })
     }
 
+    public getWidget(name: string): IEditBoxWidget {
+        return this.widgets.find(item => item.tag === name)
+    }
+
     protected loadWidgets(): void {
         this.widgets.forEach(item => item.onLoad())
     }

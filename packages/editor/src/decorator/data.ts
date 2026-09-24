@@ -1,5 +1,5 @@
 import { IFunction, ILeaf, IObject, IUI, } from '@leafer-ui/interface'
-import { defineKey, isNull, isArray, isObject, isUndefined, DataHelper } from '@leafer-ui/draw'
+import { defineKey, isNull, isArray, isObject, isUndefined, DataHelper, LeafHelper } from '@leafer-ui/draw'
 
 import { IEditor, IInnerEditor } from '@leafer-in/interface'
 
@@ -22,7 +22,24 @@ export function targetAttr(fn: IFunction) {
 
                         const isSelect = key === 'target'
                         if (isSelect) {
-                            const { beforeSelect } = t.config
+                            const { beforeSelect, skipNested } = t.config
+
+                            if (isArray(value)) {
+                                if (skipNested) { // 过滤嵌套关系的元素
+                                    const first = value[0]
+                                    if (value.some(item => item.__level !== first.__level)) {
+                                        value.sort((a, b) => a.__level - b.__level) // 顺序
+                                        const firstLevel = value[0].__level, filterValue: IUI[] = []
+                                        value.forEach(item => { if (!filterValue.length || !filterValue.some(parent => LeafHelper.hasParent(item, parent, firstLevel))) filterValue.push(item) })
+                                        value = filterValue
+                                    }
+                                }
+
+                                if (value.length > 1 && value.some(item => item.locked || item.editable === 'single')) {
+                                    value = value.filter(item => !(item.locked || item.editable === 'single')) // 锁定、单选元素不能参与多选
+                                }
+                            }
+
                             if (beforeSelect) {
                                 const check = beforeSelect({ target: value })
                                 if (isObject(check)) value = check
@@ -30,10 +47,6 @@ export function targetAttr(fn: IFunction) {
                             }
 
                             if (t.hasDimOthers) t.cancelDimOthers()
-
-                            if (isArray(value) && value.length > 1 && value.some(item => item.locked || item.editable === 'single')) {
-                                value = value.filter(item => !(item.locked || item.editable === 'single')) // 锁定、单选元素不能参与多选
-                            }
 
                             if (t.single) {
                                 delete t.element.syncEventer // 重置 EditBox.load() 同步事件设置
