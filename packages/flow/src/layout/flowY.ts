@@ -1,5 +1,5 @@
 import { IBoundsData, IBox, IUI, IPointData } from '@leafer-ui/interface'
-import { PointHelper } from '@leafer-ui/draw'
+import { isObject, PointHelper, UnitConvertHelper } from '@leafer-ui/draw'
 
 import { IFlowDrawData } from '@leafer-in/interface'
 
@@ -12,6 +12,7 @@ import { autoGap } from './common/gap'
 import { getItemBounds } from './common/bounds'
 import { growY } from './y/grow'
 import { resizeWidth } from './x/grow'
+import { resizeHeight } from './y/grow'
 
 
 const { move } = PointHelper
@@ -30,6 +31,9 @@ export function flowY(box: IBox, reverse?: boolean): void {
         if (child.__.inFlow && child.__.visible !== 0) {
 
             local = getItemBounds(child, itemBox)
+
+            if (child.__.autoWidth && isObject(child.__.autoWidth)) resizeWidth(child, local, UnitConvertHelper.number(child.__.autoWidth, width))
+            if (child.__.autoHeight && isObject(child.__.autoHeight)) resizeHeight(child, local, UnitConvertHelper.number(child.__.autoHeight, height))
 
             if (complex) {
 
