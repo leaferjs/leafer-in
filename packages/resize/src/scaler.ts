@@ -1,5 +1,5 @@
 import { IBranch, ILeaf, ILine, IPolygon, IText, IPointData } from '@leafer-ui/interface'
-import { Direction9, MatrixHelper, isArray, isObject, isUndefined } from '@leafer-ui/draw'
+import { Direction9, MatrixHelper, isArray, isObject, isUndefined, isTrackChanges, DataHelper } from '@leafer-ui/draw'
 
 import { PathScaler } from './PathScaler'
 
@@ -64,13 +64,17 @@ export function scaleResizeFontSize(leaf: IText, scaleX: number, scaleY: number,
 }
 
 export function scaleResizePath(leaf: ILeaf, scaleX: number, scaleY: number): void {
-    PathScaler.scale(leaf.__.path, scaleX, scaleY)
-    leaf.path = leaf.__.path
+    let { path } = leaf.__
+    if (!isTrackChanges(leaf.leafer)) path = [...path] // 避免产生引用，导致污染历史数据
+    PathScaler.scale(path, scaleX, scaleY)
+    leaf.path = path
 }
 
 export function scaleResizePoints(leaf: ILine | IPolygon, scaleX: number, scaleY: number): void {
-    const { points } = leaf
-    isObject(points[0]) ? (points as IPointData[]).forEach(p => { p.x *= scaleX, p.y *= scaleY }) : PathScaler.scalePoints(points as number[], scaleX, scaleY)
+    let { points } = leaf
+    const isOb = isObject(points[0])
+    if (!isTrackChanges(leaf.leafer)) points = isOb ? DataHelper.clone(points) as IPointData[] : [...points] as number[] // 避免产生引用，导致污染历史数据
+    isOb ? (points as IPointData[]).forEach(p => { p.x *= scaleX, p.y *= scaleY }) : PathScaler.scalePoints(points as number[], scaleX, scaleY)
     leaf.points = points
 }
 
