@@ -1,0 +1,38 @@
+{
+  "name": "@leafer-in/transition",
+  "version": "2.2.11",
+  "description": "@leafer-in/transition",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/transition.esm.js",
+  "exports": {
+    "import": "./dist/transition.esm.js",
+    "require": "./dist/transition.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/transition.js",
+  "jsdelivr": "dist/transition.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/transition",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer transition",
+    "leafer-transition",
+    "leafer-in",
+    "transition",
+    "leafer-ui",
+    "leaferjs"
+  ], 
+  "peerDependencies":{
+    "@leafer-ui/draw": "^1.9.10 || ^2.0.0",
+    "@leafer-in/color": "^1.9.10 || ^2.0.0",
+    "@leafer-ui/interface": "^1.9.10 || ^2.0.0",
+    "@leafer-in/interface": "^1.9.10 || ^2.0.0"
+  }
+}
