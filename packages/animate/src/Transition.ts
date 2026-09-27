@@ -69,15 +69,17 @@ function number(from: number, to: number, t: number, roundValue?: number): numbe
     return roundValue ? round(value) : value
 }
 
-function color(from: IColor, to: IColor, t: number): string {
-    from = ColorConvert.object(from), to = ColorConvert.object(to)
+function color(fromColor: IColor, toColor: IColor, t: number): string {
+    let from = ColorConvert.object(fromColor), to = ColorConvert.object(toColor)
+    if (!fromColor) from = { ...to, a: 0 }
+    if (!toColor) to = { ...from, a: 0 }
     const rgb = number(from.r, to.r, t, 1) + ',' + number(from.g, to.g, t, 1) + ',' + number(from.b, to.b, t, 1)
     const a = number(from.a, to.a, t)
     return a === 1 ? 'rgb(' + rgb + ')' : 'rgba(' + rgb + ',' + a + ')'
 }
 
 function paint(from: string, to: string, t: number): any {
-    return (isString(from) && isString(to)) ? color(from, to, t) : to
+    return ((isString(from) || !from) && (isString(to) || !to)) ? color(from, to, t) : to
 }
 
 
