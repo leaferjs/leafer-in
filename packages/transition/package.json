@@ -1,19 +1,19 @@
 {
   "name": "@leafer-in/transition",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "@leafer-in/transition",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/transition.esm.js",
+  "main": "dist/transition.esm.min.js",
   "exports": {
-    "import": "./dist/transition.esm.js",
-    "require": "./dist/transition.cjs",
+    "import": "./dist/transition.esm.min.js",
+    "require": "./dist/transition.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/transition.js",
-  "jsdelivr": "dist/transition.js",
+  "unpkg": "dist/transition.min.js",
+  "jsdelivr": "dist/transition.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

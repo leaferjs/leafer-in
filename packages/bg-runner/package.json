@@ -1,19 +1,19 @@
 {
   "name": "@leafer-in/bg-runner",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "@leafer-in/bg-runner",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/bg-runner.esm.js",
+  "main": "dist/bg-runner.esm.min.js",
   "exports": {
-    "import": "./dist/bg-runner.esm.js",
-    "require": "./dist/bg-runner.cjs",
+    "import": "./dist/bg-runner.esm.min.js",
+    "require": "./dist/bg-runner.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/bg-runner.js",
-  "jsdelivr": "dist/bg-runner.js",
+  "unpkg": "dist/bg-runner.min.js",
+  "jsdelivr": "dist/bg-runner.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

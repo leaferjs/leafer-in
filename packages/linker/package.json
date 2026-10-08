@@ -1,19 +1,19 @@
 {
   "name": "@leafer-in/linker",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "@leafer-in/linker",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/linker.esm.js",
+  "main": "dist/linker.esm.min.js",
   "exports": {
-    "import": "./dist/linker.esm.js",
-    "require": "./dist/linker.cjs",
+    "import": "./dist/linker.esm.min.js",
+    "require": "./dist/linker.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/linker.js",
-  "jsdelivr": "dist/linker.js",
+  "unpkg": "dist/linker.min.js",
+  "jsdelivr": "dist/linker.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",

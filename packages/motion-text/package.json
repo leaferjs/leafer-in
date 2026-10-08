@@ -1,19 +1,19 @@
 {
   "name": "@leafer-in/motion-text",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "@leafer-in/motion-text",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/motion-text.esm.js",
+  "main": "dist/motion-text.esm.min.js",
   "exports": {
-    "import": "./dist/motion-text.esm.js",
-    "require": "./dist/motion-text.cjs",
+    "import": "./dist/motion-text.esm.min.js",
+    "require": "./dist/motion-text.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/motion-text.js",
-  "jsdelivr": "dist/motion-text.js",
+  "unpkg": "dist/motion-text.min.js",
+  "jsdelivr": "dist/motion-text.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
@@ -30,8 +30,8 @@
     "leaferjs"
   ],
   "peerDependencies": {
-    "@leafer-ui/draw": "^2.3.0",
-    "@leafer-in/motion-path": "^2.3.0",
-    "@leafer-ui/interface": "^2.3.0"
+    "@leafer-ui/draw": "^2.3.1",
+    "@leafer-in/motion-path": "^2.3.1",
+    "@leafer-ui/interface": "^2.3.1"
   }
 }

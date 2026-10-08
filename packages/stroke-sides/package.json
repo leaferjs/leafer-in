@@ -1,19 +1,19 @@
 {
   "name": "@leafer-in/stroke-sides",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "@leafer-in/stroke-sides",
   "author": "Chao (Leafer) Wan",
   "license": "MIT",
   "type": "module",
-  "main": "dist/stroke-sides.esm.js",
+  "main": "dist/stroke-sides.esm.min.js",
   "exports": {
-    "import": "./dist/stroke-sides.esm.js",
-    "require": "./dist/stroke-sides.cjs",
+    "import": "./dist/stroke-sides.esm.min.js",
+    "require": "./dist/stroke-sides.min.cjs",
     "types": "./types/index.d.ts"
   },
   "types": "types/index.d.ts",
-  "unpkg": "dist/stroke-sides.js",
-  "jsdelivr": "dist/stroke-sides.js",
+  "unpkg": "dist/stroke-sides.min.js",
+  "jsdelivr": "dist/stroke-sides.min.js",
   "files": ["src","types","dist"],
   "repository": {
     "type": "git",
