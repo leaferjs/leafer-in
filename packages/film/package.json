@@ -1,0 +1,37 @@
+{
+  "name": "@leafer-in/film",
+  "version": "2.3.1",
+  "description": "@leafer-in/film",
+  "author": "Chao (Leafer) Wan",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/film.esm.min.js",
+  "exports": {
+    "import": "./dist/film.esm.min.js",
+    "require": "./dist/film.min.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "types": "types/index.d.ts",
+  "unpkg": "dist/film.min.js",
+  "jsdelivr": "dist/film.min.js",
+  "files": ["src","types","dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leaferjs/leafer-in.git"
+  },
+  "homepage": "https://github.com/leaferjs/leafer-in/tree/main/packages/film",
+  "bugs": "https://github.com/leaferjs/leafer-in/issues",
+  "keywords": [
+    "leafer film",
+    "leafer-film",
+    "leafer-in",
+    "film",
+    "leafer-ui",
+    "leaferjs"
+  ],
+  "peerDependencies": {
+    "@leafer-ui/draw": "^2.2.4",
+    "@leafer-ui/interface": "^2.2.4",
+    "@leafer-in/interface": "^2.2.4"
+  }
+}
