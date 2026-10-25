@@ -1,4 +1,4 @@
-import { LeaferFilm, Platform, Creator, FileHelper, PaintImage, Resource, Plugin } from '@leafer-ui/draw'
+import { LeaferFilm, Platform, Creator, FileHelper, PaintImage, Resource, Plugin, isObject } from '@leafer-ui/draw'
 import { ILeaferFilm, ILeaferFilmConfig, IImageCrossOrigin, ILeaf, IFilmDecoder, ILeafPaint, IFilmFileType } from '@leafer-ui/interface'
 
 import { FilmDecoder } from './FilmDecoder'
@@ -14,9 +14,16 @@ export { PaintFilm } from './PaintFilm'
 Plugin.add('flim')
 
 
-PaintImage.film = function (paint: ILeafPaint): void {
+PaintImage.film = function (paint: ILeafPaint, oldPaint?: ILeafPaint): void {
     paint.film = true
     paint.nowIndex = 0
+    if (isObject(oldPaint)) {
+        paint.nowIndex = oldPaint.nowIndex
+        paint.pauseIndex = oldPaint.pauseIndex
+        paint.speed = oldPaint.speed
+        paint.paused = oldPaint.paused
+        paint.loop = oldPaint.loop
+    }
 }
 
 Creator.film = function (options?: ILeaferFilmConfig): ILeaferFilm {
