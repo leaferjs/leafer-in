@@ -57,6 +57,7 @@ ui.getMotionPoint = function (motionDistance: number | IUnitData, motionAround?:
 
     const { motionRotation } = this
     if (isNumber(motionRotation)) point.rotation += motionRotation
+    else if (motionRotation === false) point.rotation = 0
 
     if (motionAround && motionAround !== 'top-left') {
         AroundHelper.toPoint(motionAround, this.__layout.boxBounds, tempPoint)
