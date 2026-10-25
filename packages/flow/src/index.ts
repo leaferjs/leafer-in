@@ -1,7 +1,7 @@
 export { Flow } from './Flow'
 
 
-import { BoundsHelper, Box, Group, UI, autoLayoutType, boundsType, Plugin, UIData } from '@leafer-ui/draw'
+import { BoundsHelper, Box, Group, UI, autoLayoutType, boundsType, Plugin, UIData, LeafHelper, BranchHelper } from '@leafer-ui/draw'
 
 import '@leafer-in/resize'
 
@@ -124,3 +124,14 @@ Object.defineProperty(uiData, '__autoSide', {
 Object.defineProperty(uiData, '__autoSize', {
     get(): boolean { return this.__autoWidth && this.__autoHeight }
 })
+
+
+LeafHelper.updateFlowLayout = function (leaf: UI): void {
+    if (leaf.__layout.childrenSortChanged) leaf.__updateSortChildren() // 立即排序子元素
+    if (leaf.__layout.boxChanged) leaf.__updateFlowLayout()
+
+    LeafHelper.updateAllMatrix(leaf)
+    BranchHelper.updateBounds(leaf, leaf)
+
+    if (leaf.__.__autoSide) leaf.__updateBoxBounds(true)
+}
