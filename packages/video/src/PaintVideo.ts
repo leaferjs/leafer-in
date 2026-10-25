@@ -22,8 +22,8 @@ export class PaintVideo {
     public set currentTime(time: number) { // 设置播放进度
         const video = this.decoder
         if (video) {
-            video.currentTime = time;
-            (this.element || this as any as IUI).forceRender()// 需要强制更新一下元素
+            video.currentTime = time
+            video.decoder.addEventListener('seeked', () => (this.element || this as any as IUI).forceRender(), { once: true }) // 需要强制更新一下元素
         }
     }
 

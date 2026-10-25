@@ -1,4 +1,4 @@
-import { LeaferVideo, Platform, Creator, PaintImage, Resource, Plugin } from '@leafer-ui/draw'
+import { LeaferVideo, Platform, Creator, PaintImage, Resource, Plugin, isObject } from '@leafer-ui/draw'
 import { ILeaferVideo, ILeaferVideoConfig, IImageCrossOrigin, ILeaf, ILeafPaint, IVideoFileType } from '@leafer-ui/interface'
 
 import { VideoDecoder } from './VideoDecoder'
@@ -8,13 +8,17 @@ export { VideoData } from './data/VideoData'
 export { VideoDecoder } from './VideoDecoder'
 export { PaintVideo } from './PaintVideo'
 
-//feat(video): 开源video插件
+
 Plugin.add('video')
 
 
-PaintImage.video = function (paint: ILeafPaint): void {
+PaintImage.video = function (paint: ILeafPaint, oldPaint?: ILeafPaint): void {
     paint.film = true
     paint.nowIndex = 0
+    if (isObject(oldPaint)) {
+        paint.paused = oldPaint.paused
+        paint.loop = oldPaint.loop
+    }
 }
 
 Creator.video = function (options?: ILeaferVideoConfig): ILeaferVideo {
@@ -57,7 +61,6 @@ Platform.origin.loadVideo = async function (url: string, _crossOrigin?: IImageCr
     decoder.height = height
     decoder.duration = duration
 
-    // await waitCanPlayReady(video)
     await waitVideoFrameReady(video)
 
     return decoder
