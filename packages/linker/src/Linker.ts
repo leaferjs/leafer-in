@@ -1,12 +1,13 @@
-import { ILinker, ILinkerInputData, ILinkerData, ILinkerPointData, ILinkerPointOptions, ILinkerComputedPointData, ILinkerPointType, IPointData, IUI, IDirection4, ILeaf, IPointsCurve, IPointsCurveData } from '@leafer-ui/interface'
-import { registerUI, dataProcessor, PathCommandDataHelper, pathType, isString, BoundsEvent, Line, PointHelper, BoundsHelper, LeafHelper, isObject } from '@leafer-ui/draw'
+import { ILinker, ILinkerInputData, ILinkerData, ILineType, ILinkerPointData, ILinkerPointOptions, ILinkerComputedPointData, ILinkerPointType, IPointData, IUI, IDirection4, ILeaf, IPointsCurve, IPointsCurveData } from '@leafer-ui/interface'
+import { registerUI, dataProcessor, PathCommandDataHelper, pathType, isString, BoundsEvent, Line, PointHelper, BoundsHelper, LeafHelper, isObject, boundsType } from '@leafer-ui/draw'
 
 import { LinkerData } from './data/LinkerData'
 import { LinkerHelper } from './helper/LinkerHelper'
 import { linkerPointType } from './decorator'
+import { drawPolyline } from './helper/drawPolyline'
 
 
-const { moveTo, bezierCurveTo, drawPoints } = PathCommandDataHelper
+const { moveTo, lineTo, bezierCurveTo, drawPoints } = PathCommandDataHelper
 const { isEmpty, getPoint } = BoundsHelper
 const { getDistance } = PointHelper
 const { getCtrlPoint, getDirectionForFromPoint, isOppositeDirection } = LinkerHelper
@@ -20,6 +21,9 @@ export class Linker extends Line implements ILinker {
 
     @dataProcessor(LinkerData)
     declare public __: ILinkerData
+
+    @boundsType('curve')
+    public lineType?: ILineType
 
     @linkerPointType()
     public startPoint?: ILinkerPointData
@@ -133,7 +137,7 @@ export class Linker extends Line implements ILinker {
     }
 
     public updateLinkerPoint(type: ILinkerPointType) {
-        const { startPoint, endPoint } = this
+        const { startPoint, endPoint, lineType } = this
         const nowPoint = type === 'end' ? endPoint : startPoint
         if (nowPoint) {
             const data = {} as ILinkerComputedPointData
@@ -167,6 +171,7 @@ export class Linker extends Line implements ILinker {
                     if (isEmpty(boxBounds)) LeafHelper.updateBounds(ui) // 防止线条位于元素底部，先于元素布局
                     p = getPoint(boxBounds, point, true)
                     ui.getWorldPointByBox(p, this, false, true)
+                    if (lineType === 'polyline') data.bounds = ui.getBounds('box', this.parent)
                 }
             } else {
                 if (isObject(point)) p = point
@@ -203,77 +208,87 @@ export class Linker extends Line implements ILinker {
         const startPoint = startData.point, endPoint = endData.point
         const startDirection = startData.direction, endDirection = endData.direction
 
-        const half: IPointData = {
-            x: abs((startPoint.x - endPoint.x) / 2),
-            y: abs((startPoint.y - endPoint.y) / 2)
-        }
-
-
         const arrowWidth = this.__.strokeWidth * 8
 
-        let minCtrl: number
+        switch (data.lineType) {
+            case 'straight':
+                moveTo(path, startPoint.x, startPoint.y)
+                lineTo(path, endPoint.x, endPoint.y)
+                break
+            case 'polyline':
+                drawPolyline(path, startPoint, endPoint, startDirection, endDirection, startData.bounds, endData.bounds, arrowWidth, hasPoints && PointHelper.toNumberPoints(data.points))
+                break
+            case 'curve':
+            default:
+                const half: IPointData = {
+                    x: abs((startPoint.x - endPoint.x) / 2),
+                    y: abs((startPoint.y - endPoint.y) / 2)
+                }
 
-        if (this.__.__useArrow) {
-            const ratio = min(getDistance(startPoint, endPoint) / (arrowWidth * 25), 1) // 控制add 手柄的长度与两点间的距离有关
-            minCtrl = max(arrowWidth * ratio * 12, arrowWidth * 3,) // 控制手柄最少不能低于3个箭头的宽度
-        } else {
-            minCtrl = arrowWidth * 2
+                let minCtrl: number
+
+                if (this.__.__useArrow) {
+                    const ratio = min(getDistance(startPoint, endPoint) / (arrowWidth * 25), 1) // 控制add 手柄的长度与两点间的距离有关
+                    minCtrl = max(arrowWidth * ratio * 12, arrowWidth * 3,) // 控制手柄最少不能低于3个箭头的宽度
+                } else {
+                    minCtrl = arrowWidth * 2
+                }
+
+                if (endDirection) {
+
+                    if (isOppositeDirection(startDirection, endDirection) && startDirection === getDirectionForFromPoint(startPoint, endPoint)) // 正好处于相反的位置, 不需要太长的控制手柄
+                    {
+                        minCtrl = arrowWidth * 2
+                    }
+
+                }
+
+                half.x = max(minCtrl, half.x)
+                half.y = max(minCtrl, half.y)
+
+                if (hasPoints) {
+                    minCtrl *= 0.6
+                    const points = PointHelper.toNumberPoints(data.points)
+                    drawPoints(path, [startPoint.x, startPoint.y, ...points, endPoint.x, endPoint.y], data.curve, false, data)
+
+                    if (startDirection) {
+                        const handleX = path[4]
+                        const handleY = path[5]
+
+                        half.x = max(minCtrl, abs(handleX - startPoint.x))
+                        half.y = max(minCtrl, abs(handleY - startPoint.y))
+                        const startCtrlPoint: IPointData = getCtrlPoint(this, startNode, startPoint, startDirection, half)
+                        path[4] = startCtrlPoint.x
+                        path[5] = startCtrlPoint.y
+                    }
+
+                    const len = path.length
+                    if (endDirection) {
+
+                        const handleX = path[len - 4]
+                        const handleY = path[len - 3]
+
+                        half.x = max(minCtrl, abs(handleX - endPoint.x))
+                        half.y = max(minCtrl, abs(handleY - endPoint.y))
+                        const endCtrlPoint: IPointData = getCtrlPoint(this, endNode, endPoint, endDirection, half)
+                        path[len - 4] = endCtrlPoint.x
+                        path[len - 3] = endCtrlPoint.y
+                    } else {
+                        path[len - 4] = endPoint.x
+                        path[len - 3] = endPoint.y
+                    }
+
+                } else {
+
+                    const startCtrlPoint: IPointData = startDirection ? getCtrlPoint(this, startNode, startPoint, startDirection, half) : startPoint
+                    const endCtrlPoint: IPointData = endDirection ? getCtrlPoint(this, endNode, endPoint, endDirection, half) : endPoint
+
+                    moveTo(path, startPoint.x, startPoint.y)
+                    bezierCurveTo(path, startCtrlPoint.x, startCtrlPoint.y, endCtrlPoint.x, endCtrlPoint.y, endPoint.x, endPoint.y)
+                }
+
+
         }
-
-        if (endDirection) {
-
-            if (isOppositeDirection(startDirection, endDirection) && startDirection === getDirectionForFromPoint(startPoint, endPoint)) // 正好处于相反的位置, 不需要太长的控制手柄
-            {
-                minCtrl = arrowWidth * 2
-            }
-
-        }
-
-        half.x = max(minCtrl, half.x)
-        half.y = max(minCtrl, half.y)
-
-        if (hasPoints) {
-            minCtrl *= 0.6
-            const points = PointHelper.toNumberPoints(data.points)
-            drawPoints(path, [startPoint.x, startPoint.y, ...points, endPoint.x, endPoint.y], data.curve, false, data)
-
-            if (startDirection) {
-                const handleX = path[4]
-                const handleY = path[5]
-
-                half.x = max(minCtrl, abs(handleX - startPoint.x))
-                half.y = max(minCtrl, abs(handleY - startPoint.y))
-                const startCtrlPoint: IPointData = getCtrlPoint(this, startNode, startPoint, startDirection, half)
-                path[4] = startCtrlPoint.x
-                path[5] = startCtrlPoint.y
-            }
-
-            const len = path.length
-            if (endDirection) {
-
-                const handleX = path[len - 4]
-                const handleY = path[len - 3]
-
-                half.x = max(minCtrl, abs(handleX - endPoint.x))
-                half.y = max(minCtrl, abs(handleY - endPoint.y))
-                const endCtrlPoint: IPointData = getCtrlPoint(this, endNode, endPoint, endDirection, half)
-                path[len - 4] = endCtrlPoint.x
-                path[len - 3] = endCtrlPoint.y
-            } else {
-                path[len - 4] = endPoint.x
-                path[len - 3] = endPoint.y
-            }
-
-        } else {
-
-            const startCtrlPoint: IPointData = startDirection ? getCtrlPoint(this, startNode, startPoint, startDirection, half) : startPoint
-            const endCtrlPoint: IPointData = endDirection ? getCtrlPoint(this, endNode, endPoint, endDirection, half) : endPoint
-
-            moveTo(path, startPoint.x, startPoint.y)
-            bezierCurveTo(path, startCtrlPoint.x, startCtrlPoint.y, endCtrlPoint.x, endCtrlPoint.y, endPoint.x, endPoint.y)
-        }
-
-
     }
 
     public createStartPoint(worldPoint: IPointData, node?: ILeaf, options?: ILinkerPointOptions): ILinkerPointData {
