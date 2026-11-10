@@ -119,6 +119,7 @@ function isPolylinePortAligned(port: number, stub: number, dx: number, dy: numbe
 
 function isPolylineMidpointAligned(port: number | undefined, stub: number, dx: number, dy: number, axis: number): boolean {
     if (port === undefined) return true
+
     // 取中点路径中实际存在的第一段，忽略重合的出口和转折点
     if (axis === POLYLINE_X && Math.abs(dx / 2) > POLYLINE_EPSILON) return isPolylinePortAligned(port, stub, dx, 0)
     if (axis === POLYLINE_Y && Math.abs(dy / 2) > POLYLINE_EPSILON) return isPolylinePortAligned(port, stub, 0, dy)
@@ -126,7 +127,21 @@ function isPolylineMidpointAligned(port: number | undefined, stub: number, dx: n
     return isPolylinePortAligned(port, stub, dx, dy)
 }
 
-function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IPointData, startPort: number, endPort: number | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, strictPorts: boolean): number {
+// 检查实际接入方向，允许顺向接入或垂直转向，禁止与后续线段原路折返
+function isPolylineApproachAligned(points: number[], port?: number): boolean {
+    if (port === undefined) return true
+
+    const last = points.length - 2, x = points[last], y = points[last + 1]
+
+    for (let i = last - 2; i >= 0; i -= 2) {
+        const dx = points[i] - x, dy = points[i + 1] - y
+        if (Math.abs(dx) > POLYLINE_EPSILON || Math.abs(dy) > POLYLINE_EPSILON) return isPolylinePortAligned(port, 1, dx, dy)
+    }
+
+    return true
+}
+
+function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IPointData, startPort: number, endPort: number | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, strictPorts: boolean, approachPort?: number): number {
     const startExit = getPolylineExit(startPoint, startBounds, startPort, clearance)
     const endExit = endPort === undefined ? endPoint : getPolylineExit(endPoint, endBounds, endPort, clearance)
     const { x: sx, y: sy } = startExit, { x: ex, y: ey } = endExit
@@ -144,8 +159,9 @@ function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IP
     result.length = 0
     result.push(startPoint.x, startPoint.y, sx, sy)
 
-    if (!strictPorts || (isPolylineMidpointAligned(startPort, startStub, dx, dy, axis) &&
-        isPolylineMidpointAligned(endPort, endStub, -dx, -dy, axis))) {
+    if ((!strictPorts || (isPolylineMidpointAligned(startPort, startStub, dx, dy, axis) &&
+        isPolylineMidpointAligned(endPort, endStub, -dx, -dy, axis))) &&
+        isPolylineMidpointAligned(approachPort, 1, -dx, -dy, axis)) {
         const mx = (sx + ex) / 2, my = (sy + ey) / 2
         if (axis === POLYLINE_X) result.push(mx, sy, mx, ey)
         else result.push(sx, my, ex, my)
@@ -160,17 +176,19 @@ function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IP
             }
         }
 
-        if (result.length > 4) return getPolylineScore(result, clearance)
+        // 兼顾出口与途径点重合的情况
+        if (result.length > 4 && isPolylineApproachAligned(result, approachPort)) return getPolylineScore(result, clearance)
+        result.length = 4
     }
 
-    const score = findPolylineGridRoute(result, startExit, endExit, startPort, endPort, startBounds, endBounds, clearance, axis, startStub, endStub, strictPorts)
+    const score = findPolylineGridRoute(result, startExit, endExit, startPort, endPort, startBounds, endBounds, clearance, axis, startStub, endStub, strictPorts, approachPort)
     if (score === Infinity) return score
 
     result.push(endPoint.x, endPoint.y)
-    return score + startStub + endStub
+    return isPolylineApproachAligned(result, approachPort) ? score + startStub + endStub : Infinity
 }
 
-function findPolylineGridRoute(result: number[], startExit: IPointData, endExit: IPointData, startPort: number, endPort: number | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, midpointAxis: number, startStub: number, endStub: number, strictPorts: boolean): number {
+function findPolylineGridRoute(result: number[], startExit: IPointData, endExit: IPointData, startPort: number, endPort: number | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, midpointAxis: number, startStub: number, endStub: number, strictPorts: boolean, approachPort?: number): number {
     const { x: sx, y: sy } = startExit, { x: ex, y: ey } = endExit
     const margin = Math.max(clearance, POLYLINE_MIN_SEGMENT) * 2
     const xs: number[] = [sx, ex, (sx + ex) / 2], ys: number[] = [sy, ey, (sy + ey) / 2]
@@ -212,6 +230,10 @@ function findPolylineGridRoute(result: number[], startExit: IPointData, endExit:
         const dx = nextX - currentX, dy = nextY - currentY
 
         if (nextNode === startNode) return
+
+        // 接入约束独立于端口约束，放宽端口时仍禁止在途径点处折返
+        if (approachPort !== undefined && nextNode === endNode && !isPolylinePortAligned(approachPort, 1, -dx, -dy)) return
+
         if (strictPorts && ((currentState === startState && !isPolylinePortAligned(startPort, startStub, dx, dy)) ||
             (endPort !== undefined && nextNode === endNode && !isPolylinePortAligned(endPort, endStub, -dx, -dy)))) return
 
@@ -309,7 +331,7 @@ function getPolylineFallback(start: IPointData, end: IPointData, port: number, s
     return xy < yx || (xy === yx && horizontal) ? [sx, sy, ex, sy, ex, ey] : [sx, sy, sx, ey, ex, ey]
 }
 
-function getBestPolyline(startPoint: IPointData, endPoint: IPointData, startDirection: IDirection, endDirection: IDirection | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number): number[] {
+function getBestPolyline(startPoint: IPointData, endPoint: IPointData, startDirection: IDirection, endDirection: IDirection | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, approachPort?: number): number[] {
     const startPorts = getPolylinePorts(startDirection, startPoint, endPoint, startBounds, endDirection === undefined ? undefined : endBounds)
     const endPorts = endDirection === undefined ? [undefined] : getPolylinePorts(endDirection, endPoint, startPoint, endBounds, startBounds)
     let candidate: number[] = [], best: number[] = [], bestScore = Infinity
@@ -319,7 +341,7 @@ function getBestPolyline(startPoint: IPointData, endPoint: IPointData, startDire
         const gap = pass ? 0 : clearance
         for (let i = 0; i < startPorts.length; i++) {
             for (let j = 0; j < endPorts.length; j++) {
-                const score = getPolylineRoute(candidate, startPoint, endPoint, startPorts[i], endPorts[j], startBounds, endBounds, gap, pass < 2)
+                const score = getPolylineRoute(candidate, startPoint, endPoint, startPorts[i], endPorts[j], startBounds, endBounds, gap, pass < 2, approachPort)
                 if (score < bestScore) {
                     bestScore = score
                     const previous = best
@@ -337,10 +359,22 @@ function getBestPolyline(startPoint: IPointData, endPoint: IPointData, startDire
     return best
 }
 
-function getPolylineEditSide(point: IPointData, waypoint: IPointData, direction: IDirection, bounds: IBoundsData | undefined, otherBounds: IBoundsData | undefined, clearance: number): number[] {
+function getPolylineEditSide(point: IPointData, waypoint: IPointData, direction: IDirection, bounds: IBoundsData | undefined, otherBounds: IBoundsData | undefined, clearance: number, points: number[], index: number, step: number): number[] {
     if (point.x === waypoint.x && point.y === waypoint.y) return []
 
-    const side = getBestPolyline(point, waypoint, direction, undefined, bounds, otherBounds, clearance)
+    let approachPort: number | undefined
+
+    // 跳过重合途径点，根据后续线段确定接入方向
+    for (let i = index + step; i >= 0 && i < points.length; i += step) {
+        const dx = points[i] - waypoint.x, dy = points[i + 1] - waypoint.y
+        if (Math.abs(dx) <= POLYLINE_EPSILON && Math.abs(dy) <= POLYLINE_EPSILON) continue
+
+        if (Math.abs(dy) <= POLYLINE_EPSILON) approachPort = dx > 0 ? 0 : 1
+        else if (Math.abs(dx) <= POLYLINE_EPSILON) approachPort = dy > 0 ? 2 : 3
+        break
+    }
+
+    const side = getBestPolyline(point, waypoint, direction, undefined, bounds, otherBounds, clearance, approachPort)
     side.length -= 2
     return side
 }
@@ -350,8 +384,8 @@ function drawPolylineEditPath(path: number[], startPoint: IPointData, endPoint: 
     if (length % 2) return false
     for (let i = 0; i < length; i++) if (!Number.isFinite(points[i])) return false
 
-    const start = getPolylineEditSide(startPoint, { x: points[0], y: points[1] }, startDirection, startBounds, endBounds, clearance)
-    const end = getPolylineEditSide(endPoint, { x: points[last], y: points[last + 1] }, endDirection, endBounds, startBounds, clearance)
+    const start = getPolylineEditSide(startPoint, { x: points[0], y: points[1] }, startDirection, startBounds, endBounds, clearance, points, 0, 2)
+    const end = getPolylineEditSide(endPoint, { x: points[last], y: points[last + 1] }, endDirection, endBounds, startBounds, clearance, points, last, -2)
 
     // 只拼接两端生成的接线，中间顶点按原坐标写入
     const first = start.length ? start : points
