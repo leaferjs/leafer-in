@@ -23,7 +23,7 @@ function getPolylineDirectionIndex(direction: IDirection): number {
     }
 }
 
-function getPolylinePorts(direction: IDirection, point: IPointData, target: IPointData, bounds: IBoundsData | undefined, targetBounds: IBoundsData | undefined, ports: number[]): number {
+function getPolylinePorts(direction: IDirection, point: IPointData, target: IPointData, bounds?: IBoundsData, targetBounds?: IBoundsData): number[] {
     const data = directionData[getPolylineDirectionIndex(direction)]
     const dx = Math.sign(data.x - 0.5), dy = Math.sign(data.y - 0.5)
     const cx = bounds ? bounds.x + bounds.width / 2 : point.x
@@ -31,44 +31,24 @@ function getPolylinePorts(direction: IDirection, point: IPointData, target: IPoi
     const tx = targetBounds ? targetBounds.x + targetBounds.width / 2 : target.x
     const ty = targetBounds ? targetBounds.y + targetBounds.height / 2 : target.y
     const deltaX = tx - cx, deltaY = ty - cy
-    const xSign = dx || (deltaX >= 0 ? 1 : -1)
-    const ySign = dy || (deltaY >= 0 ? 1 : -1)
-    const xPort = POLYLINE_X * 2 + (xSign > 0 ? 1 : 0)
-    const yPort = POLYLINE_Y * 2 + (ySign > 0 ? 1 : 0)
+    const xPort = (dx || (deltaX >= 0 ? 1 : -1)) > 0 ? 1 : 0
+    const yPort = (dy || (deltaY >= 0 ? 1 : -1)) > 0 ? 3 : 2
 
-    if (dx && !dy) {
-        ports[0] = xPort
-        return 1
-    }
-
-    if (dy && !dx) {
-        ports[0] = yPort
-        return 1
-    }
-
-    if (Math.abs(deltaX) >= Math.abs(deltaY)) {
-        ports[0] = xPort
-        ports[1] = yPort
-    } else {
-        ports[0] = yPort
-        ports[1] = xPort
-    }
-
-    return 2
+    if (dx && !dy) return [xPort]
+    if (dy && !dx) return [yPort]
+    return Math.abs(deltaX) >= Math.abs(deltaY) ? [xPort, yPort] : [yPort, xPort]
 }
 
-function getPolylineExit(point: IPointData, bounds: IBoundsData | undefined, port: number, clearance: number, result: number[]): void {
+function getPolylineExit(point: IPointData, bounds: IBoundsData | undefined, port: number, clearance: number): IPointData {
     const axis = port >> 1, sign = port & 1 ? 1 : -1
 
     if (axis === POLYLINE_X) {
-        const boundary = bounds ? sign > 0 ? bounds.x + bounds.width : bounds.x : point.x
-        result[0] = boundary + sign * clearance
-        result[1] = point.y
-    } else {
-        const boundary = bounds ? sign > 0 ? bounds.y + bounds.height : bounds.y : point.y
-        result[0] = point.x
-        result[1] = boundary + sign * clearance
+        const x = bounds ? bounds.x + (sign > 0 ? bounds.width : 0) : point.x
+        return { x: x + sign * clearance, y: point.y }
     }
+
+    const y = bounds ? bounds.y + (sign > 0 ? bounds.height : 0) : point.y
+    return { x: point.x, y: y + sign * clearance }
 }
 
 function isPolylinePointBlocked(x: number, y: number, bounds: IBoundsData | undefined, clearance: number): boolean {
@@ -131,63 +111,75 @@ function getPolylineMidpointAxis(startPort: number, endPort: number, sx: number,
     return Math.abs(ex - sx) >= Math.abs(ey - sy) ? POLYLINE_X : POLYLINE_Y
 }
 
-// 检查中点优先路径
-function getPolylineMidpointRoute(result: number[], startPoint: IPointData, endPoint: IPointData, sx: number, sy: number, ex: number, ey: number, midpointAxis: number, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number): number {
-    const midpointX = (sx + ex) / 2, midpointY = (sy + ey) / 2
-    result.length = 0
-    result.push(startPoint.x, startPoint.y, sx, sy)
-
-    if (midpointAxis === POLYLINE_X) {
-        result.push(midpointX, sy, midpointX, ey)
-    } else {
-        result.push(sx, midpointY, ex, midpointY)
-    }
-
-    result.push(ex, ey, endPoint.x, endPoint.y)
-
-    // 只检查两端出口之间的路径，起终点连接段允许进入自身元素
-    for (let i = 4; i < result.length - 2; i += 2) {
-        const x1 = result[i - 2], y1 = result[i - 1]
-        const x2 = result[i], y2 = result[i + 1]
-
-        if (isPolylineSegmentBlocked(x1, y1, x2, y2, startBounds, clearance) ||
-            isPolylineSegmentBlocked(x1, y1, x2, y2, endBounds, clearance)) return Infinity
-    }
-
-    return getPolylineScore(result, clearance)
+function isPolylinePortAligned(port: number, stub: number, dx: number, dy: number): boolean {
+    const offset = (port >> 1) === POLYLINE_X ? dx : dy
+    const sign = port & 1 ? 1 : -1
+    return Math.abs(offset) <= POLYLINE_EPSILON ? stub > POLYLINE_EPSILON : offset * sign > 0
 }
 
-function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IPointData, startPort: number, endPort: number, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number): number {
-    const startExit: number[] = [], endExit: number[] = []
-    getPolylineExit(startPoint, startBounds, startPort, clearance, startExit)
-    getPolylineExit(endPoint, endBounds, endPort, clearance, endExit)
+function isPolylineMidpointAligned(port: number | undefined, stub: number, dx: number, dy: number, axis: number): boolean {
+    if (port === undefined) return true
+    // 取中点路径中实际存在的第一段，忽略重合的出口和转折点
+    if (axis === POLYLINE_X && Math.abs(dx / 2) > POLYLINE_EPSILON) return isPolylinePortAligned(port, stub, dx, 0)
+    if (axis === POLYLINE_Y && Math.abs(dy / 2) > POLYLINE_EPSILON) return isPolylinePortAligned(port, stub, 0, dy)
+    if (Math.abs(dx) <= POLYLINE_EPSILON && Math.abs(dy) <= POLYLINE_EPSILON) return true
+    return isPolylinePortAligned(port, stub, dx, dy)
+}
 
-    const sx = startExit[0], sy = startExit[1], ex = endExit[0], ey = endExit[1]
-    const startAxis = startPort >> 1, endAxis = endPort >> 1
-    const startSign = startPort & 1 ? 1 : -1, endSign = endPort & 1 ? 1 : -1
+function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IPointData, startPort: number, endPort: number | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, strictPorts: boolean): number {
+    const startExit = getPolylineExit(startPoint, startBounds, startPort, clearance)
+    const endExit = endPort === undefined ? endPoint : getPolylineExit(endPoint, endBounds, endPort, clearance)
+    const { x: sx, y: sy } = startExit, { x: ex, y: ey } = endExit
     const startStub = Math.abs(sx - startPoint.x) + Math.abs(sy - startPoint.y)
     const endStub = Math.abs(ex - endPoint.x) + Math.abs(ey - endPoint.y)
 
     if (isPolylineSegmentBlocked(startPoint.x, startPoint.y, sx, sy, endBounds, clearance) ||
         isPolylineSegmentBlocked(endPoint.x, endPoint.y, ex, ey, startBounds, clearance)) return Infinity
 
-    const midpointAxis = getPolylineMidpointAxis(startPort, endPort, sx, sy, ex, ey)
+    if (endPort === undefined && (isPolylinePointBlocked(ex, ey, startBounds, clearance) ||
+        isPolylinePointBlocked(ex, ey, endBounds, clearance))) return Infinity
 
-    // 第一优先级：只要中点路径不受阻，就直接采用
-    const midpointScore = getPolylineMidpointRoute(result, startPoint, endPoint, sx, sy, ex, ey, midpointAxis, startBounds, endBounds, clearance)
-    if (midpointScore < Infinity) return midpointScore
+    const axis = endPort === undefined ? startPort >> 1 : getPolylineMidpointAxis(startPort, endPort, sx, sy, ex, ey)
+    const dx = ex - sx, dy = ey - sy
+    result.length = 0
+    result.push(startPoint.x, startPoint.y, sx, sy)
 
-    // 第二优先级：中点路径受阻，使用网格寻路绕行
+    if (!strictPorts || (isPolylineMidpointAligned(startPort, startStub, dx, dy, axis) &&
+        isPolylineMidpointAligned(endPort, endStub, -dx, -dy, axis))) {
+        const mx = (sx + ex) / 2, my = (sy + ey) / 2
+        if (axis === POLYLINE_X) result.push(mx, sy, mx, ey)
+        else result.push(sx, my, ex, my)
+        result.push(ex, ey, endPoint.x, endPoint.y)
+
+        // 两端的出线段可以进入各自所属元素
+        for (let i = 4; i < result.length - 2; i += 2) {
+            if (isPolylineSegmentBlocked(result[i - 2], result[i - 1], result[i], result[i + 1], startBounds, clearance) ||
+                isPolylineSegmentBlocked(result[i - 2], result[i - 1], result[i], result[i + 1], endBounds, clearance)) {
+                result.length = 4
+                break
+            }
+        }
+
+        if (result.length > 4) return getPolylineScore(result, clearance)
+    }
+
+    const score = findPolylineGridRoute(result, startExit, endExit, startPort, endPort, startBounds, endBounds, clearance, axis, startStub, endStub, strictPorts)
+    if (score === Infinity) return score
+
+    result.push(endPoint.x, endPoint.y)
+    return score + startStub + endStub
+}
+
+function findPolylineGridRoute(result: number[], startExit: IPointData, endExit: IPointData, startPort: number, endPort: number | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, midpointAxis: number, startStub: number, endStub: number, strictPorts: boolean): number {
+    const { x: sx, y: sy } = startExit, { x: ex, y: ey } = endExit
     const margin = Math.max(clearance, POLYLINE_MIN_SEGMENT) * 2
     const xs: number[] = [sx, ex, (sx + ex) / 2], ys: number[] = [sy, ey, (sy + ey) / 2]
 
     addPolylineBoundsCoordinates(xs, ys, startBounds, clearance, margin)
     addPolylineBoundsCoordinates(xs, ys, endBounds, clearance, margin)
 
-    let minX = Math.min(...xs), maxX = Math.max(...xs)
-    let minY = Math.min(...ys), maxY = Math.max(...ys)
-    xs.push(minX - margin * 2, maxX + margin * 2)
-    ys.push(minY - margin * 2, maxY + margin * 2)
+    xs.push(Math.min(...xs) - margin * 2, Math.max(...xs) + margin * 2)
+    ys.push(Math.min(...ys) - margin * 2, Math.max(...ys) + margin * 2)
 
     sortPolylineCoordinates(xs)
     sortPolylineCoordinates(ys)
@@ -207,47 +199,40 @@ function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IP
 
     const startState = startNode * 3
     distance[startState] = 0
+    const pending = [startState]
 
     const turnCost = Math.max(POLYLINE_MIN_SEGMENT, clearance * POLYLINE_TURN_WEIGHT)
+    const preferredCoordinate = midpointAxis === POLYLINE_X ? (sx + ex) / 2 : (sy + ey) / 2
     let currentState = -1, currentNode = -1, currentAxis = 0
     let currentX = 0, currentY = 0, currentDistance = 0
 
-    const relax = (nextXIndex: number, nextYIndex: number, axis: number, sign: number): void => {
+    const relax = (nextXIndex: number, nextYIndex: number, axis: number): void => {
         const nextX = xs[nextXIndex], nextY = ys[nextYIndex]
         const nextNode = nextYIndex * nx + nextXIndex
+        const dx = nextX - currentX, dy = nextY - currentY
+
+        if (nextNode === startNode) return
+        if (strictPorts && ((currentState === startState && !isPolylinePortAligned(startPort, startStub, dx, dy)) ||
+            (endPort !== undefined && nextNode === endNode && !isPolylinePortAligned(endPort, endStub, -dx, -dy)))) return
 
         if (isPolylinePointBlocked(nextX, nextY, startBounds, clearance) ||
-            isPolylinePointBlocked(nextX, nextY, endBounds, clearance)) return
-
-        if (isPolylineSegmentBlocked(currentX, currentY, nextX, nextY, startBounds, clearance) ||
+            isPolylinePointBlocked(nextX, nextY, endBounds, clearance) ||
+            isPolylineSegmentBlocked(currentX, currentY, nextX, nextY, startBounds, clearance) ||
             isPolylineSegmentBlocked(currentX, currentY, nextX, nextY, endBounds, clearance)) return
-
-        if (currentState === startState) {
-            if (axis === startAxis + 1) {
-                if (sign !== startSign) return
-            } else if (startStub <= POLYLINE_EPSILON) return
-        }
-
-        if (nextNode === endNode) {
-            if (axis === endAxis + 1) {
-                if (sign !== -endSign) return
-            } else if (endStub <= POLYLINE_EPSILON) return
-        }
 
         const nextState = nextNode * 3 + axis
         if (visited[nextState]) return
 
-        const segmentLength = Math.abs(nextX - currentX) + Math.abs(nextY - currentY)
-        let cost = currentDistance + segmentLength
+        let cost = currentDistance + (Math.abs(dx) + Math.abs(dy))
 
         if (currentAxis && currentAxis !== axis) {
             cost += turnCost
             const turnCoordinate = currentAxis === POLYLINE_X + 1 ? currentX : currentY
-            const preferredCoordinate = midpointAxis === POLYLINE_X ? (sx + ex) / 2 : (sy + ey) / 2
             if (Math.abs(turnCoordinate - preferredCoordinate) > POLYLINE_EPSILON) cost += turnCost * 2
         }
 
         if (cost < distance[nextState]) {
+            if (distance[nextState] === Infinity) pending.push(nextState)
             distance[nextState] = cost
             previous[nextState] = currentState
         }
@@ -255,22 +240,22 @@ function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IP
 
     let bestState = -1
 
-    for (let iteration = 0; iteration < total; iteration++) {
-        let minDistance = Infinity, state = -1
-
-        for (let i = 0; i < total; i++) {
-            if (!visited[i] && distance[i] < minDistance) {
-                minDistance = distance[i]
-                state = i
+    while (pending.length) {
+        let index = 0, state = pending[0]
+        for (let i = 1; i < pending.length; i++) {
+            const next = pending[i]
+            if (distance[next] < distance[state] || (distance[next] === distance[state] && next < state)) {
+                index = i
+                state = next
             }
         }
 
-        if (state < 0) break
-
+        pending[index] = pending[pending.length - 1]
+        pending.pop()
         currentState = state
         currentNode = Math.floor(state / 3)
         currentAxis = state % 3
-        currentDistance = minDistance
+        currentDistance = distance[state]
         visited[state] = 1
 
         if (currentNode === endNode) {
@@ -282,10 +267,10 @@ function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IP
         currentX = xs[xIndex]
         currentY = ys[yIndex]
 
-        if (xIndex > 0) relax(xIndex - 1, yIndex, POLYLINE_X + 1, -1)
-        if (xIndex < nx - 1) relax(xIndex + 1, yIndex, POLYLINE_X + 1, 1)
-        if (yIndex > 0) relax(xIndex, yIndex - 1, POLYLINE_Y + 1, -1)
-        if (yIndex < ny - 1) relax(xIndex, yIndex + 1, POLYLINE_Y + 1, 1)
+        if (xIndex > 0) relax(xIndex - 1, yIndex, POLYLINE_X + 1)
+        if (xIndex < nx - 1) relax(xIndex + 1, yIndex, POLYLINE_X + 1)
+        if (yIndex > 0) relax(xIndex, yIndex - 1, POLYLINE_Y + 1)
+        if (yIndex < ny - 1) relax(xIndex, yIndex + 1, POLYLINE_Y + 1)
     }
 
     if (bestState < 0) return Infinity
@@ -302,72 +287,79 @@ function getPolylineRoute(result: number[], startPoint: IPointData, endPoint: IP
 
     if (state !== startState) return Infinity
 
-    result.length = 0
-    result.push(startPoint.x, startPoint.y, sx, sy)
-
     for (let i = reverse.length - 4; i >= 0; i -= 2) result.push(reverse[i], reverse[i + 1])
-
-    result.push(endPoint.x, endPoint.y)
-    return distance[bestState] + startStub + endStub
+    return distance[bestState]
 }
 
-function appendPolylinePoint(points: number[], x: number, y: number): void {
-    const length = points.length
-    if (length >= 2 && Math.abs(points[length - 2] - x) <= POLYLINE_EPSILON && Math.abs(points[length - 1] - y) <= POLYLINE_EPSILON) return
-    points.push(x, y)
+// 锚点或途径点被元素覆盖时，保留一条尽量少穿过元素的临时接线
+function getPolylineFallback(start: IPointData, end: IPointData, port: number, startBounds?: IBoundsData, endBounds?: IBoundsData): number[] {
+    const { x: sx, y: sy } = start, { x: ex, y: ey } = end
+    if (sx === ex || sy === ey) return [sx, sy, ex, ey]
+
+    const horizontal = (port >> 1) === POLYLINE_X
+    const crosses = (x: number, y: number): number => {
+        let count = 0
+        if (isPolylineSegmentBlocked(sx, sy, x, y, startBounds, 0)) count++
+        if (isPolylineSegmentBlocked(x, y, ex, ey, startBounds, 0)) count++
+        if (isPolylineSegmentBlocked(sx, sy, x, y, endBounds, 0)) count++
+        if (isPolylineSegmentBlocked(x, y, ex, ey, endBounds, 0)) count++
+        return count
+    }
+    const xy = crosses(ex, sy), yx = crosses(sx, ey)
+    return xy < yx || (xy === yx && horizontal) ? [sx, sy, ex, sy, ex, ey] : [sx, sy, sx, ey, ex, ey]
 }
 
-function appendPolylineOrthogonal(points: number[], x1: number, y1: number, x2: number, y2: number, firstAxis = POLYLINE_X): void {
-    if (Math.abs(x1 - x2) > POLYLINE_EPSILON && Math.abs(y1 - y2) > POLYLINE_EPSILON) {
-        if (firstAxis === POLYLINE_X) {
-            const midX = (x1 + x2) / 2
-            appendPolylinePoint(points, midX, y1)
-            appendPolylinePoint(points, midX, y2)
-        } else {
-            const midY = (y1 + y2) / 2
-            appendPolylinePoint(points, x1, midY)
-            appendPolylinePoint(points, x2, midY)
+function getBestPolyline(startPoint: IPointData, endPoint: IPointData, startDirection: IDirection, endDirection: IDirection | undefined, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number): number[] {
+    const startPorts = getPolylinePorts(startDirection, startPoint, endPoint, startBounds, endDirection === undefined ? undefined : endBounds)
+    const endPorts = endDirection === undefined ? [undefined] : getPolylinePorts(endDirection, endPoint, startPoint, endBounds, startBounds)
+    let candidate: number[] = [], best: number[] = [], bestScore = Infinity
+
+    // 先保留方向并减小间距，再允许贴边转向
+    for (let pass = clearance ? 0 : 1; pass < 3 && !best.length; pass++) {
+        const gap = pass ? 0 : clearance
+        for (let i = 0; i < startPorts.length; i++) {
+            for (let j = 0; j < endPorts.length; j++) {
+                const score = getPolylineRoute(candidate, startPoint, endPoint, startPorts[i], endPorts[j], startBounds, endBounds, gap, pass < 2)
+                if (score < bestScore) {
+                    bestScore = score
+                    const previous = best
+                    best = candidate
+                    candidate = previous
+                }
+            }
         }
     }
-    appendPolylinePoint(points, x2, y2)
+
+    if (!best.length) return getPolylineFallback(startPoint, endPoint, startPorts[0], startBounds, endBounds)
+    simplifyPolyline(best)
+    const last = best.length - 2
+    if (best[last] !== endPoint.x || best[last + 1] !== endPoint.y) best.push(endPoint.x, endPoint.y)
+    return best
 }
 
-function getPolylineEditPath(result: number[], startPoint: IPointData, endPoint: IPointData, startPort: number, endPort: number, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, points: number[], clearance: number): number {
-    if (points.length % 2) return Infinity
-    for (let i = 0; i < points.length; i++) if (!Number.isFinite(points[i])) return Infinity
+function getPolylineEditSide(point: IPointData, waypoint: IPointData, direction: IDirection, bounds: IBoundsData | undefined, otherBounds: IBoundsData | undefined, clearance: number): number[] {
+    if (point.x === waypoint.x && point.y === waypoint.y) return []
 
-    const startExit: number[] = [], endExit: number[] = []
-    getPolylineExit(startPoint, startBounds, startPort, clearance, startExit)
-    getPolylineExit(endPoint, endBounds, endPort, clearance, endExit)
+    const side = getBestPolyline(point, waypoint, direction, undefined, bounds, otherBounds, clearance)
+    side.length -= 2
+    return side
+}
 
-    const sx = startExit[0], sy = startExit[1], ex = endExit[0], ey = endExit[1]
+function drawPolylineEditPath(path: number[], startPoint: IPointData, endPoint: IPointData, startDirection: IDirection, endDirection: IDirection, startBounds: IBoundsData | undefined, endBounds: IBoundsData | undefined, clearance: number, points: number[]): boolean {
+    const length = points.length, last = length - 2
+    if (length % 2) return false
+    for (let i = 0; i < length; i++) if (!Number.isFinite(points[i])) return false
 
-    if (isPolylineSegmentBlocked(startPoint.x, startPoint.y, sx, sy, endBounds, clearance) ||
-        isPolylineSegmentBlocked(endPoint.x, endPoint.y, ex, ey, startBounds, clearance)) return Infinity
+    const start = getPolylineEditSide(startPoint, { x: points[0], y: points[1] }, startDirection, startBounds, endBounds, clearance)
+    const end = getPolylineEditSide(endPoint, { x: points[last], y: points[last + 1] }, endDirection, endBounds, startBounds, clearance)
 
-    result.length = 0
-    appendPolylinePoint(result, startPoint.x, startPoint.y)
-    appendPolylinePoint(result, sx, sy)
-
-    let x = sx, y = sy
-
-    for (let i = 0; i < points.length; i += 2) {
-        const nx = points[i], ny = points[i + 1]
-        appendPolylineOrthogonal(result, x, y, nx, ny, i === 0 && clearance === 0 ? startPort >> 1 : POLYLINE_X)
-        x = nx
-        y = ny
-    }
-
-    const endAxis = endPort >> 1
-
-    if (Math.abs(x - ex) > POLYLINE_EPSILON && Math.abs(y - ey) > POLYLINE_EPSILON) {
-        if (endAxis === POLYLINE_X) appendPolylinePoint(result, x, ey)
-        else appendPolylinePoint(result, ex, y)
-    }
-
-    appendPolylinePoint(result, ex, ey)
-    appendPolylinePoint(result, endPoint.x, endPoint.y)
-    return getPolylineScore(result, clearance)
+    // 只拼接两端生成的接线，中间顶点按原坐标写入
+    const first = start.length ? start : points
+    moveTo(path, first[0], first[1])
+    for (let i = 2; i < start.length; i += 2) lineTo(path, start[i], start[i + 1])
+    for (let i = start.length ? 0 : 2; i < length; i += 2) lineTo(path, points[i], points[i + 1])
+    for (let i = end.length - 2; i >= 0; i -= 2) lineTo(path, end[i], end[i + 1])
+    return true
 }
 
 function getPolylineScore(points: number[], clearance: number): number {
@@ -421,35 +413,9 @@ export function drawPolyline(path: number[], startPoint: IPointData, endPoint: I
     if (endBounds && (!Number.isFinite(endBounds.x) || !Number.isFinite(endBounds.y) || !Number.isFinite(endBounds.width) || !Number.isFinite(endBounds.height) || endBounds.width < 0 || endBounds.height < 0)) return false
 
     clearance = Number.isFinite(clearance) ? Math.max(0, clearance) : 8
+    if (points?.length) return drawPolylineEditPath(path, startPoint, endPoint, startDirection, endDirection, startBounds, endBounds, clearance, points)
 
-    const startPorts: number[] = [], endPorts: number[] = []
-    const startCount = getPolylinePorts(startDirection, startPoint, endPoint, startBounds, endBounds, startPorts)
-    const endCount = getPolylinePorts(endDirection, endPoint, startPoint, endBounds, startBounds, endPorts)
-    const candidate: number[] = [], best: number[] = []
-
-    let bestScore = Infinity
-
-    for (let pass = 0; pass < 2 && bestScore === Infinity; pass++) {
-        const currentClearance = pass === 0 ? clearance : 0
-
-        for (let i = 0; i < startCount; i++) {
-            for (let j = 0; j < endCount; j++) {
-                const score = points !== undefined
-                    ? getPolylineEditPath(candidate, startPoint, endPoint, startPorts[i], endPorts[j], startBounds, endBounds, points, currentClearance)
-                    : getPolylineRoute(candidate, startPoint, endPoint, startPorts[i], endPorts[j], startBounds, endBounds, currentClearance)
-
-                if (score < bestScore) {
-                    bestScore = score
-                    best.length = 0
-                    for (let k = 0; k < candidate.length; k++) best.push(candidate[k])
-                }
-            }
-        }
-    }
-
-    if (!best.length) return false
-    if (points === undefined) simplifyPolyline(best)
-
+    const best = getBestPolyline(startPoint, endPoint, startDirection, endDirection, startBounds, endBounds, clearance)
     moveTo(path, best[0], best[1])
     for (let i = 2; i < best.length; i += 2) lineTo(path, best[i], best[i + 1])
     return true
