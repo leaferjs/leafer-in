@@ -10,7 +10,7 @@ export { ISimulateElement } from './editor/ISimulateTarget'
 
 // html
 
-export { IHTMLTextData, IHTMLTextInputData } from './html/IHTMLTextData'
+export { IHTMLData, IHTMLInputData, IHTMLTextData, IHTMLTextInputData } from './html/IHTMLTextData'
 
 // scroll
 

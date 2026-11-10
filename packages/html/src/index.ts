@@ -1,3 +1,4 @@
+export { HTML } from './HTML'
 export { HTMLText } from './HTMLText'
 export { HTMLTextData } from './data/HTMLTextData'
 
