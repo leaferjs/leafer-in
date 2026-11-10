@@ -22,7 +22,7 @@ export function targetAttr(fn: IFunction) {
 
                         const isSelect = key === 'target'
                         if (isSelect) {
-                            const { beforeSelect, skipNested } = t.config
+                            const { beforeSelect, skipNested, multipleSelectLocked } = t.config
 
                             if (isArray(value)) {
                                 if (skipNested) { // 过滤嵌套关系的元素
@@ -35,7 +35,7 @@ export function targetAttr(fn: IFunction) {
                                     }
                                 }
 
-                                if (value.length > 1 && value.some(item => item.locked || item.editable === 'single')) {
+                                if (value.length > 1 && value.some(item => (item.locked && !multipleSelectLocked) || item.editable === 'single')) {
                                     value = value.filter(item => !(item.locked || item.editable === 'single')) // 锁定、单选元素不能参与多选
                                 }
                             }

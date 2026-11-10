@@ -7,20 +7,20 @@ export const EditSelectHelper = {
         return path.list.find((leaf) => leaf.editable) as IUI
     },
 
-    findByBounds(branch: IUI, bounds: IBounds, mode: 'hit' | 'includes' = 'hit'): IUI[] {
+    findByBounds(branch: IUI, bounds: IBounds, mode: 'hit' | 'includes' = 'hit', multipleSelectLocked?: boolean): IUI[] {
         const list: IUI[] = []
-        eachFind([branch], list, bounds, mode)
+        eachFind([branch], list, bounds, mode, multipleSelectLocked)
         return list
     }
 
 }
 
 
-function eachFind(children: IUI[], list: IUI[], bounds: IBounds, mode: 'hit' | 'includes'): void {
+function eachFind(children: IUI[], list: IUI[], bounds: IBounds, mode: 'hit' | 'includes', multipleSelectLocked?: boolean): void {
     let child: IUI, data: IUIData, isFind: boolean
     for (let i = 0, len = children.length; i < len; i++) {
         child = children[i], data = child.__
-        if (data.hittable && data.visible && !data.locked && bounds.hit(child.__world)) {
+        if (data.hittable && data.visible && !(data.locked && !multipleSelectLocked) && bounds.hit(child.__world)) {
 
             if (data.editable && data.editable !== 'single') {
                 if (child.isFrame) {
@@ -41,7 +41,7 @@ function eachFind(children: IUI[], list: IUI[], bounds: IBounds, mode: 'hit' | '
                 }
             }
 
-            if (child.isBranch) eachFind(child.children, list, bounds, mode)
+            if (child.isBranch) eachFind(child.children, list, bounds, mode, multipleSelectLocked)
 
         }
     }

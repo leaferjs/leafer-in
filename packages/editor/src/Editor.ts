@@ -118,7 +118,7 @@ export class Editor extends Group implements IEditor {
     }
 
     public addItem(item: IUI): void {
-        if (!this.hasItem(item) && !item.locked) this.leafList.add(item), this.target = this.leafList.list as IUI[]
+        if (!this.hasItem(item) && !(item.locked && !this.mergedConfig.multipleSelectLocked)) this.leafList.add(item), this.target = this.leafList.list as IUI[]
     }
 
     public removeItem(item: IUI): void {

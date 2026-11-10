@@ -165,11 +165,11 @@ export class EditSelect extends Group implements IEditSelect {
         if (this.editor.dragging) return this.onDragEnd(e)
 
         if (this.dragging) {
-            const { editor } = this
+            const { editor } = this, { mergedConfig } = editor
             const total = e.getInnerTotal(this)
 
             const dragBounds = this.bounds.clone().unsign()
-            const list = new LeafList(findByBounds(editor.app, dragBounds, editor.mergedConfig.boxSelect === 'includes' ? 'includes' : 'hit'))
+            const list = new LeafList(findByBounds(editor.app, dragBounds, mergedConfig.boxSelect === 'includes' ? 'includes' : 'hit', mergedConfig.multipleSelectLocked))
 
             this.bounds.width = total.x
             this.bounds.height = total.y

@@ -77,6 +77,8 @@ export class EditBox extends Group implements IEditBox {
 
     protected __eventIds: IEventListenerId[] = []
 
+    public isLocked?: boolean
+
     constructor(editor: IEditor) {
         super()
         this.editor = editor
@@ -125,13 +127,14 @@ export class EditBox extends Group implements IEditBox {
 
     public load(): void {
         const { target, mergeConfig, single, rect, circle, resizePoints, resizeLines } = this
-        const { stroke, strokeWidth, ignorePixelSnap } = mergeConfig
+        const { stroke, strokeWidth, ignorePixelSnap, multipleSelectLocked } = mergeConfig
 
         const pointsStyle = this.getPointsStyle()
         const middlePointsStyle = this.getMiddlePointsStyle()
         const resizeLinesStyle = this.getResizeLinesStyle()
 
-        this.visible = !target.locked
+        this.isLocked = target.locked || (multipleSelectLocked && this.editor.list.some(item => item.locked))
+        this.visible = !this.isLocked
 
         let resizeP: IBox
 
@@ -167,7 +170,7 @@ export class EditBox extends Group implements IEditBox {
         const { editor, target } = this
         if (!target) return
         const { x, y, scaleX, scaleY, rotation, skewX, skewY, width, height } = target.getLayoutBounds('box', editor, true)
-        this.visible = !this.target.locked
+        this.visible = !(this.target.locked || this.isLocked)
         this.set({ x, y, scaleX, scaleY, rotation, skewX, skewY })
         this.updateBounds({ x: 0, y: 0, width, height })
         this.updateWidgets()
