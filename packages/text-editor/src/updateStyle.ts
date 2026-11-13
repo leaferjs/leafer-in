@@ -23,6 +23,11 @@ export const textDecorationMap = {
     'under-delete': 'underline line-through'
 }
 
+// nowrap / normal 会把连续空格折叠成一个，编辑结束后 innerText 读回的文本也会丢空格
+export function getEditWhiteSpace(text: IText): string {
+    return (text.textWrap === 'none' || text.__.__autoWidth) ? 'pre' : 'pre-wrap'
+}
+
 export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: number): void {
     const { style } = textDom
     const { fill, padding, textWrap, textOverflow, textDecoration } = text
@@ -53,7 +58,7 @@ export function updateStyle(textDom: HTMLDivElement, text: IText, textScale: num
     style.lineHeight = (text.__.__lineHeight || 0) * textScale + 'px'
     style.letterSpacing = (text.__.__letterSpacing || 0) * textScale + 'px'
 
-    style.whiteSpace = (textWrap === 'none' || text.__.__autoWidth) ? 'nowrap' : 'normal'
+    style.whiteSpace = getEditWhiteSpace(text)
     style.wordBreak = textWrap === 'break' ? 'break-all' : 'normal'
 
     style.textIndent = (text.paraIndent || 0) * textScale + 'px'
