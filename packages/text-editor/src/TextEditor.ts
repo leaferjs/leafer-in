@@ -1,7 +1,7 @@
 import { IText, IEventListenerId } from '@leafer-in/interface'
 import { Matrix, PointerEvent, Text } from '@leafer-ui/core'
 import { InnerEditor, registerInnerEditor } from '@leafer-in/editor'
-import { updateStyle } from './updateStyle'
+import { getEditWhiteSpace, updateStyle } from './updateStyle'
 
 
 @registerInnerEditor()
@@ -43,6 +43,8 @@ export class TextEditor extends InnerEditor {
         style.transformOrigin = 'left top'
         style.boxSizing = 'border-box'
 
+        // 写入文本前就保留连续空格，避免首帧按默认 white-space 折叠
+        if (!this.isHTMLText) style.whiteSpace = getEditWhiteSpace(text)
         this.isHTMLText ? div.innerHTML = String(text.text) : div.innerText = String(text.text)
 
         const { view } = editor.app;
